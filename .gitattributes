@@ -1,0 +1,21 @@
+# Tự động chuyển đổi kết thúc dòng về chuẩn LF khi push lên GitHub
+* text=auto eol=lf
+
+# Quy định rõ các file code là dạng text
+*.java text
+*.html text
+*.css text
+*.js text
+*.xml text
+*.properties text
+*.sql text
+
+# Quy định các file môi trường/cấu hình
+*.sh text eol=lf
+*.bat text eol=crlf
+
+# Quy định các file ảnh, jar là dạng binary (không được tự ý sửa đổi nội dung)
+*.jpg binary
+*.png binary
+*.gif binary
+*.jar binary
