@@ -1,0 +1,145 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f4f4;
+
+}
+
+.header-top {
+    font-weight: bold;
+    padding: 15px;
+    color: #dedede;
+    background: linear-gradient(to right, rgb(24, 202, 32), rgba(101, 236, 34, 0.8));
+}
+
+main {
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    display: flex;
+    background: linear-gradient(to right, rgb(24, 202, 32), rgba(101, 236, 34, 0.8));
+    padding: 20px 0;
+}
+
+.register-container {
+    background-color: white;
+    padding: 50px 60px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.10);
+    width: 600px;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin-top: 0;
+}
+
+a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.register-container form {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.register-container label {
+    display: block;
+    
+    font-weight: bold;
+}
+
+
+.register-container label span {
+    color: red;
+}
+
+
+.register-container input+label {
+    margin-top: 10px;
+}
+
+.register-container input {
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 8px;
+    
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.quenmk {
+    margin-top: 10px;
+}
+
+button.submit {
+    background-color: rgb(251, 217, 71);
+    border: none;
+    padding: 15px;
+    margin-top: 25px;
+    
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+
+button.submit:hover {
+    background-color: rgb(240, 207, 60);
+    
+}
+
+.hoac {
+    text-align: center;
+    margin: 30px 0 15px;
+    color: #555;
+    font-weight: bold;
+}
+
+.social-login {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.fb,
+.gg {
+    width: 150px;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    
+}
+
+.fb {
+    background-color: #3b5998;
+}
+
+.gg {
+    background-color: #dd4b39;
+}

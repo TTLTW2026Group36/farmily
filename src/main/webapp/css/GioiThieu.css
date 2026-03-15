@@ -1,0 +1,353 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.about-page-wrapper {
+    --primary-color: #4CAF50;
+    --secondary-color: #8BC34A;
+    --accent-color: #FF5722;
+    --text-color: #333;
+    --light-text: #666;
+    --bg-light: #f9f9f9;
+    --white: #ffffff;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --max-width: 1200px;
+    --spacing-unit: 1rem;
+
+    font-family: var(--font-family);
+    color: var(--text-color);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+.about-page-wrapper * {
+    box-sizing: border-box;
+}
+
+
+.about-page-wrapper .about-container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-unit);
+
+}
+
+
+.about-hero {
+    position: relative;
+    height: 60vh;
+    min-height: 400px;
+    background-image: url('https://images.unsplash.com/photo-1500937386664-56d1dfef3854?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--white);
+}
+
+.about-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.about-hero-content {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+}
+
+.about-hero h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.about-hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.about-btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+
+.about-intro {
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.about-intro h2 {
+    font-size: 2.5rem;
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.about-intro p {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+    color: var(--light-text);
+}
+
+
+.about-values {
+    padding: 4rem 0;
+    background-color: var(--bg-light);
+}
+
+.values-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+}
+
+.value-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.value-card:hover {
+    transform: translateY(-10px);
+}
+
+.value-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.value-card h3 {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+
+.about-journey {
+    padding: 4rem 0;
+}
+
+.journey-timeline {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.journey-item {
+    display: flex;
+    margin-bottom: 2rem;
+    align-items: flex-start;
+}
+
+.journey-year {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    min-width: 100px;
+    text-align: right;
+    margin-right: 2rem;
+    position: relative;
+}
+
+.journey-year::after {
+    content: '';
+    position: absolute;
+    right: -1.4rem;
+    top: 10px;
+    width: 12px;
+    height: 12px;
+    background: var(--accent-color);
+    border-radius: 50%;
+    border: 2px solid var(--white);
+    box-shadow: 0 0 0 2px var(--accent-color);
+}
+
+.journey-content {
+    flex: 1;
+    padding-bottom: 2rem;
+    border-left: 2px solid #ddd;
+    padding-left: 2rem;
+    margin-left: -1rem;
+    
+}
+
+.journey-item:last-child .journey-content {
+    border-left: none;
+}
+
+
+.about-video {
+    padding: 4rem 0;
+    background-color: #000;
+    color: var(--white);
+    text-align: center;
+}
+
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    
+    height: 0;
+    max-width: 900px;
+    margin: 2rem auto 0;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+
+.about-process {
+    padding: 4rem 0;
+    text-align: center;
+
+}
+
+.process-steps {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    margin-top: 3rem;
+}
+
+.process-step {
+    flex: 1;
+    min-width: 200px;
+    margin: 1rem;
+    position: relative;
+}
+
+.process-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--secondary-color);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin: 0 auto 1rem;
+}
+
+
+.about-testimonials {
+    padding: 4rem 0;
+    background-color: var(--bg-light);
+    text-align: center;
+}
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.testimonial-card {
+    background: var(--white);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+}
+
+.testimonial-text {
+    font-style: italic;
+    color: var(--light-text);
+    margin-bottom: 1rem;
+}
+
+.testimonial-author {
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+
+.about-cta {
+    padding: 5rem 0;
+    text-align: center;
+    background: linear-gradient(rgba(76, 175, 80, 0.9), rgba(76, 175, 80, 0.9)), url('https://images.unsplash.com/photo-1464226184884-fa280b87c399?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    color: var(--white);
+}
+
+.about-cta h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.about-cta .about-btn {
+    background-color: var(--white);
+    color: var(--primary-color);
+    margin-top: 1rem;
+}
+
+.about-cta .about-btn:hover {
+    background-color: #f1f1f1;
+}
+
+
+@media (max-width: 768px) {
+    .about-hero h1 {
+        font-size: 2rem;
+    }
+
+    .journey-item {
+        flex-direction: column;
+    }
+
+    .journey-year {
+        text-align: left;
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
+
+    .journey-year::after {
+        display: none;
+    }
+
+    .journey-content {
+        border-left: 2px solid #ddd;
+        padding-left: 1rem;
+        margin-left: 0;
+    }
+
+    .process-steps {
+        flex-direction: column;
+    }
