@@ -62,7 +62,6 @@
 
             if (selected && priceEl) {
                 const basePrice = Number(selected.dataset.price || 0);
-                const qty = clampQty(qtyInput ? qtyInput.value : 1);
 
                 let finalUnitPrice = basePrice;
                 const flashSale = window.productData?.flashSale;
@@ -71,26 +70,20 @@
                     finalUnitPrice = basePrice * (1 - flashSale.discountPercent / 100);
                 }
 
-                const totalPrice = finalUnitPrice * qty;
-                const totalOriginalPrice = basePrice * qty;
-
                 
-                priceEl.style.transform = 'scale(1.08)';
-                priceEl.style.transition = 'transform 0.15s ease';
+                
 
                 if (flashSale) {
                     priceEl.innerHTML = `
-                        <span class="current-price">${formatVND(totalPrice)}</span>
-                        <span class="old-price">${formatVND(totalOriginalPrice)}</span>
+                        <span class="current-price">${formatVND(finalUnitPrice)}</span>
+                        <span class="old-price">${formatVND(basePrice)}</span>
                         <span class="badge-sale-percent">-${flashSale.discountPercent}%</span>
                     `;
                 } else {
-                    priceEl.textContent = formatVND(totalPrice);
+                    priceEl.textContent = formatVND(basePrice);
                 }
 
-                setTimeout(() => {
-                    priceEl.style.transform = 'scale(1)';
-                }, 150);
+                
             }
         };
 
@@ -109,7 +102,6 @@
                 const step = Number(btn.dataset.step);
                 if (qtyInput) {
                     qtyInput.value = clampQty(Number(qtyInput.value) + step);
-                    updatePrice();
                 }
             });
         });
@@ -117,7 +109,6 @@
         if (qtyInput) {
             qtyInput.addEventListener('input', () => {
                 qtyInput.value = clampQty(qtyInput.value);
-                updatePrice();
             });
         }
 
