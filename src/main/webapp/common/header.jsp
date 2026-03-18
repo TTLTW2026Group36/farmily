@@ -18,7 +18,7 @@
                 display: block;
             }
         </style>
-        
+
         <header>
             <div class="topbar" role="banner">
                 <div class="wrap">
@@ -37,7 +37,7 @@
                             <button type="submit" class="btn search-btn" aria-label="Tìm">
                                 <i class="fa-solid fa-magnifying-glass"></i>
                             </button>
-                            
+
                             <div class="search-suggestions" id="search-suggestions"></div>
                         </form>
                     </div>
@@ -51,120 +51,121 @@
                             </div>
                         </div>
 
-                        
-                            <c:choose>
-                                
-                                    <c:when test="${not empty sessionScope.auth}">
-                                        <div class="user-menu" style="position: relative; display: inline-block;">
-                                            <a class="icon-btn-login" href="#" title="Tài khoản"
-                                                style="display: flex; align-items: center; gap: 5px;">
-                                                <i class="fa-solid fa-user"></i>
-                                                <span><strong>${sessionScope.auth.name}</strong></span>
-                                            </a>
-                                            <ul class="user-dropdown">
-                                                <li style="border-bottom: 1px solid #f0f0f0;">
-                                                    <a href="${pageContext.request.contextPath}/ho-so"
-                                                        style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
-                                                        <i class="fa-solid fa-user-pen"></i> Hồ sơ của tôi
-                                                    </a>
-                                                </li>
-                                                <li style="border-bottom: 1px solid #f0f0f0;">
-                                                    <a href="${pageContext.request.contextPath}/ho-so/don-hang"
-                                                        style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
-                                                        <i class="fa-solid fa-box"></i> Đơn hàng
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a href="${pageContext.request.contextPath}/logout"
-                                                        style="display: block; padding: 10px 15px; color: #d9534f; text-decoration: none;">
-                                                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
 
-                                        
-                                            <script>
-                                                document.addEventListener('DOMContentLoaded', function () {
-                                                    const userMenu = document.querySelector('.user-menu');
-                                                    if (userMenu) {
-                                                        const userBtn = userMenu.querySelector('.icon-btn-login');
-                                                        const dropdown = userMenu.querySelector('.user-dropdown');
+                        <c:choose>
 
-                                                        // Click để toggle
-                                                        userBtn.addEventListener('click', function (e) {
-                                                            e.preventDefault();
-                                                            dropdown.classList.toggle('show');
-                                                        });
-
-                                                        // Hover để hiện
-                                                        userMenu.addEventListener('mouseenter', function () {
-                                                            dropdown.classList.add('show');
-                                                        });
-
-                                                        userMenu.addEventListener('mouseleave', function () {
-                                                            dropdown.classList.remove('show');
-                                                        });
-
-                                                        // Click ra ngoài thì đóng
-                                                        document.addEventListener('click', function (e) {
-                                                            if (!userMenu.contains(e.target)) {
-                                                                dropdown.classList.remove('show');
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                            </script>
-                                    </c:when>
-
-                                    
-                                        <c:otherwise>
-                                            <a class="icon-btn-login"
-                                                href="${pageContext.request.contextPath}/dang-nhap" title="Tài khoản">
-                                                <i class="fa-solid fa-user"></i> Đăng nhập
-                                            </a>
-                                        </c:otherwise>
-                            </c:choose>
-                            
-
-                                
-                                    <a class="icon-btn-wishlist"
-                                        href="${pageContext.request.contextPath}/ho-so?tab=wishlist" title="Yêu thích">
-                                        <i class="fa-solid fa-heart"></i>
-                                        <span class="wishlist-badge" id="wishlistCount">
-                                            <c:out value="${sessionScope.wishlistCount}" default="0" />
-                                        </span>
+                            <c:when test="${not empty sessionScope.auth}">
+                                <div class="user-menu" style="position: relative; display: inline-block;">
+                                    <a class="icon-btn-login" href="#" title="Tài khoản"
+                                        style="display: flex; align-items: center; gap: 5px;">
+                                        <i class="fa-solid fa-user"></i>
+                                        <span><strong>${sessionScope.auth.name}</strong></span>
                                     </a>
+                                    <ul class="user-dropdown">
+                                        <li style="border-bottom: 1px solid #f0f0f0;">
+                                            <a href="${pageContext.request.contextPath}/ho-so"
+                                                style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
+                                                <i class="fa-solid fa-user-pen"></i> Hồ sơ của tôi
+                                            </a>
+                                        </li>
+                                        <li style="border-bottom: 1px solid #f0f0f0;">
+                                            <a href="${pageContext.request.contextPath}/ho-so/don-hang"
+                                                style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
+                                                <i class="fa-solid fa-box"></i> Đơn hàng
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a href="${pageContext.request.contextPath}/logout"
+                                                style="display: block; padding: 10px 15px; color: #d9534f; text-decoration: none;">
+                                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
 
-                                    <a class="icon-btn-shopping-cart" href="${pageContext.request.contextPath}/gio-hang"
-                                        title="Giỏ hàng">
-                                        <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng
-                                        <span class="cart-badge" id="cartCount">
-                                            <c:choose>
-                                                <c:when test="${not empty sessionScope.cartCount}">
-                                                    ${sessionScope.cartCount}</c:when>
-                                                <c:otherwise>0</c:otherwise>
-                                            </c:choose>
-                                        </span>
-                                    </a>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        const userMenu = document.querySelector('.user-menu');
+                                        if (userMenu) {
+                                            const userBtn = userMenu.querySelector('.icon-btn-login');
+                                            const dropdown = userMenu.querySelector('.user-dropdown');
+
+                                            // Click để toggle
+                                            userBtn.addEventListener('click', function (e) {
+                                                e.preventDefault();
+                                                dropdown.classList.toggle('show');
+                                            });
+
+                                            // Hover để hiện
+                                            userMenu.addEventListener('mouseenter', function () {
+                                                dropdown.classList.add('show');
+                                            });
+
+                                            userMenu.addEventListener('mouseleave', function () {
+                                                dropdown.classList.remove('show');
+                                            });
+
+                                            // Click ra ngoài thì đóng
+                                            document.addEventListener('click', function (e) {
+                                                if (!userMenu.contains(e.target)) {
+                                                    dropdown.classList.remove('show');
+                                                }
+                                            });
+                                        }
+                                    });
+                                </script>
+                            </c:when>
+
+
+                            <c:otherwise>
+                                <a class="icon-btn-login" href="${pageContext.request.contextPath}/dang-nhap"
+                                    title="Tài khoản">
+                                    <i class="fa-solid fa-user"></i> Đăng nhập
+                                </a>
+                            </c:otherwise>
+                        </c:choose>
+
+
+
+                        <a class="icon-btn-wishlist" href="${pageContext.request.contextPath}/ho-so?tab=wishlist"
+                            title="Yêu thích">
+                            <i class="fa-solid fa-heart"></i>
+                            <span class="wishlist-badge" id="wishlistCount">
+                                <c:out value="${sessionScope.wishlistCount}" default="0" />
+                            </span>
+                        </a>
+
+                        <a class="icon-btn-shopping-cart" href="${pageContext.request.contextPath}/gio-hang"
+                            title="Giỏ hàng">
+                            <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng
+                            <span class="cart-badge" id="cartCount">
+                                <c:choose>
+                                    <c:when test="${not empty sessionScope.cartCount}">
+                                        ${sessionScope.cartCount}</c:when>
+                                    <c:otherwise>0</c:otherwise>
+                                </c:choose>
+                            </span>
+                        </a>
                     </div>
                 </div>
             </div>
 
-            
+
             <div class="mini-nav" role="navigation" aria-label="Menu chính">
                 <div class="wrap">
                     <div class="cats-toggle">
                         <i class="fa-solid fa-bars"></i>
                         <span>Danh sách sản phẩm</span>
                         <ul class="dropdown">
-                            <li><a href="#">Rau ăn lá</a></li>
-                            <li><a href="#">Rau ăn củ</a></li>
-                            <li><a href="#">Rau ăn thân</a></li>
-                            <li><a href="#">Rau ăn hoa/bông</a></li>
-                            <li><a href="#">Rau ăn quả</a></li>
-                            <li><a href="#">Rau ăn hạt</a></li>
-                            <li><a href="#">Trái cây</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=1">Rau ăn lá</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=2">Rau ăn củ</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=3">Rau ăn thân</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=4">Rau ăn hoa/bông</a>
+                            </li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=5">Rau ăn quả</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=6">Rau ăn hạt</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=7">Trái cây</a></li>
                         </ul>
                     </div>
 
@@ -180,7 +181,7 @@
             </div>
         </header>
 
-        
+
         <script>
             (function () {
                 var searchInput = document.getElementById('header-search-input');
@@ -283,4 +284,3 @@
             window.contextPath = '${pageContext.request.contextPath}';
             window.isLoggedIn = ${not empty sessionScope.auth ? 'true' : 'false' };
         </script>
-        
