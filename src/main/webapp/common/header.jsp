@@ -283,4 +283,4 @@
             window.contextPath = '${pageContext.request.contextPath}';
             window.isLoggedIn = ${not empty sessionScope.auth ? 'true' : 'false' };
         </script>
-        
+        <script src="${pageContext.request.contextPath}/js/cart.js"></script>

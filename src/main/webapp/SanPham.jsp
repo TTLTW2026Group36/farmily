@@ -24,10 +24,10 @@
             </head>
 
             <body>
-                
+
                 <jsp:include page="common/header.jsp" />
 
-                
+
                 <nav class="site-breadcrumb" aria-label="Breadcrumb">
                     <div class="breadcrumb-container">
                         <ol class="breadcrumb-list">
@@ -55,21 +55,21 @@
                 </nav>
 
                 <div class="products-container">
-                    
+
                     <aside class="products-sidebar">
-                        
+
                         <div class="filter-section">
                             <h3 class="filter-section-title">DANH MỤC SẢN PHẨM</h3>
                             <div class="filter-divider"></div>
                             <ul class="filter-list category-list">
-                                
+
                                 <li class="filter-item">
                                     <a href="${pageContext.request.contextPath}/san-pham"
                                         class="filter-link ${empty selectedCategoryId ? 'active' : ''}">
                                         <i class="fas fa-th-large"></i> Tất cả sản phẩm
                                     </a>
                                 </li>
-                                
+
                                 <c:forEach var="category" items="${categories}">
                                     <li class="filter-item">
                                         <a href="${pageContext.request.contextPath}/san-pham?categoryId=${category.id}"
@@ -82,7 +82,7 @@
                         </div>
                     </aside>
 
-                    
+
                     <main class="products-main-content">
                         <div class="page-header-toolbar">
                             <div class="header-section">
@@ -157,14 +157,14 @@
                                 <c:otherwise>
                                     <c:forEach var="product" items="${products}">
                                         <div class="product-card">
-                                            
+
                                             <c:if test="${product.soldCount > 50}">
                                                 <div class="product-badges">
                                                     <span class="badge badge-hot">HOT</span>
                                                 </div>
                                             </c:if>
 
-                                            
+
                                             <button class="wishlist-btn" aria-label="Yêu thích"
                                                 data-product-id="${product.id}">
                                                 <i class="far fa-heart"></i>
@@ -215,16 +215,16 @@
                             </c:choose>
                         </div>
 
-                        
+
                         <c:if test="${totalPages > 1}">
                             <div class="pagination">
-                                
+
                                 <c:if test="${currentPage > 1}">
                                     <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage - 1}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
                                         class="page-btn prev-btn">‹</a>
                                 </c:if>
 
-                                
+
                                 <c:if test="${currentPage > 3}">
                                     <a href="${pageContext.request.contextPath}/san-pham?page=1${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
                                         class="page-btn">1</a>
@@ -233,14 +233,14 @@
                                     </c:if>
                                 </c:if>
 
-                                
+
                                 <c:forEach begin="${currentPage > 2 ? currentPage - 2 : 1}"
                                     end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}" var="i">
                                     <a href="${pageContext.request.contextPath}/san-pham?page=${i}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
                                         class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
                                 </c:forEach>
 
-                                
+
                                 <c:if test="${currentPage < totalPages - 2}">
                                     <c:if test="${currentPage < totalPages - 3}">
                                         <span class="page-dots">...</span>
@@ -249,7 +249,7 @@
                                         class="page-btn">${totalPages}</a>
                                 </c:if>
 
-                                
+
                                 <c:if test="${currentPage < totalPages}">
                                     <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage + 1}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
                                         class="page-btn next-btn">›</a>
@@ -259,16 +259,16 @@
                     </main>
                 </div>
 
-                
+
                 <jsp:include page="common/footer.jsp" />
 
-                
+
                 <input type="hidden" id="currentCategoryId" value="${selectedCategoryId}" />
                 <input type="hidden" id="currentSort" value="${currentSort}" />
                 <input type="hidden" id="currentPage" value="${currentPage}" />
 
                 <script src="${pageContext.request.contextPath}/js/SanPham.js?v=2"></script>
-                <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+
             </body>
 
             </html>

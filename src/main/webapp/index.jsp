@@ -35,10 +35,10 @@
                     <c:remove var="registerSuccess" scope="session" />
                 </c:if>
 
-                
+
                 <jsp:include page="common/header.jsp" />
 
-                
+
                 <section class="main-slider">
                     <div class="slider-container">
                         <div class="slider-wrapper">
@@ -77,7 +77,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="quick-categories">
                     <div class="container">
                         <div class="section-header">
@@ -96,10 +96,10 @@
                     </div>
                 </section>
 
-                
+
                 <jsp:include page="common/flash-sale-section.jsp" />
 
-                
+
                 <section class="products-section">
                     <div class="container">
                         <div class="section-header">
@@ -158,7 +158,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="banner-grid-section">
                     <div class="container">
                         <div class="banner-grid">
@@ -192,7 +192,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="products-section">
                     <div class="container">
                         <div class="section-header">
@@ -251,7 +251,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="blog-section">
                     <div class="container">
                         <div class="section-header">
@@ -349,11 +349,11 @@
                     </div>
                 </section>
 
-                
+
                 <jsp:include page="common/footer.jsp" />
 
                 <script src="${pageContext.request.contextPath}/js/index.js?v=1.1"></script>
-                <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+
             </body>
 
             </html>
