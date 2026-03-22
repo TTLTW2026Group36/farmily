@@ -71,17 +71,6 @@ heartBeatStyle.textContent = `
 `;
 document.head.appendChild(heartBeatStyle);
 
-
-
-
-/* addToCart, updateCartBadge, showToast are now provided globally by cart.js (loaded in header.jsp) */
-
-
-
-
-
-
-
 function initSorting() {
     const sortButtons = document.querySelectorAll('.sort-btn[data-sort]');
     const productsGrid = document.querySelector('.products-grid');

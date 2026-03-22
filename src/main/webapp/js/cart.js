@@ -3,12 +3,9 @@ function updateCartBadge(count) {
     var badge = document.getElementById('cartCount');
     if (!badge) return;
 
-    // Only update if count has changed
     if (badge.textContent != count) {
         badge.textContent = count;
     }
-
-    // Only update display if it changed
     if (count > 0) {
         if (badge.style.display !== 'inline-flex') {
             badge.style.display = 'inline-flex';
