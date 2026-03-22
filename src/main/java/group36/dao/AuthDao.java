@@ -34,4 +34,25 @@ public class AuthDao extends BaseDao {
         }
     }
 
+    public User getUserByFacebookId(String facebookId) {
+        return get()
+                .withHandle(h -> h.createQuery("select * from users where facebook_id = :facebookId").bind("facebookId", facebookId)
+                        .mapToBean(User.class).stream().findFirst().orElse(null));
+    }
+
+    public boolean insertUserWithFacebook(User user) {
+        try {
+            get().useHandle(h -> h.createUpdate(
+                    "INSERT INTO users (name, email, facebook_id, role) VALUES (:name, :email, :facebookId, :role)")
+                    .bind("name", user.getName())
+                    .bind("email", user.getEmail())
+                    .bind("facebookId", user.getFacebookId())
+                    .bind("role", user.getRole())
+                    .execute());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 }
