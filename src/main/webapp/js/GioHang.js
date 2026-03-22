@@ -126,11 +126,17 @@
             });
     };
 
-    window.updateVariant = function (itemId, variantId, selectEl) {
-        if (!variantId) return;
-        var originalValue = selectEl.dataset.original;
-        selectEl.disabled = true;
-        selectEl.style.opacity = '0.5';
+    window.onChipClick = function (itemId, variantId, chipEl) {
+        var container = chipEl.closest('.variant-chips');
+        if (!container) return;
+        if (chipEl.classList.contains('active')) return;
+        var prevActive = container.querySelector('.variant-chip.active');
+        var originalVariantId = container.dataset.original;
+        container.querySelectorAll('.variant-chip').forEach(function (c) {
+            c.classList.remove('active');
+            c.classList.add('loading');
+        });
+        chipEl.classList.add('active');
 
         fetch(API_URL + '?itemId=' + itemId + '&variantId=' + variantId, { method: 'PUT' })
             .then(function (r) { return r.json(); })
@@ -139,23 +145,30 @@
                     updateItemUI(itemId, data.item);
                     updateCartTotals();
                     updateCartBadge(data.cartCount);
-                    selectEl.dataset.original = variantId;
+                    container.dataset.original = variantId;
                     showToast('Đã cập nhật phân loại');
                     if (data.item.id != itemId) {
                         setTimeout(function () { location.reload(); }, 1200);
                     }
                 } else {
-                    selectEl.value = originalValue;
+                    container.querySelectorAll('.variant-chip').forEach(function (c) {
+                        c.classList.remove('active');
+                    });
+                    if (prevActive) prevActive.classList.add('active');
                     alert(data.message || 'Có lỗi xảy ra');
                 }
             })
             .catch(function () {
-                selectEl.value = originalValue;
+                container.querySelectorAll('.variant-chip').forEach(function (c) {
+                    c.classList.remove('active');
+                });
+                if (prevActive) prevActive.classList.add('active');
                 alert('Có lỗi xảy ra, vui lòng thử lại!');
             })
             .finally(function () {
-                selectEl.disabled = false;
-                selectEl.style.opacity = '1';
+                container.querySelectorAll('.variant-chip').forEach(function (c) {
+                    c.classList.remove('loading');
+                });
             });
     };
 
