@@ -1,7 +1,7 @@
 package group36.model;
 
 import java.io.Serializable;
-import java.sql.Timestamp; 
+import java.sql.Timestamp;
 
 public class User implements Serializable {
     private int id;
@@ -12,12 +12,13 @@ public class User implements Serializable {
     private String role;
     private Timestamp created_at;
     private Timestamp updated_at;
+    private String facebookId;
 
     public User() {
     }
 
-    public User(int id, String name, String email, String password, String phone, String role, Timestamp created_at,
-            Timestamp updated_at) {
+    public User(int id, String name, String email, String password, String phone, String role,
+            Timestamp created_at, Timestamp updated_at) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -74,6 +75,14 @@ public class User implements Serializable {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getFacebookId() {
+        return facebookId;
+    }
+
+    public void setFacebookId(String facebookId) {
+        this.facebookId = facebookId;
     }
 
     public Timestamp getCreated_at() {
