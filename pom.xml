@@ -56,6 +56,16 @@
             <artifactId>gson</artifactId>
             <version>2.12.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>fluent-hc</artifactId>
+            <version>4.5.14</version>
+        </dependency>
         <!-- JSTL for Jakarta EE 10 -->
         <dependency>
             <groupId>jakarta.servlet.jsp.jstl</groupId>

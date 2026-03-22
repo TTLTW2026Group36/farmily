@@ -71,8 +71,7 @@
 
                     <p class="hoac">Hoặc đăng nhập bằng</p>
                     <div class="social-login">
-                        <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=962984642734580
-&redirect_uri=http://localhost:8080/Farmily/LoginController" class="fb">
+                        <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=815063500335033&redirect_uri=http://localhost:8080/LoginFacebook/login" class="fb">
                             <i class="fa-brands fa-facebook"></i> Facebook
                         </a>
                         <button class="gg"><i class="fa-brands fa-google"></i> Google</button>
