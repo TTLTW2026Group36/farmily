@@ -87,6 +87,9 @@ public class ProductDetailController extends HttpServlet {
                 }
             });
 
+            List<Product> relatedProducts = productService.getRelatedProducts(productId, product.getCategoryId(), 8);
+            request.setAttribute("relatedProducts", relatedProducts);
+
             request.setAttribute("pageTitle", product.getName() + " - Chi tiết sản phẩm");
             request.getRequestDispatcher("/ChiTietSanPham.jsp").forward(request, response);
 

@@ -136,6 +136,12 @@ public class ProductService {
         return products;
     }
 
+    public List<Product> getRelatedProducts(int productId, int categoryId, int limit) {
+        List<Product> products = productDAO.findByCategoryIdExcluding(categoryId, productId, limit);
+        loadProductDetails(products);
+        return products;
+    }
+
     
 
 
