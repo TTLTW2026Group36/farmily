@@ -1,0 +1,361 @@
+package group36.controller.admin;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+import group36.model.Category;
+import group36.model.Product;
+import group36.model.ProductVariant;
+import group36.service.CategoryService;
+import group36.service.ProductService;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+
+
+
+
+@WebServlet(name = "AdminProductController", urlPatterns = { "/admin/products", "/admin/products/*" })
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, 
+        maxFileSize = 1024 * 1024 * 10, 
+        maxRequestSize = 1024 * 1024 * 50 
+)
+public class AdminProductController extends HttpServlet {
+    private final ProductService productService;
+    private final CategoryService categoryService;
+
+    private static final int PAGE_SIZE = 10;
+
+    public AdminProductController() {
+        this.productService = new ProductService();
+        this.categoryService = new CategoryService();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String pathInfo = request.getPathInfo();
+
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                
+                listProducts(request, response);
+            } else if (pathInfo.equals("/add")) {
+                
+                showAddForm(request, response);
+            } else if (pathInfo.equals("/edit")) {
+                
+                showEditForm(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
+            listProducts(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        String pathInfo = request.getPathInfo();
+
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            } else if (pathInfo.equals("/add")) {
+                createProduct(request, response);
+            } else if (pathInfo.equals("/edit")) {
+                updateProduct(request, response);
+            } else if (pathInfo.equals("/delete")) {
+                deleteProduct(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "Lỗi: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        }
+    }
+
+    
+
+
+    private void listProducts(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        int page = 1;
+        String pageParam = request.getParameter("page");
+        if (pageParam != null && !pageParam.isEmpty()) {
+            try {
+                page = Integer.parseInt(pageParam);
+                if (page < 1)
+                    page = 1;
+            } catch (NumberFormatException e) {
+                page = 1;
+            }
+        }
+
+        
+        String categoryParam = request.getParameter("category");
+        int categoryId = 0;
+        if (categoryParam != null && !categoryParam.isEmpty()) {
+            try {
+                categoryId = Integer.parseInt(categoryParam);
+            } catch (NumberFormatException e) {
+                categoryId = 0;
+            }
+        }
+
+        
+        List<Product> products;
+        int totalProducts;
+
+        if (categoryId > 0) {
+            products = productService.getProductsByCategoryPaginated(categoryId, page, PAGE_SIZE);
+            totalProducts = productService.getTotalProductsByCategory(categoryId);
+        } else {
+            products = productService.getProductsPaginated(page, PAGE_SIZE);
+            totalProducts = productService.getTotalProducts();
+        }
+
+        
+        int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);
+
+        
+        List<Category> categories = categoryService.getAllCategories();
+
+        
+        request.setAttribute("products", products);
+        request.setAttribute("categories", categories);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("totalProducts", totalProducts);
+        request.setAttribute("selectedCategory", categoryId);
+        request.setAttribute("pageSize", PAGE_SIZE);
+
+        
+        HttpSession session = request.getSession();
+        if (session.getAttribute("success") != null) {
+            request.setAttribute("success", session.getAttribute("success"));
+            session.removeAttribute("success");
+        }
+        if (session.getAttribute("error") != null) {
+            request.setAttribute("error", session.getAttribute("error"));
+            session.removeAttribute("error");
+        }
+
+        request.getRequestDispatcher("/admin/products.jsp").forward(request, response);
+    }
+
+    
+
+
+    private void showAddForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Category> categories = categoryService.getAllCategories();
+        request.setAttribute("categories", categories);
+        request.getRequestDispatcher("/admin/product-add.jsp").forward(request, response);
+    }
+
+    
+
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            Product product = productService.getProductById(id);
+            List<Category> categories = categoryService.getAllCategories();
+
+            request.setAttribute("product", product);
+            request.setAttribute("categories", categories);
+            request.getRequestDispatcher("/admin/product-edit.jsp").forward(request, response);
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "ID sản phẩm không hợp lệ");
+            listProducts(request, response);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("error", e.getMessage());
+            listProducts(request, response);
+        }
+    }
+
+    
+
+
+    private void createProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        String name = request.getParameter("productName");
+        String description = request.getParameter("description");
+        String tags = request.getParameter("tags");
+        String categoryIdParam = request.getParameter("category");
+        String priceParam = request.getParameter("price");
+        String stockParam = request.getParameter("stock");
+        String unit = request.getParameter("unit");
+        String imageUrl = request.getParameter("imageUrl");
+
+        try {
+            
+            int categoryId = Integer.parseInt(categoryIdParam);
+            double price = Double.parseDouble(priceParam);
+            int stock = Integer.parseInt(stockParam);
+
+            
+            Product product = productService.createSimpleProduct(
+                    categoryId, name, description, tags, price, stock, unit, imageUrl);
+
+            
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Thêm sản phẩm '" + product.getName() + "' thành công!");
+
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        } catch (NumberFormatException e) {
+            request.setAttribute("error", "Dữ liệu không hợp lệ");
+            showAddForm(request, response);
+        } catch (IllegalArgumentException e) {
+            request.setAttribute("error", e.getMessage());
+            
+            request.setAttribute("productName", name);
+            request.setAttribute("description", description);
+            request.setAttribute("tags", tags);
+            request.setAttribute("selectedCategory", categoryIdParam);
+            request.setAttribute("price", priceParam);
+            request.setAttribute("stock", stockParam);
+            request.setAttribute("unit", unit);
+            request.setAttribute("imageUrl", imageUrl);
+            showAddForm(request, response);
+        }
+    }
+
+    
+
+
+    private void updateProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        String name = request.getParameter("productName");
+        String description = request.getParameter("description");
+        String tags = request.getParameter("tags");
+        String categoryIdParam = request.getParameter("category");
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            int categoryId = Integer.parseInt(categoryIdParam);
+
+            
+            Product product = productService.getProductById(id);
+
+            
+            product.setName(name);
+            product.setDescription(description);
+            product.setTags(tags);
+            product.setCategoryId(categoryId);
+
+            
+            productService.updateProduct(product);
+
+            
+            updateVariantsFromRequest(request, id);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Cập nhật sản phẩm '" + product.getName() + "' thành công!");
+
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "Dữ liệu không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/admin/products/edit?id=" + idParam);
+        } catch (IllegalArgumentException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/products/edit?id=" + idParam);
+        }
+    }
+
+    
+
+
+    private void updateVariantsFromRequest(HttpServletRequest request, int productId) {
+        String[] variantIds = request.getParameterValues("variantId");
+        String[] variantOptions = request.getParameterValues("variantOptions");
+        String[] variantStocks = request.getParameterValues("variantStock");
+        String[] variantPrices = request.getParameterValues("variantPrice");
+
+        if (variantIds == null || variantOptions == null || variantStocks == null || variantPrices == null) {
+            return;
+        }
+
+        for (int i = 0; i < variantIds.length; i++) {
+            try {
+                int variantId = Integer.parseInt(variantIds[i]);
+                String options = variantOptions[i];
+                int stock = Integer.parseInt(variantStocks[i]);
+                double price = Double.parseDouble(variantPrices[i]);
+
+                ProductVariant variant = new ProductVariant();
+                variant.setId(variantId);
+                variant.setProductId(productId);
+                variant.setOptionsValue(options);
+                variant.setStock(stock);
+                variant.setPrice(price);
+
+                productService.updateVariant(variant);
+            } catch (Exception e) {
+                
+                e.printStackTrace();
+            }
+        }
+    }
+
+    
+
+
+    private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            Product product = productService.getProductById(id);
+            String productName = product.getName();
+
+            productService.deleteProduct(id);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Xóa sản phẩm '" + productName + "' thành công!");
+
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "ID sản phẩm không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        } catch (IllegalArgumentException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/products");
+        }
+    }
+}
