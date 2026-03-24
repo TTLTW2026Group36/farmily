@@ -284,6 +284,16 @@ public class ProductDAO extends BaseDao {
                 .list());
     }
 
+    public List<Product> findByCategoryIdExcluding(int categoryId, int excludeProductId, int limit) {
+        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND id != :excludeId ORDER BY soild_count DESC, id DESC LIMIT :limit";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("categoryId", categoryId)
+                .bind("excludeId", excludeProductId)
+                .bind("limit", limit)
+                .map(new ProductMapper())
+                .list());
+    }
+
     private String getSafeOrderColumn(String sortBy) {
         if (sortBy == null)
             return "id";
