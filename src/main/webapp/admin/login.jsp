@@ -12,7 +12,6 @@
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/login.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <style>
-                /* Alert styles */
                 .alert-error {
                     background: #fee2e2;
                     border-left: 4px solid #dc2626;

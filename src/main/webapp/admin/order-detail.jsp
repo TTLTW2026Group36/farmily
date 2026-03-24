@@ -20,15 +20,15 @@
 
             <body>
                 <div class="admin-layout">
-                    
-                    <jsp:include page="sidebar.jsp" />
-                    
 
-                    
+                    <jsp:include page="sidebar.jsp" />
+
+
+
                     <main class="admin-main">
-                        
+
                         <jsp:include page="header.jsp" />
-                        
+
 
                         <div class="admin-content">
                             <div class="content-header">
@@ -55,9 +55,9 @@
                             </div>
 
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
-                                
+
                                 <div>
-                                    
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title">Thông tin đơn hàng</h3>
@@ -133,7 +133,7 @@
                                         </div>
                                     </div>
 
-                                    
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title">Sản phẩm (${order.orderDetails.size()})</h3>
@@ -185,9 +185,9 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <div>
-                                    
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title">Thông tin khách hàng</h3>
@@ -230,7 +230,7 @@
                                         </div>
                                     </div>
 
-                                    
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title">Ghi chú</h3>
@@ -248,7 +248,7 @@
                                         </div>
                                     </div>
 
-                                    
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title">Tổng kết đơn hàng</h3>
@@ -278,13 +278,11 @@
                 </div>
 
                 <script>
-                    // Status update functionality
                     document.getElementById('statusSelect').addEventListener('change', function () {
                         const orderId = this.dataset.orderId;
                         const newStatus = this.value;
 
                         if (!confirm('Bạn có chắc muốn cập nhật trạng thái đơn hàng?')) {
-                            // Reset to previous value
                             location.reload();
                             return;
                         }
@@ -299,7 +297,6 @@
                             .then(response => response.json())
                             .then(data => {
                                 if (data.success) {
-                                    // Reload page to reflect changes
                                     location.reload();
                                 } else {
                                     alert('Lỗi: ' + data.message);

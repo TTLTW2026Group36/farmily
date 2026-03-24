@@ -32,12 +32,6 @@ public class CartService {
         this.flashSaleDAO = new FlashSaleDAO();
     }
 
-    
-
-
-
-
-
     public Cart getCartByUserId(int userId) {
         Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
 
@@ -47,16 +41,9 @@ public class CartService {
             return cart;
         }
 
-        
         Cart emptyCart = new Cart(userId);
         return emptyCart;
     }
-
-    
-
-
-
-
 
     public Cart getOrCreateCart(int userId) {
         Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
@@ -65,18 +52,11 @@ public class CartService {
             return cartOpt.get();
         }
 
-        
         Cart cart = new Cart(userId);
         int cartId = cartDAO.insert(cart);
         cart.setId(cartId);
         return cart;
     }
-
-    
-
-
-
-
 
     public int getCartItemCount(int userId) {
         Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
@@ -86,18 +66,8 @@ public class CartService {
         return 0;
     }
 
-    
-
-
-
-
-
-
-
-
-
     public CartItem addToCart(int userId, int productId, Integer variantId, int quantity) {
-        
+
         if (quantity <= 0) {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
@@ -144,25 +114,14 @@ public class CartService {
         }
     }
 
-    
-
-
-
-
-
-
-
-
     public CartItem updateQuantity(int userId, int itemId, int quantity) {
         if (quantity <= 0) {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
 
-        
         CartItem item = cartItemDAO.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng"));
 
-        
         Cart cart = cartDAO.findById(item.getCartId())
                 .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại"));
 
@@ -170,7 +129,6 @@ public class CartService {
             throw new IllegalArgumentException("Không có quyền cập nhật giỏ hàng này");
         }
 
-        
         if (item.getVariantId() != null) {
             ProductVariant variant = variantDAO.findById(item.getVariantId()).orElse(null);
             if (variant != null && variant.getStock() < quantity) {
@@ -179,29 +137,19 @@ public class CartService {
             }
         }
 
-        
         cartItemDAO.updateQuantity(itemId, quantity);
         item.setQuantity(quantity);
 
-        
         loadItemDetails(item);
 
         return item;
     }
 
-    
-
-
-
-
-
-
     public void removeItem(int userId, int itemId) {
-        
+
         CartItem item = cartItemDAO.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng"));
 
-        
         Cart cart = cartDAO.findById(item.getCartId())
                 .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại"));
 
@@ -212,26 +160,12 @@ public class CartService {
         cartItemDAO.delete(itemId);
     }
 
-    
-
-
-
-
     public void clearCart(int userId) {
         Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
         if (cartOpt.isPresent()) {
             cartItemDAO.deleteByCartId(cartOpt.get().getId());
         }
     }
-
-    
-
-
-
-
-
-
-
 
     public CartItem updateVariant(int userId, int itemId, int variantId) {
         CartItem item = cartItemDAO.findById(itemId)
@@ -251,7 +185,6 @@ public class CartService {
             throw new IllegalArgumentException("Phân loại không thuộc sản phẩm này");
         }
 
-        
         if (variant.getStock() < item.getQuantity()) {
             throw new IllegalArgumentException(
                     "Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
@@ -275,11 +208,9 @@ public class CartService {
             return existingItem;
         }
 
-        
         cartItemDAO.updateVariant(itemId, variantId);
         item.setVariantId(variantId);
 
-        
         loadItemDetails(item);
 
         return item;
@@ -289,7 +220,6 @@ public class CartService {
         return variantDAO.findByProductId(productId);
     }
 
-    
     private void loadCartItems(Cart cart) {
         if (cart == null)
             return;
@@ -307,14 +237,12 @@ public class CartService {
         if (item == null)
             return;
 
-        
         productDAO.findById(item.getProductId()).ifPresent(product -> {
             product.setImages(imageDAO.findByProductId(product.getId()));
             List<ProductVariant> variants = variantDAO.findByProductId(product.getId());
             product.setVariants(variants);
             item.setProduct(product);
 
-            
             if (item.getVariantId() != null) {
                 for (ProductVariant v : variants) {
                     if (Integer.valueOf(v.getId()).equals(item.getVariantId())) {
@@ -325,12 +253,10 @@ public class CartService {
             }
         });
 
-        
         if (item.getVariantId() != null && item.getVariant() == null) {
             variantDAO.findById(item.getVariantId()).ifPresent(item::setVariant);
         }
 
-        
         applyFlashSalePrice(item);
     }
 
@@ -342,13 +268,13 @@ public class CartService {
 
         if (flashSaleOpt.isPresent()) {
             FlashSale flashSale = flashSaleOpt.get();
-            
+
             if (flashSale.getRemainingStock() > 0) {
-                
+
                 double originalPrice = item.getOriginalUnitPrice();
 
                 if (originalPrice > 0) {
-                    
+
                     double salePrice = flashSale.getSalePrice(originalPrice);
                     item.setFlashSalePrice(salePrice);
                 }

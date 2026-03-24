@@ -9,14 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class CartItemDAO extends BaseDao {
-
-    
-
 
     private static class CartItemMapper implements RowMapper<CartItem> {
         @Override
@@ -34,12 +27,6 @@ public class CartItemDAO extends BaseDao {
         }
     }
 
-    
-
-
-
-
-
     public List<CartItem> findByCartId(int cartId) {
         String sql = "SELECT * FROM cart_items WHERE cart_id = :cartId";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -48,12 +35,6 @@ public class CartItemDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
     public Optional<CartItem> findById(int id) {
         String sql = "SELECT * FROM cart_items WHERE id = :id";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -61,15 +42,6 @@ public class CartItemDAO extends BaseDao {
                 .map(new CartItemMapper())
                 .findOne());
     }
-
-    
-
-
-
-
-
-
-
 
     public Optional<CartItem> findByCartAndProduct(int cartId, int productId, Integer variantId) {
         String sql;
@@ -91,12 +63,6 @@ public class CartItemDAO extends BaseDao {
         }
     }
 
-    
-
-
-
-
-
     public int insert(CartItem item) {
         String sql = "INSERT INTO cart_items (cart_id, product_id, variant_id, quantity) " +
                 "VALUES (:cartId, :productId, :variantId, :quantity)";
@@ -110,13 +76,6 @@ public class CartItemDAO extends BaseDao {
                 .one());
     }
 
-    
-
-
-
-
-
-
     public int updateQuantity(int id, int quantity) {
         String sql = "UPDATE cart_items SET quantity = :quantity WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -125,12 +84,6 @@ public class CartItemDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
     public int delete(int id) {
         String sql = "DELETE FROM cart_items WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -138,24 +91,12 @@ public class CartItemDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
     public int deleteByCartId(int cartId) {
         String sql = "DELETE FROM cart_items WHERE cart_id = :cartId";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("cartId", cartId)
                 .execute());
     }
-
-    
-
-
-
-
 
     public int countByCartId(int cartId) {
         String sql = "SELECT COUNT(*) FROM cart_items WHERE cart_id = :cartId";
@@ -165,12 +106,13 @@ public class CartItemDAO extends BaseDao {
                 .one());
     }
 
-    
-
-
-
-
-
+    public int sumQuantityByCartId(int cartId) {
+        String sql = "SELECT COALESCE(SUM(quantity), 0) FROM cart_items WHERE cart_id = :cartId";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("cartId", cartId)
+                .mapTo(Integer.class)
+                .one());
+    }
 
     public int updateVariant(int id, int variantId) {
         String sql = "UPDATE cart_items SET variant_id = :variantId WHERE id = :id";

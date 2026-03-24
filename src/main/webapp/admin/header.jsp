@@ -76,7 +76,6 @@
                 var notificationList = document.getElementById('notificationList');
                 var markAllReadBtn = document.getElementById('markAllReadBtn');
 
-                // Toggle dropdown
                 notificationBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
                     notificationDropdown.classList.toggle('show');
@@ -85,14 +84,12 @@
                     }
                 });
 
-                // Close dropdown when clicking outside
                 document.addEventListener('click', function (e) {
                     if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
                         notificationDropdown.classList.remove('show');
                     }
                 });
 
-                // Mark all as read
                 markAllReadBtn.addEventListener('click', function (e) {
                     e.preventDefault();
                     fetch(contextPath + '/admin/api/notifications/read-all', {
@@ -103,7 +100,6 @@
                         .then(function (data) {
                             if (data.success) {
                                 updateBadge(0);
-                                // Remove unread class from all items
                                 var items = notificationList.querySelectorAll('.notification-item.unread');
                                 items.forEach(function (item) {
                                     item.classList.remove('unread');
@@ -115,7 +111,6 @@
                         });
                 });
 
-                // Load notifications
                 function loadNotifications() {
                     fetch(contextPath + '/admin/api/notifications?limit=5')
                         .then(function (response) { return response.json(); })
@@ -129,7 +124,6 @@
                         });
                 }
 
-                // Render notifications
                 function renderNotifications(notifications) {
                     if (!notifications || notifications.length === 0) {
                         notificationList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748b;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>Không có thông báo</div>';
@@ -152,7 +146,6 @@
                     });
                     notificationList.innerHTML = html;
 
-                    // Add click handler to mark as read
                     notificationList.querySelectorAll('.notification-item').forEach(function (item) {
                         item.addEventListener('click', function () {
                             var id = this.getAttribute('data-id');
@@ -161,7 +154,6 @@
                     });
                 }
 
-                // Get notification link
                 function getNotificationLink(notification) {
                     if (!notification.referenceType || !notification.referenceId) {
                         return contextPath + '/admin/notifications';
@@ -176,7 +168,6 @@
                     }
                 }
 
-                // Update badge
                 function updateBadge(count) {
                     if (count > 0) {
                         notificationBadge.textContent = count > 99 ? '99+' : count;
@@ -188,7 +179,6 @@
                     }
                 }
 
-                // Mark single notification as read
                 function markAsRead(id) {
                     fetch(contextPath + '/admin/api/notifications/read', {
                         method: 'POST',
@@ -206,7 +196,6 @@
                         });
                 }
 
-                // Escape HTML
                 function escapeHtml(text) {
                     if (!text) return '';
                     var div = document.createElement('div');
@@ -214,7 +203,6 @@
                     return div.innerHTML;
                 }
 
-                // Initial load and polling
                 function fetchUnreadCount() {
                     fetch(contextPath + '/admin/api/notifications/count')
                         .then(function (response) { return response.json(); })
@@ -226,10 +214,8 @@
                         });
                 }
 
-                // Initial fetch
                 fetchUnreadCount();
 
-                // Poll every 30 seconds
                 setInterval(fetchUnreadCount, 30000);
             })();
         </script>

@@ -1,12 +1,12 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-        
+
         <footer class="footer">
             <div class="footer-top">
                 <div class="container">
                     <div class="grid">
-                        
+
                         <section class="footer-col">
                             <h4 class="title">Về chúng tôi</h4>
 
@@ -44,7 +44,7 @@
                             </div>
                         </section>
 
-                        
+
                         <nav class="footer-col">
                             <h4 class="title">Chính sách</h4>
                             <ul class="list">
@@ -69,43 +69,40 @@
                             </ul>
                         </nav>
 
-                        
+
                         <nav class="footer-col">
                             <h4 class="title">Hỗ trợ khách hàng</h4>
                             <ul class="list">
                                 <li><a class="link" href="#" title="Tìm kiếm">Tìm kiếm</a></li>
 
-                                
-                                    <c:choose>
-                                        
-                                            <c:when test="${not empty sessionScope.auth}">
-                                                <li><a class="link" href="${pageContext.request.contextPath}/ho-so"
-                                                        title="Hồ sơ">Hồ sơ của tôi</a></li>
-                                                <li><a class="link"
-                                                        href="${pageContext.request.contextPath}/ho-so/don-hang"
-                                                        title="Đơn hàng">Đơn hàng</a></li>
-                                                <li><a class="link" href="${pageContext.request.contextPath}/logout"
-                                                        title="Đăng xuất">Đăng xuất</a></li>
-                                            </c:when>
 
-                                            
-                                                <c:otherwise>
-                                                    <li><a class="link"
-                                                            href="${pageContext.request.contextPath}/dang-nhap"
-                                                            title="Đăng nhập">Đăng nhập</a></li>
-                                                    <li><a class="link"
-                                                            href="${pageContext.request.contextPath}/register"
-                                                            title="Đăng ký">Đăng ký</a></li>
-                                                </c:otherwise>
-                                    </c:choose>
-                                    
+                                <c:choose>
 
-                                        <li><a class="link" href="${pageContext.request.contextPath}/gio-hang"
-                                                title="Giỏ hàng">Giỏ hàng</a></li>
+                                    <c:when test="${not empty sessionScope.auth}">
+                                        <li><a class="link" href="${pageContext.request.contextPath}/ho-so"
+                                                title="Hồ sơ">Hồ sơ của tôi</a></li>
+                                        <li><a class="link" href="${pageContext.request.contextPath}/ho-so/don-hang"
+                                                title="Đơn hàng">Đơn hàng</a></li>
+                                        <li><a class="link" href="${pageContext.request.contextPath}/logout"
+                                                title="Đăng xuất">Đăng xuất</a></li>
+                                    </c:when>
+
+
+                                    <c:otherwise>
+                                        <li><a class="link" href="${pageContext.request.contextPath}/dang-nhap"
+                                                title="Đăng nhập">Đăng nhập</a></li>
+                                        <li><a class="link" href="${pageContext.request.contextPath}/register"
+                                                title="Đăng ký">Đăng ký</a></li>
+                                    </c:otherwise>
+                                </c:choose>
+
+
+                                <li><a class="link" href="${pageContext.request.contextPath}/gio-hang"
+                                        title="Giỏ hàng">Giỏ hàng</a></li>
                             </ul>
                         </nav>
 
-                        
+
                         <section class="footer-col">
                             <div class="social-footer">
                                 <h4 class="title">Theo dõi chúng tôi</h4>
@@ -182,18 +179,15 @@
                                             const email = emailInput.value.trim();
 
                                             if (email && validateEmail(email)) {
-                                                // Ẩn form và hiển thị thông báo thành công
                                                 newsletterForm.style.display = 'none';
                                                 newsletterSuccess.style.display = 'flex';
 
-                                                // Lưu vào localStorage để nhớ đã đăng ký
                                                 localStorage.setItem('newsletter_subscribed', 'true');
                                                 localStorage.setItem('newsletter_email', email);
                                             }
                                         });
                                     }
 
-                                    // Kiểm tra nếu đã đăng ký trước đó
                                     if (localStorage.getItem('newsletter_subscribed') === 'true') {
                                         if (newsletterForm) newsletterForm.style.display = 'none';
                                         if (newsletterSuccess) newsletterSuccess.style.display = 'flex';
@@ -210,4 +204,3 @@
                 </div>
             </div>
         </footer>
-        
