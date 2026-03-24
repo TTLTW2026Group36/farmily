@@ -155,13 +155,14 @@
                         <i class="fa-solid fa-bars"></i>
                         <span>Danh sách sản phẩm</span>
                         <ul class="dropdown">
-                            <li><a href="#">Rau ăn lá</a></li>
-                            <li><a href="#">Rau ăn củ</a></li>
-                            <li><a href="#">Rau ăn thân</a></li>
-                            <li><a href="#">Rau ăn hoa/bông</a></li>
-                            <li><a href="#">Rau ăn quả</a></li>
-                            <li><a href="#">Rau ăn hạt</a></li>
-                            <li><a href="#">Trái cây</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=1">Rau ăn lá</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=2">Rau ăn củ</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=3">Rau ăn thân</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=4">Rau ăn hoa/bông</a>
+                            </li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=5">Rau ăn quả</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=6">Rau ăn hạt</a></li>
+                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=7">Trái cây</a></li>
                         </ul>
                     </div>
 

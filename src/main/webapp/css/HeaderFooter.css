@@ -15,9 +15,10 @@
 
 body {
     margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f2f2f2;
-    color: #222
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background: #f8f9fa;
+    color: #1f2937;
+    line-height: 1.5;
 }
 
 

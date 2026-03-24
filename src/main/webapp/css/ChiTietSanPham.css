@@ -175,7 +175,11 @@ a {
 .sp-price {
     font-size: 28px;
     font-weight: 800;
-    color: #dc2626
+    color: #dc2626;
+    min-height: 40px;
+    line-height: 40px;
+    transform: none !important;
+    transition: none !important;
 }
 
 .sp-note {
