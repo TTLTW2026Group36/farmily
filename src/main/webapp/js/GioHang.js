@@ -266,23 +266,72 @@
         rows.forEach(function (row) {
             var itemId = parseInt(row.dataset.itemId, 10);
             if (selectedIds.indexOf(itemId) !== -1) {
-                productIds.push(parseInt(row.dataset.productId, 10));
+                var pid = parseInt(row.dataset.productId, 10);
+                if (!isNaN(pid) && productIds.indexOf(pid) === -1) {
+                    productIds.push(pid);
+                }
             }
         });
 
+        if (productIds.length === 0) { showToast('Không tìm thấy sản phẩm để lưu'); return; }
+
+        var wishBtn = document.getElementById('wishSelectedBtn');
+        if (wishBtn) { wishBtn.disabled = true; wishBtn.textContent = 'Đang lưu...'; }
+
         var ctx = window.contextPath || '';
         var promises = productIds.map(function (pid) {
-            return fetch(ctx + '/api/wishlist?productId=' + pid, { method: 'POST', credentials: 'same-origin' })
+            return fetch(ctx + '/api/wishlist?productId=' + pid + '&action=add', { method: 'POST', credentials: 'same-origin' })
                 .then(function (r) { return r.json(); })
                 .catch(function () { return { success: false }; });
         });
 
         Promise.all(promises).then(function (results) {
-            var saved = results.filter(function (r) { return r.success; }).length;
-            if (saved > 0) showToast('Đã lưu ' + saved + ' sản phẩm vào mục yêu thích');
-            else showToast('Không thể lưu vào yêu thích');
+            var saved = 0;
+            var alreadyExisted = 0;
+            var lastCount = 0;
+            results.forEach(function (r) {
+                if (r.success) {
+                    lastCount = r.wishlistCount || lastCount;
+                    if (r.alreadyExists) {
+                        alreadyExisted++;
+                    } else {
+                        saved++;
+                    }
+                }
+            });
+
+            updateWishlistBadge(lastCount);
+
+            if (saved > 0 && alreadyExisted > 0) {
+                showWishlistNotification('Đã lưu ' + saved + ' sản phẩm vào yêu thích, ' + alreadyExisted + ' sản phẩm đã có trong danh sách');
+            } else if (saved > 0) {
+                showWishlistNotification('Đã lưu ' + saved + ' sản phẩm vào mục yêu thích');
+            } else if (alreadyExisted > 0) {
+                showWishlistNotification('Sản phẩm đã có trong mục yêu thích của bạn');
+            } else {
+                showWishlistNotification('Không thể lưu, vui lòng thử lại sau');
+            }
+        }).finally(function () {
+            if (wishBtn) { wishBtn.disabled = false; wishBtn.textContent = 'Lưu vào mục Yêu thích'; }
         });
     };
+
+    function showWishlistNotification(message) {
+        var existing = document.getElementById('wishlistToast');
+        if (existing) existing.remove();
+
+        var toast = document.createElement('div');
+        toast.id = 'wishlistToast';
+        toast.className = 'wl-simple-toast';
+        toast.textContent = message;
+
+        document.body.appendChild(toast);
+
+        setTimeout(function () {
+            toast.classList.add('hidden');
+            setTimeout(function () { if (toast.parentNode) toast.remove(); }, 400);
+        }, 2500);
+    }
 
     window.proceedToCheckout = function () {
         var selectedIds = getSelectedItemIds();

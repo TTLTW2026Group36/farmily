@@ -65,7 +65,7 @@
                                 <tbody id="cartTableBody">
                                     <c:forEach var="item" items="${cart.items}">
                                         <tr class="cart-row row-selected" data-item-id="${item.id}"
-                                            data-price="${item.unitPrice}">
+                                            data-product-id="${item.productId}" data-price="${item.unitPrice}">
                                             <td class="col-check">
                                                 <div class="cb-wrap">
                                                     <input type="checkbox" class="cb cart-item-check"

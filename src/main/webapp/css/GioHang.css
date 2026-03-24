@@ -315,7 +315,7 @@ body {
 }
 
 .col-total {
-  width: 10px;
+  width: 80px;
   text-align: center;
 }
 
@@ -682,5 +682,43 @@ body {
     flex-wrap: wrap;
     height: auto;
     padding: 10px 16px;
+  }
+}
+
+.wl-simple-toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 14px 28px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  z-index: 10000;
+  pointer-events: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  max-width: 90%;
+  line-height: 1.4;
+  animation: wlToastIn 0.3s ease;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.wl-simple-toast.hidden {
+  opacity: 0;
+  transform: translate(-50%, -40%);
+}
+
+@keyframes wlToastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -60%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
   }
 }

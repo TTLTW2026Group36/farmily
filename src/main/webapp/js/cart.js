@@ -34,6 +34,41 @@ function refreshCartCount() {
 window.updateCartBadge = updateCartBadge;
 window.refreshCartCount = refreshCartCount;
 
+function updateWishlistBadge(count) {
+    var badge = document.getElementById('wishlistCount');
+    if (!badge) return;
+
+    if (badge.textContent != count) {
+        badge.textContent = count;
+    }
+    if (count > 0) {
+        if (badge.style.display !== 'inline-flex') {
+            badge.style.display = 'inline-flex';
+        }
+    } else {
+        if (badge.style.display !== 'none') {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function refreshWishlistCount() {
+    var ctx = window.contextPath || '';
+    fetch(ctx + '/api/wishlist?action=count', { method: 'GET', credentials: 'same-origin' })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success) {
+                updateWishlistBadge(data.count);
+            }
+        })
+        .catch(function (err) {
+            console.warn('refreshWishlistCount failed:', err);
+        });
+}
+
+window.updateWishlistBadge = updateWishlistBadge;
+window.refreshWishlistCount = refreshWishlistCount;
+
 function addToCart(productId, variantId) {
     var ctx = window.contextPath || '';
 
@@ -108,5 +143,6 @@ if (!document.querySelector('#toast-styles')) {
 document.addEventListener('DOMContentLoaded', function () {
     if (window.isLoggedIn) {
         refreshCartCount();
+        refreshWishlistCount();
     }
 });
