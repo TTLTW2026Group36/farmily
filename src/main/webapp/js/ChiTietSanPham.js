@@ -2,11 +2,11 @@
 (function () {
     'use strict';
 
-    
+
     const init = function () {
         console.log('ChiTietSanPham.js initialized');
 
-        
+
         const formatVND = n => (n || 0).toLocaleString('vi-VN') + 'đ';
         const clampQty = n => {
             n = parseInt(n, 10);
@@ -15,7 +15,7 @@
             return n;
         };
 
-        
+
         const mainImg = document.getElementById('mainImg');
         const thumbs = Array.from(document.querySelectorAll('.thumb'));
         const priceEl = document.getElementById('price');
@@ -23,13 +23,13 @@
         const purchaseForm = document.getElementById('purchaseForm');
         const msgEl = document.getElementById('msg');
 
-        
+
         if (!purchaseForm) {
             console.log('purchaseForm not found, exiting init');
             return;
         }
 
-        
+
         thumbs.forEach(btn => {
             btn.addEventListener('click', () => {
                 thumbs.forEach(b => b.classList.remove('is-active'));
@@ -41,7 +41,7 @@
             });
         });
 
-        
+
         document.querySelectorAll('.sp-photo-main .nav').forEach(nav => {
             nav.addEventListener('click', () => {
                 const dir = Number(nav.dataset.dir);
@@ -53,7 +53,7 @@
             });
         });
 
-        
+
         const updatePrice = () => {
             let selected = document.querySelector('input[name="variantId"]:checked');
             if (!selected) {
@@ -70,9 +70,6 @@
                     finalUnitPrice = basePrice * (1 - flashSale.discountPercent / 100);
                 }
 
-                
-                
-
                 if (flashSale) {
                     priceEl.innerHTML = `
                         <span class="current-price">${formatVND(finalUnitPrice)}</span>
@@ -87,7 +84,7 @@
             }
         };
 
-        
+
         document.querySelectorAll('input[name="variantId"]').forEach(radio => {
             radio.addEventListener('change', updatePrice);
         });
@@ -96,7 +93,7 @@
             radio.addEventListener('change', updatePrice);
         });
 
-        
+
         document.querySelectorAll('.qty-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const step = Number(btn.dataset.step);
@@ -112,10 +109,10 @@
             });
         }
 
-        
+
         updatePrice();
 
-        
+
         const initFlashSale = () => {
             const timerEl = document.getElementById('flashTimer');
             if (!timerEl) return;
@@ -149,18 +146,18 @@
 
         initFlashSale();
 
-        
+
         purchaseForm.addEventListener('submit', (e) => {
             e.preventDefault();
             console.log('Submit handler triggered!');
 
-            
+
             let selectedVariant = document.querySelector('input[name="variantId"]:checked');
             if (!selectedVariant) {
                 selectedVariant = document.querySelector('input[name="weight"]:checked');
             }
 
-            
+
             const variantInputs = document.querySelectorAll('input[name="variantId"], input[name="weight"]');
             const hasVariants = variantInputs.length > 0;
 
@@ -177,7 +174,7 @@
             const variantText = selectedVariant?.nextElementSibling?.textContent?.trim() || '';
             const productName = document.querySelector('.sp-title')?.textContent?.trim() || '';
 
-            
+
             console.log('Add to cart:', { productId, variantId, qty, hasVariants });
 
             if (!productId) {
@@ -190,7 +187,7 @@
                 return;
             }
 
-            
+
             const submitBtn = purchaseForm.querySelector('button[type="submit"]');
             const originalText = submitBtn ? submitBtn.textContent : '';
             if (submitBtn) {
@@ -198,7 +195,7 @@
                 submitBtn.textContent = 'Đang xử lý...';
             }
 
-            
+
             const params = new URLSearchParams();
             params.append('productId', productId);
             if (variantId) params.append('variantId', variantId);
@@ -212,15 +209,15 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        
-                        const cartBadge = document.getElementById('cartCount');
-                        if (cartBadge) {
-                            cartBadge.textContent = data.cartCount;
-                            cartBadge.style.transform = 'scale(1.3)';
-                            setTimeout(() => { cartBadge.style.transform = 'scale(1)'; }, 200);
+
+                        if (typeof updateCartBadge === 'function') {
+                            updateCartBadge(data.cartCount);
+                        } else {
+                            const cartBadge = document.getElementById('cartCount');
+                            if (cartBadge) cartBadge.textContent = data.cartCount;
                         }
 
-                        
+
                         if (msgEl) {
                             const msg = variantText
                                 ? '✓ Đã thêm ' + qty + ' × ' + productName + ' (' + variantText + ') vào giỏ!'
@@ -230,10 +227,10 @@
                             setTimeout(() => { msgEl.textContent = ''; }, 4000);
                         }
 
-                        
+
                         showToast('Đã thêm vào giỏ hàng!', 'success');
                     } else {
-                        
+
                         if (data.requireLogin) {
                             if (confirm('Vui lòng đăng nhập để thêm vào giỏ hàng.\n\nBấm OK để chuyển đến trang đăng nhập.')) {
                                 window.location.href = (window.contextPath || '') + '/DangNhap.jsp';
@@ -254,7 +251,7 @@
                     }
                 });
         });
-        
+
         function showToast(message, type) {
             type = type || 'info';
             const toast = document.createElement('div');
@@ -271,7 +268,7 @@
             }, 3000);
         }
 
-        
+
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -301,11 +298,11 @@
         });
     };
 
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', init);
     } else {
-        
+
         init();
     }
 

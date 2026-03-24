@@ -91,13 +91,11 @@
                                             const userBtn = userMenu.querySelector('.icon-btn-login');
                                             const dropdown = userMenu.querySelector('.user-dropdown');
 
-                                            // Click để toggle
                                             userBtn.addEventListener('click', function (e) {
                                                 e.preventDefault();
                                                 dropdown.classList.toggle('show');
                                             });
 
-                                            // Hover để hiện
                                             userMenu.addEventListener('mouseenter', function () {
                                                 dropdown.classList.add('show');
                                             });
@@ -106,7 +104,6 @@
                                                 dropdown.classList.remove('show');
                                             });
 
-                                            // Click ra ngoài thì đóng
                                             document.addEventListener('click', function (e) {
                                                 if (!userMenu.contains(e.target)) {
                                                     dropdown.classList.remove('show');
@@ -191,7 +188,6 @@
 
                 if (!searchInput || !suggestionsContainer) return;
 
-                // Debounced search function
                 function debounce(func, wait) {
                     return function () {
                         var args = arguments;
@@ -201,12 +197,10 @@
                     };
                 }
 
-                // Format price
                 function formatPrice(price) {
                     return new Intl.NumberFormat('vi-VN').format(price) + '₫';
                 }
 
-                // Fetch suggestions
                 function fetchSuggestions(keyword) {
                     if (!keyword || keyword.trim().length < 2) {
                         hideSuggestions();
@@ -235,7 +229,6 @@
                                 html += '</a>';
                             });
 
-                            // Add "Xem tất cả" link
                             html += '<a href="' + contextPath + '/san-pham?keyword=' + encodeURIComponent(keyword) + '" class="search-view-all">';
                             html += '<i class="fa-solid fa-search"></i> Xem tất cả kết quả cho "' + keyword + '"';
                             html += '</a>';
@@ -253,7 +246,6 @@
                     suggestionsContainer.innerHTML = '';
                 }
 
-                // Event listeners
                 searchInput.addEventListener('input', debounce(function (e) {
                     fetchSuggestions(e.target.value);
                 }, 300));
@@ -264,14 +256,12 @@
                     }
                 });
 
-                // Hide suggestions when clicking outside
                 document.addEventListener('click', function (e) {
                     if (!searchInput.contains(e.target) && !suggestionsContainer.contains(e.target)) {
                         hideSuggestions();
                     }
                 });
 
-                // Prevent form submit when clicking suggestion
                 suggestionsContainer.addEventListener('click', function (e) {
                     if (e.target.closest('.search-suggestion-item')) {
                         e.stopPropagation();
@@ -280,7 +270,7 @@
             })();
         </script>
         <script>
-            // Global configuration
             window.contextPath = '${pageContext.request.contextPath}';
             window.isLoggedIn = ${not empty sessionScope.auth ? 'true' : 'false' };
         </script>
+        <script src="${pageContext.request.contextPath}/js/cart.js"></script>

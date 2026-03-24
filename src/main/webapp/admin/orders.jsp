@@ -17,17 +17,17 @@
 
             <body>
                 <div class="admin-layout">
-                    
+
                     <jsp:include page="sidebar.jsp" />
-                    
 
-                    
+
+
                     <main class="admin-main">
-                        
-                        <jsp:include page="header.jsp" />
-                        
 
-                        
+                        <jsp:include page="header.jsp" />
+
+
+
                         <div class="admin-content">
                             <div class="content-header">
                                 <div>
@@ -41,7 +41,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="stats-grid" style="grid-template-columns: repeat(5, 1fr); margin-bottom: 20px;">
                                 <div class="stat-card" style="padding: 20px;">
                                     <div style="text-align: center;">
@@ -78,7 +78,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <form action="${pageContext.request.contextPath}/admin/orders" method="get"
                                 class="filters-bar">
                                 <div class="filter-group">
@@ -118,7 +118,7 @@
                                 </div>
                             </form>
 
-                            
+
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Danh sách đơn hàng (${totalOrders})</h3>
@@ -247,7 +247,7 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <c:if test="${totalPages > 1}">
                                     <div class="card-footer">
                                         <div class="pagination">
@@ -301,7 +301,6 @@
                 <script>
                     var contextPath = '${pageContext.request.contextPath}';
 
-                    // Update order status via AJAX
                     document.querySelectorAll('.status-select').forEach(function (select) {
                         select.addEventListener('change', function () {
                             var orderId = this.dataset.orderId;
@@ -318,7 +317,6 @@
                                 .then(function (data) {
                                     if (data.success) {
                                         showNotification('Cập nhật trạng thái thành công', 'success');
-                                        // Reload page to update stats for terminal statuses
                                         if (newStatus === 'delivered' || newStatus === 'cancelled') {
                                             setTimeout(function () { location.reload(); }, 1000);
                                         }
