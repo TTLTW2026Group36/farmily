@@ -488,7 +488,49 @@
                     </section>
                 </main>
 
-                
+                <c:if test="${not empty relatedProducts}">
+                    <section class="sp-related sp-container" aria-labelledby="related-title">
+                        <h2 id="related-title" class="sp-related-heading">Sản phẩm liên quan</h2>
+                        <div class="sp-related-grid">
+                            <c:forEach var="rp" items="${relatedProducts}">
+                                <div class="sp-related-card">
+                                    <div class="sp-related-img">
+                                        <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rp.id}">
+                                            <c:choose>
+                                                <c:when test="${not empty rp.primaryImageUrl}">
+                                                    <img src="${rp.primaryImageUrl}" alt="${rp.name}" />
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <img src="${pageContext.request.contextPath}/images/no-image.jpg" alt="${rp.name}" />
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </a>
+                                    </div>
+                                    <div class="sp-related-info">
+                                        <h3 class="sp-related-name">
+                                            <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rp.id}">
+                                                <c:out value="${rp.name}" />
+                                            </a>
+                                        </h3>
+                                        <p class="sp-related-price">
+                                            <span class="price-current">
+                                                <fmt:formatNumber value="${rp.minPrice}" type="number" groupingUsed="true" />đ
+                                            </span>
+                                            <c:if test="${not empty rp.minPriceVariant}">
+                                                <span class="price-unit">/${rp.minPriceVariant.optionsValue}</span>
+                                            </c:if>
+                                        </p>
+                                        <button class="sp-related-cart-btn"
+                                            onclick="addToCart(${rp.id}, ${not empty rp.minPriceVariant ? rp.minPriceVariant.id : 0})">
+                                            <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                                        </button>
+                                    </div>
+                                </div>
+                            </c:forEach>
+                        </div>
+                    </section>
+                </c:if>
+
                 <jsp:include page="common/footer.jsp" />
 
                 <script>

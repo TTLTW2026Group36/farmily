@@ -25,13 +25,6 @@ public class WishlistController extends HttpServlet {
         wishlistService = new WishlistService();
     }
 
-    
-
-
-
-
-
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -52,13 +45,13 @@ public class WishlistController extends HttpServlet {
 
         try {
             if ("count".equals(action)) {
-                
+
                 int count = wishlistService.getWishlistCount(user.getId());
                 session.setAttribute("wishlistCount", count);
                 out.print("{\"success\":true,\"count\":" + count + "}");
 
             } else if ("check".equals(action)) {
-                
+
                 int productId = parseIntParam(request, "productId", 0);
                 if (productId <= 0) {
                     out.print("{\"success\":false,\"message\":\"ID sản phẩm không hợp lệ\"}");
@@ -68,7 +61,7 @@ public class WishlistController extends HttpServlet {
                 out.print("{\"success\":true,\"inWishlist\":" + inWishlist + "}");
 
             } else {
-                
+
                 List<Wishlist> wishlistItems = wishlistService.getWishlistByUserId(user.getId());
                 out.print(buildWishlistJson(wishlistItems));
             }
@@ -98,21 +91,37 @@ public class WishlistController extends HttpServlet {
 
         try {
             int productId = parseIntParam(request, "productId", 0);
+            String action = request.getParameter("action");
 
             if (productId <= 0) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
                 out.print("{\"success\":false,\"message\":\"ID sản phẩm không hợp lệ\"}");
                 return;
             }
-            boolean added = wishlistService.toggleWishlist(user.getId(), productId);
 
-            int wishlistCount = wishlistService.getWishlistCount(user.getId());
-            session.setAttribute("wishlistCount", wishlistCount);
+            if ("add".equals(action)) {
+                boolean alreadyExists = wishlistService.isInWishlist(user.getId(), productId);
+                if (!alreadyExists) {
+                    wishlistService.addToWishlist(user.getId(), productId);
+                }
+                int wishlistCount = wishlistService.getWishlistCount(user.getId());
+                session.setAttribute("wishlistCount", wishlistCount);
+                String message = alreadyExists ? "Sản phẩm đã có trong yêu thích" : "Đã thêm vào yêu thích";
+                out.print("{\"success\":true,\"message\":\"" + message + "\"," +
+                        "\"added\":true," +
+                        "\"alreadyExists\":" + alreadyExists + "," +
+                        "\"wishlistCount\":" + wishlistCount + "}");
+            } else {
+                boolean added = wishlistService.toggleWishlist(user.getId(), productId);
 
-            String message = added ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích";
-            out.print("{\"success\":true,\"message\":\"" + message + "\"," +
-                    "\"added\":" + added + "," +
-                    "\"wishlistCount\":" + wishlistCount + "}");
+                int wishlistCount = wishlistService.getWishlistCount(user.getId());
+                session.setAttribute("wishlistCount", wishlistCount);
+
+                String message = added ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích";
+                out.print("{\"success\":true,\"message\":\"" + message + "\"," +
+                        "\"added\":" + added + "," +
+                        "\"wishlistCount\":" + wishlistCount + "}");
+            }
 
         } catch (IllegalArgumentException e) {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -123,10 +132,6 @@ public class WishlistController extends HttpServlet {
             out.print("{\"success\":false,\"message\":\"Có lỗi xảy ra\"}");
         }
     }
-
-    
-
-
 
     @Override
     protected void doDelete(HttpServletRequest request, HttpServletResponse response)

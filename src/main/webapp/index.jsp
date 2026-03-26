@@ -9,6 +9,9 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Farmily - Rau Củ Quả Tươi Sạch Giao Tận Nhà 24h</title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <link rel="preconnect" href="https://fonts.googleapis.com">
+                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/index.css">
                 <script>
@@ -35,10 +38,10 @@
                     <c:remove var="registerSuccess" scope="session" />
                 </c:if>
 
-                
+
                 <jsp:include page="common/header.jsp" />
 
-                
+
                 <section class="main-slider">
                     <div class="slider-container">
                         <div class="slider-wrapper">
@@ -77,7 +80,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="quick-categories">
                     <div class="container">
                         <div class="section-header">
@@ -96,10 +99,10 @@
                     </div>
                 </section>
 
-                
+
                 <jsp:include page="common/flash-sale-section.jsp" />
 
-                
+
                 <section class="products-section">
                     <div class="container">
                         <div class="section-header">
@@ -158,7 +161,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="banner-grid-section">
                     <div class="container">
                         <div class="banner-grid">
@@ -192,7 +195,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="products-section">
                     <div class="container">
                         <div class="section-header">
@@ -251,7 +254,7 @@
                     </div>
                 </section>
 
-                
+
                 <section class="blog-section">
                     <div class="container">
                         <div class="section-header">
@@ -349,11 +352,11 @@
                     </div>
                 </section>
 
-                
+
                 <jsp:include page="common/footer.jsp" />
 
                 <script src="${pageContext.request.contextPath}/js/index.js?v=1.1"></script>
-                <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+
             </body>
 
             </html>
