@@ -226,7 +226,7 @@ function saveAddress() {
         `${window.contextPath}/api/address`;
 
     fetch(url, {
-        method: isUpdate ? 'PUT' : 'POST',
+        method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
         },
@@ -271,7 +271,7 @@ function setDefaultAddress(addressId) {
             formData.append('isDefault', 'true');
 
             return fetch(`${window.contextPath}/api/address/${addressId}`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 },

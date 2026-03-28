@@ -91,6 +91,12 @@ public class AddressApiController extends HttpServlet {
             return;
         }
 
+        String pathInfo = request.getPathInfo();
+        if (pathInfo != null && !pathInfo.equals("/")) {
+            doPut(request, response);
+            return;
+        }
+
         try {
             
             String receiver = request.getParameter("receiver");
@@ -165,7 +171,15 @@ public class AddressApiController extends HttpServlet {
             String addressDetail = request.getParameter("addressDetail");
             String district = request.getParameter("district");
             String city = request.getParameter("city");
-            boolean isDefault = "true".equals(request.getParameter("isDefault"));
+            String isDefaultStr = request.getParameter("isDefault");
+            
+            
+            if (receiver == null || addressDetail == null) {
+                // If parameters are missing, it might be due to request parsing issues or incorrect frontend data
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Thiếu thông tin cập nhật (receiver: " + receiver + ", detail: " + addressDetail + ")\"}");
+                return;
+            }
 
             if (isEmpty(receiver) || isEmpty(addressDetail)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -179,7 +193,7 @@ public class AddressApiController extends HttpServlet {
             address.setAddressDetail(addressDetail);
             address.setDistrict(district);
             address.setCity(city);
-            address.setDefault(isDefault);
+            address.setDefault("true".equals(isDefaultStr));
 
             boolean updated = addressService.updateAddress(address);
             if (updated) {

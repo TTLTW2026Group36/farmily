@@ -93,7 +93,7 @@ public class AddressDAO extends BaseDao {
 
     public int update(Address address) {
         String sql = "UPDATE address SET receiver = :receiver, phone = :phone, address_detail = :addressDetail, " +
-                "district = :district, city = :city, is_default = :isDefault WHERE id = :id";
+                "district = :district, city = :city, is_default = :isDefault, updated_at = NOW() WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", address.getId())
                 .bind("receiver", address.getReceiver())
