@@ -633,7 +633,7 @@ textarea {
     font-weight: 600;
 }
 
-.actions {
+.checkout-actions {
     display: flex;
     justify-content: space-between;
     align-items: center;

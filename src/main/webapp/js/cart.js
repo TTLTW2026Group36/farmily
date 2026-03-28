@@ -133,7 +133,6 @@ if (!document.querySelector('#toast-styles')) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    // Server-side visibility handles the initial state to prevent flickering.
     if (window.isLoggedIn) {
         refreshCartCount();
         refreshWishlistCount();

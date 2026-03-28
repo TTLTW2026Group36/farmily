@@ -290,7 +290,7 @@
                 </p>
               </div>
 
-              <div class="actions">
+              <div class="checkout-actions">
                 <a href="${pageContext.request.contextPath}/gio-hang" class="back-link">← Quay về giỏ hàng</a>
                 <button id="placeOrder" class="submit-btn" type="button">
                   <i class="fas fa-lock"></i> ĐẶT HÀNG

@@ -163,7 +163,7 @@
                         justify-content: center;
                     }
 
-                    .btn {
+                    .thankyou-page .ty-btn {
                         padding: 12px 24px;
                         border-radius: 8px;
                         font-size: 15px;
@@ -175,22 +175,22 @@
                         transition: all 0.2s;
                     }
 
-                    .btn-primary {
+                    .thankyou-page .btn-primary {
                         background: #22c55e;
                         color: #fff;
                     }
 
-                    .btn-primary:hover {
+                    .thankyou-page .btn-primary:hover {
                         transform: translateY(-2px);
                         box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
                     }
 
-                    .btn-secondary {
+                    .thankyou-page .btn-secondary {
                         background: #f3f4f6;
                         color: #374151;
                     }
 
-                    .btn-secondary:hover {
+                    .thankyou-page .btn-secondary:hover {
                         background: #e5e7eb;
                     }
 
@@ -213,7 +213,7 @@
                             flex-direction: column;
                         }
 
-                        .btn {
+                        .thankyou-page .ty-btn {
                             justify-content: center;
                         }
                     }
@@ -297,11 +297,11 @@
                         </div>
 
                         <div class="action-buttons">
-                            <a href="${pageContext.request.contextPath}/" class="btn btn-primary">
+                            <a href="${pageContext.request.contextPath}/" class="ty-btn btn-primary">
                                 <i class="fas fa-home"></i>
                                 Về trang chủ
                             </a>
-                            <a href="${pageContext.request.contextPath}/san-pham" class="btn btn-secondary">
+                            <a href="${pageContext.request.contextPath}/san-pham" class="ty-btn btn-secondary">
                                 <i class="fas fa-shopping-bag"></i>
                                 Tiếp tục mua sắm
                             </a>
