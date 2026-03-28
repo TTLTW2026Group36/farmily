@@ -71,10 +71,13 @@
 
                     <p class="hoac">Hoặc đăng nhập bằng</p>
                     <div class="social-login">
-                        <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=962984642734580&redirect_uri=http://localhost:8080/farmily_v2_war_exploded/dang-nhap" class="fb">
+                        <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=962984642734580&redirect_uri=http://localhost:8080/farmily_v2_war_exploded/dang-nhap"
+                            class="fb">
                             <i class="fa-brands fa-facebook"></i> Facebook
                         </a>
-                        <button class="gg"><i class="fa-brands fa-google"></i> Google</button>
+                        <a href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile%20openid&redirect_uri=http://localhost:8080/farmily_v2_war_exploded/dang-nhap&response_type=code&client_id=281202711893-chnhob1qmodiuk43ct7sphrjs5thin4n.apps.googleusercontent.com&approval_prompt=force"
+                            class="gg">
+                            <i class="fa-brands fa-google"></i> Google</a>
                     </div>
                 </div>
             </main>
