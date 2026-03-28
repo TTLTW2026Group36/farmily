@@ -113,8 +113,12 @@
                                     <div class="product-badges">
                                         <span class="badge badge-hot">HOT</span>
                                     </div>
-                                    <button class="wishlist-btn" aria-label="Yêu thích"><i
-                                            class="far fa-heart"></i></button>
+                                    <button
+                                        class="wishlist-btn ${wishlistProductIds.contains(product.id) ? 'active' : ''}"
+                                        aria-label="Yêu thích" data-product-id="${product.id}">
+                                        <i
+                                            class="${wishlistProductIds.contains(product.id) ? 'fas' : 'far'} fa-heart"></i>
+                                    </button>
                                     <div class="product-image">
                                         <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${product.id}">
                                             <c:choose>
@@ -206,8 +210,12 @@
                                     <div class="product-badges">
                                         <span class="badge badge-new">MỚI</span>
                                     </div>
-                                    <button class="wishlist-btn" aria-label="Yêu thích"><i
-                                            class="far fa-heart"></i></button>
+                                    <button
+                                        class="wishlist-btn ${wishlistProductIds.contains(product.id) ? 'active' : ''}"
+                                        aria-label="Yêu thích" data-product-id="${product.id}">
+                                        <i
+                                            class="${wishlistProductIds.contains(product.id) ? 'fas' : 'far'} fa-heart"></i>
+                                    </button>
                                     <div class="product-image">
                                         <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${product.id}">
                                             <c:choose>
@@ -352,7 +360,7 @@
 
                 <jsp:include page="common/footer.jsp" />
 
-                <script src="${pageContext.request.contextPath}/js/index.js?v=1.1"></script>
+                <script src="${pageContext.request.contextPath}/js/index.js?v=2"></script>
 
             </body>
 

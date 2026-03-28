@@ -175,9 +175,11 @@
                                             </c:if>
 
 
-                                            <button class="wishlist-btn" aria-label="Yêu thích"
-                                                data-product-id="${product.id}">
-                                                <i class="far fa-heart"></i>
+                                            <button
+                                                class="wishlist-btn ${wishlistProductIds.contains(product.id) ? 'active' : ''}"
+                                                aria-label="Yêu thích" data-product-id="${product.id}">
+                                                <i
+                                                    class="${wishlistProductIds.contains(product.id) ? 'fas' : 'far'} fa-heart"></i>
                                             </button>
 
                                             <div class="product-image">
@@ -277,7 +279,7 @@
                 <input type="hidden" id="currentSort" value="${currentSort}" />
                 <input type="hidden" id="currentPage" value="${currentPage}" />
 
-                <script src="${pageContext.request.contextPath}/js/SanPham.js?v=2"></script>
+                <script src="${pageContext.request.contextPath}/js/SanPham.js?v=3"></script>
 
             </body>
 

@@ -8,7 +8,7 @@ if (slides.length > 0 && sliderDots) {
     let currentSlide = 0;
     let slideInterval;
 
-    
+
     slides.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.classList.add('dot');
@@ -22,11 +22,11 @@ if (slides.length > 0 && sliderDots) {
     function goToSlide(n) {
         slides[currentSlide].classList.remove('active');
         dots[currentSlide].classList.remove('active');
-        
+
         currentSlide = n;
         if (currentSlide >= slides.length) currentSlide = 0;
         if (currentSlide < 0) currentSlide = slides.length - 1;
-        
+
         slides[currentSlide].classList.add('active');
         dots[currentSlide].classList.add('active');
     }
@@ -39,11 +39,11 @@ if (slides.length > 0 && sliderDots) {
         goToSlide(currentSlide - 1);
     }
 
-    
+
     if (nextBtn) nextBtn.addEventListener('click', nextSlide);
     if (prevBtn) prevBtn.addEventListener('click', prevSlide);
 
-    
+
     function startSlideShow() {
         slideInterval = setInterval(nextSlide, 5000);
     }
@@ -60,7 +60,7 @@ if (slides.length > 0 && sliderDots) {
         sliderContainer.addEventListener('mouseleave', startSlideShow);
     }
 
-    
+
     document.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') prevSlide();
         if (e.key === 'ArrowRight') nextSlide();
@@ -72,19 +72,19 @@ function updateCountdown() {
     const hoursEl = document.getElementById('hours');
     const minutesEl = document.getElementById('minutes');
     const secondsEl = document.getElementById('seconds');
-    
+
     if (!hoursEl || !minutesEl || !secondsEl) return;
-    
+
     const now = new Date();
     const endTime = new Date();
     endTime.setHours(23, 59, 59, 999);
-    
+
     const diff = endTime - now;
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     hoursEl.textContent = String(hours).padStart(2, '0');
     minutesEl.textContent = String(minutes).padStart(2, '0');
     secondsEl.textContent = String(seconds).padStart(2, '0');
@@ -95,10 +95,10 @@ setInterval(updateCountdown, 1000);
 
 
 document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
+    btn.addEventListener('click', function () {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        
+
         const category = this.dataset.category;
         console.log('Filter by:', category);
     });
@@ -106,15 +106,55 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 
 
 document.querySelectorAll('.wishlist-btn').forEach(btn => {
-    btn.addEventListener('click', function(e) {
+    btn.addEventListener('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-        this.classList.toggle('active');
-        
-        if (this.classList.contains('active')) {
-            this.style.animation = 'heartBeat 0.5s';
-            setTimeout(() => this.style.animation = '', 500);
-        }
+
+        const productId = this.getAttribute('data-product-id');
+        const icon = this.querySelector('i');
+        const currentBtn = this;
+
+        currentBtn.disabled = true;
+
+        fetch((window.contextPath || '') + '/api/wishlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            credentials: 'same-origin',
+            body: 'productId=' + productId
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.added) {
+                        currentBtn.classList.add('active');
+                        if (icon) { icon.classList.remove('far'); icon.classList.add('fas'); }
+                        currentBtn.style.animation = 'heartBeat 0.5s';
+                        setTimeout(() => currentBtn.style.animation = '', 500);
+                    } else {
+                        currentBtn.classList.remove('active');
+                        if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
+                    }
+                    const badge = document.getElementById('wishlistCount');
+                    if (badge) {
+                        badge.textContent = data.wishlistCount;
+                        if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                        else badge.classList.add('badge-hidden');
+                    }
+                } else if (data.requireLogin) {
+                    if (confirm('Vui lòng đăng nhập để thêm vào yêu thích.')) {
+                        window.location.href = (window.contextPath || '') + '/DangNhap.jsp';
+                    }
+                } else {
+                    alert(data.message || 'Có lỗi xảy ra');
+                }
+            })
+            .catch(error => {
+                console.error('Wishlist error:', error);
+                alert('Có lỗi xảy ra, vui lòng thử lại!');
+            })
+            .finally(() => {
+                currentBtn.disabled = false;
+            });
     });
 });
 
@@ -124,10 +164,10 @@ document.querySelectorAll('.wishlist-btn').forEach(btn => {
 
 const loadMoreBtn = document.querySelector('.btn-load-more');
 if (loadMoreBtn) {
-    loadMoreBtn.addEventListener('click', function() {
+    loadMoreBtn.addEventListener('click', function () {
         this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải...';
         this.disabled = true;
-        
+
         setTimeout(() => {
             this.innerHTML = 'Xem thêm sản phẩm <i class="fas fa-chevron-down"></i>';
             this.disabled = false;
@@ -136,25 +176,12 @@ if (loadMoreBtn) {
     });
 }
 
-
-const heartBeatStyle = document.createElement('style');
-heartBeatStyle.textContent = `
-    @keyframes heartBeat {
-        0%, 100% { transform: scale(1); }
-        25% { transform: scale(1.3); }
-        50% { transform: scale(1.1); }
-        75% { transform: scale(1.2); }
-    }
-`;
-document.head.appendChild(heartBeatStyle);
-
-
 const flashProductsScroll = document.querySelector('.flash-products-scroll');
 const flashPrevBtn = document.querySelector('.flash-prev');
 const flashNextBtn = document.querySelector('.flash-next');
 
 if (flashProductsScroll && flashPrevBtn && flashNextBtn) {
-    const scrollAmount = 250; 
+    const scrollAmount = 250;
 
     flashNextBtn.addEventListener('click', () => {
         flashProductsScroll.scrollBy({
@@ -170,24 +197,24 @@ if (flashProductsScroll && flashPrevBtn && flashNextBtn) {
         });
     });
 
-    
+
     function updateScrollButtons() {
         const scrollLeft = flashProductsScroll.scrollLeft;
         const maxScroll = flashProductsScroll.scrollWidth - flashProductsScroll.clientWidth;
 
-        
+
         flashPrevBtn.disabled = scrollLeft <= 0;
-        
-        
+
+
         flashNextBtn.disabled = scrollLeft >= maxScroll - 1;
     }
 
-    
+
     updateScrollButtons();
 
-    
+
     flashProductsScroll.addEventListener('scroll', updateScrollButtons);
 
-    
+
     window.addEventListener('resize', updateScrollButtons);
 }

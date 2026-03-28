@@ -133,8 +133,6 @@ if (!document.querySelector('#toast-styles')) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-    if (window.isLoggedIn) {
-        refreshCartCount();
-        refreshWishlistCount();
-    }
+    refreshCartCount();
+    refreshWishlistCount();
 });
