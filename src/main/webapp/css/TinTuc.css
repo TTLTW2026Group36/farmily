@@ -657,7 +657,7 @@ blockquote p {
 }
 
 .post-conclusion {
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    background: #f5f7fa;
     padding: 30px;
     border-radius: 10px;
     margin-top: 40px;

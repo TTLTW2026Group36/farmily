@@ -1,6 +1,5 @@
-
 :root {
-    --primary-color: #4CAF50;
+    --primary-color: #219653;
     --primary-hover: #45a049;
     --text-dark: #333;
     --text-muted: #666;
@@ -61,7 +60,7 @@ body {
 
 .filter-divider {
     height: 2px;
-    background: linear-gradient(to right, var(--primary-color), transparent);
+    background: var(--primary-color);
     margin-bottom: 16px;
 }
 
@@ -117,7 +116,7 @@ body {
     height: 6px;
     border-radius: 3px;
     outline: none;
-    background: linear-gradient(to right, var(--primary-color) 50%, #e5e7eb 50%);
+    background: #e5e7eb;
     cursor: pointer;
 }
 
@@ -205,17 +204,17 @@ body {
 }
 
 .badge-hot {
-    background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+    background: #ff6b6b;
     color: white;
 }
 
 .badge-sale {
-    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    background: #ffd700;
     color: #333;
 }
 
 .badge-new {
-    background: linear-gradient(135deg, #4CAF50, #66bb6a);
+    background: #4CAF50;
     color: white;
 }
 
@@ -512,7 +511,6 @@ body {
 
 
 .category-list {
-    max-height: 300px;
     overflow-y: auto;
 }
 

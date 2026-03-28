@@ -1,23 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-        <style>
-            .user-dropdown {
-                position: absolute;
-                top: 100%;
-                background: white;
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                min-width: 200px;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                z-index: 1000;
-                list-style: none;
-                display: none;
-            }
 
-            .user-dropdown.show {
-                display: block;
-            }
-        </style>
 
         <header>
             <div class="topbar" role="banner">
@@ -55,28 +38,24 @@
                         <c:choose>
 
                             <c:when test="${not empty sessionScope.auth}">
-                                <div class="user-menu" style="position: relative; display: inline-block;">
-                                    <a class="icon-btn-login" href="#" title="Tài khoản"
-                                        style="display: flex; align-items: center; gap: 5px;">
+                                <div class="user-menu">
+                                    <a class="icon-btn-login" href="#" title="Tài khoản">
                                         <i class="fa-solid fa-user"></i>
                                         <span><strong>${sessionScope.auth.name}</strong></span>
                                     </a>
                                     <ul class="user-dropdown">
-                                        <li style="border-bottom: 1px solid #f0f0f0;">
-                                            <a href="${pageContext.request.contextPath}/ho-so"
-                                                style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
+                                        <li>
+                                            <a href="${pageContext.request.contextPath}/ho-so">
                                                 <i class="fa-solid fa-user-pen"></i> Hồ sơ của tôi
                                             </a>
                                         </li>
-                                        <li style="border-bottom: 1px solid #f0f0f0;">
-                                            <a href="${pageContext.request.contextPath}/ho-so/don-hang"
-                                                style="display: block; padding: 10px 15px; color: #333; text-decoration: none;">
+                                        <li>
+                                            <a href="${pageContext.request.contextPath}/ho-so/don-hang">
                                                 <i class="fa-solid fa-box"></i> Đơn hàng
                                             </a>
                                         </li>
                                         <li>
-                                            <a href="${pageContext.request.contextPath}/logout"
-                                                style="display: block; padding: 10px 15px; color: #d9534f; text-decoration: none;">
+                                            <a href="${pageContext.request.contextPath}/logout">
                                                 <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                                             </a>
                                         </li>
@@ -128,15 +107,19 @@
                         <a class="icon-btn-wishlist" href="${pageContext.request.contextPath}/ho-so?tab=wishlist"
                             title="Yêu thích">
                             <i class="fa-solid fa-heart"></i>
-                            <span class="wishlist-badge" id="wishlistCount">
+                            <span
+                                class="wishlist-badge ${empty sessionScope.wishlistCount || sessionScope.wishlistCount == 0 ? 'badge-hidden' : ''}"
+                                id="wishlistCount">
                                 <c:out value="${sessionScope.wishlistCount}" default="0" />
                             </span>
                         </a>
 
                         <a class="icon-btn-shopping-cart" href="${pageContext.request.contextPath}/gio-hang"
                             title="Giỏ hàng">
-                            <i class="fa-solid fa-shopping-cart"></i> Giỏ hàng
-                            <span class="cart-badge" id="cartCount">
+                            <i class="fa-solid fa-shopping-cart"></i> <span class="cart-text">Giỏ hàng</span>
+                            <span
+                                class="cart-badge ${empty sessionScope.cartCount || sessionScope.cartCount == 0 ? 'badge-hidden' : ''}"
+                                id="cartCount">
                                 <c:choose>
                                     <c:when test="${not empty sessionScope.cartCount}">
                                         ${sessionScope.cartCount}</c:when>
