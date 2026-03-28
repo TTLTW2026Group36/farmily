@@ -1,5 +1,6 @@
 package group36.controller.auth;
 
+import group36.service.FacebookAuthService;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -14,8 +15,47 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String code = request.getParameter("code");
+        
+        if (code != null && !code.trim().isEmpty()) {
+            try {
+                String accessToken = group36.service.FacebookAuthService.getToken(code);
+                group36.service.FacebookAuthService.FacebookAccount fbAccount = group36.service.FacebookAuthService.getUserInfo(accessToken);
+                
+                User user = group36.service.FacebookAuthService.loginOrRegister(fbAccount);
+                
+                if (user != null) {
+                    HttpSession session = request.getSession();
+                    session.setAttribute("auth", user);
+                    
+                    try {
+                        CartService cartService = new CartService();
+                        int cartCount = cartService.getCartItemCount(user.getId());
+                        session.setAttribute("cartCount", cartCount);
+                    } catch (Exception e) {
+                        session.setAttribute("cartCount", 0);
+                    }
+        
+                    try {
+                        WishlistService wishlistService = new WishlistService();
+                        int wishlistCount = wishlistService.getWishlistCount(user.getId());
+                        session.setAttribute("wishlistCount", wishlistCount);
+                    } catch (Exception e) {
+                        session.setAttribute("wishlistCount", 0);
+                    }
+                    
+                    response.sendRedirect(request.getContextPath() + "/home");
+                    return;
+                } else {
+                    request.setAttribute("error", "Failed to login with Facebook.");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                request.setAttribute("error", "Error connecting to Facebook: " + e.getMessage());
+            }
+        }
+        
         request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
-
     }
 
     @Override
