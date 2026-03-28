@@ -63,7 +63,7 @@
                 <div class="news-container">
                     <div class="container">
                         
-                        <header class="page-header">
+                        <div class="page-header">
                             <h1 class="page-title">
                                 <c:choose>
                                     <c:when test="${not empty selectedCategory}">
@@ -87,7 +87,7 @@
                                     </c:otherwise>
                                 </c:choose>
                             </p>
-                        </header>
+                        </div>
 
                         <div class="news-layout">
                             
