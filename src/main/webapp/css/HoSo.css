@@ -47,11 +47,7 @@ body {
     font-size: 14px;
 }
 
-.breadcrumb-item+.breadcrumb-item::before {
-    content: "â€º";
-    margin-right: 8px;
-    color: #999;
-}
+/* Removed redundant breadcrumb separator */
 
 
 

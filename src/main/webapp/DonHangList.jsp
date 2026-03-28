@@ -10,9 +10,9 @@
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>${pageTitle} | Farmily</title>
-                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
-                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DonHang.css">
-                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css?v=3">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DonHang.css?v=3">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
                     <link rel="stylesheet"
                         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 </head>
