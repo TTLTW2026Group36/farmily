@@ -75,7 +75,7 @@
                 </style>
             </head>
 
-            <body>
+            <body data-page="posts">
                 <div class="admin-layout">
                     <jsp:include page="sidebar.jsp" />
 
@@ -101,7 +101,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success">
                                     <i class="fas fa-check-circle"></i> ${success}
@@ -113,7 +113,7 @@
                                 </div>
                             </c:if>
 
-                            
+
                             <div class="status-filter">
                                 <a href="${pageContext.request.contextPath}/admin/posts"
                                     class="${empty selectedStatus ? 'active' : ''}">
@@ -150,7 +150,7 @@
                                             </div>
                                         </c:when>
                                         <c:otherwise>
-                                            <table class="admin-table">
+                                            <table class="admin-table" id="postsTable">
                                                 <thead>
                                                     <tr>
                                                         <th>Tiêu đề</th>
@@ -222,7 +222,7 @@
                                     </c:choose>
                                 </div>
 
-                                
+
                                 <c:if test="${totalPages > 1}">
                                     <div class="card-footer">
                                         <div class="pagination">

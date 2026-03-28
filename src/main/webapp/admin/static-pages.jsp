@@ -14,16 +14,16 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
 
-        <body>
+        <body data-page="static-pages">
             <div class="admin-layout">
-                
+
                 <jsp:include page="sidebar.jsp" />
-                
+
 
                 <main class="admin-main">
-                    
+
                     <jsp:include page="header.jsp" />
-                    
+
 
                     <div class="admin-content">
                         <div class="content-header">
@@ -38,7 +38,7 @@
                             </div>
                         </div>
 
-                        
+
                         <c:if test="${not empty success}">
                             <div class="alert alert-success"
                                 style="background: #d1fae5; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -59,7 +59,7 @@
                                 <h3 class="card-title">Danh sách trang tĩnh (${totalPages})</h3>
                             </div>
                             <div class="card-body" style="padding: 0;">
-                                <table class="admin-table">
+                                <table class="admin-table" id="staticPagesTable">
                                     <thead>
                                         <tr>
                                             <th style="width: 60px;">ID</th>
@@ -124,7 +124,7 @@
                             </div>
                         </div>
 
-                        
+
                         <div class="card" style="margin-top: 20px; background: #fffbeb; border: 1px solid #fcd34d;">
                             <div class="card-body" style="padding: 16px;">
                                 <div style="display: flex; gap: 12px; align-items: flex-start;">

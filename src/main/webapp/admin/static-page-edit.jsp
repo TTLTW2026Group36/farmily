@@ -13,7 +13,7 @@
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/categories-add.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-            
+
             <script
                 src="https://cdn.tiny.cloud/1/55k82785hwgngja2sfqjim6xvkxnmmpkj79wkzdhyx8z571l/tinymce/8/tinymce.min.js"
                 referrerpolicy="origin"></script>
@@ -65,14 +65,14 @@
 
         <body>
             <div class="admin-layout">
-                
+
                 <jsp:include page="sidebar.jsp" />
-                
+
 
                 <main class="admin-main">
-                    
+
                     <jsp:include page="header.jsp" />
-                    
+
 
                     <div class="admin-content">
                         <div class="content-header">
@@ -89,7 +89,7 @@
                             </div>
                         </div>
 
-                        
+
                         <c:if test="${not empty error}">
                             <div class="alert alert-error"
                                 style="background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -103,7 +103,7 @@
                             <input type="hidden" name="id" value="${staticPage.id}" />
 
                             <div class="form-grid">
-                                
+
                                 <div class="card">
                                     <div class="card-header">
                                         <h3 class="card-title">Nội dung trang</h3>
@@ -142,7 +142,7 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <div>
                                     <div class="card" style="margin-bottom: 24px;">
                                         <div class="card-header">
@@ -191,7 +191,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="form-actions">
                                 <a href="${pageContext.request.contextPath}/admin/static-pages" class="btn btn-outline">
                                     <i class="fas fa-times"></i> Hủy

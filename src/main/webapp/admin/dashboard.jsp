@@ -15,19 +15,19 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
-            <body>
+            <body data-page="dashboard">
                 <div class="admin-layout">
-                    
+
                     <jsp:include page="sidebar.jsp" />
-                    
 
-                    
+
+
                     <main class="admin-main">
-                        
-                        <jsp:include page="header.jsp" />
-                        
 
-                        
+                        <jsp:include page="header.jsp" />
+
+
+
                         <div class="admin-content">
                             <div class="content-header">
                                 <h1 class="content-title">Dashboard</h1>
@@ -37,7 +37,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="stats-grid">
                                 <div class="stat-card primary">
                                     <div class="stat-info">
@@ -122,9 +122,9 @@
                                 </div>
                             </div>
 
-                            
+
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
-                                
+
                                 <div class="card">
                                     <div class="card-header">
                                         <h3 class="card-title">Đơn hàng gần đây</h3>
@@ -230,7 +230,7 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <div class="card">
                                     <div class="card-header">
                                         <h3 class="card-title">Sản phẩm bán chạy</h3>
@@ -296,7 +296,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="card" style="margin-top: 20px;">
                                 <div class="card-header">
                                     <h3 class="card-title">Thao tác nhanh</h3>
@@ -318,11 +318,11 @@
                                             <i class="fas fa-users"></i>
                                             Quản lý khách hàng
                                         </a>
-                                        <a href="${pageContext.request.contextPath}/admin/settings.jsp"
+                                        <!-- <a href="${pageContext.request.contextPath}/admin/settings.jsp"
                                             class="btn btn-outline" style="justify-content: center;">
                                             <i class="fas fa-cog"></i>
                                             Cài đặt
-                                        </a>
+                                        </a> -->
                                     </div>
                                 </div>
                             </div>
