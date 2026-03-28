@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
         loadAddresses();
     }
 
-    
+
     initAddressForm();
     initPasswordForm();
     initProfileForm();
@@ -134,7 +134,7 @@ function openAddressModal() {
 
     if (!modal || !form) return;
 
-    
+
     form.reset();
     document.getElementById('address-id').value = '';
     title.textContent = 'Thêm địa chỉ mới';
@@ -142,7 +142,7 @@ function openAddressModal() {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
 
-    
+
     setTimeout(() => {
         document.getElementById('receiver').focus();
     }, 100);
@@ -174,7 +174,7 @@ function editAddress(addressId) {
             const modal = document.getElementById('address-modal');
             const title = document.getElementById('modal-title');
 
-            
+
             document.getElementById('address-id').value = address.id;
             document.getElementById('receiver').value = address.receiver || '';
             document.getElementById('phone').value = address.phone || '';
@@ -201,7 +201,7 @@ function saveAddress() {
     const addressId = document.getElementById('address-id').value;
     const saveBtn = form.querySelector('.btn-save');
 
-    
+
     const formData = new URLSearchParams();
     formData.append('receiver', document.getElementById('receiver').value.trim());
     formData.append('phone', document.getElementById('phone').value.trim());
@@ -210,13 +210,13 @@ function saveAddress() {
     formData.append('city', document.getElementById('city').value.trim());
     formData.append('isDefault', document.getElementById('isDefault').checked ? 'true' : 'false');
 
-    
+
     if (!formData.get('receiver') || !formData.get('addressDetail')) {
         showToast('Vui lòng điền đầy đủ thông tin bắt buộc', 'error');
         return;
     }
 
-    
+
     saveBtn.disabled = true;
     saveBtn.textContent = 'Đang lưu...';
 
@@ -261,7 +261,7 @@ function setDefaultAddress(addressId) {
     })
         .then(response => response.json())
         .then(address => {
-            
+
             const formData = new URLSearchParams();
             formData.append('receiver', address.receiver || '');
             formData.append('phone', address.phone || '');
@@ -306,7 +306,7 @@ function confirmDeleteAddress(addressId) {
         document.body.style.overflow = 'hidden';
     }
 
-    
+
     const confirmBtn = document.getElementById('confirm-delete-btn');
     if (confirmBtn) {
         confirmBtn.onclick = function () {
@@ -366,7 +366,7 @@ function initPasswordForm() {
         const confirmPassword = document.getElementById('confirm-password').value;
         const submitBtn = form.querySelector('.btn-submit');
 
-        
+
         if (!currentPassword || !newPassword || !confirmPassword) {
             showToast('Vui lòng điền đầy đủ thông tin', 'error');
             return;
@@ -382,11 +382,11 @@ function initPasswordForm() {
             return;
         }
 
-        
+
         submitBtn.disabled = true;
         submitBtn.textContent = 'Đang xử lý...';
 
-        
+
         const formData = new URLSearchParams();
         formData.append('currentPassword', currentPassword);
         formData.append('newPassword', newPassword);
@@ -423,7 +423,7 @@ function initPasswordForm() {
 
 
 function showToast(message, type = 'success') {
-    
+
     const existingToast = document.querySelector('.toast');
     if (existingToast) {
         existingToast.remove();
@@ -438,7 +438,7 @@ function showToast(message, type = 'success') {
 
     document.body.appendChild(toast);
 
-    
+
     setTimeout(() => {
         toast.style.animation = 'slideInRight 0.3s ease reverse';
         setTimeout(() => toast.remove(), 300);
@@ -496,7 +496,7 @@ function toggleEditMode() {
     editMode.style.display = 'block';
     editBtn.style.display = 'none';
 
-    
+
     const nameInput = document.getElementById('edit-name');
     if (nameInput) {
         nameInput.focus();
@@ -517,7 +517,7 @@ function cancelEditMode() {
     editMode.style.display = 'none';
     editBtn.style.display = 'inline-flex';
 
-    
+
     const displayName = document.getElementById('display-name');
     const displayPhone = document.getElementById('display-phone');
     const editName = document.getElementById('edit-name');
@@ -548,20 +548,20 @@ function initProfileForm() {
         const name = nameInput ? nameInput.value.trim() : '';
         const phone = phoneInput ? phoneInput.value.trim() : '';
 
-        
+
         if (!name) {
             showToast('Vui lòng nhập họ tên', 'error');
             nameInput.focus();
             return;
         }
 
-        
+
         if (saveBtn) {
             saveBtn.disabled = true;
             saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
         }
 
-        
+
         fetch(`${window.contextPath}/api/user/update-profile`, {
             method: 'POST',
             headers: {
@@ -577,7 +577,7 @@ function initProfileForm() {
                 if (data.success) {
                     showToast('Cập nhật thông tin thành công!', 'success');
 
-                    
+
                     const displayName = document.getElementById('display-name');
                     const displayPhone = document.getElementById('display-phone');
                     const sidebarName = document.getElementById('user-name-sidebar');
@@ -586,7 +586,7 @@ function initProfileForm() {
                     if (displayPhone) displayPhone.textContent = phone || '';
                     if (sidebarName) sidebarName.textContent = name;
 
-                    
+
                     cancelEditMode();
                 } else {
                     showToast(data.message || 'Có lỗi xảy ra', 'error');
@@ -700,11 +700,12 @@ function removeFromWishlist(wishlistId, productId) {
             if (data.success) {
                 showToast('Da xoa khoi yeu thich', 'success');
                 loadWishlist();
-                
+
                 const badge = document.getElementById('wishlistCount');
                 if (badge && data.wishlistCount !== undefined) {
                     badge.textContent = data.wishlistCount;
-                    badge.style.display = data.wishlistCount > 0 ? 'flex' : 'none';
+                    if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                    else badge.classList.add('badge-hidden');
                 }
             } else {
                 showToast(data.message || 'Co loi xay ra', 'error');

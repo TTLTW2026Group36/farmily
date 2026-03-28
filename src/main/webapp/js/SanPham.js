@@ -19,7 +19,7 @@ function initSortButtons() {
         button.addEventListener('click', function () {
             const sortValue = this.getAttribute('data-sort');
 
-            
+
             const url = new URL(window.location.href);
 
             if (sortValue && sortValue !== 'default') {
@@ -28,10 +28,10 @@ function initSortButtons() {
                 url.searchParams.delete('sort');
             }
 
-            
+
             url.searchParams.set('page', '1');
 
-            
+
             window.location.href = url.toString();
         });
     });
@@ -52,10 +52,10 @@ function initWishlistButtons() {
             const icon = this.querySelector('i');
             const currentBtn = this;
 
-            
+
             currentBtn.disabled = true;
 
-            
+
             fetch((window.contextPath || '') + '/api/wishlist', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -65,23 +65,24 @@ function initWishlistButtons() {
                 .then(data => {
                     if (data.success) {
                         if (data.added) {
-                            
+
                             currentBtn.classList.add('active');
                             icon.classList.remove('far');
                             icon.classList.add('fas');
                             currentBtn.style.animation = 'heartBeat 0.5s';
                             setTimeout(() => currentBtn.style.animation = '', 500);
                         } else {
-                            
+
                             currentBtn.classList.remove('active');
                             icon.classList.remove('fas');
                             icon.classList.add('far');
                         }
-                        
+
                         const badge = document.getElementById('wishlistCount');
                         if (badge) {
                             badge.textContent = data.wishlistCount;
-                            badge.style.display = data.wishlistCount > 0 ? 'flex' : 'none';
+                            if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                            else badge.classList.add('badge-hidden');
                         }
                     } else if (data.requireLogin) {
                         if (confirm('Vui lòng đăng nhập để thêm vào yêu thích.')) {

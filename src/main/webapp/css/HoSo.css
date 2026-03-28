@@ -1,13 +1,10 @@
-﻿
-
-* {
+﻿* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    font-family: 'Segoe UI', Arial, sans-serif;
     background: #f5f5f5;
     margin: 0;
 }
@@ -222,7 +219,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -452,7 +449,7 @@ body {
 .btn-submit {
     width: 100%;
     padding: 14px 24px;
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -631,7 +628,7 @@ body {
 
 .btn-save {
     padding: 12px 28px;
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -674,7 +671,7 @@ body {
 
 .btn-delete {
     padding: 12px 28px;
-    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    background: #f44336;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -710,11 +707,11 @@ body {
 }
 
 .toast.success {
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
 }
 
 .toast.error {
-    background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+    background: #f44336;
 }
 
 @keyframes slideInRight {
@@ -818,7 +815,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 10px 18px;
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
     color: #fff;
     border: none;
     border-radius: 6px;
@@ -888,7 +885,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 12px 24px;
-    background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    background: #43a047;
     color: #fff;
     border: none;
     border-radius: 6px;

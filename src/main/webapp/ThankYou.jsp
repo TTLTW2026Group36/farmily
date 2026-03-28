@@ -10,18 +10,19 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Đặt hàng thành công - Nông Sản Farmily</title>
 
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ThanhToan.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ThanhToan.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
                 <style>
-                    .thankyou-container {
+                    .thankyou-page .thankyou-container {
                         max-width: 800px;
                         margin: 40px auto;
                         padding: 0 20px;
+                        font-family: var(--font-main);
                     }
 
-                    .thankyou-card {
+                    .thankyou-page .thankyou-card {
                         background: #fff;
                         border-radius: 16px;
                         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -29,10 +30,10 @@
                         text-align: center;
                     }
 
-                    .success-icon {
+                    .thankyou-page .success-icon {
                         width: 80px;
                         height: 80px;
-                        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+                        background: var(--primary);
                         border-radius: 50%;
                         display: flex;
                         align-items: center;
@@ -41,12 +42,14 @@
                         animation: scaleIn 0.5s ease;
                     }
 
-                    .success-icon i {
+                    .thankyou-page .success-icon i {
                         font-size: 40px;
                         color: #fff;
                     }
 
-                    .thankyou-title {
+                    .thankyou-page .thankyou-title {
+                        font-family: var(--font-main);
+                        font-weight: 700;
                         font-size: 28px;
                         color: #1f2937;
                         margin-bottom: 12px;
@@ -173,7 +176,7 @@
                     }
 
                     .btn-primary {
-                        background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+                        background: #22c55e;
                         color: #fff;
                     }
 
@@ -217,8 +220,8 @@
                 </style>
             </head>
 
-            <body>
-                
+            <body class="thankyou-page">
+
                 <jsp:include page="common/header.jsp" />
 
                 <main class="thankyou-container">
@@ -260,7 +263,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <div class="order-items-list">
                                 <c:forEach var="item" items="${order.orderDetails}">
                                     <div class="order-item-row">
@@ -276,7 +279,7 @@
                                 </c:forEach>
                             </div>
 
-                            
+
                             <div class="order-totals">
                                 <div class="order-total-row">
                                     <span>Tạm tính</span>
@@ -306,7 +309,7 @@
                     </div>
                 </main>
 
-                
+
                 <jsp:include page="common/footer.jsp" />
             </body>
 

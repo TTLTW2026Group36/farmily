@@ -151,7 +151,7 @@
 
 
 .contact-hotline {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    background: var(--primary);
     padding: 24px;
     border-radius: 12px;
     margin-top: 10px;
@@ -280,7 +280,7 @@ textarea {
     font-size: 15px;
     border: none;
     border-radius: 12px;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    background: var(--primary);
     color: #fff;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);

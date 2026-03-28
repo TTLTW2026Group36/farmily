@@ -16,9 +16,6 @@
                     Sản Phẩm - Nông Sản Farmily
                 </title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                <link rel="preconnect" href="https://fonts.googleapis.com">
-                <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-                <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
                 <script>
@@ -36,23 +33,33 @@
                         <ol class="breadcrumb-list">
                             <li class="breadcrumb-item">
                                 <a href="${pageContext.request.contextPath}/">
-                                    <i class="fas fa-home"></i>
-                                    Trang chủ
+                                    <i class="fas fa-home"></i> Trang chủ
                                 </a>
                             </li>
-                            <li class="breadcrumb-item">
-                                <a href="${pageContext.request.contextPath}/san-pham">Sản phẩm</a>
-                            </li>
-                            <c:if test="${not empty selectedCategory}">
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    ${selectedCategory.name}
-                                </li>
-                            </c:if>
-                            <c:if test="${not empty keyword}">
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    Tìm kiếm: "${keyword}"
-                                </li>
-                            </c:if>
+
+                            <c:choose>
+                                <c:when test="${not empty selectedCategory}">
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/san-pham">Sản phẩm</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        ${selectedCategory.name}
+                                    </li>
+                                </c:when>
+                                <c:when test="${not empty keyword}">
+                                    <li class="breadcrumb-item">
+                                        <a href="${pageContext.request.contextPath}/san-pham">Sản phẩm</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Tìm kiếm: "${keyword}"
+                                    </li>
+                                </c:when>
+                                <c:otherwise>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Sản phẩm
+                                    </li>
+                                </c:otherwise>
+                            </c:choose>
                         </ol>
                     </div>
                 </nav>

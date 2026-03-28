@@ -80,7 +80,7 @@
                     priceEl.textContent = formatVND(basePrice);
                 }
 
-                
+
             }
         };
 
@@ -346,7 +346,8 @@
                         var badge = document.getElementById('wishlistCount');
                         if (badge) {
                             badge.textContent = data.wishlistCount;
-                            badge.style.display = data.wishlistCount > 0 ? 'flex' : 'none';
+                            if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                            else badge.classList.add('badge-hidden');
                         }
                     } else if (data.requireLogin) {
                         if (confirm('Vui long dang nhap de them vao yeu thich.')) {

@@ -3,17 +3,13 @@ function updateCartBadge(count) {
     var badge = document.getElementById('cartCount');
     if (!badge) return;
 
-    if (badge.textContent != count) {
-        badge.textContent = count;
-    }
+    count = parseInt(count, 10) || 0;
+    badge.textContent = count;
+
     if (count > 0) {
-        if (badge.style.display !== 'inline-flex') {
-            badge.style.display = 'inline-flex';
-        }
+        badge.classList.remove('badge-hidden');
     } else {
-        if (badge.style.display !== 'none') {
-            badge.style.display = 'none';
-        }
+        badge.classList.add('badge-hidden');
     }
 }
 
@@ -38,17 +34,13 @@ function updateWishlistBadge(count) {
     var badge = document.getElementById('wishlistCount');
     if (!badge) return;
 
-    if (badge.textContent != count) {
-        badge.textContent = count;
-    }
+    count = parseInt(count, 10) || 0;
+    badge.textContent = count;
+
     if (count > 0) {
-        if (badge.style.display !== 'inline-flex') {
-            badge.style.display = 'inline-flex';
-        }
+        badge.classList.remove('badge-hidden');
     } else {
-        if (badge.style.display !== 'none') {
-            badge.style.display = 'none';
-        }
+        badge.classList.add('badge-hidden');
     }
 }
 
@@ -141,6 +133,7 @@ if (!document.querySelector('#toast-styles')) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Server-side visibility handles the initial state to prevent flickering.
     if (window.isLoggedIn) {
         refreshCartCount();
         refreshWishlistCount();

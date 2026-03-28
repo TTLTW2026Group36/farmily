@@ -1,8 +1,8 @@
 :root {
     --flash-primary: #ff6b35;
     --flash-secondary: #f7931e;
-    --flash-gradient: linear-gradient(135deg, #ff6b35, #f7931e);
-    --flash-gradient-hover: linear-gradient(135deg, #e55a2b, #e8841a);
+    --flash-gradient: #ff6b35;
+    --flash-gradient-hover: #e55a2b;
     --flash-red: #dc2626;
     --text-dark: #1f2937;
     --text-muted: #6b7280;
@@ -372,7 +372,7 @@
 
 .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #ff6b6b, var(--flash-red));
+    background: #ff6b6b;
     border-radius: 10px;
     transition: width 0.5s ease;
     position: relative;
@@ -385,7 +385,7 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    background: transparent;
     animation: shimmer 2s infinite;
 }
 
@@ -408,7 +408,7 @@
 
 .btn-add-flash {
     width: calc(100% - 32px);
-    
+
     padding: 12px;
     background: var(--flash-gradient);
     color: white;
