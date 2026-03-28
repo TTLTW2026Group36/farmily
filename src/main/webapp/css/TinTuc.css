@@ -285,9 +285,12 @@
     margin-top: 40px;
 }
 
-.page-btn {
+.pagination .page-btn {
     min-width: 40px;
     height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid var(--border-color);
     background: white;
     color: var(--text-color);
@@ -295,21 +298,24 @@
     cursor: pointer;
     transition: all 0.3s ease;
     font-weight: 600;
+    text-decoration: none !important;
+    padding: 0 10px;
+    box-sizing: border-box;
 }
 
-.page-btn:hover:not(:disabled) {
+.pagination .page-btn:hover:not(:disabled) {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
 }
 
-.page-btn.active {
+.pagination .page-btn.active {
     background: var(--primary-color);
     color: white;
     border-color: var(--primary-color);
 }
 
-.page-btn:disabled {
+.pagination .page-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
