@@ -13,6 +13,7 @@ public class User implements Serializable {
     private Timestamp created_at;
     private Timestamp updated_at;
     private String facebookId;
+    private String googleId;
 
     public User() {
     }
@@ -84,6 +85,10 @@ public class User implements Serializable {
     public void setFacebookId(String facebookId) {
         this.facebookId = facebookId;
     }
+
+    public String getGoogleId() { return googleId; }
+
+    public void setGoogleId(String googleId) { this.googleId = googleId; }
 
     public Timestamp getCreated_at() {
         return created_at;

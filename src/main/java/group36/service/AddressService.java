@@ -46,12 +46,19 @@ public class AddressService {
     public Address createAddress(Address address) {
         
         int count = addressDAO.countByUserId(address.getUserId());
-        if (count == 0) {
+        if (count == 0 || address.isDefault()) {
+            addressDAO.setDefault(address.getUserId(), 0); 
             address.setDefault(true);
         }
 
         int id = addressDAO.insert(address);
         address.setId(id);
+        
+        
+        if (address.isDefault()) {
+            addressDAO.setDefault(address.getUserId(), id);
+        }
+        
         return address;
     }
 
@@ -64,8 +71,9 @@ public class AddressService {
         if (address.isDefault()) {
             addressDAO.setDefault(address.getUserId(), address.getId());
         }
-        int result = addressDAO.update(address);
-        return result > 0;
+        
+        addressDAO.update(address);
+        return true; 
     }
 
     

@@ -1,13 +1,10 @@
 package group36.controller.auth;
 
-import group36.service.FacebookAuthService;
+import group36.service.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.User;
-import group36.service.AuthService;
-import group36.service.CartService;
-import group36.service.WishlistService;
 import java.io.IOException;
 
 @WebServlet(name = "LoginController", value = { "/login", "/dang-nhap" })
@@ -19,11 +16,16 @@ public class LoginController extends HttpServlet {
         
         if (code != null && !code.trim().isEmpty()) {
             try {
-                String accessToken = group36.service.FacebookAuthService.getToken(code);
-                group36.service.FacebookAuthService.FacebookAccount fbAccount = group36.service.FacebookAuthService.getUserInfo(accessToken);
-                
-                User user = group36.service.FacebookAuthService.loginOrRegister(fbAccount);
-                
+                User user = null;
+                if(request.getParameter("scope") != null) {
+                    String accessToken = GoogleAuthService.getToken(code);
+                    GoogleAuthService.GoogleAccount ggAcc = GoogleAuthService.getUserInfo(accessToken);
+                    user = GoogleAuthService.loginOrRegister(ggAcc);
+                } else {
+                    String accessToken = FacebookAuthService.getToken(code);
+                    FacebookAuthService.FacebookAccount fbAccount = FacebookAuthService.getUserInfo(accessToken);
+                    user = FacebookAuthService.loginOrRegister(fbAccount);
+                }
                 if (user != null) {
                     HttpSession session = request.getSession();
                     session.setAttribute("auth", user);
@@ -51,7 +53,7 @@ public class LoginController extends HttpServlet {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                request.setAttribute("error", "Error connecting to Facebook: " + e.getMessage());
+                request.setAttribute("error", "Error connecting to provider: " + e.getMessage());
             }
         }
         

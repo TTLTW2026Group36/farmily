@@ -22,8 +22,8 @@
                     </c:choose>
                 </title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/TinTuc.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/TinTuc.css?v=3">
             </head>
 
             <body>
@@ -63,7 +63,7 @@
                 <div class="news-container">
                     <div class="container">
                         
-                        <header class="page-header">
+                        <div class="page-header">
                             <h1 class="page-title">
                                 <c:choose>
                                     <c:when test="${not empty selectedCategory}">
@@ -87,7 +87,7 @@
                                     </c:otherwise>
                                 </c:choose>
                             </p>
-                        </header>
+                        </div>
 
                         <div class="news-layout">
                             

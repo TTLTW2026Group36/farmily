@@ -1,4 +1,4 @@
-﻿* {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -440,7 +440,7 @@ body {
     right: 0;
     bottom: 0;
     background: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 9000;
     align-items: center;
     justify-content: center;
     padding: 20px;
@@ -664,7 +664,7 @@ body {
     border-radius: 8px;
     font-size: 14px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    z-index: 2000;
+    z-index: 9500;
     animation: slideInRight 0.3s ease;
     display: flex;
     align-items: center;
