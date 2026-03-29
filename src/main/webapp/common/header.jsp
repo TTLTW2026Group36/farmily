@@ -137,15 +137,7 @@
                     <div class="cats-toggle">
                         <i class="fa-solid fa-bars"></i>
                         <span>Danh sách sản phẩm</span>
-                        <ul class="dropdown">
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=1">Rau ăn lá</a></li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=2">Rau ăn củ</a></li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=3">Rau ăn thân</a></li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=4">Rau ăn hoa/bông</a>
-                            </li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=5">Rau ăn quả</a></li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=6">Rau ăn hạt</a></li>
-                            <li><a href="${pageContext.request.contextPath}/san-pham?categoryId=7">Trái cây</a></li>
+                        <ul class="dropdown" id="category-dropdown-header">
                         </ul>
                     </div>
 
@@ -250,6 +242,30 @@
                         e.stopPropagation();
                     }
                 });
+
+                function loadHeaderCategories() {
+                    var dropdown = document.getElementById('category-dropdown-header');
+                    if (!dropdown) return;
+
+                    fetch(contextPath + '/api/categories')
+                        .then(function (res) { return res.json(); })
+                        .then(function (categories) {
+                            if (!categories || categories.length === 0) {
+                                dropdown.innerHTML = '<li><a href="javascript:void(0)">Chưa có danh mục</a></li>';
+                                return;
+                            }
+                            var html = '';
+                            categories.forEach(function (cat) {
+                                html += '<li><a href="' + contextPath + '/san-pham?categoryId=' + cat.id + '">' + cat.name + '</a></li>';
+                            });
+                            dropdown.innerHTML = html;
+                        })
+                        .catch(function (err) {
+                            console.error('Lỗi khi tải danh mục header:', err);
+                            dropdown.innerHTML = '<li><a href="javascript:void(0)">Lỗi tải danh mục</a></li>';
+                        });
+                }
+                loadHeaderCategories();
             })();
         </script>
         <script>

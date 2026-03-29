@@ -449,6 +449,49 @@ textarea.form-control {
   gap: 10px;
 }
 
+
+.alert {
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.alert-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px !important;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #cbd5e1;
+  margin-bottom: 12px;
+  display: block;
+}
+
+.empty-state p {
+  color: #64748b;
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
 @media (max-width: 768px) {
   .admin-sidebar {
     transform: translateX(-100%);
@@ -467,6 +510,6 @@ textarea.form-control {
   }
 
   .admin-table {
-    min-width: 800px;
+    min-width: 600px;
   }
 }
