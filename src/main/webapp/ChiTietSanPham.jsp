@@ -18,10 +18,10 @@
             </head>
 
             <body>
-                
+
                 <jsp:include page="common/header.jsp" />
 
-                
+
                 <nav class="site-breadcrumb" aria-label="Breadcrumb">
                     <div class="breadcrumb-container">
                         <ol class="breadcrumb-list">
@@ -51,7 +51,7 @@
 
                 <main class="sp sp-container">
                     <section class="sp-grid" aria-labelledby="sp-title">
-                        
+
                         <aside class="sp-gallery" aria-label="Bộ sưu tập ảnh sản phẩm">
                             <div class="sp-photo-main" id="photoMain" role="img" aria-label="Ảnh sản phẩm">
                                 <c:choose>
@@ -90,7 +90,7 @@
                             </div>
                         </aside>
 
-                        
+
                         <article class="sp-info">
                             <h1 id="sp-title" class="sp-title">
                                 <c:out value="${product.name}" />
@@ -143,7 +143,7 @@
                                     </strong></span>
                             </div>
 
-                            
+
                             <c:if test="${not empty flashSale}">
                                 <div class="sp-flash-sale">
                                     <div class="flash-sale-info">
@@ -194,7 +194,7 @@
                             <form class="sp-purchase" id="purchaseForm">
                                 <input type="hidden" id="productId" value="${product.id}">
 
-                                
+
                                 <c:if test="${not empty product.variants}">
                                     <div class="field weight-field">
                                         <span class="label">Khối lượng:</span>
@@ -213,7 +213,7 @@
                                     </div>
                                 </c:if>
 
-                                
+
                                 <div class="field qty-field">
                                     <span class="label">Số lượng:</span>
                                     <div class="qty">
@@ -225,11 +225,11 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <div class="actions">
                                     <c:choose>
                                         <c:when test="${product.totalStock > 0}">
-                                            <button type="submit" class="btn-primary">
+                                            <button type="submit" class="btn-primary"><i class="fas fa-cart-plus"></i>
                                                 Thêm vào giỏ hàng
                                             </button>
                                         </c:when>
@@ -240,11 +240,11 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </div>
-                                
+
                                 <p class="msg" id="msg" role="status" aria-live="polite"></p>
                             </form>
 
-                            
+
                             <button type="button" class="btn-wishlist ${inWishlist ? 'active' : ''}" id="wishlistBtn"
                                 data-product-id="${product.id}"
                                 title="${inWishlist ? 'Xóa khỏi yêu thích' : 'Thêm vào yêu thích'}"
@@ -255,7 +255,7 @@
                         </article>
                     </section>
 
-                    
+
                     <section class="sp-desc card" aria-labelledby="desc-title">
                         <h2 id="desc-title" style="text-align: left; margin-left: 40px;">Mô tả</h2>
                         <c:choose>
@@ -280,11 +280,11 @@
                         </c:choose>
                     </section>
 
-                    
+
                     <section class="sp-reviews card" aria-labelledby="reviews-title">
                         <h2 id="reviews-title">Đánh giá sản phẩm</h2>
 
-                        
+
                         <div class="reviews-summary">
                             <div class="rating-overview">
                                 <div class="rating-score">
@@ -379,7 +379,7 @@
                             </div>
                         </div>
 
-                        
+
                         <div class="reviews-filter">
                             <button class="filter-btn active" data-filter="all">Tất cả</button>
                             <button class="filter-btn" data-filter="5">5 sao (
@@ -399,7 +399,7 @@
                             </button>
                         </div>
 
-                        
+
                         <div class="reviews-list">
                             <c:choose>
                                 <c:when test="${not empty reviews}">
@@ -476,7 +476,7 @@
                             </c:choose>
                         </div>
 
-                        
+
                         <c:if test="${not empty reviews && totalReviewPages > 1}">
                             <div class="reviews-loadmore">
                                 <c:if test="${currentReviewPage < totalReviewPages}">
@@ -501,7 +501,8 @@
                                                     <img src="${rp.primaryImageUrl}" alt="${rp.name}" />
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <img src="${pageContext.request.contextPath}/images/no-image.jpg" alt="${rp.name}" />
+                                                    <img src="${pageContext.request.contextPath}/images/no-image.jpg"
+                                                        alt="${rp.name}" />
                                                 </c:otherwise>
                                             </c:choose>
                                         </a>
@@ -514,7 +515,8 @@
                                         </h3>
                                         <p class="sp-related-price">
                                             <span class="price-current">
-                                                <fmt:formatNumber value="${rp.minPrice}" type="number" groupingUsed="true" />đ
+                                                <fmt:formatNumber value="${rp.minPrice}" type="number"
+                                                    groupingUsed="true" />đ
                                             </span>
                                             <c:if test="${not empty rp.minPriceVariant}">
                                                 <span class="price-unit">/${rp.minPriceVariant.optionsValue}</span>
