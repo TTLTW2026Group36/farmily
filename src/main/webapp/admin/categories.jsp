@@ -15,17 +15,17 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
 
-        <body>
+        <body data-page="categories">
             <div class="admin-layout">
-                
+
                 <jsp:include page="sidebar.jsp" />
-                
+
 
 
                 <main class="admin-main">
-                    
+
                     <jsp:include page="header.jsp" />
-                    
+
                     <div class="admin-content">
                         <div class="content-header">
                             <div>
@@ -52,7 +52,7 @@
                                 <h3 class="card-title">Danh sách danh mục (${totalCategories})</h3>
                             </div>
                             <div class="card-body" style="padding: 0;">
-                                <table class="admin-table">
+                                <table class="admin-table" id="categoriesTable">
                                     <thead>
                                         <tr>
                                             <th>STT</th>
