@@ -7,10 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class OrderService {
 
     private final OrderDAO orderDAO;
@@ -26,9 +22,8 @@ public class OrderService {
     private final UserDAO userDAO;
     private final FlashSaleDAO flashSaleDAO;
 
-    
-    public static final double FREE_SHIPPING_THRESHOLD = 100000; 
-    public static final double STANDARD_SHIPPING_FEE = 30000; 
+    public static final double FREE_SHIPPING_THRESHOLD = 100000;
+    public static final double STANDARD_SHIPPING_FEE = 30000;
 
     public OrderService() {
         this.orderDAO = new OrderDAO();
@@ -45,33 +40,23 @@ public class OrderService {
         this.flashSaleDAO = new FlashSaleDAO();
     }
 
-    
-
-
-
     public double calculateShippingFee(double subtotal) {
         return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
     }
 
-    
-
-
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note)
             throws IllegalArgumentException {
 
-        
         Optional<Address> addressOpt = addressDAO.findById(addressId);
         if (addressOpt.isEmpty()) {
             throw new IllegalArgumentException("Địa chỉ không tồn tại");
         }
 
-        
         Optional<PaymentMethod> paymentOpt = paymentMethodDAO.findById(paymentMethodId);
         if (paymentOpt.isEmpty() || !paymentOpt.get().isActive()) {
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ");
         }
 
-        
         Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
         if (cartOpt.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng trống");
@@ -83,18 +68,15 @@ public class OrderService {
             throw new IllegalArgumentException("Giỏ hàng trống");
         }
 
-        
         double subtotal = 0;
         for (CartItem item : cartItems) {
             loadCartItemDetails(item);
             subtotal += item.getSubtotal();
         }
 
-        
         double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
-        
         Order order = new Order();
         order.setUserId(userId);
         order.setAddressId(addressId);
@@ -107,7 +89,6 @@ public class OrderService {
         int orderId = orderDAO.insert(order);
         order.setId(orderId);
 
-        
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (CartItem item : cartItems) {
             OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
@@ -116,14 +97,12 @@ public class OrderService {
         orderDetailDAO.insertBatch(orderDetails);
         order.setOrderDetails(orderDetails);
 
-        
         for (CartItem item : cartItems) {
             if (item.getVariantId() != null) {
                 productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
             }
             productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
 
-            
             if (item.hasFlashSalePrice()) {
                 flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
                     flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
@@ -131,32 +110,25 @@ public class OrderService {
             }
         }
 
-        
         cartItemDAO.deleteByCartId(cart.getId());
 
-        
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
 
-        
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
-            
+
             e.printStackTrace();
         }
 
         return order;
     }
 
-    
-
-
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems)
             throws IllegalArgumentException {
 
-        
         if (guestInfo == null || !guestInfo.isValid()) {
             throw new IllegalArgumentException("Thông tin khách hàng không đầy đủ");
         }
@@ -165,36 +137,30 @@ public class OrderService {
             throw new IllegalArgumentException("Email không hợp lệ");
         }
 
-        
         Optional<PaymentMethod> paymentOpt = paymentMethodDAO.findById(paymentMethodId);
         if (paymentOpt.isEmpty() || !paymentOpt.get().isActive()) {
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ");
         }
 
-        
         if (cartItems == null || cartItems.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng trống");
         }
 
-        
         double subtotal = 0;
         for (CartItem item : cartItems) {
             loadCartItemDetails(item);
             subtotal += item.getSubtotal();
         }
 
-        
         double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
-        
-        shippingAddress.setUserId(0); 
+        shippingAddress.setUserId(0);
         int addressId = addressDAO.insert(shippingAddress);
         shippingAddress.setId(addressId);
 
-        
         Order order = new Order();
-        order.setUserId(null); 
+        order.setUserId(null);
         order.setAddressId(addressId);
         order.setPaymentMethodId(paymentMethodId);
         order.setNote(note);
@@ -208,7 +174,6 @@ public class OrderService {
         int orderId = orderDAO.insertGuestOrder(order);
         order.setId(orderId);
 
-        
         List<OrderDetail> orderDetails = new ArrayList<>();
         for (CartItem item : cartItems) {
             OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
@@ -217,14 +182,12 @@ public class OrderService {
         orderDetailDAO.insertBatch(orderDetails);
         order.setOrderDetails(orderDetails);
 
-        
         for (CartItem item : cartItems) {
             if (item.getVariantId() != null) {
                 productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
             }
             productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
 
-            
             if (item.hasFlashSalePrice()) {
                 flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
                     flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
@@ -232,11 +195,9 @@ public class OrderService {
             }
         }
 
-        
         order.setAddress(shippingAddress);
         order.setPaymentMethod(paymentOpt.get());
 
-        
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
@@ -245,9 +206,6 @@ public class OrderService {
 
         return order;
     }
-
-    
-
 
     public Optional<Order> getOrderById(int orderId) {
         Optional<Order> orderOpt = orderDAO.findById(orderId);
@@ -258,9 +216,6 @@ public class OrderService {
         return orderOpt;
     }
 
-    
-
-
     public List<Order> getOrdersByUserId(int userId) {
         List<Order> orders = orderDAO.findByUserId(userId);
         for (Order order : orders) {
@@ -269,59 +224,39 @@ public class OrderService {
         return orders;
     }
 
-    
-
-
     public List<Order> getAllOrders() {
         return orderDAO.findAll();
     }
 
-    
-
-
     public List<Order> getOrdersPaginated(int page, int size) {
         return orderDAO.findAllPaginated(page, size);
     }
-
-    
-
 
     public boolean updateOrderStatus(int orderId, String status) {
         int result = orderDAO.updateStatus(orderId, status);
         return result > 0;
     }
 
-    
-
-
     public int countOrders() {
         return orderDAO.count();
     }
-
-    
-
 
     public int countOrdersByStatus(String status) {
         return orderDAO.countByStatus(status);
     }
 
-    
-
     private void loadOrderDetails(Order order) {
-        
+
         List<OrderDetail> details = orderDetailDAO.findByOrderId(order.getId());
         for (OrderDetail detail : details) {
             loadOrderDetailProducts(detail);
         }
         order.setOrderDetails(details);
 
-        
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
 
-        
         paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
 
-        
         if (!order.isGuestOrder() && order.getUserId() != null) {
             userDAO.findById(order.getUserId()).ifPresent(order::setUser);
         }
@@ -346,13 +281,12 @@ public class OrderService {
 
     private void loadCartItemDetails(CartItem item) {
         productDAO.findById(item.getProductId()).ifPresent(product -> {
-            
+
             product.setImages(productImageDAO.findByProductId(product.getId()));
             List<ProductVariant> variants = productVariantDAO.findByProductId(product.getId());
             product.setVariants(variants);
             item.setProduct(product);
 
-            
             if (item.getVariantId() != null) {
                 for (ProductVariant v : variants) {
                     if (Integer.valueOf(v.getId()).equals(item.getVariantId())) {
@@ -363,12 +297,10 @@ public class OrderService {
             }
         });
 
-        
         if (item.getVariantId() != null && item.getVariant() == null) {
             productVariantDAO.findById(item.getVariantId()).ifPresent(item::setVariant);
         }
 
-        
         applyFlashSalePrice(item);
     }
 
@@ -376,7 +308,6 @@ public class OrderService {
         if (item == null)
             return;
 
-        
         Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
 
         if (flashSaleOpt.isPresent()) {
@@ -391,48 +322,37 @@ public class OrderService {
         }
     }
 
-    
-
-
     public List<Order> getOrdersByStatusPaginated(String status, int page, int size) {
         return orderDAO.findByStatusPaginated(status, page, size);
     }
 
-    
+    public List<Order> getOrdersFiltered(String status, String keyword, String fromDate, String toDate, int page,
+            int size) {
+        return orderDAO.findFiltered(status, keyword, fromDate, toDate, page, size);
+    }
 
-
+    public int countOrdersFiltered(String status, String keyword, String fromDate, String toDate) {
+        return orderDAO.countFiltered(status, keyword, fromDate, toDate);
+    }
 
     public void loadOrderDetailsForAdmin(Order order) {
         List<OrderDetail> details = orderDetailDAO.findByOrderId(order.getId());
         order.setOrderDetails(details);
 
-        
         if (!order.isGuestOrder() && order.getUserId() != null) {
             userDAO.findById(order.getUserId()).ifPresent(order::setUser);
         }
 
-        
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
     }
-
-    
-
-    
-
 
     public double getTotalRevenue() {
         return orderDAO.getTotalRevenue();
     }
 
-    
-
-
     public double getRevenueThisMonth() {
         return orderDAO.getRevenueThisMonth();
     }
-
-    
-
 
     public double getRevenueChangePercent() {
         double thisMonth = orderDAO.getRevenueThisMonth();
@@ -443,15 +363,9 @@ public class OrderService {
         return ((thisMonth - lastMonth) / lastMonth) * 100;
     }
 
-    
-
-
     public int getOrdersThisMonth() {
         return orderDAO.countOrdersThisMonth();
     }
-
-    
-
 
     public double getOrdersChangePercent() {
         int thisMonth = orderDAO.countOrdersThisMonth();
@@ -461,9 +375,6 @@ public class OrderService {
         }
         return ((double) (thisMonth - lastMonth) / lastMonth) * 100;
     }
-
-    
-
 
     public List<Order> getRecentOrders(int limit) {
         List<Order> orders = orderDAO.findRecent(limit);
