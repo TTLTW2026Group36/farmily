@@ -3,33 +3,24 @@ package group36.model;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-
-
-
-
 public class Category implements Serializable {
     private int id;
     private String name;
-    private String imageUrl;
     private Timestamp createdAt;
 
-    
     public Category() {
     }
 
-    public Category(int id, String name, String imageUrl, Timestamp createdAt) {
+    public Category(int id, String name, Timestamp createdAt) {
         this.id = id;
         this.name = name;
-        this.imageUrl = imageUrl;
         this.createdAt = createdAt;
     }
 
-    public Category(String name, String imageUrl) {
+    public Category(String name) {
         this.name = name;
-        this.imageUrl = imageUrl;
     }
 
-    
     public int getId() {
         return id;
     }
@@ -46,14 +37,6 @@ public class Category implements Serializable {
         this.name = name;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -67,7 +50,6 @@ public class Category implements Serializable {
         return "Category{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", imageUrl='" + imageUrl + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

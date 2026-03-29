@@ -25,7 +25,6 @@ public class CategoryDAO extends BaseDao {
             Category category = new Category();
             category.setId(rs.getInt("id"));
             category.setName(rs.getString("name"));
-            category.setImageUrl(rs.getString("image_url"));
             category.setCreatedAt(rs.getTimestamp("created_at"));
             return category;
         }
@@ -78,10 +77,9 @@ public class CategoryDAO extends BaseDao {
 
 
     public int insert(Category category) {
-        String sql = "INSERT INTO category (name, image_url) VALUES (:name, :imageUrl)";
+        String sql = "INSERT INTO category (name) VALUES (:name)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("name", category.getName())
-                .bind("imageUrl", category.getImageUrl())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -94,11 +92,10 @@ public class CategoryDAO extends BaseDao {
 
 
     public int update(Category category) {
-        String sql = "UPDATE category SET name = :name, image_url = :imageUrl WHERE id = :id";
+        String sql = "UPDATE category SET name = :name WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", category.getId())
                 .bind("name", category.getName())
-                .bind("imageUrl", category.getImageUrl())
                 .execute());
     }
 

@@ -7,7 +7,9 @@ import group36.model.Category;
 import group36.service.CategoryService;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 
@@ -79,9 +81,26 @@ public class AdminCategoryController extends HttpServlet {
 
     private void listCategories(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String success = (String) session.getAttribute("success");
+        String error = (String) session.getAttribute("error");
+        if (success != null) {
+            request.setAttribute("success", success);
+            session.removeAttribute("success");
+        }
+        if (error != null) {
+            request.setAttribute("error", error);
+            session.removeAttribute("error");
+        }
+
         List<Category> categories = categoryService.getAllCategories();
+        Map<Integer, Integer> productCountMap = new HashMap<>();
+        for (Category cat : categories) {
+            productCountMap.put(cat.getId(), categoryService.getProductCount(cat.getId()));
+        }
         request.setAttribute("categories", categories);
         request.setAttribute("totalCategories", categories.size());
+        request.setAttribute("productCountMap", productCountMap);
         request.getRequestDispatcher("/admin/categories.jsp").forward(request, response);
     }
 
@@ -99,7 +118,9 @@ public class AdminCategoryController extends HttpServlet {
         try {
             int id = Integer.parseInt(idParam);
             Category category = categoryService.getCategoryById(id);
+            int productCount = categoryService.getProductCount(id);
             request.setAttribute("category", category);
+            request.setAttribute("productCount", productCount);
             request.getRequestDispatcher("/admin/categories-edit.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             request.setAttribute("error", "Invalid category ID");
@@ -116,22 +137,15 @@ public class AdminCategoryController extends HttpServlet {
     private void createCategory(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String name = request.getParameter("name");
-        String imageUrl = request.getParameter("imageUrl");
+        HttpSession session = request.getSession();
 
         try {
-            Category category = categoryService.createCategory(name, imageUrl);
-
-            
-            HttpSession session = request.getSession();
-            session.setAttribute("success", "Category '" + category.getName() + "' created successfully!");
-
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            Category category = categoryService.createCategory(name);
+            session.setAttribute("success", "Đã thêm danh mục '" + category.getName() + "' thành công!");
         } catch (IllegalArgumentException e) {
-            request.setAttribute("error", e.getMessage());
-            request.setAttribute("name", name);
-            request.setAttribute("imageUrl", imageUrl);
-            request.getRequestDispatcher("/admin/categories-add.jsp").forward(request, response);
+            session.setAttribute("error", e.getMessage());
         }
+        response.sendRedirect(request.getContextPath() + "/admin/categories");
     }
 
     
@@ -141,7 +155,7 @@ public class AdminCategoryController extends HttpServlet {
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
         String name = request.getParameter("name");
-        String imageUrl = request.getParameter("imageUrl");
+        HttpSession session = request.getSession();
 
         if (idParam == null || idParam.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/admin/categories");
@@ -150,22 +164,14 @@ public class AdminCategoryController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idParam);
-            Category category = categoryService.updateCategory(id, name, imageUrl);
-
-            
-            HttpSession session = request.getSession();
-            session.setAttribute("success", "Category '" + category.getName() + "' updated successfully!");
-
-            response.sendRedirect(request.getContextPath() + "/admin/categories");
+            Category category = categoryService.updateCategory(id, name);
+            session.setAttribute("success", "Đã cập nhật danh mục '" + category.getName() + "' thành công!");
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Invalid category ID");
-            showEditForm(request, response);
+            session.setAttribute("error", "ID danh mục không hợp lệ");
         } catch (IllegalArgumentException e) {
-            request.setAttribute("error", e.getMessage());
-            request.setAttribute("name", name);
-            request.setAttribute("imageUrl", imageUrl);
-            showEditForm(request, response);
+            session.setAttribute("error", e.getMessage());
         }
+        response.sendRedirect(request.getContextPath() + "/admin/categories");
     }
 
     
@@ -187,14 +193,13 @@ public class AdminCategoryController extends HttpServlet {
 
             categoryService.deleteCategory(id);
 
-            
             HttpSession session = request.getSession();
-            session.setAttribute("success", "Category '" + categoryName + "' deleted successfully!");
+            session.setAttribute("success", "Đã xóa danh mục '" + categoryName + "' thành công!");
 
             response.sendRedirect(request.getContextPath() + "/admin/categories");
         } catch (NumberFormatException e) {
             HttpSession session = request.getSession();
-            session.setAttribute("error", "Invalid category ID");
+            session.setAttribute("error", "ID danh mục không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/admin/categories");
         } catch (IllegalArgumentException e) {
             HttpSession session = request.getSession();
