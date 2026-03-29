@@ -14,21 +14,21 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
-            <body>
+            <body data-page="products">
                 <div class="admin-layout">
-                    
+
                     <jsp:include page="sidebar.jsp" />
-                    
 
-                    
+
+
                     <main class="admin-main">
-                        
-                        <jsp:include page="header.jsp" />
-                        
 
-                        
+                        <jsp:include page="header.jsp" />
+
+
+
                         <div class="admin-content">
-                            
+
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success"
                                     style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -64,7 +64,7 @@
                                 </div>
                             </div>
 
-                            
+
                             <form method="get" action="${pageContext.request.contextPath}/admin/products"
                                 class="filters-bar">
                                 <div class="filter-group">
@@ -105,7 +105,7 @@
                                 </div>
                             </form>
 
-                            
+
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Danh sách sản phẩm (${totalProducts})</h3>
@@ -150,7 +150,8 @@
                                                     <c:otherwise>
                                                         <c:forEach var="product" items="${products}">
                                                             <tr>
-                                                                <td><input type="checkbox" class="product-checkbox" name="productIds" value="${product.id}"></td>
+                                                                <td><input type="checkbox" class="product-checkbox"
+                                                                        name="productIds" value="${product.id}"></td>
                                                                 <td>
                                                                     <div class="product-cell">
                                                                         <c:choose>
@@ -235,11 +236,11 @@
                                     </div>
                                 </div>
 
-                                
+
                                 <c:if test="${totalPages > 1}">
                                     <div class="card-footer">
                                         <div class="pagination">
-                                            
+
                                             <c:choose>
                                                 <c:when test="${currentPage == 1}">
                                                     <span class="disabled"><i class="fas fa-chevron-left"></i></span>
@@ -252,7 +253,7 @@
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            
+
                                             <c:forEach begin="1" end="${totalPages}" var="i">
                                                 <c:choose>
                                                     <c:when test="${i == currentPage}">
@@ -273,7 +274,7 @@
                                                 </c:choose>
                                             </c:forEach>
 
-                                            
+
                                             <c:choose>
                                                 <c:when test="${currentPage == totalPages}">
                                                     <span class="disabled"><i class="fas fa-chevron-right"></i></span>
@@ -293,113 +294,114 @@
                     </main>
                 </div>
                 <script>
-                    document.addEventListener('DOMContentLoaded', function() {
+                    document.addEventListener('DOMContentLoaded', function () {
                         const selectAll = document.getElementById('selectAll');
                         const productCheckboxes = document.querySelectorAll('.product-checkbox');
-                        const totalProducts = ${totalProducts != null ? totalProducts : 0};
+                        const totalProducts = ${ totalProducts != null ? totalProducts : 0
+                    };
 
-                       
-                        let selectAllPages = sessionStorage.getItem('selectAllPages') === 'true';
-                        let selectedIds = JSON.parse(sessionStorage.getItem('selectedProductIds') || '[]');
-                        let excludedIds = JSON.parse(sessionStorage.getItem('excludedProductIds') || '[]');
 
-                        function updateStorage() {
-                            sessionStorage.setItem('selectAllPages', selectAllPages);
-                            sessionStorage.setItem('selectedProductIds', JSON.stringify(selectedIds));
-                            sessionStorage.setItem('excludedProductIds', JSON.stringify(excludedIds));
-                        }
+                    let selectAllPages = sessionStorage.getItem('selectAllPages') === 'true';
+                    let selectedIds = JSON.parse(sessionStorage.getItem('selectedProductIds') || '[]');
+                    let excludedIds = JSON.parse(sessionStorage.getItem('excludedProductIds') || '[]');
 
-                        function renderState() {
-                            let currentChecked = 0;
-                            productCheckboxes.forEach(function(checkbox) {
-                                const id = checkbox.value;
-                                if (selectAllPages) {
-                                    checkbox.checked = !excludedIds.includes(id);
-                                } else {
-                                    checkbox.checked = selectedIds.includes(id);
-                                }
-                                if (checkbox.checked) currentChecked++;
-                            });
+                    function updateStorage() {
+                        sessionStorage.setItem('selectAllPages', selectAllPages);
+                        sessionStorage.setItem('selectedProductIds', JSON.stringify(selectedIds));
+                        sessionStorage.setItem('excludedProductIds', JSON.stringify(excludedIds));
+                    }
 
-                            if (selectAll) {
-                                selectAll.checked = productCheckboxes.length > 0 && currentChecked === productCheckboxes.length;
+                    function renderState() {
+                        let currentChecked = 0;
+                        productCheckboxes.forEach(function (checkbox) {
+                            const id = checkbox.value;
+                            if (selectAllPages) {
+                                checkbox.checked = !excludedIds.includes(id);
+                            } else {
+                                checkbox.checked = selectedIds.includes(id);
                             }
-                            
-
-                            const exportBtn = document.querySelector('button[onclick="exportExcel()"]');
-                            if (exportBtn) {
-                                if (selectAllPages) {
-                                    let count = totalProducts - excludedIds.length;
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + count + ')';
-                                } else if (selectedIds.length > 0) {
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + selectedIds.length + ')';
-                                } else {
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel';
-                                }
-                            }
-                        }
-
-                        renderState();
+                            if (checkbox.checked) currentChecked++;
+                        });
 
                         if (selectAll) {
-                            selectAll.addEventListener('change', function() {
-                                if (this.checked) {
-                                    const confirmAll = confirm('Bạn có muốn chọn tất cả ' + totalProducts + ' sản phẩm trên tất cả các trang không?\n\n- Nhấn OK để chọn tất cả ' + totalProducts + ' sản phẩm.\n- Nhấn Cancel để chỉ chọn các sản phẩm trên trang hiện tại.');
-                                    if (confirmAll) {
-                                        selectAllPages = true;
-                                        selectedIds = [];
-                                        excludedIds = [];
-                                    } else {
-                                        selectAllPages = false;
-                                        productCheckboxes.forEach(cb => {
-                                            if (!selectedIds.includes(cb.value)) {
-                                                selectedIds.push(cb.value);
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    selectAllPages = false;
-                                    if (confirm('Bỏ chọn tất cả sản phẩm?')) {
-                                        selectedIds = [];
-                                        excludedIds = [];
-                                    } else {
-                                        productCheckboxes.forEach(cb => {
-                                            selectedIds = selectedIds.filter(id => id !== cb.value);
-                                        });
-                                    }
-                                }
-                                updateStorage();
-                                renderState();
-                            });
+                            selectAll.checked = productCheckboxes.length > 0 && currentChecked === productCheckboxes.length;
                         }
 
-                        productCheckboxes.forEach(function(checkbox) {
-                            checkbox.addEventListener('change', function() {
-                                const id = this.value;
-                                if (selectAllPages) {
-                                    if (!this.checked) {
-                                        if (!excludedIds.includes(id)) excludedIds.push(id);
-                                    } else {
-                                        excludedIds = excludedIds.filter(e => e !== id);
-                                    }
+
+                        const exportBtn = document.querySelector('button[onclick="exportExcel()"]');
+                        if (exportBtn) {
+                            if (selectAllPages) {
+                                let count = totalProducts - excludedIds.length;
+                                exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + count + ')';
+                            } else if (selectedIds.length > 0) {
+                                exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + selectedIds.length + ')';
+                            } else {
+                                exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel';
+                            }
+                        }
+                    }
+
+                    renderState();
+
+                    if (selectAll) {
+                        selectAll.addEventListener('change', function () {
+                            if (this.checked) {
+                                const confirmAll = confirm('Bạn có muốn chọn tất cả ' + totalProducts + ' sản phẩm trên tất cả các trang không?\n\n- Nhấn OK để chọn tất cả ' + totalProducts + ' sản phẩm.\n- Nhấn Cancel để chỉ chọn các sản phẩm trên trang hiện tại.');
+                                if (confirmAll) {
+                                    selectAllPages = true;
+                                    selectedIds = [];
+                                    excludedIds = [];
                                 } else {
-                                    if (this.checked) {
-                                        if (!selectedIds.includes(id)) selectedIds.push(id);
-                                    } else {
-                                        selectedIds = selectedIds.filter(e => e !== id);
-                                    }
+                                    selectAllPages = false;
+                                    productCheckboxes.forEach(cb => {
+                                        if (!selectedIds.includes(cb.value)) {
+                                            selectedIds.push(cb.value);
+                                        }
+                                    });
                                 }
-                                updateStorage();
-                                renderState();
-                            });
+                            } else {
+                                selectAllPages = false;
+                                if (confirm('Bỏ chọn tất cả sản phẩm?')) {
+                                    selectedIds = [];
+                                    excludedIds = [];
+                                } else {
+                                    productCheckboxes.forEach(cb => {
+                                        selectedIds = selectedIds.filter(id => id !== cb.value);
+                                    });
+                                }
+                            }
+                            updateStorage();
+                            renderState();
                         });
+                    }
+
+                    productCheckboxes.forEach(function (checkbox) {
+                        checkbox.addEventListener('change', function () {
+                            const id = this.value;
+                            if (selectAllPages) {
+                                if (!this.checked) {
+                                    if (!excludedIds.includes(id)) excludedIds.push(id);
+                                } else {
+                                    excludedIds = excludedIds.filter(e => e !== id);
+                                }
+                            } else {
+                                if (this.checked) {
+                                    if (!selectedIds.includes(id)) selectedIds.push(id);
+                                } else {
+                                    selectedIds = selectedIds.filter(e => e !== id);
+                                }
+                            }
+                            updateStorage();
+                            renderState();
+                        });
+                    });
                     });
 
                     function exportExcel() {
                         let selectAllPages = sessionStorage.getItem('selectAllPages') === 'true';
                         let selectedIds = JSON.parse(sessionStorage.getItem('selectedProductIds') || '[]');
                         let excludedIds = JSON.parse(sessionStorage.getItem('excludedProductIds') || '[]');
-                        
+
                         if (selectAllPages) {
                             alert("Đang xuất file excel cho TẤT CẢ sản phẩm (trừ " + excludedIds.length + " sản phẩm bị bỏ chọn)");
                         } else if (selectedIds.length > 0) {
