@@ -15,7 +15,7 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
-            <body>
+            <body data-page="orders">
                 <div class="admin-layout">
 
                     <jsp:include page="sidebar.jsp" />
