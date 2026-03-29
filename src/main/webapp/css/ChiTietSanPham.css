@@ -2,7 +2,8 @@
     --c-text: #1f2937;
     --c-muted: #6b7280;
     --c-primary: #ff5a1f;
-    
+    --primary: #219653;
+    --primary-hover: #45a049;
     --c-border: #e5e7eb;
     --c-bg: #ffffff;
     --radius: 16px;
@@ -51,7 +52,7 @@ a {
 .sp-grid {
     display: grid;
     grid-template-columns: 1.2fr 1fr;
-    
+
     gap: 24px;
 }
 
@@ -69,7 +70,7 @@ a {
     border-radius: var(--radius);
     overflow: hidden;
     aspect-ratio: 4/3;
-    
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -84,7 +85,7 @@ a {
 
 .sp-photo-main .nav {
     position: absolute;
-    
+
     top: 50%;
     transform: translateY(-50%);
     border: none;
@@ -349,7 +350,7 @@ a {
     padding: 14px 16px;
     border: 0;
     border-radius: 14px;
-    background: var(--c-primary);
+    background: var(--primary);
     color: #fff;
     font-weight: 700;
     cursor: pointer;
@@ -1026,7 +1027,7 @@ a {
 }
 
 .sp-related-name a:hover {
-    color: var(--c-primary);
+    color: var(--primary);
 }
 
 .sp-related-price {
@@ -1047,7 +1048,7 @@ a {
     padding: 10px;
     border: none;
     border-radius: 10px;
-    background: var(--c-primary);
+    background: var(--primary);
     color: #fff;
     font-size: 13px;
     font-weight: 600;
