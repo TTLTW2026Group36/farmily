@@ -15,20 +15,26 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
 
-            <body>
-                <div class="admin-layout">
+        <body data-page="categories">
+            <div class="admin-layout">
+
+                <jsp:include page="sidebar.jsp" />
 
 
-                    <main class="admin-main">
 
-                        <jsp:include page="header.jsp" />
+                <main class="admin-main">
 
-                        <div class="admin-content">
+                    <jsp:include page="header.jsp" />
 
-                            <c:if test="${not empty success}">
-                                <div class="alert alert-success">
-                                    <i class="fas fa-check-circle"></i>
-                                    ${success}
+                    <div class="admin-content">
+                        <div class="content-header">
+                            <div>
+                                <h1 class="content-title">Quản lý Danh mục</h1>
+                                <div class="content-breadcrumb">
+                                    <a href="${pageContext.request.contextPath}/admin/dashboard"><i
+                                            class="fas fa-home"></i> Dashboard</a>
+                                    <span>/</span>
+                                    <span>Danh mục</span>
                                 </div>
                             </div>
                             <div class="page-actions">
@@ -36,121 +42,57 @@
                                     <a href="${pageContext.request.contextPath}/admin/categories-add.jsp"
                                         style="color: inherit; text-decoration: none;">
                                         <i class="fas fa-plus"></i> Thêm danh mục
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="card">
-                                <div class="card-header">
-                                    <h3 class="card-title">Danh sách danh mục (${totalCategories})</h3>
-                                </div>
-                                <div class="card-body" style="padding: 0;">
-                                    <div class="table-wrapper">
-                                        <table class="admin-table" id="categoriesTable">
-                                            <thead>
-                                                <tr>
-                                                    <th style="width: 60px;">STT</th>
-                                                    <th>Tên danh mục</th>
-                                                    <th>Số sản phẩm</th>
-                                                    <th>Ngày tạo</th>
-                                                    <th style="width: 150px;">Thao tác</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <c:choose>
-                                                    <c:when test="${empty categories}">
-                                                        <tr>
-                                                            <td colspan="5" class="empty-state">
-                                                                <i class="fas fa-folder-open"></i>
-                                                                <p>Chưa có danh mục nào</p>
-                                                                <button type="button" class="btn btn-primary btn-sm"
-                                                                    onclick="openAddModal()">
-                                                                    <i class="fas fa-plus"></i> Thêm danh mục đầu tiên
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    </c:when>
-                                                    <c:otherwise>
-                                                        <c:forEach var="category" items="${categories}"
-                                                            varStatus="status">
-                                                            <tr>
-                                                                <td>${status.index + 1}</td>
-                                                                <td><strong>${category.name}</strong></td>
-                                                                <td>
-                                                                    <span
-                                                                        class="badge ${productCountMap[category.id] > 0 ? 'success' : 'secondary'}">
-                                                                        ${productCountMap[category.id]} sản phẩm
-                                                                    </span>
-                                                                </td>
-                                                                <td>
-                                                                    <c:choose>
-                                                                        <c:when test="${not empty category.createdAt}">
-                                                                            <fmt:formatDate
-                                                                                value="${category.createdAt}"
-                                                                                pattern="dd/MM/yyyy HH:mm" />
-                                                                        </c:when>
-                                                                        <c:otherwise>
-                                                                            <span style="color: #94a3b8;">—</span>
-                                                                        </c:otherwise>
-                                                                    </c:choose>
-                                                                </td>
-                                                                <td>
-                                                                    <div class="action-buttons">
-                                                                        <button type="button"
-                                                                            class="btn btn-sm btn-outline edit-btn"
-                                                                            title="Chỉnh sửa"
-                                                                            data-id="${category.id}"
-                                                                            data-name="${category.name}">
-                                                                            <i class="fas fa-edit"></i>
-                                                                        </button>
-                                                                        <form method="post"
-                                                                            action="${pageContext.request.contextPath}/admin/categories/delete"
-                                                                            style="display: inline;"
-                                                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục \'${category.name}\'?');">
-                                                                            <input type="hidden" name="id"
-                                                                                value="${category.id}" />
-                                                                            <button type="submit"
-                                                                                class="btn btn-sm btn-danger"
-                                                                                title="Xóa">
-                                                                                <i class="fas fa-trash"></i>
-                                                                            </button>
-                                                                        </form>
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        </c:forEach>
-                                                    </c:otherwise>
-                                                </c:choose>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </main>
-                </div>
-                <div class="modal" id="addModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h3 class="modal-title">Thêm danh mục mới</h3>
-                            <button type="button" class="modal-close" onclick="closeModal('addModal')">&times;</button>
-                        </div>
-                        <form method="post" action="${pageContext.request.contextPath}/admin/categories/add">
-                            <div class="modal-body">
-                                <div class="form-group" style="margin-bottom: 0;">
-                                    <label for="addCategoryName">Tên danh mục <span class="required">*</span></label>
-                                    <input type="text" name="name" id="addCategoryName" class="form-control"
-                                        placeholder="VD: Rau lá,..." required autofocus>
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary"
-                                    onclick="closeModal('addModal')">Hủy</button>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save"></i> Lưu danh mục
+                                    </a>
                                 </button>
                             </div>
-                        </form>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">Danh sách danh mục (${totalCategories})</h3>
+                            </div>
+                            <div class="card-body" style="padding: 0;">
+                                <table class="admin-table" id="categoriesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>STT</th>
+                                            <th>Tên danh mục</th>
+                                            <th>Số sản phẩm</th>
+                                            <th>Trạng thái</th>
+                                            <th style="width: 150px;">Thao tác</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <c:forEach var="category" items="${categories}" varStatus="status">
+                                            <tr>
+                                                <td>${status.index + 1}</td>
+                                                <td><strong>${category.name}</strong></td>
+                                                <td>0</td>
+                                                <td><span class="badge success">Hiển thị</span></td>
+                                                <td>
+                                                    <div class="action-buttons">
+                                                        <a href="${pageContext.request.contextPath}/admin/categories/edit?id=${category.id}"
+                                                            class="btn btn-sm btn-outline" title="Chỉnh sửa">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+                                                        <form method="post"
+                                                            action="${pageContext.request.contextPath}/admin/categories/delete"
+                                                            style="display: inline;"
+                                                            onsubmit="return confirm('Xóa \'${category.name}\'?');">
+                                                            <input type="hidden" name="id" value="${category.id}" />
+                                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                                title="Xóa">
+                                                                <i class="fas fa-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </main>
             </div>
