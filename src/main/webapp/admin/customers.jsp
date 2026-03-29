@@ -15,19 +15,19 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
-            <body>
+            <body data-page="customers">
                 <div class="admin-layout">
-                    
+
                     <jsp:include page="sidebar.jsp" />
-                    
+
 
                     <main class="admin-main">
-                        
+
                         <jsp:include page="header.jsp" />
-                        
+
 
                         <div class="admin-content">
-                            
+
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success"
                                     style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -55,8 +55,8 @@
                                 </div>
                             </div>
 
-                            
-                            <form method="get" action="${pageContext.request.contextPath}/admin/users"
+
+                            <!-- <form method="get" action="${pageContext.request.contextPath}/admin/users"
                                 class="filters-bar">
                                 <div class="filter-group">
                                     <label>Tìm kiếm</label>
@@ -69,7 +69,7 @@
                                         Tìm kiếm
                                     </button>
                                 </div>
-                            </form>
+                            </form> -->
 
                             <div class="card">
                                 <div class="card-header">
@@ -162,11 +162,11 @@
                                     </table>
                                 </div>
 
-                                
+
                                 <c:if test="${totalPages > 1}">
                                     <div class="card-footer">
                                         <div class="pagination">
-                                            
+
                                             <c:choose>
                                                 <c:when test="${currentPage == 1}">
                                                     <span class="disabled"><i class="fas fa-chevron-left"></i></span>
@@ -179,7 +179,7 @@
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            
+
                                             <c:forEach begin="1" end="${totalPages}" var="i">
                                                 <c:choose>
                                                     <c:when test="${i == currentPage}">
@@ -200,7 +200,7 @@
                                                 </c:choose>
                                             </c:forEach>
 
-                                            
+
                                             <c:choose>
                                                 <c:when test="${currentPage == totalPages}">
                                                     <span class="disabled"><i class="fas fa-chevron-right"></i></span>
