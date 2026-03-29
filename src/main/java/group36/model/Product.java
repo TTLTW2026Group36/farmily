@@ -12,8 +12,6 @@ public class Product implements Serializable {
     private int id;
     private int categoryId;
     private String name;
-    private String description;
-    private String tags;
     private double avgRating;
     private int reviewCount;
     private int soldCount;
@@ -29,21 +27,17 @@ public class Product implements Serializable {
     public Product() {
     }
 
-    public Product(int categoryId, String name, String description, String tags) {
+    public Product(int categoryId, String name) {
         this.categoryId = categoryId;
         this.name = name;
-        this.description = description;
-        this.tags = tags;
     }
 
-    public Product(int id, int categoryId, String name, String description, String tags,
+    public Product(int id, int categoryId, String name,
             double avgRating, int reviewCount, int soldCount,
             Timestamp createdAt, Timestamp updatedAt) {
         this.id = id;
         this.categoryId = categoryId;
         this.name = name;
-        this.description = description;
-        this.tags = tags;
         this.avgRating = avgRating;
         this.reviewCount = reviewCount;
         this.soldCount = soldCount;
@@ -76,21 +70,7 @@ public class Product implements Serializable {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
 
     public double getAvgRating() {
         return avgRating;
@@ -228,8 +208,6 @@ public class Product implements Serializable {
                 "id=" + id +
                 ", categoryId=" + categoryId +
                 ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", tags='" + tags + '\'' +
                 ", avgRating=" + avgRating +
                 ", reviewCount=" + reviewCount +
                 ", soldCount=" + soldCount +

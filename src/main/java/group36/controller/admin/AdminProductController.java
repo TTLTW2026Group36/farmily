@@ -89,20 +89,17 @@ public class AdminProductController extends HttpServlet {
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         int page = 1;
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1)
-                    page = 1;
+                if (page < 1) page = 1;
             } catch (NumberFormatException e) {
                 page = 1;
             }
         }
 
-        
         String categoryParam = request.getParameter("category");
         int categoryId = 0;
         if (categoryParam != null && !categoryParam.isEmpty()) {
@@ -113,34 +110,28 @@ public class AdminProductController extends HttpServlet {
             }
         }
 
-        
-        List<Product> products;
-        int totalProducts;
+        String status = request.getParameter("status");
+        String sort = request.getParameter("sort");
+        String search = request.getParameter("search");
+        if (search != null) search = search.trim();
 
-        if (categoryId > 0) {
-            products = productService.getProductsByCategoryPaginated(categoryId, page, PAGE_SIZE);
-            totalProducts = productService.getTotalProductsByCategory(categoryId);
-        } else {
-            products = productService.getProductsPaginated(page, PAGE_SIZE);
-            totalProducts = productService.getTotalProducts();
-        }
-
-        
+        List<Product> products = productService.getProductsFiltered(categoryId, status, search, sort, page, PAGE_SIZE);
+        int totalProducts = productService.getTotalProductsFiltered(categoryId, status, search);
         int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);
 
-        
         List<Category> categories = categoryService.getAllCategories();
 
-        
         request.setAttribute("products", products);
         request.setAttribute("categories", categories);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("selectedCategory", categoryId);
+        request.setAttribute("selectedStatus", status != null ? status : "");
+        request.setAttribute("selectedSort", sort != null ? sort : "");
+        request.setAttribute("searchKeyword", search != null ? search : "");
         request.setAttribute("pageSize", PAGE_SIZE);
 
-        
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {
             request.setAttribute("success", session.getAttribute("success"));
@@ -197,45 +188,61 @@ public class AdminProductController extends HttpServlet {
 
     private void createProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
         String name = request.getParameter("productName");
-        String description = request.getParameter("description");
-        String tags = request.getParameter("tags");
         String categoryIdParam = request.getParameter("category");
-        String priceParam = request.getParameter("price");
-        String stockParam = request.getParameter("stock");
-        String unit = request.getParameter("unit");
-        String imageUrl = request.getParameter("imageUrl");
+        String[] variantNames = request.getParameterValues("variantName");
+        String[] variantPrices = request.getParameterValues("variantPrice");
+        String[] variantStocks = request.getParameterValues("variantStock");
+        String[] imageUrls = request.getParameterValues("imageUrl");
 
         try {
-            
             int categoryId = Integer.parseInt(categoryIdParam);
-            double price = Double.parseDouble(priceParam);
-            int stock = Integer.parseInt(stockParam);
 
-            
-            Product product = productService.createSimpleProduct(
-                    categoryId, name, description, tags, price, stock, unit, imageUrl);
+            if (variantNames == null || variantNames.length == 0) {
+                throw new IllegalArgumentException("Cần ít nhất 1 biến thể sản phẩm");
+            }
 
-            
+            Product product = new Product(categoryId, name);
+
+            List<ProductVariant> variants = new ArrayList<>();
+            for (int i = 0; i < variantNames.length; i++) {
+                String vName = variantNames[i];
+                if (vName == null || vName.trim().isEmpty()) continue;
+
+                ProductVariant variant = new ProductVariant();
+                variant.setOptionsValue(vName.trim());
+                variant.setPrice(Double.parseDouble(variantPrices[i]));
+                variant.setStock(Integer.parseInt(variantStocks[i]));
+                variants.add(variant);
+            }
+
+            if (variants.isEmpty()) {
+                throw new IllegalArgumentException("Cần ít nhất 1 biến thể sản phẩm");
+            }
+
+            List<String> validImageUrls = new ArrayList<>();
+            if (imageUrls != null) {
+                for (String url : imageUrls) {
+                    if (url != null && !url.trim().isEmpty()) {
+                        validImageUrls.add(url.trim());
+                    }
+                }
+            }
+
+            Product created = productService.createProduct(product, variants, validImageUrls);
+
             HttpSession session = request.getSession();
-            session.setAttribute("success", "Thêm sản phẩm '" + product.getName() + "' thành công!");
-
+            session.setAttribute("success", "Thêm sản phẩm '" + created.getName() + "' thành công!");
             response.sendRedirect(request.getContextPath() + "/admin/products");
         } catch (NumberFormatException e) {
-            request.setAttribute("error", "Dữ liệu không hợp lệ");
+            request.setAttribute("error", "Dữ liệu không hợp lệ. Vui lòng kiểm tra giá và số lượng.");
+            request.setAttribute("productName", name);
+            request.setAttribute("selectedCategory", categoryIdParam);
             showAddForm(request, response);
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
-            
             request.setAttribute("productName", name);
-            request.setAttribute("description", description);
-            request.setAttribute("tags", tags);
             request.setAttribute("selectedCategory", categoryIdParam);
-            request.setAttribute("price", priceParam);
-            request.setAttribute("stock", stockParam);
-            request.setAttribute("unit", unit);
-            request.setAttribute("imageUrl", imageUrl);
             showAddForm(request, response);
         }
     }
@@ -247,8 +254,6 @@ public class AdminProductController extends HttpServlet {
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
         String name = request.getParameter("productName");
-        String description = request.getParameter("description");
-        String tags = request.getParameter("tags");
         String categoryIdParam = request.getParameter("category");
 
         if (idParam == null || idParam.trim().isEmpty()) {
@@ -260,24 +265,19 @@ public class AdminProductController extends HttpServlet {
             int id = Integer.parseInt(idParam);
             int categoryId = Integer.parseInt(categoryIdParam);
 
-            
             Product product = productService.getProductById(id);
-
-            
             product.setName(name);
-            product.setDescription(description);
-            product.setTags(tags);
             product.setCategoryId(categoryId);
-
-            
             productService.updateProduct(product);
 
-            
             updateVariantsFromRequest(request, id);
+            addNewVariantsFromRequest(request, id);
+
+            addNewImagesFromRequest(request, id);
+            deleteImagesFromRequest(request, id);
 
             HttpSession session = request.getSession();
             session.setAttribute("success", "Cập nhật sản phẩm '" + product.getName() + "' thành công!");
-
             response.sendRedirect(request.getContextPath() + "/admin/products");
         } catch (NumberFormatException e) {
             HttpSession session = request.getSession();
@@ -325,7 +325,67 @@ public class AdminProductController extends HttpServlet {
         }
     }
 
-    
+    private void addNewVariantsFromRequest(HttpServletRequest request, int productId) {
+        String[] names = request.getParameterValues("newVariantName");
+        String[] prices = request.getParameterValues("newVariantPrice");
+        String[] stocks = request.getParameterValues("newVariantStock");
+
+        if (names == null || prices == null || stocks == null) {
+            return;
+        }
+
+        for (int i = 0; i < names.length; i++) {
+            try {
+                String vName = names[i];
+                if (vName == null || vName.trim().isEmpty()) continue;
+
+                ProductVariant variant = new ProductVariant();
+                variant.setProductId(productId);
+                variant.setOptionsValue(vName.trim());
+                variant.setPrice(Double.parseDouble(prices[i]));
+                variant.setStock(Integer.parseInt(stocks[i]));
+
+                productService.addVariant(variant);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void addNewImagesFromRequest(HttpServletRequest request, int productId) {
+        String[] imageUrls = request.getParameterValues("newImageUrls");
+        if (imageUrls == null) {
+            return;
+        }
+
+        for (String url : imageUrls) {
+            try {
+                if (url != null && !url.trim().isEmpty()) {
+                    productService.addImage(productId, url.trim());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void deleteImagesFromRequest(HttpServletRequest request, int productId) {
+        String[] deleteIds = request.getParameterValues("deleteImageId");
+        if (deleteIds == null) {
+            return;
+        }
+
+        for (String idStr : deleteIds) {
+            try {
+                int imageId = Integer.parseInt(idStr);
+                
+                productService.deleteImage(imageId);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)

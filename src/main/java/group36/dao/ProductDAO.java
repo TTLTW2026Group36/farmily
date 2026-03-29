@@ -26,8 +26,6 @@ public class ProductDAO extends BaseDao {
             product.setId(rs.getInt("id"));
             product.setCategoryId(rs.getInt("category_id"));
             product.setName(rs.getString("name"));
-            product.setDescription(rs.getString("description"));
-            product.setTags(rs.getString("tags"));
             product.setAvgRating(rs.getDouble("avg_rating"));
             product.setReviewCount(rs.getInt("review_count"));
             product.setSoldCount(rs.getInt("soild_count")); 
@@ -134,13 +132,10 @@ public class ProductDAO extends BaseDao {
 
 
     public int insert(Product product) {
-        String sql = "INSERT INTO products (category_id, name, description, tags) " +
-                "VALUES (:categoryId, :name, :description, :tags)";
+        String sql = "INSERT INTO products (category_id, name) VALUES (:categoryId, :name)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("categoryId", product.getCategoryId())
                 .bind("name", product.getName())
-                .bind("description", product.getDescription())
-                .bind("tags", product.getTags())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -153,14 +148,11 @@ public class ProductDAO extends BaseDao {
 
 
     public int update(Product product) {
-        String sql = "UPDATE products SET category_id = :categoryId, name = :name, " +
-                "description = :description, tags = :tags WHERE id = :id";
+        String sql = "UPDATE products SET category_id = :categoryId, name = :name WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", product.getId())
                 .bind("categoryId", product.getCategoryId())
                 .bind("name", product.getName())
-                .bind("description", product.getDescription())
-                .bind("tags", product.getTags())
                 .execute());
     }
 
@@ -204,6 +196,58 @@ public class ProductDAO extends BaseDao {
                 .mapTo(Integer.class)
                 .one());
     }
+
+    public List<Product> findFiltered(int categoryId, String status, String search, String sort, int page, int size) {
+        int offset = (page - 1) * size;
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT p.* FROM products p ");
+        if ("instock".equals(status) || "outofstock".equals(status) || "price_asc".equals(sort) || "price_desc".equals(sort)) {
+            sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock, COALESCE(MIN(price), 0) AS min_price FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
+        }
+        sql.append("WHERE 1=1 ");
+        if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
+        if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
+        if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
+        if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+
+        switch (sort != null ? sort : "") {
+            case "name_asc": sql.append("ORDER BY p.name ASC "); break;
+            case "price_asc": sql.append("ORDER BY pv.min_price ASC "); break;
+            case "price_desc": sql.append("ORDER BY pv.min_price DESC "); break;
+            default: sql.append("ORDER BY p.id DESC "); break;
+        }
+        sql.append("LIMIT :size OFFSET :offset");
+
+        return get().withHandle(handle -> {
+            var query = handle.createQuery(sql.toString())
+                    .bind("size", size)
+                    .bind("offset", offset);
+            if (categoryId > 0) query.bind("categoryId", categoryId);
+            if (search != null && !search.isEmpty()) query.bind("search", "%" + search + "%");
+            return query.map(new ProductMapper()).list();
+        });
+    }
+
+    public int countFiltered(int categoryId, String status, String search) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT COUNT(*) FROM products p ");
+        if ("instock".equals(status) || "outofstock".equals(status)) {
+            sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
+        }
+        sql.append("WHERE 1=1 ");
+        if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
+        if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
+        if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
+        if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+
+        return get().withHandle(handle -> {
+            var query = handle.createQuery(sql.toString());
+            if (categoryId > 0) query.bind("categoryId", categoryId);
+            if (search != null && !search.isEmpty()) query.bind("search", "%" + search + "%");
+            return query.mapTo(Integer.class).one();
+        });
+    }
+
 
     
 
