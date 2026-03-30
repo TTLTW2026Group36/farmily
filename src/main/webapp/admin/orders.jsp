@@ -71,8 +71,8 @@
                                         <div class="stat-card-label">Đang giao</div>
                                     </div>
                                 </a>
-                                <a href="${pageContext.request.contextPath}/admin/orders?status=delivered"
-                                    class="stat-card-link ${selectedStatus == 'delivered' ? 'active' : ''}">
+                                <a href="${pageContext.request.contextPath}/admin/orders?status=completed"
+                                    class="stat-card-link ${selectedStatus == 'completed' ? 'active' : ''}">
                                     <div class="stat-card-icon completed"><i class="fas fa-check-circle"></i></div>
                                     <div class="stat-card-body">
                                         <div class="stat-card-number">${completedCount}</div>
@@ -124,7 +124,7 @@
                                                 Đơn hàng — <span class="filter-label-inline">${selectedStatus ==
                                                     'pending' ? 'Chờ xác nhận' : selectedStatus == 'processing' ? 'Đang
                                                     xử lý' : selectedStatus == 'shipping' ? 'Đang giao' : selectedStatus
-                                                    == 'delivered' ? 'Hoàn thành' : selectedStatus == 'cancelled' ? 'Đã
+                                                    == 'completed' ? 'Hoàn thành' : selectedStatus == 'cancelled' ? 'Đã
                                                     hủy' : ''}</span>
                                                 (${totalOrders})
                                             </c:when>
@@ -230,8 +230,8 @@
                                                                             <span class="status-badge status-shipping">
                                                                                 Đang giao</span>
                                                                         </c:when>
-                                                                        <c:when test="${order.status == 'delivered'}">
-                                                                            <span class="status-badge status-delivered">
+                                                                        <c:when test="${order.status == 'completed'}">
+                                                                            <span class="status-badge status-completed">
                                                                                 Hoàn thành</span>
                                                                         </c:when>
                                                                         <c:when test="${order.status == 'cancelled'}">
@@ -276,13 +276,13 @@
                                                                                 test="${order.status == 'shipping'}">
                                                                                 <button
                                                                                     class="btn-next-step btn-complete"
-                                                                                    onclick="confirmNextStep(${order.id}, 'delivered', 'Xác nhận hoàn thành #${order.id}?', 'Khách đã nhận hàng thành công.')">
+                                                                                    onclick="confirmNextStep(${order.id}, 'completed', 'Xác nhận hoàn thành #${order.id}?', 'Khách đã nhận hàng thành công.')">
                                                                                     <i class="fas fa-check-double"></i>
                                                                                     Hoàn thành
                                                                                 </button>
                                                                             </c:when>
                                                                             <c:when
-                                                                                test="${order.status == 'delivered'}">
+                                                                                test="${order.status == 'completed'}">
                                                                                 <span class="done-label"><i
                                                                                         class="fas fa-check-circle"></i>
                                                                                     Đã xong</span>

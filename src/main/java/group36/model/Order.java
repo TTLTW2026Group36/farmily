@@ -5,13 +5,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
 public class Order implements Serializable {
     private int id;
-    private Integer userId; 
+    private Integer userId;
     private int addressId;
     private int paymentMethodId;
     private String status;
@@ -20,30 +16,25 @@ public class Order implements Serializable {
     private double totalPrice;
     private Timestamp orderDate;
 
-    
     private String guestEmail;
     private String guestName;
     private String guestPhone;
 
-    
     private Address address;
     private PaymentMethod paymentMethod;
     private User user;
     private List<OrderDetail> orderDetails;
 
-    
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_CONFIRMED = "confirmed";
     public static final String STATUS_PROCESSING = "processing";
     public static final String STATUS_SHIPPING = "shipping";
-    public static final String STATUS_DELIVERED = "delivered";
+    public static final String STATUS_DELIVERED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
 
-    
-    public static final double FREE_SHIPPING_THRESHOLD = 100000; 
-    public static final double STANDARD_SHIPPING_FEE = 30000; 
+    public static final double FREE_SHIPPING_THRESHOLD = 100000;
+    public static final double STANDARD_SHIPPING_FEE = 30000;
 
-    
     public Order() {
         this.orderDetails = new ArrayList<>();
         this.status = STATUS_PENDING;
@@ -58,7 +49,6 @@ public class Order implements Serializable {
         this.orderDetails = new ArrayList<>();
     }
 
-    
     public int getId() {
         return id;
     }
@@ -187,50 +177,21 @@ public class Order implements Serializable {
         this.orderDetails = orderDetails != null ? orderDetails : new ArrayList<>();
     }
 
-    
-
-    
-
-
-
-
     public boolean isGuestOrder() {
         return userId == null;
     }
-
-    
-
-
-
-
-
 
     public static double calculateShippingFee(double subtotal) {
         return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
     }
 
-    
-
-
-
-
     public double getSubtotal() {
         return totalPrice - shippingFee;
     }
 
-    
-
-
-
-
     public String getFormattedTotalPrice() {
         return String.format("%,.0f", totalPrice).replace(",", ".") + "đ";
     }
-
-    
-
-
-
 
     public String getFormattedShippingFee() {
         if (shippingFee == 0) {
@@ -239,43 +200,28 @@ public class Order implements Serializable {
         return String.format("%,.0f", shippingFee).replace(",", ".") + "đ";
     }
 
-    
-
-
-
-
     public String getFormattedSubtotal() {
         return String.format("%,.0f", getSubtotal()).replace(",", ".") + "đ";
     }
-
-    
-
-
-
 
     public String getStatusText() {
         switch (status) {
             case STATUS_PENDING:
                 return "Chờ xác nhận";
             case STATUS_CONFIRMED:
-                return "Đã xác nhận";
+                return "Đang xử lý";
             case STATUS_PROCESSING:
                 return "Đang xử lý";
             case STATUS_SHIPPING:
-                return "Đang giao hàng";
+                return "Đang giao";
             case STATUS_DELIVERED:
-                return "Đã giao hàng";
+                return "Hoàn thành";
             case STATUS_CANCELLED:
                 return "Đã hủy";
             default:
                 return status;
         }
     }
-
-    
-
-
-
 
     public String getStatusClass() {
         switch (status) {
@@ -295,11 +241,6 @@ public class Order implements Serializable {
         }
     }
 
-    
-
-
-
-
     public int getTotalItems() {
         if (orderDetails == null || orderDetails.isEmpty()) {
             return 0;
@@ -309,11 +250,6 @@ public class Order implements Serializable {
                 .sum();
     }
 
-    
-
-
-
-
     public String getCustomerName() {
         if (isGuestOrder()) {
             return guestName;
@@ -321,22 +257,12 @@ public class Order implements Serializable {
         return user != null ? user.getName() : "";
     }
 
-    
-
-
-
-
     public String getCustomerEmail() {
         if (isGuestOrder()) {
             return guestEmail;
         }
         return user != null ? user.getEmail() : "";
     }
-
-    
-
-
-
 
     public String getCustomerPhone() {
         if (isGuestOrder()) {
