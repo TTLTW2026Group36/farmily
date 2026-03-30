@@ -66,8 +66,7 @@
 }
 
 .featured-post:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-5px);
+    border-color: var(--primary-color);
 }
 
 .post-image {
@@ -82,10 +81,6 @@
     height: 100%;
     object-fit: cover;
     transition: transform 0.3s ease;
-}
-
-.featured-post:hover .post-image img {
-    transform: scale(1.05);
 }
 
 .post-category {
@@ -105,9 +100,10 @@
 }
 
 .featured-post .post-title {
-    font-size: 28px;
+    font-size: 24px;
     margin-bottom: 15px;
-    line-height: 1.3;
+    line-height: 1.4;
+    font-weight: 700;
 }
 
 .featured-post .post-title a {
@@ -158,8 +154,7 @@
 }
 
 .btn-read-more:hover {
-    background: #45a049;
-    transform: translateX(5px);
+    background: #388E3C;
 }
 
 
@@ -181,8 +176,7 @@
 }
 
 .news-card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-5px);
+    border-color: var(--primary-color);
 }
 
 .card-image {
@@ -199,9 +193,7 @@
     transition: transform 0.3s ease;
 }
 
-.news-card:hover .card-image img {
-    transform: scale(1.1);
-}
+
 
 .card-category {
     position: absolute;
@@ -223,9 +215,10 @@
 }
 
 .card-title {
-    font-size: 18px;
+    font-size: 16px;
     margin-bottom: 10px;
-    line-height: 1.4;
+    line-height: 1.5;
+    font-weight: 700;
 }
 
 .card-title a {
@@ -254,11 +247,12 @@
 
 .card-excerpt {
     color: var(--text-light);
-    font-size: 14px;
-    line-height: 1.6;
+    font-size: 13.5px;
+    line-height: 1.7;
     margin-bottom: auto;
     display: -webkit-box;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
@@ -411,7 +405,6 @@
 
 .category-list a:hover {
     color: var(--primary-color);
-    padding-left: 10px;
 }
 
 .category-list i {
@@ -459,9 +452,6 @@
     transition: transform 0.3s ease;
 }
 
-.popular-post-item:hover .popular-post-image img {
-    transform: scale(1.1);
-}
 
 .popular-post-content {
     flex: 1;
@@ -553,11 +543,11 @@
 }
 
 .post-title {
-    font-size: 32px;
+    font-size: 28px;
     color: var(--dark-color);
-    line-height: 1.3;
-    margin-bottom: 10px;
-    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 15px;
+    font-weight: 800;
 }
 
 .post-meta {
@@ -613,12 +603,13 @@
 }
 
 .post-content h2 {
-    font-size: 24px;
+    font-size: 20px;
     color: var(--dark-color);
     margin: 35px 0 20px;
-    padding-bottom: 10px;
+    padding-bottom: 12px;
     border-bottom: 2px solid var(--light-bg);
     font-weight: 700;
+    line-height: 1.4;
 }
 
 .post-content p {
@@ -759,7 +750,6 @@ blockquote p {
 
 .share-btn:hover {
     opacity: 0.9;
-    transform: translateY(-2px);
 }
 
 
@@ -850,8 +840,7 @@ blockquote p {
 }
 
 .related-post-item:hover {
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transform: translateY(-3px);
+    border-color: var(--primary-color);
 }
 
 .related-post-image {
@@ -866,9 +855,7 @@ blockquote p {
     transition: transform 0.3s ease;
 }
 
-.related-post-item:hover .related-post-image img {
-    transform: scale(1.1);
-}
+
 
 .related-post-content {
     padding: 15px;
@@ -1011,7 +998,7 @@ blockquote p {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    transition: color 0.3s ease;
+    transition: color 0.1s ease;
 }
 
 .btn-reply:hover {

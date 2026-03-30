@@ -56,12 +56,11 @@
     padding: 32px;
     box-shadow: var(--shadow);
     border: 1px solid var(--border);
-    transition: all 0.3s ease;
+    transition: background 0.1s, border-color 0.1s;
 }
 
 .card:hover {
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-2px);
+    border-color: var(--primary);
 }
 
 .card h2 {
@@ -91,13 +90,12 @@
     background: var(--bg-soft);
     border-radius: 12px;
     border-left: 4px solid var(--primary);
-    transition: all 0.3s ease;
+    transition: background 0.1s;
 }
 
 .contact-block:hover {
     background: var(--bg-hover);
     border-left-color: var(--primary-light);
-    transform: translateX(4px);
 }
 
 .contact-block h3 {
@@ -141,7 +139,7 @@
     color: var(--primary);
     text-decoration: none;
     font-weight: 500;
-    transition: color 0.2s ease;
+    transition: color 0.1s;
 }
 
 .contact-block a:hover {
@@ -184,12 +182,11 @@
     align-items: center;
     justify-content: space-between;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
+    transition: background 0.1s;
 }
 
 .contact-hotline ul li:hover {
     background: rgba(255, 255, 255, 0.3);
-    transform: translateX(4px);
 }
 
 .contact-hotline ul li:last-child {
@@ -205,11 +202,11 @@
     text-decoration: none;
     font-weight: 700;
     font-size: 16px;
-    transition: all 0.2s ease;
+    transition: color 0.1s ease;
 }
 
 .contact-hotline a:hover {
-    letter-spacing: 1px;
+    text-decoration: underline;
 }
 
 
@@ -247,7 +244,7 @@ textarea {
     font-family: inherit;
     color: var(--text);
     background: var(--bg);
-    transition: all 0.3s ease;
+    transition: border-color 0.1s;
 }
 
 input:focus,
@@ -284,13 +281,12 @@ textarea {
     color: #fff;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
-    transition: all 0.3s ease;
+    transition: background 0.1s;
     letter-spacing: 0.5px;
 }
 
 .btn-submit:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.4);
+    background: var(--primary-dark);
 }
 
 .btn-submit:active {

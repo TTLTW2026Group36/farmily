@@ -87,12 +87,11 @@
     text-decoration: none;
     border-radius: 50px;
     font-weight: bold;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition: background-color 0.1s;
 }
 
 .about-btn:hover {
     background-color: var(--secondary-color);
-    transform: translateY(-2px);
 }
 
 
@@ -132,11 +131,11 @@
     border-radius: 10px;
     text-align: center;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    transition: transform 0.3s ease;
+    transition: border-color 0.1s;
 }
 
 .value-card:hover {
-    transform: translateY(-10px);
+    border-color: var(--primary-color);
 }
 
 .value-icon {
@@ -196,7 +195,7 @@
     border-left: 2px solid #ddd;
     padding-left: 2rem;
     margin-left: -1rem;
-    
+
 }
 
 .journey-item:last-child .journey-content {
@@ -214,7 +213,7 @@
 .video-wrapper {
     position: relative;
     padding-bottom: 56.25%;
-    
+
     height: 0;
     max-width: 900px;
     margin: 2rem auto 0;
@@ -351,3 +350,4 @@
     .process-steps {
         flex-direction: column;
     }
+}

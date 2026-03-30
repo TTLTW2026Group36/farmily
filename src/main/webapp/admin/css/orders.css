@@ -131,15 +131,13 @@ body {
   outline: 2px solid transparent;
   outline-offset: -2px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, .07);
-  transition: box-shadow .2s, outline-color .2s, transform .2s;
+  transition: background .1s, outline-color .1s;
   position: relative;
   overflow: hidden;
   min-height: 80px;
 }
 
 .stat-card-link:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, .12);
   outline-color: var(--gray-300);
 }
 
@@ -234,7 +232,7 @@ body {
   border: 1px solid var(--gray-300);
   border-radius: 8px;
   font-size: 14px;
-  transition: border .2s, box-shadow .2s;
+  transition: border .1s;
 }
 
 .search-input:focus {
@@ -337,7 +335,7 @@ body {
 }
 
 .admin-table tbody tr {
-  transition: background .15s;
+  transition: background .1s;
 }
 
 .admin-table tbody tr:hover {
@@ -415,7 +413,7 @@ body {
   color: #5b21b6;
 }
 
-.status-delivered {
+.status-completed {
   background: #dcfce7;
   color: #166534;
 }
@@ -467,14 +465,12 @@ body {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: background .1s;
   white-space: nowrap;
 }
 
 .btn-next-step:hover {
   background: var(--primary-dark);
-  transform: translateY(-1px);
-  box-shadow: 0 3px 8px rgba(22, 163, 74, .35);
 }
 
 .btn-next-step.btn-complete {
@@ -483,7 +479,6 @@ body {
 
 .btn-next-step.btn-complete:hover {
   background: #047857;
-  box-shadow: 0 3px 8px rgba(5, 150, 105, .35);
 }
 
 .btn-icon-detail {
@@ -497,7 +492,7 @@ body {
   border-radius: 7px;
   color: var(--gray-600);
   text-decoration: none;
-  transition: all .2s;
+  transition: border-color .1s;
   font-size: 13px;
 }
 
@@ -534,7 +529,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all .2s;
+  transition: background .1s;
   text-decoration: none;
   line-height: 1.4;
 }
@@ -647,12 +642,11 @@ body {
   max-width: 90vw;
   text-align: center;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
-  transform: translateY(16px) scale(.97);
-  transition: transform .25s;
+  transition: opacity 0.2s;
 }
 
 .modal-overlay.open .modal-box {
-  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .modal-icon {
@@ -707,14 +701,12 @@ body {
   color: white;
   box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
   opacity: 0;
-  transform: translateX(40px);
-  transition: all .3s;
+  transition: opacity .3s;
   max-width: 300px;
 }
 
 .toast.show {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .toast-success {
