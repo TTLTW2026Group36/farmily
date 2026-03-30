@@ -10,11 +10,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
-
-
-
-
-
 @WebServlet(name = "AdminOrderController", urlPatterns = { "/admin/orders", "/admin/orders/*" })
 public class AdminOrderController extends HttpServlet {
     private final OrderService orderService;
@@ -32,10 +27,10 @@ public class AdminOrderController extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                
+
                 listOrders(request, response);
             } else if (pathInfo.equals("/detail")) {
-                
+
                 showOrderDetail(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -67,12 +62,9 @@ public class AdminOrderController extends HttpServlet {
         }
     }
 
-    
-
-
     private void listOrders(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         int page = 1;
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
@@ -85,50 +77,56 @@ public class AdminOrderController extends HttpServlet {
             }
         }
 
-        
         String statusFilter = request.getParameter("status");
+        if (statusFilter != null && statusFilter.isEmpty())
+            statusFilter = null;
 
-        
-        List<Order> orders;
-        int totalOrders;
+        String keyword = request.getParameter("q");
+        if (keyword != null)
+            keyword = keyword.trim();
+        if (keyword != null && keyword.isEmpty())
+            keyword = null;
 
-        if (statusFilter != null && !statusFilter.isEmpty()) {
-            orders = orderService.getOrdersByStatusPaginated(statusFilter, page, PAGE_SIZE);
-            totalOrders = orderService.countOrdersByStatus(statusFilter);
-        } else {
-            orders = orderService.getOrdersPaginated(page, PAGE_SIZE);
-            totalOrders = orderService.countOrders();
-        }
+        String fromDate = request.getParameter("fromDate");
+        if (fromDate != null && fromDate.isEmpty())
+            fromDate = null;
 
-        
+        String toDate = request.getParameter("toDate");
+        if (toDate != null && toDate.isEmpty())
+            toDate = null;
+
+        List<Order> orders = orderService.getOrdersFiltered(statusFilter, keyword, fromDate, toDate, page, PAGE_SIZE);
+        int totalOrders = orderService.countOrdersFiltered(statusFilter, keyword, fromDate, toDate);
+
         for (Order order : orders) {
             orderService.loadOrderDetailsForAdmin(order);
         }
 
-        
         int totalPages = (int) Math.ceil((double) totalOrders / PAGE_SIZE);
 
-        
         int pendingCount = orderService.countOrdersByStatus("pending");
+        int processingCount = orderService.countOrdersByStatus("processing")
+                + orderService.countOrdersByStatus("confirmed");
         int shippingCount = orderService.countOrdersByStatus("shipping");
         int completedCount = orderService.countOrdersByStatus("delivered");
         int cancelledCount = orderService.countOrdersByStatus("cancelled");
 
-        
         request.setAttribute("orders", orders);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalOrders", totalOrders);
         request.setAttribute("selectedStatus", statusFilter != null ? statusFilter : "");
+        request.setAttribute("keyword", keyword != null ? keyword : "");
+        request.setAttribute("fromDate", fromDate != null ? fromDate : "");
+        request.setAttribute("toDate", toDate != null ? toDate : "");
         request.setAttribute("pageSize", PAGE_SIZE);
 
-        
         request.setAttribute("pendingCount", pendingCount);
+        request.setAttribute("processingCount", processingCount);
         request.setAttribute("shippingCount", shippingCount);
         request.setAttribute("completedCount", completedCount);
         request.setAttribute("cancelledCount", cancelledCount);
 
-        
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {
             request.setAttribute("success", session.getAttribute("success"));
@@ -141,9 +139,6 @@ public class AdminOrderController extends HttpServlet {
 
         request.getRequestDispatcher("/admin/orders.jsp").forward(request, response);
     }
-
-    
-
 
     private void showOrderDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -173,9 +168,6 @@ public class AdminOrderController extends HttpServlet {
         }
     }
 
-    
-
-
     private void updateOrderStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("application/json;charset=UTF-8");
@@ -192,13 +184,11 @@ public class AdminOrderController extends HttpServlet {
         try {
             int orderId = Integer.parseInt(orderIdParam);
 
-            
             if (!isValidStatus(newStatus)) {
                 out.print("{\"success\": false, \"message\": \"Trạng thái không hợp lệ\"}");
                 return;
             }
 
-            
             boolean updated = orderService.updateOrderStatus(orderId, newStatus);
 
             if (updated) {
@@ -210,9 +200,6 @@ public class AdminOrderController extends HttpServlet {
             out.print("{\"success\": false, \"message\": \"ID đơn hàng không hợp lệ\"}");
         }
     }
-
-    
-
 
     private boolean isValidStatus(String status) {
         return status.equals("pending") ||
