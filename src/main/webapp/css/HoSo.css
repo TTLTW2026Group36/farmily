@@ -1003,3 +1003,81 @@ body {
 .btn-explore:hover {
     background: #15803d;
 }
+
+.input-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.field-error {
+    display: block;
+    font-size: 12px;
+    color: #e53935;
+    margin-top: 5px;
+    min-height: 16px;
+}
+
+.field-invalid,
+input.field-invalid,
+.info-input.field-invalid {
+    border-color: #e53935 !important;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.12) !important;
+}
+
+.form-group input.field-invalid {
+    border-color: #e53935;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.12);
+}
+
+.form-split {
+    display: flex;
+    gap: 16px;
+}
+
+.form-split .form-group {
+    flex: 1;
+}
+
+.address-form select,
+.address-form .form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fafafa;
+    color: #333;
+    transition: all 0.2s;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23666' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 10px;
+    cursor: pointer;
+}
+
+.address-form select:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+    background-color: #fff;
+}
+
+.address-form select:disabled {
+    background-color: #f5f5f5;
+    color: #bbb;
+    cursor: not-allowed;
+}
+
+.address-form select.field-invalid {
+    border-color: #e53935;
+    box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.12);
+}
+
+@media (max-width: 480px) {
+    .form-split {
+        flex-direction: column;
+        gap: 0;
+    }
+}

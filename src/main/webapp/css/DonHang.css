@@ -608,9 +608,26 @@
 }
 
 .hidden-products {
-    display: flex;
+    display: none;
     flex-direction: column;
     gap: 12px;
+    animation: fadeInDown 0.25s ease;
+}
+
+.hidden-products.expanded {
+    display: flex;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hidden-products .product-item {
