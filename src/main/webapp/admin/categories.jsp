@@ -12,7 +12,7 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/sidebar.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/categories.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
             <body>
@@ -114,8 +114,7 @@
                                                                     <div class="action-buttons">
                                                                         <button type="button"
                                                                             class="btn btn-sm btn-outline edit-btn"
-                                                                            title="Chỉnh sửa"
-                                                                            data-id="${category.id}"
+                                                                            title="Chỉnh sửa" data-id="${category.id}"
                                                                             data-name="${category.name}">
                                                                             <i class="fas fa-edit"></i>
                                                                         </button>
@@ -174,8 +173,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h3 class="modal-title">Chỉnh sửa danh mục</h3>
-                            <button type="button" class="modal-close"
-                                onclick="closeModal('editModal')">&times;</button>
+                            <button type="button" class="modal-close" onclick="closeModal('editModal')">&times;</button>
                         </div>
                         <form method="post" action="${pageContext.request.contextPath}/admin/categories/edit">
                             <input type="hidden" name="id" id="editCategoryId" />

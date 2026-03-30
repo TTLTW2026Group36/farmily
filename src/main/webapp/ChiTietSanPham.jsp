@@ -258,26 +258,17 @@
 
                     <section class="sp-desc card" aria-labelledby="desc-title">
                         <h2 id="desc-title" style="text-align: left; margin-left: 40px;">Mô tả</h2>
-                        <c:choose>
-                            <c:when test="${not empty product.description}">
-                                <div class="desc-content" style="padding: 0 40px; line-height: 1.8;">
-                                    <c:out value="${product.description}" escapeXml="false" />
-                                </div>
-                            </c:when>
-                            <c:otherwise>
-                                <ul class="desc-list">
-                                    <li>Sản xuất theo tiêu chuẩn an toàn, VietGAP.</li>
-                                    <li>Sơ chế, đóng gói, giao trong ngày. Thu hoạch buổi sáng – giao trong 12–24h.</li>
-                                    <li><strong>Lưu ý:</strong></li>
-                                    <li>Trọng lượng có thể chênh lệch ~5% do đặc tính nông sản.</li>
-                                    <li>Sản phẩm nhận được có thể khác với hình ảnh về màu sắc và kích thước tùy theo
-                                        mùa vụ hoặc thời
-                                        tiết nhưng vẫn đảm bảo chất lượng.</li>
-                                    <li>Nếu có yêu cầu đặc biệt về rửa/lựa size, vui lòng ghi chú khi đặt hàng.</li>
-                                    <li>Hotline/Zalo: 0378827924</li>
-                                </ul>
-                            </c:otherwise>
-                        </c:choose>
+                        <ul class="desc-list">
+                            <li>Sản xuất theo tiêu chuẩn an toàn, VietGAP.</li>
+                            <li>Sơ chế, đóng gói, giao trong ngày. Thu hoạch buổi sáng – giao trong 12–24h.</li>
+                            <li><strong>Lưu ý:</strong></li>
+                            <li>Trọng lượng có thể chênh lệch ~5% do đặc tính nông sản.</li>
+                            <li>Sản phẩm nhận được có thể khác với hình ảnh về màu sắc và kích thước tùy theo
+                                mùa vụ hoặc thời
+                                tiết nhưng vẫn đảm bảo chất lượng.</li>
+                            <li>Nếu có yêu cầu đặc biệt về rửa/lựa size, vui lòng ghi chú khi đặt hàng.</li>
+                            <li>Hotline/Zalo: 0378827924</li>
+                        </ul>
                     </section>
 
 
