@@ -43,7 +43,8 @@
                     <div class="slider-container">
                         <div class="slider-wrapper">
                             <div class="slide active">
-                                <img src="https://i.postimg.cc/xdZztWKq/demosanpham.jpg" alt="Rau củ quả tươi sạch">
+                                <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1920&q=80"
+                                    alt="Rau củ quả tươi sạch">
                                 <div class="slide-content">
                                     <h2>Rau Củ Quả Tươi Sạch</h2>
                                     <p>Giao hàng nhanh chóng trong 24h</p>
@@ -52,7 +53,8 @@
                                 </div>
                             </div>
                             <div class="slide">
-                                <img src="https://i.postimg.cc/xdZztWKq/demosanpham.jpg" alt="Ưu đãi hấp dẫn">
+                                <img src="https://images.unsplash.com/photo-1601648764658-cf37e8c89b70?auto=format&fit=crop&w=1920&q=80"
+                                    alt="Ưu đãi hấp dẫn">
                                 <div class="slide-content">
                                     <h2>Ưu Đãi Đặc Biệt</h2>
                                     <p>Giảm giá lên đến 30% cho đơn hàng đầu tiên</p>
@@ -61,7 +63,8 @@
                                 </div>
                             </div>
                             <div class="slide">
-                                <img src="https://i.postimg.cc/xdZztWKq/demosanpham.jpg" alt="An toàn vệ sinh">
+                                <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1920&q=80"
+                                    alt="An toàn vệ sinh">
                                 <div class="slide-content">
                                     <h2>100% An Toàn Vệ Sinh</h2>
                                     <p>Cam kết chất lượng, nguồn gốc rõ ràng</p>
@@ -168,8 +171,7 @@
                         <div class="banner-grid">
                             <a href="${pageContext.request.contextPath}/san-pham?categoryId=1"
                                 class="banner-item large">
-                                <img src="https://lh3.googleusercontent.com/gg/AMW1TPqgmTfYmazEGc61H0OyP1bjmmcPkwaT4cH6vWOl5JlcQtf5qj4SYpaBJeASdkt8Y6v0xMXKmM2gWBzR-zWW4gf9Ec7ApH8YkoE6OREFdAEz_TOVTw3oivkH0wvpQ-OGKoSjwAE4KLp7hircm7XV9QadFspMjg2qfYUCeQZ2Eq55mmj-XoTA=s1024-rj-mp2"
-                                    alt="Rau hữu cơ">
+                                <img src="https://files.catbox.moe/attdfd.png" alt="Rau hữu cơ">
                                 <div class="banner-content">
                                     <h3>RAU HỮU CƠ</h3>
                                     <p>An toàn - Tươi ngon</p>
@@ -177,16 +179,14 @@
                                 </div>
                             </a>
                             <a href="${pageContext.request.contextPath}/san-pham?categoryId=2" class="banner-item">
-                                <img src="https://lh3.googleusercontent.com/gg/AMW1TPoRm95lDbx1OVIfC_K1C1TVs9wjQQ5zVgzDc-U5RGej7sAEgNNaOz0Z6IFnT-wiJVCRcVLdUD4a7f4GHyudueKs7jBCgV7UJip06k356__2yPT3Qmzaz0q7x1GsIRbs0JsMyR2pHCRwP96gcrr7hSECqY-6QdmDBm-zEOiZY-yPKr4GeaZD=s1024-rj-mp2"
-                                    alt="Trái cây nhập khẩu">
+                                <img src="https://files.catbox.moe/wbtu84.png" alt="Trái cây nhập khẩu">
                                 <div class="banner-content">
                                     <h3>TRÁI CÂY NHẬP KHẨU</h3>
                                     <p>Giảm 20%</p>
                                 </div>
                             </a>
                             <a href="${pageContext.request.contextPath}/san-pham?categoryId=3" class="banner-item">
-                                <img src="https://lh3.googleusercontent.com/gg/AMW1TPpDoDdWrOsDOAjLRNQpRtBZHngc6v2Z0_gkqpn9zu7j6OCh0uAdxBPkCRRAe3suGUoboDLO-HL1NAv9GdSLVagSu36dPvHY_OgrHsJNjGYFKvk8l72dX0pueUHdkYKEOqFGfTAnk1I_54sSWIO2CDPLnyWJvz5OpuQQ6kAb0ju6coCG1GmG=s1024-rj-mp2"
-                                    alt="Củ quả">
+                                <img src="https://files.catbox.moe/rq8g9z.png" alt="Củ quả">
                                 <div class="banner-content">
                                     <h3>CỦ QUẢ</h3>
                                     <p>Cam kết chất lượng</p>

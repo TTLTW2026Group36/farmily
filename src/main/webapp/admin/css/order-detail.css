@@ -131,7 +131,7 @@ body {
   color: #5b21b6;
 }
 
-.status-delivered {
+.status-completed {
   background: #dcfce7;
   color: #166534;
 }
@@ -178,7 +178,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all .2s;
+  transition: background 0.1s;
   text-decoration: none;
   line-height: 1.4;
 }
@@ -195,7 +195,6 @@ body {
 
 .btn-primary:hover {
   background: var(--primary-dark);
-  box-shadow: 0 3px 10px rgba(22, 163, 74, .3);
 }
 
 .btn-secondary {
@@ -230,7 +229,6 @@ body {
 
 .btn-shipping:hover {
   background: #6d28d9;
-  box-shadow: 0 3px 10px rgba(124, 58, 237, .3);
 }
 
 .btn-complete {
@@ -461,7 +459,7 @@ body {
   border: 1px solid var(--gray-300);
   border-radius: 8px;
   font-size: 14px;
-  transition: border .2s, box-shadow .2s;
+  transition: border-color 0.1s;
 }
 
 .form-control:focus {
@@ -727,12 +725,11 @@ body {
   max-width: 90vw;
   text-align: center;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .18);
-  transform: translateY(14px) scale(.97);
-  transition: transform .25s;
+  transition: opacity .2s;
 }
 
 .modal-overlay.open .modal-box {
-  transform: translateY(0) scale(1);
+  opacity: 1;
 }
 
 .modal-icon {
@@ -789,13 +786,11 @@ body {
   color: white;
   box-shadow: 0 4px 16px rgba(0, 0, 0, .2);
   opacity: 0;
-  transform: translateX(40px);
-  transition: all .3s;
+  transition: opacity .2s;
 }
 
 .toast.show {
   opacity: 1;
-  transform: translateX(0);
 }
 
 .toast-success {
