@@ -194,7 +194,6 @@
 
 
                 <jsp:include page="common/footer.jsp" />
-                <script src="${pageContext.request.contextPath}/js/SanPham.js"></script>
                 <script src="${pageContext.request.contextPath}/js/GiaTot.js"></script>
 
 
