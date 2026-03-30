@@ -558,6 +558,16 @@
     white-space: nowrap;
 }
 
+.flash-product-item h3 a {
+    color: inherit;
+    text-decoration: none !important;
+    transition: color 0.3s ease;
+}
+
+.flash-product-item h3 a:hover {
+    color: var(--primary-color) !important;
+}
+
 .flash-product-item .product-price {
     display: flex;
     align-items: center;
@@ -800,8 +810,8 @@
 }
 
 .product-title a {
-    text-decoration: none;
-    color: var(--text-dark);
+    text-decoration: none !important;
+    color: var(--text-color);
     transition: all 0.3s ease;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -811,7 +821,8 @@
 }
 
 .product-title a:hover {
-    color: var(--primary-color);
+    color: var(--primary-color) !important;
+    text-decoration: none !important;
 }
 
 
