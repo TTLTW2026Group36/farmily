@@ -242,12 +242,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex-grow: 1;
 }
 
 .product-title {
     font-weight: 600;
     line-height: 1.4;
-    min-height: 20px;
+    min-height: 2.8em;
     margin: 0;
 }
 
@@ -286,6 +287,7 @@ body {
 
 
 .add-to-cart-btn {
+    margin-top: auto;
     width: 100%;
     padding: 12px;
     background: var(--primary-color);

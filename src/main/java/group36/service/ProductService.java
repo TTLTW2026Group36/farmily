@@ -10,10 +10,6 @@ import group36.model.ProductVariant;
 
 import java.util.List;
 
-
-
-
-
 public class ProductService {
     private final ProductDAO productDAO;
     private final ProductVariantDAO variantDAO;
@@ -27,23 +23,11 @@ public class ProductService {
         this.categoryDAO = new CategoryDAO();
     }
 
-    
-
-
-
-
     public List<Product> getAllProducts() {
         List<Product> products = productDAO.findAll();
         loadProductDetails(products);
         return products;
     }
-
-    
-
-
-
-
-
 
     public List<Product> getProductsPaginated(int page, int size) {
         List<Product> products = productDAO.findAllPaginated(page, size);
@@ -51,26 +35,21 @@ public class ProductService {
         return products;
     }
 
-    
-
-
-
-
-
-
-
     public List<Product> getProductsByCategoryPaginated(int categoryId, int page, int size) {
         List<Product> products = productDAO.findByCategoryIdPaginated(categoryId, page, size);
         loadProductDetails(products);
         return products;
     }
 
-    
+    public List<Product> getProductsFiltered(int categoryId, String status, String search, String sort, int page, int size) {
+        List<Product> products = productDAO.findFiltered(categoryId, status, search, sort, page, size);
+        loadProductDetails(products);
+        return products;
+    }
 
-
-
-
-
+    public int getTotalProductsFiltered(int categoryId, String status, String search) {
+        return productDAO.countFiltered(categoryId, status, search);
+    }
 
     public Product getProductById(int id) {
         Product product = productDAO.findById(id)
@@ -79,56 +58,25 @@ public class ProductService {
         return product;
     }
 
-    
-
-
-
-
-
     public List<Product> searchProducts(String keyword) {
         List<Product> products = productDAO.searchByName(keyword);
         loadProductDetails(products);
         return products;
     }
 
-    
-
-
-
-
     public int getTotalProducts() {
         return productDAO.count();
     }
 
-    
-
-
-
-
-
     public int getTotalProductsByCategory(int categoryId) {
         return productDAO.countByCategoryId(categoryId);
     }
-
-    
-
-
-
-
-
 
     public List<Product> getBestSellingProducts(int limit) {
         List<Product> products = productDAO.findBestSelling(limit);
         loadProductDetails(products);
         return products;
     }
-
-    
-
-
-
-
-
 
     public List<Product> getNewestProducts(int limit) {
         List<Product> products = productDAO.findNewest(limit);
@@ -142,35 +90,17 @@ public class ProductService {
         return products;
     }
 
-    
-
-
-
-
-
-
-
     public List<Product> getProductsPaginatedSorted(int page, int size, String sort) {
         String[] sortParams = parseSortParam(sort);
         List<Product> products = productDAO.findAllPaginatedSorted(page, size, sortParams[0], sortParams[1]);
         loadProductDetails(products);
 
-        
         if ("price".equals(sortParams[0])) {
             sortByPrice(products, "DESC".equals(sortParams[1]));
         }
 
         return products;
     }
-
-    
-
-
-
-
-
-
-
 
     public List<Product> getProductsByCategoryPaginatedSorted(int categoryId, int page, int size, String sort) {
         String[] sortParams = parseSortParam(sort);
@@ -178,16 +108,12 @@ public class ProductService {
                 sortParams[0], sortParams[1]);
         loadProductDetails(products);
 
-        
         if ("price".equals(sortParams[0])) {
             sortByPrice(products, "DESC".equals(sortParams[1]));
         }
 
         return products;
     }
-
-    
-
 
     private String[] parseSortParam(String sort) {
         if (sort == null || sort.isEmpty() || "default".equals(sort)) {
@@ -211,9 +137,6 @@ public class ProductService {
         }
     }
 
-    
-
-
     private void sortByPrice(List<Product> products, boolean descending) {
         products.sort((p1, p2) -> {
             double price1 = p1.getMinPrice();
@@ -222,30 +145,18 @@ public class ProductService {
         });
     }
 
-    
-
-
-
-
-
-
-
-
     public Product createProduct(Product product, List<ProductVariant> variants, List<String> imageUrls) {
-        
+
         validateProduct(product);
         validateVariants(variants);
 
-        
         categoryDAO.findById(product.getCategoryId())
                 .orElseThrow(
                         () -> new IllegalArgumentException("Category not found with ID: " + product.getCategoryId()));
 
-        
         int productId = productDAO.insert(product);
         product.setId(productId);
 
-        
         if (variants != null && !variants.isEmpty()) {
             for (ProductVariant variant : variants) {
                 variant.setProductId(productId);
@@ -255,7 +166,6 @@ public class ProductService {
             product.setVariants(variants);
         }
 
-        
         if (imageUrls != null && !imageUrls.isEmpty()) {
             for (String imageUrl : imageUrls) {
                 if (imageUrl != null && !imageUrl.trim().isEmpty()) {
@@ -268,50 +178,16 @@ public class ProductService {
         return product;
     }
 
-    
-
-
-
-
-
-
-
-
-
-
-
-
-    public Product createSimpleProduct(int categoryId, String name, String description,
-            String tags, double price, int stock,
-            String unit, String imageUrl) {
-        Product product = new Product(categoryId, name, description, tags);
-
-        ProductVariant variant = new ProductVariant();
-        variant.setOptionsValue(unit != null ? unit : "1kg");
-        variant.setPrice(price);
-        variant.setStock(stock);
-
-        List<ProductVariant> variants = List.of(variant);
-        List<String> imageUrls = (imageUrl != null && !imageUrl.trim().isEmpty())
-                ? List.of(imageUrl)
-                : List.of();
-
-        return createProduct(product, variants, imageUrls);
-    }
-
     public Product updateProduct(Product product) {
-        
+
         validateProduct(product);
 
-        
-        getProductById(product.getId()); 
+        getProductById(product.getId());
 
-        
         categoryDAO.findById(product.getCategoryId())
                 .orElseThrow(
                         () -> new IllegalArgumentException("Category not found with ID: " + product.getCategoryId()));
 
-        
         int rowsAffected = productDAO.update(product);
         if (rowsAffected == 0) {
             throw new IllegalStateException("Failed to update product");
@@ -321,10 +197,9 @@ public class ProductService {
     }
 
     public ProductVariant addVariant(int productId, String optionsValue, int stock, double price) {
-        
+
         getProductById(productId);
 
-        
         if (optionsValue == null || optionsValue.trim().isEmpty()) {
             throw new IllegalArgumentException("Options value cannot be empty");
         }
@@ -354,8 +229,24 @@ public class ProductService {
         return variantDAO.update(variant);
     }
 
+    public ProductVariant addVariant(ProductVariant variant) {
+        getProductById(variant.getProductId());
+        if (variant.getOptionsValue() == null || variant.getOptionsValue().trim().isEmpty()) {
+            throw new IllegalArgumentException("Options value cannot be empty");
+        }
+        if (variant.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than 0");
+        }
+        if (variant.getStock() < 0) {
+            throw new IllegalArgumentException("Stock cannot be negative");
+        }
+        int variantId = variantDAO.insert(variant);
+        variant.setId(variantId);
+        return variant;
+    }
+
     public ProductImage addImage(int productId, String imageUrl) {
-        
+
         getProductById(productId);
 
         if (imageUrl == null || imageUrl.trim().isEmpty()) {
@@ -369,7 +260,7 @@ public class ProductService {
     }
 
     public void deleteProduct(int id) {
-        
+
         getProductById(id);
 
         int rowsAffected = productDAO.delete(id);
@@ -390,19 +281,13 @@ public class ProductService {
         if (product == null)
             return;
 
-        
         categoryDAO.findById(product.getCategoryId())
                 .ifPresent(product::setCategory);
 
-        
         product.setVariants(variantDAO.findByProductId(product.getId()));
 
-        
         product.setImages(imageDAO.findByProductId(product.getId()));
     }
-
-    
-
 
     private void loadProductDetails(List<Product> products) {
         if (products == null || products.isEmpty())

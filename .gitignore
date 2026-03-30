@@ -11,6 +11,7 @@ target/
 *.iml
 out/
 gen/
+.agent
 
 # --- VS Code (Nếu có đứa nào dùng VS Code) ---
 .vscode/
