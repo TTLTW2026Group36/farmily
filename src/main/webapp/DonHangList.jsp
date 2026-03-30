@@ -104,10 +104,182 @@
                                     class="filter-btn ${currentStatus == 'cancelled' ? 'active' : ''}">
                                     Đã hủy (${countCancelled})
                                 </a>
+                                <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=review"
+                                    class="filter-btn ${currentStatus == 'review' ? 'active' : ''}">
+                                    <i class="fas fa-star"></i> Đánh giá
+                                </a>
                             </div>
 
 
                             <c:choose>
+                                <c:when test="${currentStatus == 'review'}">
+                                    <c:choose>
+                                        <c:when test="${empty orders}">
+                                            <div class="empty-orders">
+                                                <i class="fas fa-star"></i>
+                                                <p>Chưa có đơn hàng nào hoàn thành để đánh giá</p>
+                                                <a href="${pageContext.request.contextPath}/san-pham"
+                                                    class="btn-primary">
+                                                    Tiếp tục mua sắm
+                                                </a>
+                                            </div>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="review-list">
+                                                <c:forEach var="order" items="${orders}">
+                                                    <div class="review-order-card">
+                                                        <div class="review-order-header">
+                                                            <div class="review-order-id">
+                                                                <i class="fas fa-receipt"></i>
+                                                                Đơn hàng #${order.id}
+                                                            </div>
+                                                            <div class="review-order-date">
+                                                                <fmt:formatDate value="${order.orderDate}"
+                                                                    pattern="dd/MM/yyyy" />
+                                                            </div>
+                                                        </div>
+                                                        <div class="review-products-list">
+                                                            <c:forEach var="detail" items="${order.orderDetails}">
+                                                                <div class="review-product-card">
+                                                                    <div class="review-product-info">
+                                                                        <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${detail.productId}"
+                                                                            class="review-product-img">
+                                                                            <c:choose>
+                                                                                <c:when
+                                                                                    test="${detail.imageUrl != null && (fn:startsWith(detail.imageUrl, 'http') || fn:startsWith(detail.imageUrl, 'https'))}">
+                                                                                    <img src="${detail.imageUrl}"
+                                                                                        alt="${detail.productName}"
+                                                                                        onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                </c:when>
+                                                                                <c:otherwise>
+                                                                                    <img src="${pageContext.request.contextPath}${detail.imageUrl}"
+                                                                                        alt="${detail.productName}"
+                                                                                        onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                </c:otherwise>
+                                                                            </c:choose>
+                                                                        </a>
+                                                                        <div class="review-product-meta">
+                                                                            <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${detail.productId}"
+                                                                                class="review-product-name">${detail.productName}</a>
+                                                                            <c:if
+                                                                                test="${not empty detail.variantText}">
+                                                                                <span
+                                                                                    class="review-product-variant">Phân
+                                                                                    loại: ${detail.variantText}</span>
+                                                                            </c:if>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <c:set var="thisReviewMap"
+                                                                        value="${orderReviewMaps[order.id]}" />
+                                                                    <c:choose>
+                                                                        <c:when
+                                                                            test="${not empty thisReviewMap && not empty thisReviewMap[detail.productId]}">
+                                                                            <c:set var="existingReview"
+                                                                                value="${thisReviewMap[detail.productId]}" />
+                                                                            <div class="review-completed">
+                                                                                <div class="review-completed-header">
+                                                                                    <span class="review-badge reviewed">
+                                                                                        <i
+                                                                                            class="fas fa-check-circle"></i>
+                                                                                        Đã đánh giá
+                                                                                    </span>
+                                                                                    <span class="review-date">
+                                                                                        <fmt:formatDate
+                                                                                            value="${existingReview.createdAt}"
+                                                                                            pattern="dd/MM/yyyy HH:mm" />
+                                                                                    </span>
+                                                                                </div>
+                                                                                <div class="review-stars-display">
+                                                                                    <c:forEach var="i" begin="1"
+                                                                                        end="5">
+                                                                                        <i
+                                                                                            class="fa-star ${i <= existingReview.rating ? 'fas active' : 'far'}"></i>
+                                                                                    </c:forEach>
+                                                                                </div>
+                                                                                <p class="review-text-display">
+                                                                                    ${fn:escapeXml(existingReview.reviewText)}
+                                                                                </p>
+                                                                            </div>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <div class="review-form-wrapper">
+                                                                                <div class="review-form-header">
+                                                                                    <span
+                                                                                        class="review-badge not-reviewed">
+                                                                                        <i
+                                                                                            class="far fa-comment-dots"></i>
+                                                                                        Chưa đánh giá
+                                                                                    </span>
+                                                                                </div>
+                                                                                <form class="review-form" method="post"
+                                                                                    action="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet"
+                                                                                    onsubmit="return validateReviewForm(this)">
+                                                                                    <input type="hidden" name="action"
+                                                                                        value="review">
+                                                                                    <input type="hidden" name="returnTo"
+                                                                                        value="review">
+                                                                                    <input type="hidden" name="orderId"
+                                                                                        value="${order.id}">
+                                                                                    <input type="hidden"
+                                                                                        name="productId"
+                                                                                        value="${detail.productId}">
+                                                                                    <c:if
+                                                                                        test="${detail.variantId != null}">
+                                                                                        <input type="hidden"
+                                                                                            name="variantId"
+                                                                                            value="${detail.variantId}">
+                                                                                    </c:if>
+                                                                                    <input type="hidden" name="rating"
+                                                                                        value="0" class="rating-input">
+
+                                                                                    <div class="star-rating-input">
+                                                                                        <span class="star-label">Đánh
+                                                                                            giá:</span>
+                                                                                        <div class="stars-interactive">
+                                                                                            <i class="far fa-star"
+                                                                                                data-value="1"></i>
+                                                                                            <i class="far fa-star"
+                                                                                                data-value="2"></i>
+                                                                                            <i class="far fa-star"
+                                                                                                data-value="3"></i>
+                                                                                            <i class="far fa-star"
+                                                                                                data-value="4"></i>
+                                                                                            <i class="far fa-star"
+                                                                                                data-value="5"></i>
+                                                                                        </div>
+                                                                                        <span class="star-text"></span>
+                                                                                    </div>
+
+                                                                                    <textarea name="reviewText"
+                                                                                        class="review-textarea"
+                                                                                        placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                                                                                        rows="3"
+                                                                                        maxlength="500"></textarea>
+
+                                                                                    <div class="review-form-actions">
+                                                                                        <span
+                                                                                            class="char-count">0/500</span>
+                                                                                        <button type="submit"
+                                                                                            class="btn-submit-review">
+                                                                                            <i
+                                                                                                class="fas fa-paper-plane"></i>
+                                                                                            Gửi đánh giá
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </form>
+                                                                            </div>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </div>
+                                                            </c:forEach>
+                                                        </div>
+                                                    </div>
+                                                </c:forEach>
+                                            </div>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:when>
                                 <c:when test="${empty orders}">
                                     <div class="empty-orders">
                                         <i class="fas fa-box-open"></i>
@@ -278,6 +450,73 @@
                         window.contextPath = '${pageContext.request.contextPath}';
                     </script>
                     <script src="${pageContext.request.contextPath}/js/DonHang.js"></script>
+                    <script>
+                        var starLabels = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Rất tốt'];
+
+                        document.querySelectorAll('.stars-interactive').forEach(function (container) {
+                            var stars = container.querySelectorAll('i');
+                            var form = container.closest('.review-form');
+                            var ratingInput = form.querySelector('.rating-input');
+                            var starText = container.nextElementSibling;
+
+                            stars.forEach(function (star) {
+                                star.addEventListener('mouseenter', function () {
+                                    var val = parseInt(this.getAttribute('data-value'));
+                                    highlightStars(stars, val);
+                                    starText.textContent = starLabels[val];
+                                });
+
+                                star.addEventListener('mouseleave', function () {
+                                    var current = parseInt(ratingInput.value);
+                                    highlightStars(stars, current);
+                                    starText.textContent = current > 0 ? starLabels[current] : '';
+                                });
+
+                                star.addEventListener('click', function () {
+                                    var val = parseInt(this.getAttribute('data-value'));
+                                    ratingInput.value = val;
+                                    highlightStars(stars, val);
+                                    starText.textContent = starLabels[val];
+                                });
+                            });
+                        });
+
+                        function highlightStars(stars, count) {
+                            stars.forEach(function (s, idx) {
+                                if (idx < count) {
+                                    s.classList.remove('far');
+                                    s.classList.add('fas', 'active');
+                                } else {
+                                    s.classList.remove('fas', 'active');
+                                    s.classList.add('far');
+                                }
+                            });
+                        }
+
+                        document.querySelectorAll('.review-textarea').forEach(function (textarea) {
+                            var counter = textarea.closest('.review-form').querySelector('.char-count');
+                            textarea.addEventListener('input', function () {
+                                counter.textContent = this.value.length + '/500';
+                            });
+                        });
+
+                        function validateReviewForm(form) {
+                            var rating = parseInt(form.querySelector('.rating-input').value);
+                            var text = form.querySelector('.review-textarea').value.trim();
+
+                            if (rating < 1 || rating > 5) {
+                                alert('Vui lòng chọn số sao đánh giá');
+                                return false;
+                            }
+                            if (text.length === 0) {
+                                alert('Vui lòng nhập nội dung đánh giá');
+                                return false;
+                            }
+                            form.querySelector('button[type="submit"]').disabled = true;
+                            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+                            return true;
+                        }
+                    </script>
                 </body>
 
                 </html>

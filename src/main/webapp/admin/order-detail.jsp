@@ -49,8 +49,8 @@
                                             <c:when test="${order.status == 'shipping'}">
                                                 <span class="status-badge status-shipping">Đang giao</span>
                                             </c:when>
-                                            <c:when test="${order.status == 'delivered'}">
-                                                <span class="status-badge status-delivered">Hoàn thành</span>
+                                            <c:when test="${order.status == 'completed'}">
+                                                <span class="status-badge status-completed">Hoàn thành</span>
                                             </c:when>
                                             <c:when test="${order.status == 'cancelled'}">
                                                 <span class="status-badge status-cancelled">Đã hủy</span>
@@ -69,7 +69,7 @@
                             </div>
 
                             <!-- Next-step action bar -->
-                            <c:if test="${order.status != 'delivered' && order.status != 'cancelled'}">
+                            <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
                                 <div class="action-bar">
                                     <div class="action-bar-left">
                                         <i class="fas fa-info-circle" style="color:#3b82f6;"></i>
@@ -103,7 +103,7 @@
                                             </c:when>
                                             <c:when test="${order.status == 'shipping'}">
                                                 <button class="btn btn-complete"
-                                                    onclick="openStatusModal('delivered', 'Xác nhận hoàn thành?', 'Đơn hàng sẽ được đánh dấu là đã giao thành công.')">
+                                                    onclick="openStatusModal('completed', 'Xác nhận hoàn thành?', 'Đơn hàng sẽ được đánh dấu là đã giao thành công.')">
                                                     <i class="fas fa-check-double"></i> Đã nhận hàng
                                                 </button>
                                             </c:when>
@@ -255,7 +255,7 @@
                                                 </div>
 
                                                 <c:set var="step2done"
-                                                    value="${order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'delivered'}" />
+                                                    value="${order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed'}" />
                                                 <div
                                                     class="timeline-step ${step2done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
                                                     <div class="timeline-dot"><i
@@ -272,7 +272,7 @@
                                                 </div>
 
                                                 <c:set var="step3done"
-                                                    value="${order.status == 'processing' || order.status == 'shipping' || order.status == 'delivered'}" />
+                                                    value="${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed'}" />
                                                 <div
                                                     class="timeline-step ${step3done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
                                                     <div class="timeline-dot"><i
@@ -289,7 +289,7 @@
                                                 </div>
 
                                                 <c:set var="step4done"
-                                                    value="${order.status == 'shipping' || order.status == 'delivered'}" />
+                                                    value="${order.status == 'shipping' || order.status == 'completed'}" />
                                                 <div
                                                     class="timeline-step ${step4done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
                                                     <div class="timeline-dot"><i
@@ -306,7 +306,7 @@
                                                 </div>
 
                                                 <c:choose>
-                                                    <c:when test="${order.status == 'delivered'}">
+                                                    <c:when test="${order.status == 'completed'}">
                                                         <div class="timeline-step done final">
                                                             <div class="timeline-dot"><i
                                                                     class="fas fa-check-double"></i></div>

@@ -9,14 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class ReviewDAO extends BaseDao {
-
-        
-
 
         private static class ReviewMapper implements RowMapper<Review> {
                 @Override
@@ -40,12 +33,6 @@ public class ReviewDAO extends BaseDao {
                 }
         }
 
-        
-
-
-
-
-
         public List<Review> findByProductId(int productId) {
                 String sql = "SELECT * FROM review WHERE product_id = :productId ORDER BY created_at DESC";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -53,14 +40,6 @@ public class ReviewDAO extends BaseDao {
                                 .map(new ReviewMapper())
                                 .list());
         }
-
-        
-
-
-
-
-
-
 
         public List<Review> findByProductIdPaginated(int productId, int page, int size) {
                 int offset = (page - 1) * size;
@@ -74,13 +53,6 @@ public class ReviewDAO extends BaseDao {
                                 .list());
         }
 
-        
-
-
-
-
-
-
         public List<Review> findByProductIdAndRating(int productId, int rating) {
                 String sql = "SELECT * FROM review WHERE product_id = :productId AND rating = :rating " +
                                 "ORDER BY created_at DESC";
@@ -90,12 +62,6 @@ public class ReviewDAO extends BaseDao {
                                 .map(new ReviewMapper())
                                 .list());
         }
-
-        
-
-
-
-
 
         public List<Review> findByProductIdWithImages(int productId) {
                 String sql = "SELECT DISTINCT r.* FROM review r " +
@@ -109,12 +75,6 @@ public class ReviewDAO extends BaseDao {
                                 .list());
         }
 
-        
-
-
-
-
-
         public List<Review> findVerifiedByProductId(int productId) {
                 String sql = "SELECT * FROM review WHERE product_id = :productId AND order_id IS NOT NULL " +
                                 "ORDER BY created_at DESC";
@@ -124,12 +84,6 @@ public class ReviewDAO extends BaseDao {
                                 .list());
         }
 
-        
-
-
-
-
-
         public Optional<Review> findById(int id) {
                 String sql = "SELECT * FROM review WHERE id = :id";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -137,12 +91,6 @@ public class ReviewDAO extends BaseDao {
                                 .map(new ReviewMapper())
                                 .findOne());
         }
-
-        
-
-
-
-
 
         public int countByProductId(int productId) {
                 String sql = "SELECT COUNT(*) FROM review WHERE product_id = :productId";
@@ -152,13 +100,6 @@ public class ReviewDAO extends BaseDao {
                                 .one());
         }
 
-        
-
-
-
-
-
-
         public int countByProductIdAndRating(int productId, int rating) {
                 String sql = "SELECT COUNT(*) FROM review WHERE product_id = :productId AND rating = :rating";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -167,12 +108,6 @@ public class ReviewDAO extends BaseDao {
                                 .mapTo(Integer.class)
                                 .one());
         }
-
-        
-
-
-
-
 
         public int countWithImagesByProductId(int productId) {
                 String sql = "SELECT COUNT(DISTINCT r.id) FROM review r " +
@@ -185,12 +120,6 @@ public class ReviewDAO extends BaseDao {
                                 .one());
         }
 
-        
-
-
-
-
-
         public int countVerifiedByProductId(int productId) {
                 String sql = "SELECT COUNT(*) FROM review WHERE product_id = :productId AND order_id IS NOT NULL";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -199,12 +128,6 @@ public class ReviewDAO extends BaseDao {
                                 .one());
         }
 
-        
-
-
-
-
-
         public double getAverageRating(int productId) {
                 String sql = "SELECT COALESCE(AVG(rating), 0) FROM review WHERE product_id = :productId";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -212,12 +135,6 @@ public class ReviewDAO extends BaseDao {
                                 .mapTo(Double.class)
                                 .one());
         }
-
-        
-
-
-
-
 
         public int insert(Review review) {
                 String sql = "INSERT INTO review (user_id, product_id, order_id, variant_id, rating, review_text, image_url) "
@@ -236,25 +153,12 @@ public class ReviewDAO extends BaseDao {
                                 .one());
         }
 
-        
-
-
-
-
-
         public int delete(int id) {
                 String sql = "DELETE FROM review WHERE id = :id";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", id)
                                 .execute());
         }
-
-        
-
-
-
-
-
 
         public boolean existsByUserAndProduct(int userId, int productId) {
                 String sql = "SELECT COUNT(*) FROM review WHERE user_id = :userId AND product_id = :productId";
@@ -264,5 +168,25 @@ public class ReviewDAO extends BaseDao {
                                 .mapTo(Integer.class)
                                 .one());
                 return count > 0;
+        }
+
+        public boolean existsByUserAndOrderAndProduct(int userId, int orderId, int productId) {
+                String sql = "SELECT COUNT(*) FROM review WHERE user_id = :userId AND order_id = :orderId AND product_id = :productId";
+                int count = get().withHandle(handle -> handle.createQuery(sql)
+                                .bind("userId", userId)
+                                .bind("orderId", orderId)
+                                .bind("productId", productId)
+                                .mapTo(Integer.class)
+                                .one());
+                return count > 0;
+        }
+
+        public List<Review> findByOrderIdAndUserId(int orderId, int userId) {
+                String sql = "SELECT * FROM review WHERE order_id = :orderId AND user_id = :userId ORDER BY created_at DESC";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .bind("orderId", orderId)
+                                .bind("userId", userId)
+                                .map(new ReviewMapper())
+                                .list());
         }
 }

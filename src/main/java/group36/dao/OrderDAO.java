@@ -162,7 +162,7 @@ public class OrderDAO extends BaseDao {
         }
 
         public double getTotalRevenue() {
-                String sql = "SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE status = 'delivered'";
+                String sql = "SELECT COALESCE(SUM(total_price), 0) FROM orders WHERE status = 'completed'";
                 return get().withHandle(handle -> handle.createQuery(sql)
                                 .mapTo(Double.class)
                                 .one());
@@ -170,7 +170,7 @@ public class OrderDAO extends BaseDao {
 
         public double getRevenueThisMonth() {
                 String sql = "SELECT COALESCE(SUM(total_price), 0) FROM orders " +
-                                "WHERE status = 'delivered' " +
+                                "WHERE status = 'completed' " +
                                 "AND MONTH(order_date) = MONTH(CURRENT_DATE()) " +
                                 "AND YEAR(order_date) = YEAR(CURRENT_DATE())";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -180,7 +180,7 @@ public class OrderDAO extends BaseDao {
 
         public double getRevenuePreviousMonth() {
                 String sql = "SELECT COALESCE(SUM(total_price), 0) FROM orders " +
-                                "WHERE status = 'delivered' " +
+                                "WHERE status = 'completed' " +
                                 "AND MONTH(order_date) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)) " +
                                 "AND YEAR(order_date) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))";
                 return get().withHandle(handle -> handle.createQuery(sql)

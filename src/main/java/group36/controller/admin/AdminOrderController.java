@@ -108,7 +108,7 @@ public class AdminOrderController extends HttpServlet {
         int processingCount = orderService.countOrdersByStatus("processing")
                 + orderService.countOrdersByStatus("confirmed");
         int shippingCount = orderService.countOrdersByStatus("shipping");
-        int completedCount = orderService.countOrdersByStatus("delivered");
+        int completedCount = orderService.countOrdersByStatus("completed");
         int cancelledCount = orderService.countOrdersByStatus("cancelled");
 
         request.setAttribute("orders", orders);
@@ -206,7 +206,7 @@ public class AdminOrderController extends HttpServlet {
                 status.equals("confirmed") ||
                 status.equals("processing") ||
                 status.equals("shipping") ||
-                status.equals("delivered") ||
+                status.equals("completed") ||
                 status.equals("cancelled");
     }
 }
