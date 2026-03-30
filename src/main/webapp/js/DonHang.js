@@ -5,10 +5,10 @@
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DonHang.js loaded');
 
-    
+
     animateOrderCards();
 
-    
+
     initSmoothScroll();
 });
 
@@ -20,47 +20,30 @@ function toggleProductList(orderId) {
     const hiddenProducts = document.getElementById(`hidden-products-${orderId}`);
     const toggleBtn = document.querySelector(`button[data-order-id="${orderId}"]`);
 
-    if (!hiddenProducts || !toggleBtn) return;
+    if (!hiddenProducts || !toggleBtn) {
+        console.warn('toggleProductList: element not found for orderId', orderId);
+        return;
+    }
 
     const icon = toggleBtn.querySelector('i');
     const text = toggleBtn.querySelector('.toggle-text');
-    const isHidden = hiddenProducts.style.display === 'none';
+    const isCollapsed = !hiddenProducts.classList.contains('expanded');
 
-    if (isHidden) {
-        
-        hiddenProducts.style.display = 'flex';
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
+    if (isCollapsed) {
+        hiddenProducts.classList.add('expanded');
+        icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
         text.textContent = 'Thu gọn';
         toggleBtn.classList.add('expanded');
-
-        
-        hiddenProducts.style.maxHeight = hiddenProducts.scrollHeight + 'px';
-        setTimeout(() => {
-            hiddenProducts.style.maxHeight = 'none';
-        }, 300);
     } else {
-        
-        hiddenProducts.style.maxHeight = hiddenProducts.scrollHeight + 'px';
-
-        
-        void hiddenProducts.offsetHeight;
-
-        hiddenProducts.style.maxHeight = '0';
-
-        setTimeout(() => {
-            hiddenProducts.style.display = 'none';
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-
-            
-            const orderCard = toggleBtn.closest('.order-card');
-            const allProducts = orderCard.querySelectorAll('.product-item').length;
-            text.textContent = `Xem đầy đủ (${allProducts} sản phẩm)`;
-            toggleBtn.classList.remove('expanded');
-        }, 300);
+        hiddenProducts.classList.remove('expanded');
+        icon.classList.replace('fa-chevron-up', 'fa-chevron-down');
+        const orderCard = toggleBtn.closest('.order-card');
+        const totalItems = orderCard ? orderCard.querySelectorAll('.product-item').length : 0;
+        text.textContent = `Xem đầy đủ (${totalItems} sản phẩm)`;
+        toggleBtn.classList.remove('expanded');
     }
 }
+
 
 
 
@@ -69,7 +52,7 @@ function animateOrderCards() {
     const orderCards = document.querySelectorAll('.order-card');
 
     orderCards.forEach((card, index) => {
-        
+
         card.style.opacity = '0';
         card.style.transform = 'translateY(20px)';
         card.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
@@ -128,7 +111,7 @@ function copyOrderId(orderId) {
             console.error('Không thể copy:', err);
         });
     } else {
-        
+
         const tempInput = document.createElement('input');
         tempInput.value = orderId;
         document.body.appendChild(tempInput);
@@ -172,33 +155,18 @@ function showNotification(message, type = 'info') {
 }
 
 
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
+if (!document.getElementById('donhang-anim-style')) {
+    const _donhangStyle = document.createElement('style');
+    _donhangStyle.id = 'donhang-anim-style';
+    _donhangStyle.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
         }
-        to {
-            transform: translateX(0);
-            opacity: 1;
+        @keyframes slideOut {
+            from { transform: translateX(0);    opacity: 1; }
+            to   { transform: translateX(100%); opacity: 0; }
         }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-    }
-    
-    .hidden-products {
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-    }
-`;
-document.head.appendChild(style);
+    `;
+    document.head.appendChild(_donhangStyle);
+}

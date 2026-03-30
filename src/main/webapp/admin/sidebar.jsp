@@ -44,7 +44,7 @@
                         <span class="badge">5</span>
                     </a></li>
 
-                <li><a href="${pageContext.request.contextPath}/admin/customers" data-page="customers">
+                <li><a href="${pageContext.request.contextPath}/admin/users" data-page="customers">
                         <i class="fas fa-users"></i>
                         <span>Khách hàng</span>
                     </a></li>

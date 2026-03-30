@@ -15,10 +15,6 @@ import java.io.PrintWriter;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 @WebServlet(name = "AddressApiController", urlPatterns = { "/api/address", "/api/address/*" })
 public class AddressApiController extends HttpServlet {
 
@@ -49,11 +45,11 @@ public class AddressApiController extends HttpServlet {
             String pathInfo = request.getPathInfo();
 
             if (pathInfo == null || pathInfo.equals("/")) {
-                
+
                 List<Address> addresses = addressService.getAddressesByUserId(user.getId());
                 out.print(toJsonArray(addresses));
             } else {
-                
+
                 int addressId = Integer.parseInt(pathInfo.substring(1));
                 Optional<Address> addressOpt = addressService.getAddressById(addressId);
 
@@ -98,7 +94,7 @@ public class AddressApiController extends HttpServlet {
         }
 
         try {
-            
+
             String receiver = request.getParameter("receiver");
             String phone = request.getParameter("phone");
             String addressDetail = request.getParameter("addressDetail");
@@ -108,7 +104,25 @@ public class AddressApiController extends HttpServlet {
 
             if (isEmpty(receiver) || isEmpty(addressDetail)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\":false,\"message\":\"Vui lòng điền đầy đủ thông tin\"}");
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập họ tên và địa chỉ cụ thể\"}");
+                return;
+            }
+
+            if (isEmpty(phone)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập số điện thoại\"}");
+                return;
+            }
+
+            if (!isValidPhone(phone)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Số điện thoại không hợp lệ (VD: 0912345678)\"}");
+                return;
+            }
+
+            if (isEmpty(city)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập tỉnh/thành phố\"}");
                 return;
             }
 
@@ -165,25 +179,41 @@ public class AddressApiController extends HttpServlet {
                 return;
             }
 
-            
             String receiver = request.getParameter("receiver");
             String phone = request.getParameter("phone");
             String addressDetail = request.getParameter("addressDetail");
             String district = request.getParameter("district");
             String city = request.getParameter("city");
             String isDefaultStr = request.getParameter("isDefault");
-            
-            
+
             if (receiver == null || addressDetail == null) {
-                // If parameters are missing, it might be due to request parsing issues or incorrect frontend data
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\":false,\"message\":\"Thiếu thông tin cập nhật (receiver: " + receiver + ", detail: " + addressDetail + ")\"}");
+                out.print("{\"success\":false,\"message\":\"Thiếu thông tin cập nhật (receiver: " + receiver
+                        + ", detail: " + addressDetail + ")\"}");
                 return;
             }
 
             if (isEmpty(receiver) || isEmpty(addressDetail)) {
                 response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\":false,\"message\":\"Vui lòng điền đầy đủ thông tin\"}");
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập họ tên và địa chỉ cụ thể\"}");
+                return;
+            }
+
+            if (isEmpty(phone)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập số điện thoại\"}");
+                return;
+            }
+
+            if (!isValidPhone(phone)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Số điện thoại không hợp lệ (VD: 0912345678)\"}");
+                return;
+            }
+
+            if (isEmpty(city)) {
+                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                out.print("{\"success\":false,\"message\":\"Vui lòng nhập tỉnh/thành phố\"}");
                 return;
             }
 
@@ -259,6 +289,13 @@ public class AddressApiController extends HttpServlet {
 
     private boolean isEmpty(String str) {
         return str == null || str.trim().isEmpty();
+    }
+
+    private boolean isValidPhone(String phone) {
+        if (phone == null)
+            return false;
+        String cleaned = phone.trim().replaceAll("\\s+", "");
+        return cleaned.matches("^0[3-9][0-9]{8}$");
     }
 
     private String toJson(Address address) {
