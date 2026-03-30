@@ -11,7 +11,7 @@
     --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
     --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.15);
-    --transition: all 0.3s ease;
+    --transition: none;
 }
 
 
@@ -64,7 +64,6 @@
 .products-page-title i {
     color: var(--flash-primary);
     font-size: 32px;
-    animation: pulse-bolt 1.5s ease-in-out infinite;
 }
 
 @keyframes pulse-bolt {
@@ -138,7 +137,6 @@
     font-weight: 800;
     color: white;
     line-height: 1;
-    animation: blink 1s infinite;
 }
 
 @keyframes blink {
@@ -201,8 +199,6 @@
     border-color: var(--flash-primary);
     color: var(--flash-primary);
     background: #fff8f5;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
 }
 
 .sort-btn.active {
@@ -244,8 +240,6 @@
 }
 
 .flash-product-item:hover {
-    transform: translateY(-8px);
-    box-shadow: var(--shadow-lg);
     border-color: var(--flash-primary);
 }
 
@@ -288,7 +282,6 @@
     font-size: 13px;
     font-weight: 800;
     box-shadow: 0 3px 10px rgba(220, 38, 38, 0.35);
-    animation: discount-pulse 2s ease-in-out infinite;
 }
 
 @keyframes discount-pulse {
@@ -315,12 +308,9 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.5s ease;
+    transition: none;
 }
 
-.flash-product-item:hover .product-img img {
-    transform: scale(1.08);
-}
 
 
 .flash-product-item h3 {
@@ -331,6 +321,7 @@
     line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     min-height: 58px;
@@ -386,7 +377,6 @@
     right: 0;
     bottom: 0;
     background: transparent;
-    animation: shimmer 2s infinite;
 }
 
 @keyframes shimmer {
@@ -428,8 +418,6 @@
 
 .btn-add-flash:hover {
     background: var(--flash-gradient-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
 }
 
 .btn-add-flash:active {
@@ -467,8 +455,6 @@
 .load-more-btn:hover {
     background: var(--flash-gradient);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.3);
 }
 
 
@@ -512,8 +498,6 @@
 
 .empty-state .btn-browse:hover {
     background: var(--flash-gradient-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
 }
 
 
@@ -530,7 +514,7 @@
 }
 
 .flash-product-item {
-    animation: fadeInUp 0.5s ease-out;
+    opacity: 1;
 }
 
 .flash-product-item:nth-child(1) {
