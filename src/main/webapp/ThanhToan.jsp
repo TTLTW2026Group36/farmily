@@ -9,8 +9,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Thanh Toán - Nông Sản Farmily</title>
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ThanhToan.css">
-        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ThanhToan.css?v=3">
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
       </head>
 
@@ -290,7 +290,7 @@
                 </p>
               </div>
 
-              <div class="actions">
+              <div class="checkout-actions">
                 <a href="${pageContext.request.contextPath}/gio-hang" class="back-link">← Quay về giỏ hàng</a>
                 <button id="placeOrder" class="submit-btn" type="button">
                   <i class="fas fa-lock"></i> ĐẶT HÀNG

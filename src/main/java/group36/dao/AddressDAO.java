@@ -9,14 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class AddressDAO extends BaseDao {
-
-    
-
 
     private static class AddressMapper implements RowMapper<Address> {
         @Override
@@ -36,9 +29,6 @@ public class AddressDAO extends BaseDao {
         }
     }
 
-    
-
-
     public Optional<Address> findById(int id) {
         String sql = "SELECT * FROM address WHERE id = :id";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -46,9 +36,6 @@ public class AddressDAO extends BaseDao {
                 .map(new AddressMapper())
                 .findOne());
     }
-
-    
-
 
     public List<Address> findByUserId(int userId) {
         String sql = "SELECT * FROM address WHERE user_id = :userId ORDER BY is_default DESC, created_at DESC";
@@ -58,9 +45,6 @@ public class AddressDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
     public Optional<Address> findDefaultByUserId(int userId) {
         String sql = "SELECT * FROM address WHERE user_id = :userId AND is_default = TRUE LIMIT 1";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -68,9 +52,6 @@ public class AddressDAO extends BaseDao {
                 .map(new AddressMapper())
                 .findOne());
     }
-
-    
-
 
     public int insert(Address address) {
         String sql = "INSERT INTO address (user_id, receiver, phone, address_detail, district, city, is_default) " +
@@ -88,12 +69,9 @@ public class AddressDAO extends BaseDao {
                 .one());
     }
 
-    
-
-
     public int update(Address address) {
         String sql = "UPDATE address SET receiver = :receiver, phone = :phone, address_detail = :addressDetail, " +
-                "district = :district, city = :city, is_default = :isDefault WHERE id = :id";
+                "district = :district, city = :city, is_default = :isDefault, updated_at = NOW() WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", address.getId())
                 .bind("receiver", address.getReceiver())
@@ -105,9 +83,6 @@ public class AddressDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
     public int delete(int id) {
         String sql = "DELETE FROM address WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -115,25 +90,20 @@ public class AddressDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
     public void setDefault(int userId, int addressId) {
-        get().useHandle(handle -> {
-            
+        get().inTransaction(handle -> {
             handle.createUpdate("UPDATE address SET is_default = FALSE WHERE user_id = :userId")
                     .bind("userId", userId)
                     .execute();
-            
-            handle.createUpdate("UPDATE address SET is_default = TRUE WHERE id = :id AND user_id = :userId")
-                    .bind("id", addressId)
-                    .bind("userId", userId)
-                    .execute();
+            if (addressId > 0) {
+                handle.createUpdate("UPDATE address SET is_default = TRUE WHERE id = :id AND user_id = :userId")
+                        .bind("id", addressId)
+                        .bind("userId", userId)
+                        .execute();
+            }
+            return null;
         });
     }
-
-    
-
 
     public int countByUserId(int userId) {
         String sql = "SELECT COUNT(*) FROM address WHERE user_id = :userId";

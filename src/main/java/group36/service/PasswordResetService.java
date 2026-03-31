@@ -10,10 +10,6 @@ import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.Optional;
 
-
-
-
-
 public class PasswordResetService {
     private final PasswordResetTokenDAO tokenDAO;
     private final UserDAO userDAO;
@@ -24,12 +20,9 @@ public class PasswordResetService {
     public PasswordResetService() {
         this.tokenDAO = new PasswordResetTokenDAO();
         this.userDAO = new UserDAO();
-        
+
         initializeTable();
     }
-
-    
-
 
     private void initializeTable() {
         try {
@@ -39,15 +32,8 @@ public class PasswordResetService {
         }
     }
 
-    
-
-
-
-
-
-
     public String generateOTP(String email) {
-        
+
         Optional<User> userOpt = userDAO.findByEmail(email.trim().toLowerCase());
         if (userOpt.isEmpty()) {
             throw new IllegalArgumentException("Email không tồn tại trong hệ thống");
@@ -55,21 +41,15 @@ public class PasswordResetService {
 
         User user = userOpt.get();
 
-        
         tokenDAO.invalidateAllByEmail(email);
 
-        
         String otpCode = generateRandomOTP();
 
-        
         Timestamp expiresAt = new Timestamp(System.currentTimeMillis() + (OTP_EXPIRY_MINUTES * 60 * 1000));
 
-        
         PasswordResetToken token = new PasswordResetToken(user.getId(), email.trim().toLowerCase(), otpCode, expiresAt);
         tokenDAO.insert(token);
 
-        
-        
         System.out.println("==============================================");
         System.out.println("📧 [MOCK EMAIL] Password Reset OTP for: " + email);
         System.out.println("📧 OTP Code: " + otpCode);
@@ -78,14 +58,6 @@ public class PasswordResetService {
 
         return otpCode;
     }
-
-    
-
-
-
-
-
-
 
     public PasswordResetToken verifyOTP(String email, String otpCode) {
         Optional<PasswordResetToken> tokenOpt = tokenDAO.findByEmailAndOtp(
@@ -109,50 +81,26 @@ public class PasswordResetService {
         return token;
     }
 
-    
-
-
-
-
-
-
-
-
     public void resetPassword(String email, String otpCode, String newPassword) {
-        
+
         PasswordResetToken token = verifyOTP(email, otpCode);
 
-        
         if (newPassword == null || newPassword.length() < 6) {
             throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 6 ký tự");
         }
 
-        
         String hashedPassword = PasswordUtil.hashPassword(newPassword);
         userDAO.updatePassword(token.getUserId(), hashedPassword);
 
-        
         tokenDAO.markAsUsed(token.getId());
 
         System.out.println("✅ Password reset successful for user: " + email);
     }
 
-    
-
-
-
-
-
     public boolean hasValidOTP(String email) {
         Optional<PasswordResetToken> tokenOpt = tokenDAO.findLatestByEmail(email.trim().toLowerCase());
         return tokenOpt.isPresent() && tokenOpt.get().isValid();
     }
-
-    
-
-
-
-
 
     public long getRemainingTimeSeconds(String email) {
         Optional<PasswordResetToken> tokenOpt = tokenDAO.findLatestByEmail(email.trim().toLowerCase());
@@ -163,9 +111,6 @@ public class PasswordResetService {
         return Math.max(0, remaining / 1000);
     }
 
-    
-
-
     private String generateRandomOTP() {
         StringBuilder otp = new StringBuilder();
         for (int i = 0; i < OTP_LENGTH; i++) {
@@ -173,9 +118,6 @@ public class PasswordResetService {
         }
         return otp.toString();
     }
-
-    
-
 
     public void cleanupExpiredTokens() {
         int deleted = tokenDAO.deleteExpired();

@@ -30,7 +30,7 @@
                 </style>
             </head>
 
-            <body>
+            <body data-page="flash-sales">
                 <div class="admin-layout">
                     <jsp:include page="sidebar.jsp" />
 
@@ -38,7 +38,7 @@
                         <jsp:include page="header.jsp" />
 
                         <div class="admin-content">
-                            
+
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success"
                                     style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -78,7 +78,7 @@
                                 </div>
                                 <div class="card-body" style="padding: 0;">
                                     <div class="table-wrapper">
-                                        <table class="admin-table">
+                                        <table class="admin-table" id="flashSalesTable">
                                             <thead>
                                                 <tr>
                                                     <th>Sản phẩm</th>

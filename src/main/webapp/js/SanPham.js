@@ -1,15 +1,8 @@
-
-
-
-
-
 document.addEventListener('DOMContentLoaded', function () {
     initSortButtons();
     initWishlistButtons();
     initPriceFilter();
 });
-
-
 
 
 function initSortButtons() {
@@ -19,7 +12,6 @@ function initSortButtons() {
         button.addEventListener('click', function () {
             const sortValue = this.getAttribute('data-sort');
 
-            
             const url = new URL(window.location.href);
 
             if (sortValue && sortValue !== 'default') {
@@ -28,16 +20,12 @@ function initSortButtons() {
                 url.searchParams.delete('sort');
             }
 
-            
             url.searchParams.set('page', '1');
 
-            
             window.location.href = url.toString();
         });
     });
 }
-
-
 
 
 function initWishlistButtons() {
@@ -52,36 +40,38 @@ function initWishlistButtons() {
             const icon = this.querySelector('i');
             const currentBtn = this;
 
-            
             currentBtn.disabled = true;
 
-            
             fetch((window.contextPath || '') + '/api/wishlist', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                credentials: 'same-origin',
                 body: 'productId=' + productId
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         if (data.added) {
-                            
                             currentBtn.classList.add('active');
-                            icon.classList.remove('far');
-                            icon.classList.add('fas');
+                            if (icon) {
+                                icon.classList.remove('far');
+                                icon.classList.add('fas');
+                            }
                             currentBtn.style.animation = 'heartBeat 0.5s';
                             setTimeout(() => currentBtn.style.animation = '', 500);
                         } else {
-                            
                             currentBtn.classList.remove('active');
-                            icon.classList.remove('fas');
-                            icon.classList.add('far');
+                            if (icon) {
+                                icon.classList.remove('fas');
+                                icon.classList.add('far');
+                            }
                         }
-                        
+
                         const badge = document.getElementById('wishlistCount');
                         if (badge) {
                             badge.textContent = data.wishlistCount;
-                            badge.style.display = data.wishlistCount > 0 ? 'flex' : 'none';
+                            if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                            else badge.classList.add('badge-hidden');
                         }
                     } else if (data.requireLogin) {
                         if (confirm('Vui lòng đăng nhập để thêm vào yêu thích.')) {
@@ -103,8 +93,6 @@ function initWishlistButtons() {
 }
 
 
-
-
 function initPriceFilter() {
     const priceRange = document.getElementById('priceRange');
     const minPrice = document.getElementById('minPrice');
@@ -120,72 +108,34 @@ function initPriceFilter() {
 }
 
 
-
-
 function formatPrice(price) {
-    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
 
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes heartBeat {
-        0% { transform: scale(1); }
-        25% { transform: scale(1.3); }
-        50% { transform: scale(1); }
-        75% { transform: scale(1.3); }
-        100% { transform: scale(1); }
-    }
-    
-    .wishlist-btn.active {
-        color: #e74c3c;
-    }
-    
-    .wishlist-btn.active i {
-        color: #e74c3c;
-    }
-    
-    .filter-link.active {
-        color: #27ae60;
-        font-weight: 600;
-    }
-    
-    .no-products {
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 60px 20px;
-        color: #666;
-    }
-    
-    .no-products i {
-        font-size: 64px;
-        color: #ccc;
-        margin-bottom: 20px;
-    }
-    
-    .no-products p {
-        font-size: 18px;
-        margin-bottom: 20px;
-    }
-    
-    .btn-back {
-        display: inline-block;
-        padding: 12px 24px;
-        background: #27ae60;
-        color: white;
-        text-decoration: none;
-        border-radius: 8px;
-        transition: background 0.3s;
-    }
-    
-    .btn-back:hover {
-        background: #219a52;
-    }
-    
-    .product-count {
-        color: #666;
-        font-size: 14px;
-        margin-left: 10px;
-    }
-`;
-document.head.appendChild(style);
+(function () {
+    var s = document.createElement('style');
+    s.textContent = `
+        .filter-link.active { color: #27ae60; font-weight: 600; }
+        .no-products {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        .no-products i { font-size: 64px; color: #ccc; margin-bottom: 20px; }
+        .no-products p { font-size: 18px; margin-bottom: 20px; }
+        .btn-back {
+            display: inline-block;
+            padding: 12px 24px;
+            background: #27ae60;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background 0.3s;
+        }
+        .btn-back:hover { background: #219a52; }
+        .product-count { color: #666; font-size: 14px; margin-left: 10px; }
+    `;
+    document.head.appendChild(s);
+})();

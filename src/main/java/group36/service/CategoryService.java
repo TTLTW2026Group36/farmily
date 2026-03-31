@@ -1,6 +1,7 @@
 package group36.service;
 
 import group36.dao.CategoryDAO;
+import group36.dao.ProductDAO;
 import group36.model.Category;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public class CategoryService {
 
 
 
-    public Category createCategory(String name, String imageUrl) {
+    public Category createCategory(String name) {
         
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be empty");
@@ -60,7 +61,7 @@ public class CategoryService {
         }
 
         
-        Category category = new Category(name, imageUrl);
+        Category category = new Category(name);
         int generatedId = categoryDAO.insert(category);
         category.setId(generatedId);
 
@@ -76,7 +77,7 @@ public class CategoryService {
 
 
 
-    public Category updateCategory(int id, String name, String imageUrl) {
+    public Category updateCategory(int id, String name) {
         
         if (name == null || name.trim().isEmpty()) {
             throw new IllegalArgumentException("Category name cannot be empty");
@@ -95,7 +96,6 @@ public class CategoryService {
 
         
         existing.setName(name);
-        existing.setImageUrl(imageUrl);
 
         int rowsAffected = categoryDAO.update(existing);
         if (rowsAffected == 0) {
@@ -151,5 +151,9 @@ public class CategoryService {
         
         
         return name.trim().length() <= 255;
+    }
+
+    public int getProductCount(int categoryId) {
+        return new ProductDAO().countByCategoryId(categoryId);
     }
 }

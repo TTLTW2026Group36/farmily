@@ -14,21 +14,17 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
 
-            <body>
+            <body data-page="products">
                 <div class="admin-layout">
-                    
+
                     <jsp:include page="sidebar.jsp" />
-                    
 
-                    
                     <main class="admin-main">
-                        
-                        <jsp:include page="header.jsp" />
-                        
 
-                        
+                        <jsp:include page="header.jsp" />
+
                         <div class="admin-content">
-                            
+
                             <c:if test="${not empty success}">
                                 <div class="alert alert-success"
                                     style="background: #d4edda; color: #155724; padding: 12px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
@@ -64,9 +60,15 @@
                                 </div>
                             </div>
 
-                            
                             <form method="get" action="${pageContext.request.contextPath}/admin/products"
-                                class="filters-bar">
+                                class="filters-bar" id="filterForm">
+                                <div class="filter-group">
+                                    <label>Tìm kiếm</label>
+                                    <input type="text" name="search" class="form-control"
+                                        placeholder="Tên sản phẩm..." value="${searchKeyword}"
+                                        style="min-width: 180px;">
+                                </div>
+
                                 <div class="filter-group">
                                     <label>Danh mục</label>
                                     <select name="category" class="form-control" onchange="this.form.submit()">
@@ -80,32 +82,24 @@
 
                                 <div class="filter-group">
                                     <label>Trạng thái</label>
-                                    <select class="form-control">
+                                    <select name="status" class="form-control" onchange="this.form.submit()">
                                         <option value="">Tất cả</option>
-                                        <option>Còn hàng</option>
-                                        <option>Hết hàng</option>
+                                        <option value="instock" ${selectedStatus=='instock' ? 'selected' : '' }>Còn hàng</option>
+                                        <option value="outofstock" ${selectedStatus=='outofstock' ? 'selected' : '' }>Hết hàng</option>
                                     </select>
                                 </div>
 
-                                <div class="filter-group">
+                                 <div class="filter-group">
                                     <label>Sắp xếp</label>
-                                    <select class="form-control">
-                                        <option>Mới nhất</option>
-                                        <option>Tên A-Z</option>
-                                        <option>Giá thấp - cao</option>
-                                        <option>Giá cao - thấp</option>
+                                    <select name="sort" class="form-control" onchange="this.form.submit()">
+                                        <option value="newest" ${selectedSort=='newest' ? 'selected' : '' }>Mới nhất</option>
+                                        <option value="name_asc" ${selectedSort=='name_asc' ? 'selected' : '' }>Tên A-Z</option>
+                                        <option value="price_asc" ${selectedSort=='price_asc' ? 'selected' : '' }>Giá thấp - cao</option>
+                                        <option value="price_desc" ${selectedSort=='price_desc' ? 'selected' : '' }>Giá cao - thấp</option>
                                     </select>
-                                </div>
-
-                                <div class="filter-group" style="display: flex; align-items: end;">
-                                    <button type="submit" class="btn btn-secondary">
-                                        <i class="fas fa-filter"></i>
-                                        Lọc
-                                    </button>
                                 </div>
                             </form>
 
-                            
                             <div class="card">
                                 <div class="card-header">
                                     <h3 class="card-title">Danh sách sản phẩm (${totalProducts})</h3>
@@ -128,6 +122,7 @@
                                                     <th>Danh mục</th>
                                                     <th>Giá</th>
                                                     <th>Tồn kho</th>
+                                                    <th>Đã bán</th>
                                                     <th>Trạng thái</th>
                                                     <th style="width: 150px;">Thao tác</th>
                                                 </tr>
@@ -136,10 +131,10 @@
                                                 <c:choose>
                                                     <c:when test="${empty products}">
                                                         <tr>
-                                                            <td colspan="7" style="text-align: center; padding: 40px;">
+                                                            <td colspan="8" style="text-align: center; padding: 40px;">
                                                                 <i class="fas fa-box-open"
                                                                     style="font-size: 48px; color: #ccc; margin-bottom: 10px;"></i>
-                                                                <p style="color: #666;">Chưa có sản phẩm nào</p>
+                                                                <p style="color: #666;">Không tìm thấy sản phẩm nào</p>
                                                                 <a href="${pageContext.request.contextPath}/admin/products/add"
                                                                     class="btn btn-primary" style="margin-top: 10px;">
                                                                     <i class="fas fa-plus"></i> Thêm sản phẩm đầu tiên
@@ -150,7 +145,8 @@
                                                     <c:otherwise>
                                                         <c:forEach var="product" items="${products}">
                                                             <tr>
-                                                                <td><input type="checkbox" class="product-checkbox" name="productIds" value="${product.id}"></td>
+                                                                <td><input type="checkbox" class="product-checkbox"
+                                                                        name="productIds" value="${product.id}"></td>
                                                                 <td>
                                                                     <div class="product-cell">
                                                                         <c:choose>
@@ -193,6 +189,7 @@
                                                                     </strong>
                                                                 </td>
                                                                 <td>${product.totalStock}</td>
+                                                                <td>${product.soldCount}</td>
                                                                 <td>
                                                                     <c:choose>
                                                                         <c:when test="${product.totalStock == 0}">
@@ -235,24 +232,34 @@
                                     </div>
                                 </div>
 
-                                
                                 <c:if test="${totalPages > 1}">
+                                    <c:set var="filterParams" value="" />
+                                    <c:if test="${selectedCategory > 0}">
+                                        <c:set var="filterParams" value="${filterParams}&category=${selectedCategory}" />
+                                    </c:if>
+                                    <c:if test="${not empty selectedStatus}">
+                                        <c:set var="filterParams" value="${filterParams}&status=${selectedStatus}" />
+                                    </c:if>
+                                    <c:if test="${not empty selectedSort && selectedSort != 'newest'}">
+                                        <c:set var="filterParams" value="${filterParams}&sort=${selectedSort}" />
+                                    </c:if>
+                                    <c:if test="${not empty searchKeyword}">
+                                        <c:set var="filterParams" value="${filterParams}&search=${searchKeyword}" />
+                                    </c:if>
+
                                     <div class="card-footer">
                                         <div class="pagination">
-                                            
                                             <c:choose>
                                                 <c:when test="${currentPage == 1}">
                                                     <span class="disabled"><i class="fas fa-chevron-left"></i></span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a
-                                                        href="${pageContext.request.contextPath}/admin/products?page=${currentPage - 1}${selectedCategory > 0 ? '&category='.concat(selectedCategory) : ''}">
+                                                    <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage - 1}${filterParams}">
                                                         <i class="fas fa-chevron-left"></i>
                                                     </a>
                                                 </c:otherwise>
                                             </c:choose>
 
-                                            
                                             <c:forEach begin="1" end="${totalPages}" var="i">
                                                 <c:choose>
                                                     <c:when test="${i == currentPage}">
@@ -260,8 +267,7 @@
                                                     </c:when>
                                                     <c:when
                                                         test="${i <= 3 || i > totalPages - 2 || (i >= currentPage - 1 && i <= currentPage + 1)}">
-                                                        <a
-                                                            href="${pageContext.request.contextPath}/admin/products?page=${i}${selectedCategory > 0 ? '&category='.concat(selectedCategory) : ''}">${i}</a>
+                                                        <a href="${pageContext.request.contextPath}/admin/products?page=${i}${filterParams}">${i}</a>
                                                     </c:when>
                                                     <c:when test="${i == 4 && currentPage > 5}">
                                                         <span>...</span>
@@ -273,14 +279,12 @@
                                                 </c:choose>
                                             </c:forEach>
 
-                                            
                                             <c:choose>
                                                 <c:when test="${currentPage == totalPages}">
                                                     <span class="disabled"><i class="fas fa-chevron-right"></i></span>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <a
-                                                        href="${pageContext.request.contextPath}/admin/products?page=${currentPage + 1}${selectedCategory > 0 ? '&category='.concat(selectedCategory) : ''}">
+                                                    <a href="${pageContext.request.contextPath}/admin/products?page=${currentPage + 1}${filterParams}">
                                                         <i class="fas fa-chevron-right"></i>
                                                     </a>
                                                 </c:otherwise>
@@ -293,117 +297,32 @@
                     </main>
                 </div>
                 <script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        const selectAll = document.getElementById('selectAll');
-                        const productCheckboxes = document.querySelectorAll('.product-checkbox');
-                        const totalProducts = ${totalProducts != null ? totalProducts : 0};
-
-                       
-                        let selectAllPages = sessionStorage.getItem('selectAllPages') === 'true';
-                        let selectedIds = JSON.parse(sessionStorage.getItem('selectedProductIds') || '[]');
-                        let excludedIds = JSON.parse(sessionStorage.getItem('excludedProductIds') || '[]');
-
-                        function updateStorage() {
-                            sessionStorage.setItem('selectAllPages', selectAllPages);
-                            sessionStorage.setItem('selectedProductIds', JSON.stringify(selectedIds));
-                            sessionStorage.setItem('excludedProductIds', JSON.stringify(excludedIds));
-                        }
-
-                        function renderState() {
-                            let currentChecked = 0;
-                            productCheckboxes.forEach(function(checkbox) {
-                                const id = checkbox.value;
-                                if (selectAllPages) {
-                                    checkbox.checked = !excludedIds.includes(id);
-                                } else {
-                                    checkbox.checked = selectedIds.includes(id);
-                                }
-                                if (checkbox.checked) currentChecked++;
-                            });
-
-                            if (selectAll) {
-                                selectAll.checked = productCheckboxes.length > 0 && currentChecked === productCheckboxes.length;
-                            }
-                            
-
-                            const exportBtn = document.querySelector('button[onclick="exportExcel()"]');
-                            if (exportBtn) {
-                                if (selectAllPages) {
-                                    let count = totalProducts - excludedIds.length;
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + count + ')';
-                                } else if (selectedIds.length > 0) {
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel (' + selectedIds.length + ')';
-                                } else {
-                                    exportBtn.innerHTML = '<i class="fas fa-download"></i> Xuất Excel';
-                                }
-                            }
-                        }
-
-                        renderState();
+                    document.addEventListener('DOMContentLoaded', function () {
+                        var selectAll = document.getElementById('selectAll');
+                        var productCheckboxes = document.querySelectorAll('.product-checkbox');
+                        var totalProducts = ${totalProducts != null ? totalProducts : 0};
 
                         if (selectAll) {
-                            selectAll.addEventListener('change', function() {
-                                if (this.checked) {
-                                    const confirmAll = confirm('Bạn có muốn chọn tất cả ' + totalProducts + ' sản phẩm trên tất cả các trang không?\n\n- Nhấn OK để chọn tất cả ' + totalProducts + ' sản phẩm.\n- Nhấn Cancel để chỉ chọn các sản phẩm trên trang hiện tại.');
-                                    if (confirmAll) {
-                                        selectAllPages = true;
-                                        selectedIds = [];
-                                        excludedIds = [];
-                                    } else {
-                                        selectAllPages = false;
-                                        productCheckboxes.forEach(cb => {
-                                            if (!selectedIds.includes(cb.value)) {
-                                                selectedIds.push(cb.value);
-                                            }
-                                        });
-                                    }
-                                } else {
-                                    selectAllPages = false;
-                                    if (confirm('Bỏ chọn tất cả sản phẩm?')) {
-                                        selectedIds = [];
-                                        excludedIds = [];
-                                    } else {
-                                        productCheckboxes.forEach(cb => {
-                                            selectedIds = selectedIds.filter(id => id !== cb.value);
-                                        });
-                                    }
-                                }
-                                updateStorage();
-                                renderState();
+                            selectAll.addEventListener('change', function () {
+                                productCheckboxes.forEach(function (cb) {
+                                    cb.checked = selectAll.checked;
+                                });
                             });
                         }
 
-                        productCheckboxes.forEach(function(checkbox) {
-                            checkbox.addEventListener('change', function() {
-                                const id = this.value;
-                                if (selectAllPages) {
-                                    if (!this.checked) {
-                                        if (!excludedIds.includes(id)) excludedIds.push(id);
-                                    } else {
-                                        excludedIds = excludedIds.filter(e => e !== id);
-                                    }
-                                } else {
-                                    if (this.checked) {
-                                        if (!selectedIds.includes(id)) selectedIds.push(id);
-                                    } else {
-                                        selectedIds = selectedIds.filter(e => e !== id);
-                                    }
+                        productCheckboxes.forEach(function (checkbox) {
+                            checkbox.addEventListener('change', function () {
+                                if (selectAll) {
+                                    selectAll.checked = document.querySelectorAll('.product-checkbox:checked').length === productCheckboxes.length;
                                 }
-                                updateStorage();
-                                renderState();
                             });
                         });
                     });
 
                     function exportExcel() {
-                        let selectAllPages = sessionStorage.getItem('selectAllPages') === 'true';
-                        let selectedIds = JSON.parse(sessionStorage.getItem('selectedProductIds') || '[]');
-                        let excludedIds = JSON.parse(sessionStorage.getItem('excludedProductIds') || '[]');
-                        
-                        if (selectAllPages) {
-                            alert("Đang xuất file excel cho TẤT CẢ sản phẩm (trừ " + excludedIds.length + " sản phẩm bị bỏ chọn)");
-                        } else if (selectedIds.length > 0) {
-                            alert("Đang xuất file excel cho " + selectedIds.length + " sản phẩm được chọn");
+                        var selected = document.querySelectorAll('.product-checkbox:checked');
+                        if (selected.length > 0) {
+                            alert("Đang xuất file excel cho " + selected.length + " sản phẩm được chọn");
                         } else {
                             alert("Vui lòng chọn ít nhất 1 sản phẩm để xuất file excel!");
                         }

@@ -34,4 +34,48 @@ public class AuthDao extends BaseDao {
         }
     }
 
+    public User getUserByFacebookId(String facebookId) {
+        return get()
+                .withHandle(h -> h.createQuery("select * from users where facebook_id = :facebookId").bind("facebookId", facebookId)
+                        .mapToBean(User.class).stream().findFirst().orElse(null));
+    }
+
+    public boolean insertUserWithFacebook(User user) {
+        try {
+            get().useHandle(h -> h.createUpdate(
+                    "INSERT INTO users (name, email, password, facebook_id, role) VALUES (:name, :email, :password, :facebookId, :role)")
+                    .bind("name", user.getName())
+                    .bind("email", user.getEmail())
+                    .bind("password", "")
+                    .bind("facebookId", user.getFacebookId())
+                    .bind("role", user.getRole())
+                    .execute());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi CSDL khi tạo user FB: " + e.getMessage());
+        }
+    }
+
+    public User getUserByGoogleId(String googleId) {
+        return get().withHandle(h -> h.createQuery("select * from users where google_id = :googleId").bind("googleId", googleId)
+                .mapToBean(User.class).stream().findFirst().orElse(null));
+    }
+
+    public boolean insertUserWithGoogle(User user) {
+        try {
+            get().useHandle(h -> h.createUpdate(
+                    "INSERT INTO users(name, email, password, google_id, role) VALUES (:name, :email, :password, :googleId, :role)")
+                    .bind("name", user.getName())
+                    .bind("email", user.getEmail())
+                    .bind("password","")
+                    .bind("googleId", user.getGoogleId())
+                    .bind("role",user.getRole())
+                    .execute());
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("Lỗi CSDL khi tạo user GG: " + e.getMessage());
+        }
+    }
 }

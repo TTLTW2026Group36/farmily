@@ -1,7 +1,3 @@
-
-
-
-
 :root {
   --primary: #16a34a;
   --primary-dark: #15803d;
@@ -58,7 +54,7 @@ body {
   height: 100vh;
   overflow-y: auto;
   z-index: 1000;
-  transition: transform 0.3s ease;
+  transition: none;
 }
 
 .admin-sidebar::-webkit-scrollbar {
@@ -167,7 +163,7 @@ body {
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background 0.1s;
   text-decoration: none;
   line-height: 1.4;
 }
@@ -258,7 +254,7 @@ body {
   border: 1px solid var(--gray-300);
   border-radius: 6px;
   font-size: 14px;
-  transition: border 0.2s, box-shadow 0.2s;
+  transition: border-color 0.1s;
 }
 
 .form-control:focus {
@@ -309,7 +305,7 @@ textarea.form-control {
   padding: 30px;
   text-align: center;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.1s;
 }
 
 .file-upload:hover {
@@ -426,9 +422,54 @@ textarea.form-control {
   }
 }
 
+.image-url-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
 
+.image-url-row .form-group {
+  margin-bottom: 0;
+}
 
+.table-wrapper {
+  overflow-x: auto;
+}
 
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
 
+.admin-table thead {
+  background: #f9fafb;
+}
 
+.admin-table th {
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e5e7eb;
+}
 
+.admin-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e5e7eb;
+  vertical-align: middle;
+}
+
+.admin-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.form-text {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 6px;
+}

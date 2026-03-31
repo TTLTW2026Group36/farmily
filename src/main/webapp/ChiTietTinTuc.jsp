@@ -11,8 +11,8 @@
                 <title>${news.title} - Farmily</title>
                 <meta name="description" content="${news.excerpt}">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/TinTuc.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/TinTuc.css?v=3">
             </head>
 
             <body>
@@ -54,7 +54,7 @@
                             <main class="post-detail-main">
                                 <article class="post-detail">
                                     
-                                    <header class="post-header">
+                                    <div class="post-header">
                                         <c:if test="${not empty news.category}">
                                             <div class="post-category-badge">
                                                 <i class="fas fa-folder"></i> ${news.category.name}
@@ -80,7 +80,7 @@
                                                 </span>
                                             </div>
                                         </div>
-                                    </header>
+                                    </div>
 
                                     
                                     <div class="post-featured-image">

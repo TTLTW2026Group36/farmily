@@ -7,7 +7,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
                 <div class="header-search">
-                    <input type="text" id="searchTable" placeholder="Tìm kiếm...">
+                    <input type="text" id="searchTable" placeholder="Tìm kiếm..." autocomplete="off">
                     <i class="fas fa-search"></i>
                 </div>
             </div>
@@ -53,10 +53,10 @@
                         </div>
                     </div>
                     <div class="user-dropdown">
-                        <a href="${pageContext.request.contextPath}/admin/settings" data-page="settings">
+                        <!-- <a href="${pageContext.request.contextPath}/admin/settings" data-page="settings">
                             <i class="fas fa-cog"></i>
                             <span>Cài đặt</span>
-                        </a>
+                        </a> -->
                         <a href="${pageContext.request.contextPath}/admin/logout">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Đăng xuất</span>
@@ -217,5 +217,136 @@
                 fetchUnreadCount();
 
                 setInterval(fetchUnreadCount, 30000);
+                (function () {
+                    var searchInput = document.getElementById('searchTable');
+                    if (!searchInput) return;
+
+                    var page = document.body.getAttribute('data-page') || '';
+
+                    var config = {
+                        orders: {
+                            placeholder: 'Tìm mã đơn, tên hoặc SĐT khách hàng...',
+                            tableId: 'ordersTable',
+                            columns: [0, 1]
+                        },
+                        products: {
+                            placeholder: 'Tìm tên sản phẩm hoặc danh mục...',
+                            tableId: 'productsTable',
+                            columns: [1, 2]
+                        },
+                        customers: {
+                            placeholder: 'Tìm tên, email hoặc số điện thoại...',
+                            tableId: 'customersTable',
+                            columns: [1, 2, 3]
+                        },
+                        notifications: {
+                            placeholder: 'Tìm nội dung thông báo...',
+                            tableId: null,
+                            listSelector: '.notification-full-item',
+                            textSelectors: ['.notification-full-title', '.notification-full-text']
+                        },
+                        categories: {
+                            placeholder: 'Tìm tên danh mục...',
+                            tableId: 'categoriesTable',
+                            columns: [1]
+                        },
+                        posts: {
+                            placeholder: 'Tìm tiêu đề, danh mục hoặc tác giả...',
+                            tableId: 'postsTable',
+                            columns: [0, 1, 2]
+                        },
+                        'static-pages': {
+                            placeholder: 'Tìm tiêu đề hoặc slug trang tĩnh...',
+                            tableId: 'staticPagesTable',
+                            columns: [1, 2]
+                        },
+                        'flash-sales': {
+                            placeholder: 'Tìm tên sản phẩm Flash Sale...',
+                            tableId: 'flashSalesTable',
+                            columns: [0]
+                        }
+                    };
+
+                    var cfg = config[page];
+                    if (!cfg) {
+                        searchInput.placeholder = 'Tìm kiếm...';
+                        searchInput.disabled = true;
+                        searchInput.title = 'Trang này không có bảng dữ liệu để lọc';
+                        searchInput.style.opacity = '0.45';
+                        searchInput.style.cursor = 'not-allowed';
+                        return;
+                    }
+
+                    searchInput.placeholder = cfg.placeholder;
+
+                    function normalizeText(str) {
+                        return (str || '').toLowerCase().trim();
+                    }
+
+                    function filterTable(query) {
+                        var table = document.getElementById(cfg.tableId);
+                        if (!table) return;
+                        var rows = table.querySelectorAll('tbody tr');
+                        var q = normalizeText(query);
+                        var visibleCount = 0;
+                        rows.forEach(function (row) {
+                            var cells = row.querySelectorAll('td');
+                            if (cells.length === 0) { row.style.display = ''; return; }
+                            var match = !q;
+                            if (!match) {
+                                cfg.columns.forEach(function (ci) {
+                                    if (cells[ci] && normalizeText(cells[ci].textContent).indexOf(q) !== -1) {
+                                        match = true;
+                                    }
+                                });
+                            }
+                            row.style.display = match ? '' : 'none';
+                            if (match) visibleCount++;
+                        });
+
+                        var emptyRow = table.querySelector('tr.search-empty-state');
+                        if (!q || visibleCount > 0) {
+                            if (emptyRow) emptyRow.remove();
+                        } else if (!emptyRow) {
+                            var colCount = table.querySelector('thead tr') ? table.querySelectorAll('thead tr th').length : 5;
+                            var tr = document.createElement('tr');
+                            tr.className = 'search-empty-state';
+                            tr.innerHTML = '<td colspan="' + colCount + '" style="text-align:center;padding:30px;color:#64748b;">' +
+                                '<i class="fas fa-search" style="font-size:32px;margin-bottom:10px;display:block;opacity:0.3;"></i>' +
+                                'Không tìm thấy kết quả phù hợp với "<strong>' + escapeHtml(query) + '</strong>"' +
+                                '</td>';
+                            table.querySelector('tbody').appendChild(tr);
+                        }
+                    }
+
+                    function filterNotifications(query) {
+                        var items = document.querySelectorAll(cfg.listSelector);
+                        var q = normalizeText(query);
+                        items.forEach(function (item) {
+                            var text = '';
+                            cfg.textSelectors.forEach(function (sel) {
+                                var el = item.querySelector(sel);
+                                if (el) text += ' ' + el.textContent;
+                            });
+                            item.style.display = (!q || normalizeText(text).indexOf(q) !== -1) ? '' : 'none';
+                        });
+                    }
+
+                    searchInput.addEventListener('input', function () {
+                        var q = this.value;
+                        if (cfg.tableId) {
+                            filterTable(q);
+                        } else {
+                            filterNotifications(q);
+                        }
+                    });
+
+                    searchInput.addEventListener('keydown', function (e) {
+                        if (e.key === 'Escape') {
+                            this.value = '';
+                            this.dispatchEvent(new Event('input'));
+                        }
+                    });
+                })();
             })();
         </script>

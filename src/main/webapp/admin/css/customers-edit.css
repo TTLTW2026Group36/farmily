@@ -48,20 +48,20 @@ body {
 }
 
 .content-breadcrumb {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: var(--gray-500);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--gray-500);
 }
 
 .content-breadcrumb a {
-  color: var(--gray-500);
-  text-decoration: none;
+    color: var(--gray-500);
+    text-decoration: none;
 }
 
 .content-breadcrumb a:hover {
-  color: var(--primary);
+    color: var(--primary);
 }
 
 
@@ -152,7 +152,7 @@ body {
     border-radius: 8px;
     font-size: 14px;
     font-family: inherit;
-    transition: all 0.2s;
+    transition: background 0.1s;
     background: #fff;
     color: #1e293b;
 }
@@ -253,7 +253,7 @@ body {
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: background 0.1s;
     text-decoration: none;
     font-family: inherit;
 }
@@ -271,7 +271,6 @@ body {
 .btn-primary:hover {
     background: #2563eb;
     box-shadow: 0 4px 6px rgba(59, 130, 246, 0.25);
-    transform: translateY(-1px);
 }
 
 .btn-outline {
@@ -295,7 +294,6 @@ body {
 .btn-danger:hover {
     background: #dc2626;
     box-shadow: 0 4px 6px rgba(239, 68, 68, 0.25);
-    transform: translateY(-1px);
 }
 
 

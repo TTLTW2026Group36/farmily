@@ -13,7 +13,7 @@ import java.util.List;
 
 
 
-@WebServlet(name = "AdminUserController", urlPatterns = { "/admin/customers", "/admin/customers/*" })
+@WebServlet(name = "AdminUserController", urlPatterns = { "/admin/users", "/admin/users/*" })
 public class AdminUserController extends HttpServlet {
     private final UserService userService;
 
