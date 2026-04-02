@@ -95,7 +95,7 @@
               <div class="checkout-products">
                 <h2 class="section-heading">
                   <i class="fas fa-shopping-bag"></i>
-                  Sản phẩm đặt mua (<span id="itemCount">${cart.totalItems}</span> sản phẩm)
+                  Sản phẩm đặt mua (<span id="cartTitleCount">${cart.items.size()}</span> sản phẩm)
                 </h2>
 
                 <div class="checkout-table-wrap">
