@@ -6,10 +6,7 @@
                 <button class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <div class="header-search">
-                    <input type="text" id="searchTable" placeholder="Tìm kiếm..." autocomplete="off">
-                    <i class="fas fa-search"></i>
-                </div>
+
             </div>
 
             <div class="header-right">

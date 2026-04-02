@@ -76,9 +76,6 @@
 
                             <div class="form-section">
                                 <h3 class="form-section-title">Biến thể sản phẩm <span class="required">*</span></h3>
-                                <p class="form-text" style="margin-top: -8px; margin-bottom: 12px;">Thêm ít nhất 1 biến
-                                    thể. Mỗi biến thể có tên phân loại, giá bán và số lượng tồn kho riêng.</p>
-
                                 <div class="table-wrapper">
                                     <table class="admin-table" id="variantsTable">
                                         <thead>

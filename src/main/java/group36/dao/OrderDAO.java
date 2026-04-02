@@ -229,11 +229,18 @@ public class OrderDAO extends BaseDao {
                         }
                 }
                 if (keyword != null && !keyword.isEmpty()) {
-                        sql.append("AND (CAST(o.id AS CHAR) LIKE :kw " +
-                                        "OR a.receiver LIKE :kw " +
-                                        "OR a.phone LIKE :kw " +
-                                        "OR o.guest_name LIKE :kw " +
-                                        "OR o.guest_phone LIKE :kw) ");
+                        String cleanKeyword = keyword.trim().toUpperCase()
+                                        .replace("#", "")
+                                        .replace("DH-0", "")
+                                        .replace("DH-", "")
+                                        .replace("ORD", "");
+
+                        sql.append("AND (CAST(o.id AS CHAR) LIKE :kw ");
+                        if (cleanKeyword.matches("\\d+")) {
+                                sql.append("OR o.id = :idVal ");
+                        }
+                        sql.append("OR a.receiver LIKE :kw " +
+                                        "OR a.phone LIKE :kw) ");
                 }
                 if (fromDate != null && !fromDate.isEmpty()) {
                         sql.append("AND DATE(o.order_date) >= :fromDate ");
@@ -248,8 +255,17 @@ public class OrderDAO extends BaseDao {
                         org.jdbi.v3.core.statement.Query q = handle.createQuery(finalSql);
                         if (status != null && !status.isEmpty() && !"processing".equals(status))
                                 q.bind("status", status);
-                        if (keyword != null && !keyword.isEmpty())
+                        if (keyword != null && !keyword.isEmpty()) {
                                 q.bind("kw", "%" + keyword + "%");
+                                String cleanKeyword = keyword.trim().toUpperCase()
+                                                .replace("#", "")
+                                                .replace("DH-0", "")
+                                                .replace("DH-", "")
+                                                .replace("ORD", "");
+                                if (cleanKeyword.matches("\\d+")) {
+                                        q.bind("idVal", Integer.parseInt(cleanKeyword));
+                                }
+                        }
                         if (fromDate != null && !fromDate.isEmpty())
                                 q.bind("fromDate", fromDate);
                         if (toDate != null && !toDate.isEmpty())
@@ -272,11 +288,18 @@ public class OrderDAO extends BaseDao {
                         }
                 }
                 if (keyword != null && !keyword.isEmpty()) {
-                        sql.append("AND (CAST(o.id AS CHAR) LIKE :kw " +
-                                        "OR a.receiver LIKE :kw " +
-                                        "OR a.phone LIKE :kw " +
-                                        "OR o.guest_name LIKE :kw " +
-                                        "OR o.guest_phone LIKE :kw) ");
+                        String cleanKeyword = keyword.trim().toUpperCase()
+                                        .replace("#", "")
+                                        .replace("DH-0", "")
+                                        .replace("DH-", "")
+                                        .replace("ORD", "");
+
+                        sql.append("AND (CAST(o.id AS CHAR) LIKE :kw ");
+                        if (cleanKeyword.matches("\\d+")) {
+                                sql.append("OR o.id = :idVal ");
+                        }
+                        sql.append("OR a.receiver LIKE :kw " +
+                                        "OR a.phone LIKE :kw) ");
                 }
                 if (fromDate != null && !fromDate.isEmpty()) {
                         sql.append("AND DATE(o.order_date) >= :fromDate ");
@@ -289,8 +312,17 @@ public class OrderDAO extends BaseDao {
                         org.jdbi.v3.core.statement.Query q = handle.createQuery(finalSql);
                         if (status != null && !status.isEmpty() && !"processing".equals(status))
                                 q.bind("status", status);
-                        if (keyword != null && !keyword.isEmpty())
+                        if (keyword != null && !keyword.isEmpty()) {
                                 q.bind("kw", "%" + keyword + "%");
+                                String cleanKeyword = keyword.trim().toUpperCase()
+                                                .replace("#", "")
+                                                .replace("DH-0", "")
+                                                .replace("DH-", "")
+                                                .replace("ORD", "");
+                                if (cleanKeyword.matches("\\d+")) {
+                                        q.bind("idVal", Integer.parseInt(cleanKeyword));
+                                }
+                        }
                         if (fromDate != null && !fromDate.isEmpty())
                                 q.bind("fromDate", fromDate);
                         if (toDate != null && !toDate.isEmpty())
