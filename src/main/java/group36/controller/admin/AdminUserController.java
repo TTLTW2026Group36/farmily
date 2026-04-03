@@ -3,24 +3,25 @@ package group36.controller.admin;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
+import group36.dao.AddressDAO;
 import group36.model.User;
 import group36.service.UserService;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
-
-
-
-
+import java.util.Map;
 
 @WebServlet(name = "AdminUserController", urlPatterns = { "/admin/users", "/admin/users/*" })
 public class AdminUserController extends HttpServlet {
     private final UserService userService;
+    private final AddressDAO addressDAO;
 
     private static final int PAGE_SIZE = 10;
 
     public AdminUserController() {
         this.userService = new UserService();
+        this.addressDAO = new AddressDAO();
     }
 
     @Override
@@ -30,13 +31,13 @@ public class AdminUserController extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                
+
                 listUsers(request, response);
             } else if (pathInfo.equals("/view")) {
-                
+
                 showUserDetail(request, response);
             } else if (pathInfo.equals("/edit")) {
-                
+
                 showEditForm(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
@@ -74,12 +75,9 @@ public class AdminUserController extends HttpServlet {
         }
     }
 
-    
-
-
     private void listUsers(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         int page = 1;
         String pageParam = request.getParameter("page");
         if (pageParam != null && !pageParam.isEmpty()) {
@@ -92,23 +90,20 @@ public class AdminUserController extends HttpServlet {
             }
         }
 
-        
         String keyword = request.getParameter("search");
 
-        
         String role = request.getParameter("role");
         if (role == null || role.isEmpty()) {
-            role = "customer"; 
+            role = "all";
         }
 
-        
         List<User> users;
         int totalUsers;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-            
+
             users = userService.searchUsers(keyword);
-            
+
             if (!"all".equals(role)) {
                 String finalRole = role;
                 users = users.stream()
@@ -116,7 +111,7 @@ public class AdminUserController extends HttpServlet {
                         .toList();
             }
             totalUsers = users.size();
-            
+
             int start = (page - 1) * PAGE_SIZE;
             int end = Math.min(start + PAGE_SIZE, users.size());
             if (start < users.size()) {
@@ -125,7 +120,7 @@ public class AdminUserController extends HttpServlet {
                 users = List.of();
             }
         } else {
-            
+
             if ("all".equals(role)) {
                 users = userService.getUsersPaginated(page, PAGE_SIZE);
                 totalUsers = userService.getTotalUsers();
@@ -135,11 +130,15 @@ public class AdminUserController extends HttpServlet {
             }
         }
 
-        
         int totalPages = (int) Math.ceil((double) totalUsers / PAGE_SIZE);
 
-        
+        Map<Integer, Integer> addressCountMap = new HashMap<>();
+        for (User u : users) {
+            addressCountMap.put(u.getId(), addressDAO.countByUserId(u.getId()));
+        }
+
         request.setAttribute("users", users);
+        request.setAttribute("addressCountMap", addressCountMap);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("totalUsers", totalUsers);
@@ -147,7 +146,6 @@ public class AdminUserController extends HttpServlet {
         request.setAttribute("selectedRole", role);
         request.setAttribute("pageSize", PAGE_SIZE);
 
-        
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {
             request.setAttribute("success", session.getAttribute("success"));
@@ -160,9 +158,6 @@ public class AdminUserController extends HttpServlet {
 
         request.getRequestDispatcher("/admin/customers.jsp").forward(request, response);
     }
-
-    
-
 
     private void showUserDetail(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -187,9 +182,6 @@ public class AdminUserController extends HttpServlet {
         }
     }
 
-    
-
-
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
@@ -213,14 +205,10 @@ public class AdminUserController extends HttpServlet {
         }
     }
 
-    
-
-
     private void updateUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
         String name = request.getParameter("name");
-        String email = request.getParameter("email");
         String phone = request.getParameter("phone");
         String role = request.getParameter("role");
 
@@ -231,9 +219,7 @@ public class AdminUserController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idParam);
-
-            
-            userService.updateUser(id, name, email, phone, role);
+            userService.updateUserBasic(id, name, phone, role);
 
             HttpSession session = request.getSession();
             session.setAttribute("success", "Cập nhật thông tin khách hàng thành công!");
@@ -249,9 +235,6 @@ public class AdminUserController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/users/edit?id=" + idParam);
         }
     }
-
-    
-
 
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -283,9 +266,6 @@ public class AdminUserController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/users");
         }
     }
-
-    
-
 
     private void resetPassword(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {

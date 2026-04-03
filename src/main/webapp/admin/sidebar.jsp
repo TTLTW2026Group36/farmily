@@ -4,7 +4,7 @@
             <div class="sidebar-header">
                 <a href="${pageContext.request.contextPath}/admin/dashboard" class="sidebar-logo">
                     <img src="https://i.postimg.cc/5N6zh927/logo-white.png" alt="Logo">
-                    
+
 
 
                 </a>
@@ -18,7 +18,6 @@
                 <li><a href="${pageContext.request.contextPath}/admin/notifications" data-page="notifications">
                         <i class="fas fa-bell"></i>
                         <span>Thông báo</span>
-                        <span class="badge">3</span>
                     </a></li>
 
                 <div class="menu-section-title">Quản lý bán hàng</div>
@@ -41,7 +40,6 @@
                 <li><a href="${pageContext.request.contextPath}/admin/orders" data-page="orders">
                         <i class="fas fa-shopping-cart"></i>
                         <span>Đơn hàng</span>
-                        <span class="badge">5</span>
                     </a></li>
 
                 <li><a href="${pageContext.request.contextPath}/admin/users" data-page="customers">
@@ -63,7 +61,7 @@
 
                 <div class="menu-section-title">Hệ thống</div>
 
-                
+
 
 
 

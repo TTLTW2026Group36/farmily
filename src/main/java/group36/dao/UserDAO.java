@@ -9,15 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class UserDAO extends BaseDao {
-
-    
-
-
 
     private static class UserMapper implements RowMapper<User> {
         @Override
@@ -35,24 +27,12 @@ public class UserDAO extends BaseDao {
         }
     }
 
-    
-
-
-
-
     public List<User> findAll() {
         String sql = "SELECT * FROM users ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .map(new UserMapper())
                 .list());
     }
-
-    
-
-
-
-
-
 
     public List<User> findAllPaginated(int page, int size) {
         int offset = (page - 1) * size;
@@ -64,12 +44,6 @@ public class UserDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
     public Optional<User> findById(int id) {
         String sql = "SELECT * FROM users WHERE id = :id";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -77,12 +51,6 @@ public class UserDAO extends BaseDao {
                 .map(new UserMapper())
                 .findOne());
     }
-
-    
-
-
-
-
 
     public Optional<User> findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = :email";
@@ -92,12 +60,6 @@ public class UserDAO extends BaseDao {
                 .findOne());
     }
 
-    
-
-
-
-
-
     public List<User> findByRole(String role) {
         String sql = "SELECT * FROM users WHERE role = :role ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -105,14 +67,6 @@ public class UserDAO extends BaseDao {
                 .map(new UserMapper())
                 .list());
     }
-
-    
-
-
-
-
-
-
 
     public List<User> findByRolePaginated(String role, int page, int size) {
         int offset = (page - 1) * size;
@@ -125,12 +79,6 @@ public class UserDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
     public List<User> searchByNameOrEmail(String keyword) {
         String sql = "SELECT * FROM users WHERE name LIKE :keyword OR email LIKE :keyword ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -138,12 +86,6 @@ public class UserDAO extends BaseDao {
                 .map(new UserMapper())
                 .list());
     }
-
-    
-
-
-
-
 
     public int insert(User user) {
         String sql = "INSERT INTO users (name, email, password, phone, role) " +
@@ -153,17 +95,11 @@ public class UserDAO extends BaseDao {
                 .bind("email", user.getEmail())
                 .bind("password", user.getPassword())
                 .bind("phone", user.getPhone())
-                .bind("role", user.getRole() != null ? user.getRole() : "customer")
+                .bind("role", user.getRole() != null ? user.getRole() : "user")
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
     }
-
-    
-
-
-
-
 
     public int update(User user) {
         String sql = "UPDATE users SET name = :name, email = :email, phone = :phone, role = :role WHERE id = :id";
@@ -176,13 +112,6 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
-
     public int updatePassword(int id, String hashedPassword) {
         String sql = "UPDATE users SET password = :password WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -191,12 +120,6 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
     public int delete(int id) {
         String sql = "DELETE FROM users WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -204,23 +127,12 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
     public int count() {
         String sql = "SELECT COUNT(*) FROM users";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .mapTo(Integer.class)
                 .one());
     }
-
-    
-
-
-
-
 
     public int countByRole(String role) {
         String sql = "SELECT COUNT(*) FROM users WHERE role = :role";
