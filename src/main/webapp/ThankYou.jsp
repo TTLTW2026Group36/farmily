@@ -181,7 +181,7 @@
                     }
 
                     .thankyou-page .btn-primary:hover {
-                        transform: translateY(-2px);
+                        
                         box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
                     }
 
