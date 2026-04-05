@@ -162,6 +162,7 @@
 
               <form class="checkout-form" id="checkoutForm" novalidate>
                 <input type="hidden" id="selectedAddressId" name="addressId" value="">
+                <input type="hidden" name="isBuyNow" value="${isBuyNow}">
 
                 <c:if test="${!isLoggedIn}">
                   <h2 class="section-heading"><i class="fas fa-user"></i> Thông tin người nhận</h2>

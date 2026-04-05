@@ -82,17 +82,16 @@ public class PlaceOrderController extends HttpServlet {
                 }
             }
 
+            boolean isBuyNow = "true".equals(request.getParameter("isBuyNow"));
+
             Order order;
 
             if (user != null) {
-                
                 int addressId;
 
                 if (addressIdStr != null && !addressIdStr.isEmpty() && !addressIdStr.equals("new")) {
-                    
                     addressId = Integer.parseInt(addressIdStr);
                 } else {
-                    
                     Address newAddress = new Address();
                     newAddress.setUserId(user.getId());
                     newAddress.setReceiver(fullname);
@@ -104,41 +103,45 @@ public class PlaceOrderController extends HttpServlet {
                     addressId = created.getId();
                 }
 
-                
-                order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note);
-
-                
-                session.setAttribute("cartCount", 0);
+                if (isBuyNow) {
+                    Cart buyNowCart = (Cart) session.getAttribute("buyNowCart");
+                    if (buyNowCart == null || buyNowCart.isEmpty()) {
+                        sendError(out, "Phiên giao dịch Mua Ngay đã hết hạn.");
+                        return;
+                    }
+                    order = orderService.createOrderFromItems(user.getId(), addressId, paymentMethodId, note, buyNowCart.getItems());
+                    session.removeAttribute("buyNowCart");
+                } else {
+                    order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note);
+                    session.setAttribute("cartCount", 0);
+                }
 
             } else {
-                
-                @SuppressWarnings("unchecked")
-                Cart guestCart = (Cart) session.getAttribute("guestCart");
+                Cart targetCart = isBuyNow ? (Cart) session.getAttribute("buyNowCart") : (Cart) session.getAttribute("guestCart");
 
-                if (guestCart == null || guestCart.isEmpty()) {
-                    sendError(out, "Giỏ hàng trống");
+                if (targetCart == null || targetCart.isEmpty()) {
+                    sendError(out, isBuyNow ? "Phiên giao dịch Mua Ngay đã hết hạn." : "Giỏ hàng trống");
                     return;
                 }
 
-                
                 GuestInfo guestInfo = new GuestInfo(email, fullname, phone);
 
-                
                 Address shippingAddress = new Address();
                 shippingAddress.setReceiver(fullname);
                 shippingAddress.setAddressDetail(buildAddressDetail(street, ward));
                 shippingAddress.setDistrict(district);
                 shippingAddress.setCity(city);
 
-                
-                List<CartItem> cartItems = guestCart.getItems();
+                List<CartItem> cartItems = targetCart.getItems();
 
-                
                 order = orderService.createGuestOrder(guestInfo, shippingAddress,
                         paymentMethodId, note, cartItems);
 
-                
-                session.removeAttribute("guestCart");
+                if (isBuyNow) {
+                    session.removeAttribute("buyNowCart");
+                } else {
+                    session.removeAttribute("guestCart");
+                }
             }
 
             
