@@ -20,10 +20,13 @@ public class Order implements Serializable {
     private String guestName;
     private String guestPhone;
 
+    private String paymentStatus;
+
     private Address address;
     private PaymentMethod paymentMethod;
     private User user;
     private List<OrderDetail> orderDetails;
+    private Payment latestPayment;
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_CONFIRMED = "confirmed";
@@ -179,6 +182,86 @@ public class Order implements Serializable {
 
     public boolean isGuestOrder() {
         return userId == null;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public Payment getLatestPayment() {
+        return latestPayment;
+    }
+
+    public void setLatestPayment(Payment latestPayment) {
+        this.latestPayment = latestPayment;
+    }
+
+    public String getPaymentMethodText() {
+        if (paymentMethod == null)
+            return "COD";
+        String name = paymentMethod.getMethodName();
+        if (name == null)
+            return "COD";
+        String lower = name.toLowerCase();
+        if (lower.contains("chuyển khoản") || lower.contains("ngân hàng")
+                || lower.contains("bank") || lower.contains("online")) {
+            return "Chuyển khoản";
+        }
+        return "COD";
+    }
+
+    public boolean isOnlinePayment() {
+        return "Chuyển khoản".equals(getPaymentMethodText());
+    }
+
+    public String getPaymentStatusText() {
+        if (!isOnlinePayment()) {
+            if (STATUS_DELIVERED.equals(status)) {
+                return "Đã thanh toán";
+            }
+            return "Thanh toán khi nhận hàng";
+        }
+        if (paymentStatus == null || "unpaid".equals(paymentStatus))
+            return "Chưa thanh toán";
+        switch (paymentStatus) {
+            case "pending":
+                return "Đang chờ thanh toán";
+            case "paid":
+                return "Đã thanh toán";
+            case "failed":
+                return "Thanh toán thất bại";
+            case "expired":
+                return "Hết hạn thanh toán";
+            default:
+                return paymentStatus;
+        }
+    }
+
+    public String getPaymentStatusBadgeClass() {
+        if (!isOnlinePayment()) {
+            if (STATUS_DELIVERED.equals(status)) {
+                return "bento-pay-paid";
+            }
+            return "bento-pay-cod";
+        }
+        if (paymentStatus == null || "unpaid".equals(paymentStatus))
+            return "bento-pay-unpaid";
+        switch (paymentStatus) {
+            case "pending":
+                return "bento-pay-pending";
+            case "paid":
+                return "bento-pay-paid";
+            case "failed":
+                return "bento-pay-failed";
+            case "expired":
+                return "bento-pay-expired";
+            default:
+                return "bento-pay-unpaid";
+        }
     }
 
     public static double calculateShippingFee(double subtotal) {

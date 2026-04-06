@@ -119,13 +119,14 @@
                     <div class="table-responsive">
                         <table class="bento-table">
                             <thead>
-                                <tr>
+                                    <tr>
                                     <th>Mã đơn</th>
                                     <th>Khách hàng</th>
                                     <th>Sản phẩm</th>
                                     <th>Tổng tiền</th>
-                                    <th>Thanh toán</th>
-                                    <th>Trạng thái</th>
+                                    <th>Phương thức TT</th>
+                                    <th>Trạng thái TT</th>
+                                    <th>Trạng thái đơn</th>
                                     <th>Ngày đặt</th>
                                     <th></th>
                                 </tr>
@@ -134,7 +135,7 @@
                                 <c:choose>
                                     <c:when test="${empty orders}">
                                         <tr>
-                                            <td colspan="8">
+                                            <td colspan="9">
                                                 <div class="bento-empty-state">
                                                     <i class="fas fa-inbox bento-empty-icon"></i>
                                                     <div class="bento-empty-title">Không có đơn hàng nào</div>
@@ -151,7 +152,7 @@
                                                 </td>
                                                 <td class="bento-td-customer">
                                                     <p class="bento-td-customer-name">${order.customerName}</p>
-                                                    <p class="bento-td-customer-phone"><i class="fas fa-phone-alt"></i> ${order.customerPhone}</p>
+                                                    <p class="bento-td-customer-phone">${order.customerPhone}</p>
                                                 </td>
                                                 <td class="bento-td-product">
                                                     <c:choose>
@@ -168,7 +169,10 @@
                                                     <div class="bento-td-price"><fmt:formatNumber value="${order.totalPrice}" type="number" groupingUsed="true" />₫</div>
                                                 </td>
                                                 <td>
-                                                    <span class="bento-tag">${order.paymentMethod != null ? order.paymentMethod.name : 'COD'}</span>
+                                                    <span class="bento-tag">${order.paymentMethodText}</span>
+                                                </td>
+                                                <td>
+                                                    <span class="bento-status-badge ${order.paymentStatusBadgeClass}">${order.paymentStatusText}</span>
                                                 </td>
                                                 <td>
                                                     <c:choose>

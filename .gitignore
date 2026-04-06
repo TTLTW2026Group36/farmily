@@ -1,4 +1,4 @@
-# --- Java & Maven ---
+    # --- Java & Maven ---
 target/
 *.class
 *.jar
@@ -7,6 +7,7 @@ target/
 *.log
 
 # --- IntelliJ IDEA (Cực kỳ quan trọng để không bị xung đột cấu hình máy mỗi đứa) ---
+.agent
 .idea/
 *.iml
 out/
@@ -27,3 +28,4 @@ dist/
 .env
 
 src/main/resources/config.properties
+src/main/resources/payment.properties

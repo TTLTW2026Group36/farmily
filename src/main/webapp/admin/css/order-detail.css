@@ -237,3 +237,71 @@
     position: static;
   }
 }
+
+.pay-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+.pay-badge::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+.bento-pay-paid {
+  background: #ecfdf5;
+  color: #059669;
+}
+.bento-pay-paid::before {
+  background: #059669;
+}
+.bento-pay-pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+.bento-pay-pending::before {
+  background: #b45309;
+}
+.bento-pay-unpaid {
+  background: #f1f5f9;
+  color: #64748b;
+}
+.bento-pay-unpaid::before {
+  background: #64748b;
+}
+.bento-pay-failed {
+  background: #fef2f2;
+  color: #dc2626;
+}
+.bento-pay-failed::before {
+  background: #dc2626;
+}
+.bento-pay-expired {
+  background: #fef2f2;
+  color: #991b1b;
+}
+.bento-pay-expired::before {
+  background: #991b1b;
+}
+.bento-pay-cod {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+.bento-pay-cod::before {
+  background: #1d4ed8;
+}
+
+.payment-txn {
+  font-family: "Courier New", monospace;
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  word-break: break-all;
+}

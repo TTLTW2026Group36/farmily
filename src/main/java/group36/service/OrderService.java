@@ -13,6 +13,7 @@ public class OrderService {
     private final OrderDetailDAO orderDetailDAO;
     private final AddressDAO addressDAO;
     private final PaymentMethodDAO paymentMethodDAO;
+    private final PaymentDAO paymentDAO;
     private final CartDAO cartDAO;
     private final CartItemDAO cartItemDAO;
     private final ProductVariantDAO productVariantDAO;
@@ -30,6 +31,7 @@ public class OrderService {
         this.orderDetailDAO = new OrderDetailDAO();
         this.addressDAO = new AddressDAO();
         this.paymentMethodDAO = new PaymentMethodDAO();
+        this.paymentDAO = new PaymentDAO();
         this.cartDAO = new CartDAO();
         this.cartItemDAO = new CartItemDAO();
         this.productVariantDAO = new ProductVariantDAO();
@@ -246,7 +248,6 @@ public class OrderService {
     }
 
     private void loadOrderDetails(Order order) {
-
         List<OrderDetail> details = orderDetailDAO.findByOrderId(order.getId());
         for (OrderDetail detail : details) {
             loadOrderDetailProducts(detail);
@@ -254,8 +255,8 @@ public class OrderService {
         order.setOrderDetails(details);
 
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
-
         paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
+        paymentDAO.findLatestByOrderId(order.getId()).ifPresent(order::setLatestPayment);
 
         if (!order.isGuestOrder() && order.getUserId() != null) {
             userDAO.findById(order.getUserId()).ifPresent(order::setUser);
@@ -344,6 +345,8 @@ public class OrderService {
         }
 
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
+        paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
+        paymentDAO.findLatestByOrderId(order.getId()).ifPresent(order::setLatestPayment);
     }
 
     public double getTotalRevenue() {
