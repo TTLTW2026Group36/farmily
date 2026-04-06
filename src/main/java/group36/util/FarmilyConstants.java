@@ -4,8 +4,8 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class FarmilyConstants {
-    public static final String FACEBOOK_CLIENT_ID = "962984642734580";
-    public static final String FACEBOOK_CLIENT_SECRET = "dec807c6655c03fc81b3126a562beb37";
+    public static String FACEBOOK_CLIENT_ID;
+    public static String FACEBOOK_CLIENT_SECRET;
     public static final String FACEBOOK_LINK_GET_TOKEN = "https://graph.facebook.com/v19.0/oauth/access_token";
     public static final String FACEBOOK_LINK_GET_USER_INFO = "https://graph.facebook.com/me?fields=id,name,email,picture&access_token=";
 
@@ -25,6 +25,8 @@ public class FarmilyConstants {
                 pro.load(input);
                 GOOGLE_CLIENT_ID = pro.getProperty("google.client.id");
                 GOOGLE_CLIENT_SECRET = pro.getProperty("google.client.secret");
+                FACEBOOK_CLIENT_ID = pro.getProperty("facebook.client.id");
+                FACEBOOK_CLIENT_SECRET = pro.getProperty("facebook.client.secret");
 
                 String baseUrl = pro.getProperty("app.base.url", "http://localhost:8080");
                 FACEBOOK_REDIRECT_URI = baseUrl + "/dang-nhap";
