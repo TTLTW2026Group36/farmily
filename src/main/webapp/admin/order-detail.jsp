@@ -423,7 +423,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Payment Info -->
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-credit-card"
@@ -432,25 +431,40 @@
                                         <div class="card-body">
                                             <div class="info-row">
                                                 <span class="info-label">Phương thức</span>
-                                                <strong class="info-value">
-                                                    <c:choose>
-                                                        <c:when test="${order.paymentMethod != null}">
-                                                            ${order.paymentMethod.name}</c:when>
-                                                        <c:otherwise>COD (Tiền mặt)</c:otherwise>
-                                                    </c:choose>
-                                                </strong>
+                                                <strong class="info-value">${order.paymentMethodText}</strong>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label">Trạng thái TT</span>
+                                                <span class="pay-badge ${order.paymentStatusBadgeClass}">${order.paymentStatusText}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày đặt</span>
                                                 <span class="info-value">
-                                                    <fmt:formatDate value="${order.orderDate}"
-                                                        pattern="dd/MM/yyyy HH:mm" />
+                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" />
                                                 </span>
                                             </div>
-                                            <div class="info-row">
-                                                <span class="info-label">Trạng thái TT</span>
-                                                <span class="pay-status unpaid">Chưa thanh toán</span>
-                                            </div>
+                                            <c:if test="${order.latestPayment != null}">
+                                                <c:if test="${not empty order.latestPayment.provider}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Nhà cung cấp</span>
+                                                        <span class="info-value">${order.latestPayment.provider}</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty order.latestPayment.transactionId}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Mã giao dịch</span>
+                                                        <span class="info-value payment-txn">${order.latestPayment.transactionId}</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${order.latestPayment.paidAt != null}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Thanh toán lúc</span>
+                                                        <span class="info-value">
+                                                            <fmt:formatDate value="${order.latestPayment.paidAt}" pattern="dd/MM/yyyy HH:mm" />
+                                                        </span>
+                                                    </div>
+                                                </c:if>
+                                            </c:if>
                                         </div>
                                     </div>
 

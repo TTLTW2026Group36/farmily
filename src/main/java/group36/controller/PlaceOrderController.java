@@ -6,16 +6,17 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.google.gson.Gson;
 import group36.model.*;
 import group36.service.*;
+import group36.service.payment.PaymentCreateResult;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashMap;
 import java.util.List;
-
-
-
-
+import java.util.Map;
+import java.util.Optional;
 
 @WebServlet(name = "PlaceOrderController", urlPatterns = { "/place-order" })
 public class PlaceOrderController extends HttpServlet {
@@ -23,12 +24,17 @@ public class PlaceOrderController extends HttpServlet {
     private OrderService orderService;
     private AddressService addressService;
     private CartService cartService;
+    private PaymentService paymentService;
+    private PaymentMethodService paymentMethodService;
+    private final Gson gson = new Gson();
 
     @Override
     public void init() throws ServletException {
         orderService = new OrderService();
         addressService = new AddressService();
         cartService = new CartService();
+        paymentService = new PaymentService();
+        paymentMethodService = new PaymentMethodService();
     }
 
     @Override
@@ -43,31 +49,29 @@ public class PlaceOrderController extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         try {
-            
+
             String email = request.getParameter("email");
             String fullname = request.getParameter("fullname");
             String phone = request.getParameter("phone");
             String street = request.getParameter("street");
             String ward = request.getParameter("ward");
             String district = request.getParameter("district");
-            String city = request.getParameter("province"); 
+            String city = request.getParameter("province");
             String note = request.getParameter("note");
             String paymentMethodStr = request.getParameter("payment");
             String addressIdStr = request.getParameter("addressId");
 
-            
             if (isEmpty(email) || isEmpty(fullname) || isEmpty(phone) || isEmpty(street)) {
                 sendError(out, "Vui lòng điền đầy đủ thông tin bắt buộc");
                 return;
             }
 
-            
-            int paymentMethodId = 1; 
+            int paymentMethodId = 1;
             if (paymentMethodStr != null && !paymentMethodStr.isEmpty()) {
                 try {
                     paymentMethodId = Integer.parseInt(paymentMethodStr);
                 } catch (NumberFormatException e) {
-                    
+
                     switch (paymentMethodStr) {
                         case "COD":
                             paymentMethodId = 1;
@@ -87,11 +91,14 @@ public class PlaceOrderController extends HttpServlet {
             Order order;
 
             if (user != null) {
+
                 int addressId;
 
                 if (addressIdStr != null && !addressIdStr.isEmpty() && !addressIdStr.equals("new")) {
+
                     addressId = Integer.parseInt(addressIdStr);
                 } else {
+
                     Address newAddress = new Address();
                     newAddress.setUserId(user.getId());
                     newAddress.setReceiver(fullname);
@@ -103,21 +110,14 @@ public class PlaceOrderController extends HttpServlet {
                     addressId = created.getId();
                 }
 
-                if (isBuyNow) {
-                    Cart buyNowCart = (Cart) session.getAttribute("buyNowCart");
-                    if (buyNowCart == null || buyNowCart.isEmpty()) {
-                        sendError(out, "Phiên giao dịch Mua Ngay đã hết hạn.");
-                        return;
-                    }
-                    order = orderService.createOrderFromItems(user.getId(), addressId, paymentMethodId, note, buyNowCart.getItems());
-                    session.removeAttribute("buyNowCart");
-                } else {
-                    order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note);
-                    session.setAttribute("cartCount", 0);
-                }
+                order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note);
+
+                session.setAttribute("cartCount", 0);
 
             } else {
-                Cart targetCart = isBuyNow ? (Cart) session.getAttribute("buyNowCart") : (Cart) session.getAttribute("guestCart");
+
+                @SuppressWarnings("unchecked")
+                Cart guestCart = (Cart) session.getAttribute("guestCart");
 
                 if (targetCart == null || targetCart.isEmpty()) {
                     sendError(out, isBuyNow ? "Phiên giao dịch Mua Ngay đã hết hạn." : "Giỏ hàng trống");
@@ -132,23 +132,37 @@ public class PlaceOrderController extends HttpServlet {
                 shippingAddress.setDistrict(district);
                 shippingAddress.setCity(city);
 
-                List<CartItem> cartItems = targetCart.getItems();
+                List<CartItem> cartItems = guestCart.getItems();
 
                 order = orderService.createGuestOrder(guestInfo, shippingAddress,
                         paymentMethodId, note, cartItems);
 
-                if (isBuyNow) {
-                    session.removeAttribute("buyNowCart");
-                } else {
-                    session.removeAttribute("guestCart");
-                }
+                session.removeAttribute("guestCart");
             }
 
-            
             session.setAttribute("lastOrderId", order.getId());
 
-            
-            sendSuccess(out, order.getId());
+            boolean isOnlinePayment = isOnlinePaymentMethod(paymentMethodId);
+
+            if (isOnlinePayment) {
+                try {
+                    PaymentCreateResult paymentResult = paymentService.createPayment(order);
+
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("success", true);
+                    result.put("orderId", order.getId());
+                    result.put("paymentRedirect", true);
+                    result.put("checkoutFormHtml", paymentResult.getCheckoutFormHtml());
+
+                    out.print(gson.toJson(result));
+                } catch (Exception e) {
+                    System.err.println("[PlaceOrder] Payment creation failed: " + e.getMessage());
+                    e.printStackTrace();
+                    sendSuccess(out, order.getId());
+                }
+            } else {
+                sendSuccess(out, order.getId());
+            }
 
         } catch (IllegalArgumentException e) {
             sendError(out, e.getMessage());
@@ -176,12 +190,18 @@ public class PlaceOrderController extends HttpServlet {
     }
 
     private void sendSuccess(PrintWriter out, int orderId) {
-        out.print("{\"success\":true,\"orderId\":" + orderId + ",\"redirectUrl\":\"/order-confirmation?id=" + orderId
-                + "\"}");
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", true);
+        result.put("orderId", orderId);
+        result.put("redirectUrl", "/order-confirmation?id=" + orderId);
+        out.print(gson.toJson(result));
     }
 
     private void sendError(PrintWriter out, String message) {
-        out.print("{\"success\":false,\"message\":\"" + escapeJson(message) + "\"}");
+        Map<String, Object> result = new HashMap<>();
+        result.put("success", false);
+        result.put("message", message);
+        out.print(gson.toJson(result));
     }
 
     private String escapeJson(String text) {
@@ -190,13 +210,31 @@ public class PlaceOrderController extends HttpServlet {
         return text.replace("\\", "\\\\")
                 .replace("\"", "\\\"")
                 .replace("\n", "\\n")
-                .replace("\r", "\\r");
+                .replace("\r", "\\r")
+                .replace("'", "\\'");
+    }
+
+    private boolean isOnlinePaymentMethod(int paymentMethodId) {
+        try {
+            Optional<PaymentMethod> pm = paymentMethodService.getPaymentMethodById(paymentMethodId);
+            if (pm.isPresent()) {
+                String name = pm.get().getMethodName();
+                if (name != null) {
+                    String lower = name.toLowerCase();
+                    return lower.contains("chuyển khoản") || lower.contains("ngân hàng")
+                            || lower.contains("bank") || lower.contains("online");
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("[PlaceOrder] Error checking payment method: " + e.getMessage());
+        }
+        return false;
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         response.sendRedirect(request.getContextPath() + "/checkout");
     }
 }

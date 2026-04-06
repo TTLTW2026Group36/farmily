@@ -12,10 +12,6 @@ import group36.service.OrderService;
 import java.io.IOException;
 import java.util.Optional;
 
-
-
-
-
 @WebServlet(name = "OrderConfirmController", urlPatterns = { "/order-confirmation", "/xac-nhan-don-hang" })
 public class OrderConfirmController extends HttpServlet {
 
@@ -33,7 +29,7 @@ public class OrderConfirmController extends HttpServlet {
         HttpSession session = request.getSession();
 
         try {
-            
+
             String orderIdStr = request.getParameter("id");
             Integer lastOrderId = (Integer) session.getAttribute("lastOrderId");
 
@@ -42,30 +38,32 @@ public class OrderConfirmController extends HttpServlet {
                 orderId = Integer.parseInt(orderIdStr);
             } else if (lastOrderId != null) {
                 orderId = lastOrderId;
-                
+
                 session.removeAttribute("lastOrderId");
             } else {
-                
+
                 response.sendRedirect(request.getContextPath() + "/");
                 return;
             }
 
-            
             Optional<Order> orderOpt = orderService.getOrderById(orderId);
 
             if (orderOpt.isEmpty()) {
-                
+
                 response.sendRedirect(request.getContextPath() + "/");
                 return;
             }
 
             Order order = orderOpt.get();
 
-            
             request.setAttribute("order", order);
             request.setAttribute("pageTitle", "Đặt hàng thành công");
 
-            
+            String paymentCallback = request.getParameter("payment");
+            if (paymentCallback != null) {
+                request.setAttribute("paymentCallback", paymentCallback);
+            }
+
             request.getRequestDispatcher("/ThankYou.jsp").forward(request, response);
 
         } catch (NumberFormatException e) {

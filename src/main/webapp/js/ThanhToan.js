@@ -633,10 +633,24 @@
       }
 
       if (result.success) {
-        showSuccess('Đặt hàng thành công!');
-        setTimeout(() => {
-          window.location.href = window.contextPath + '/order-confirmation?id=' + result.orderId;
-        }, 1000);
+        if (result.paymentRedirect && result.checkoutFormHtml) {
+          showSuccess('Đang chuyển đến cổng thanh toán...');
+          const container = document.getElementById('sepay-form-container');
+          if (container) {
+            container.innerHTML = result.checkoutFormHtml;
+            const form = container.querySelector('form');
+            if (form) {
+              setTimeout(() => { form.submit(); }, 600);
+              return;
+            }
+          }
+          window.location.replace(window.contextPath + '/order-confirmation?id=' + result.orderId);
+        } else {
+          showSuccess('Đặt hàng thành công!');
+          setTimeout(() => {
+            window.location.replace(window.contextPath + '/order-confirmation?id=' + result.orderId);
+          }, 1000);
+        }
       } else {
         showError(result.message || 'Có lỗi xảy ra, vui lòng thử lại');
         placeOrderBtn.disabled = false;

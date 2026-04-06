@@ -354,6 +354,7 @@
             </form>
           </div>
         </div>
+    <div id="sepay-form-container" style="display:none;"></div>
 
         <jsp:include page="common/footer.jsp" />
 
@@ -367,7 +368,7 @@
           window.userName = '${userName}';
           window.userPhone = '${userPhone}';
         </script>
-        <script src="${pageContext.request.contextPath}/js/ThanhToan.js"></script>
+        <script src="${pageContext.request.contextPath}/js/ThanhToan.js?v=2"></script>
       </body>
 
       </html>

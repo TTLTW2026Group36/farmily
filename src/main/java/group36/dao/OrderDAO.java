@@ -36,6 +36,11 @@ public class OrderDAO extends BaseDao {
 
                         }
 
+                        try {
+                                order.setPaymentStatus(rs.getString("payment_status"));
+                        } catch (SQLException e) {
+                        }
+
                         return order;
                 }
         }
@@ -135,6 +140,14 @@ public class OrderDAO extends BaseDao {
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", orderId)
                                 .bind("status", status)
+                                .execute());
+        }
+
+        public int updatePaymentStatus(int orderId, String paymentStatus) {
+                String sql = "UPDATE orders SET payment_status = :ps WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", orderId)
+                                .bind("ps", paymentStatus)
                                 .execute());
         }
 
