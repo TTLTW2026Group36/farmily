@@ -609,6 +609,11 @@
       const paymentRadio = document.querySelector('input[name="payment"]:checked');
       params.append('payment', paymentRadio ? paymentRadio.value : '1');
 
+      const isBuyNowInput = document.querySelector('input[name="isBuyNow"]');
+      if (isBuyNowInput) {
+        params.append('isBuyNow', isBuyNowInput.value);
+      }
+
       const url = window.contextPath + '/place-order';
       const response = await fetch(url, {
         method: 'POST',
