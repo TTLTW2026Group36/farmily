@@ -43,35 +43,51 @@ public class CheckoutController extends HttpServlet {
             Cart cart;
             List<Address> addresses = null;
 
-            if (user != null) {
-                
-                cart = cartService.getCartByUserId(user.getId());
+            boolean isBuyNow = "true".equals(request.getParameter("buyNow"));
+            if (isBuyNow) {
+                try {
+                    int productId = Integer.parseInt(request.getParameter("productId"));
+                    String vIdStr = request.getParameter("variantId");
+                    Integer variantId = (vIdStr != null && !vIdStr.trim().isEmpty() && !"null".equals(vIdStr)) ? Integer.parseInt(vIdStr) : null;
+                    int quantity = Integer.parseInt(request.getParameter("quantity"));
 
-                
-                if (cart == null || cart.isEmpty()) {
-                    response.sendRedirect(request.getContextPath() + "/gio-hang");
+                    cart = cartService.createBuyNowCart(user != null ? user.getId() : 0, productId, variantId, quantity);
+                    session.setAttribute("buyNowCart", cart);
+                    request.setAttribute("isBuyNow", true);
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    response.sendRedirect(request.getContextPath() + "/san-pham");
                     return;
                 }
+            } else {
+                session.removeAttribute("buyNowCart");
+                request.setAttribute("isBuyNow", false);
 
-                
+                if (user != null) {
+                    cart = cartService.getCartByUserId(user.getId());
+                    if (cart == null || cart.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/gio-hang");
+                        return;
+                    }
+                } else {
+                    cart = (Cart) session.getAttribute("guestCart");
+
+                    if (cart == null || cart.isEmpty()) {
+                        response.sendRedirect(request.getContextPath() + "/san-pham");
+                        return;
+                    }
+                }
+            }
+
+            // Still load addresses if logged in
+            if (user != null) {
                 addresses = addressService.getAddressesByUserId(user.getId());
-
-                
                 request.setAttribute("userEmail", user.getEmail());
                 request.setAttribute("userName", user.getName());
                 request.setAttribute("userPhone", user.getPhone());
                 request.setAttribute("isLoggedIn", true);
-
             } else {
-                
-                cart = (Cart) session.getAttribute("guestCart");
-
-                if (cart == null || cart.isEmpty()) {
-                    
-                    response.sendRedirect(request.getContextPath() + "/san-pham");
-                    return;
-                }
-
                 request.setAttribute("isLoggedIn", false);
             }
 

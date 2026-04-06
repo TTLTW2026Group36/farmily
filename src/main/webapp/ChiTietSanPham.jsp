@@ -12,7 +12,7 @@
                     <c:out value="${product.name}" default="Chi Tiết Sản Phẩm" /> - Nông Sản Farmily
                 </title>
 
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ChiTietSanPham.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ChiTietSanPham.css?v=<%= System.currentTimeMillis() %>">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
@@ -229,9 +229,14 @@
                                 <div class="actions">
                                     <c:choose>
                                         <c:when test="${product.totalStock > 0}">
-                                            <button type="submit" class="btn-primary"><i class="fas fa-cart-plus"></i>
-                                                Thêm vào giỏ hàng
-                                            </button>
+                                            <div style="display: flex; flex-direction: row; gap: 12px; width: 100%;">
+                                                <button type="submit" class="btn-primary" style="flex: 1; padding: 14px 8px; font-size: 15px;">
+                                                    <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                                                </button>
+                                                <button type="button" class="btn-buy-now" id="btnBuyNow">
+                                                    Mua ngay
+                                                </button>
+                                            </div>
                                         </c:when>
                                         <c:otherwise>
                                             <button type="button" class="btn-primary" disabled>
@@ -528,6 +533,7 @@
 
                 <script>
                     window.contextPath = "<c:out value='${pageContext.request.contextPath}'/>";
+                    window.isLoggedIn = ${sessionScope.auth != null};
 
                     window.productData = {
                         id: ${empty product.id ? 0 : product.id },
@@ -554,7 +560,7 @@
     };
                 </script>
 
-                <script src="${pageContext.request.contextPath}/js/ChiTietSanPham.js"></script>
+                <script src="${pageContext.request.contextPath}/js/ChiTietSanPham.js?v=<%= System.currentTimeMillis() %>"></script>
             </body>
 
             </html>

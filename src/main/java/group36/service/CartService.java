@@ -281,4 +281,39 @@ public class CartService {
             }
         }
     }
+
+    public Cart createBuyNowCart(int userId, int productId, Integer variantId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
+        }
+
+        Product product = productDAO.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
+
+        ProductVariant variant = null;
+        if (variantId != null) {
+            variant = variantDAO.findById(variantId)
+                    .orElseThrow(() -> new IllegalArgumentException("Phân loại sản phẩm không tồn tại"));
+
+            if (variant.getStock() < quantity) {
+                throw new IllegalArgumentException("Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
+            }
+        }
+
+        Cart cart = new Cart(userId);
+        CartItem item = new CartItem(0, productId, variantId, quantity);
+        item.setProduct(product);
+        item.setVariant(variant);
+        
+        // This sets the correct price and attributes without pushing to DB
+        applyFlashSalePrice(item);
+        
+        // Let's make sure it contains variants + images so ThanhToan.jsp doesn't crash on null properties 
+        product.setImages(imageDAO.findByProductId(product.getId()));
+        List<ProductVariant> variants = variantDAO.findByProductId(product.getId());
+        product.setVariants(variants);
+
+        cart.getItems().add(item);
+        return cart;
+    }
 }
