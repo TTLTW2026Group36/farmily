@@ -86,6 +86,8 @@ public class PlaceOrderController extends HttpServlet {
                 }
             }
 
+            boolean isBuyNow = "true".equals(request.getParameter("isBuyNow"));
+
             Order order;
 
             if (user != null) {
@@ -117,8 +119,8 @@ public class PlaceOrderController extends HttpServlet {
                 @SuppressWarnings("unchecked")
                 Cart guestCart = (Cart) session.getAttribute("guestCart");
 
-                if (guestCart == null || guestCart.isEmpty()) {
-                    sendError(out, "Giỏ hàng trống");
+                if (targetCart == null || targetCart.isEmpty()) {
+                    sendError(out, isBuyNow ? "Phiên giao dịch Mua Ngay đã hết hạn." : "Giỏ hàng trống");
                     return;
                 }
 

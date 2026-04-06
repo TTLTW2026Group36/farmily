@@ -127,6 +127,77 @@ public class OrderService {
         return order;
     }
 
+    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems)
+            throws IllegalArgumentException {
+
+        Optional<Address> addressOpt = addressDAO.findById(addressId);
+        if (addressOpt.isEmpty()) {
+            throw new IllegalArgumentException("Địa chỉ không tồn tại");
+        }
+
+        Optional<PaymentMethod> paymentOpt = paymentMethodDAO.findById(paymentMethodId);
+        if (paymentOpt.isEmpty() || !paymentOpt.get().isActive()) {
+            throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ");
+        }
+
+        if (cartItems == null || cartItems.isEmpty()) {
+            throw new IllegalArgumentException("Sản phẩm trống");
+        }
+
+        double subtotal = 0;
+        for (CartItem item : cartItems) {
+            loadCartItemDetails(item);
+            subtotal += item.getSubtotal();
+        }
+
+        double shippingFee = calculateShippingFee(subtotal);
+        double totalPrice = subtotal + shippingFee;
+
+        Order order = new Order();
+        order.setUserId(userId);
+        order.setAddressId(addressId);
+        order.setPaymentMethodId(paymentMethodId);
+        order.setNote(note);
+        order.setShippingFee(shippingFee);
+        order.setTotalPrice(totalPrice);
+        order.setStatus(Order.STATUS_PENDING);
+
+        int orderId = orderDAO.insert(order);
+        order.setId(orderId);
+
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (CartItem item : cartItems) {
+            OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
+            orderDetails.add(detail);
+        }
+        orderDetailDAO.insertBatch(orderDetails);
+        order.setOrderDetails(orderDetails);
+
+        for (CartItem item : cartItems) {
+            if (item.getVariantId() != null) {
+                productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
+            }
+            productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
+
+            if (item.hasFlashSalePrice()) {
+                flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
+                    flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
+                });
+            }
+        }
+
+        order.setAddress(addressOpt.get());
+        order.setPaymentMethod(paymentOpt.get());
+
+        try {
+            adminNotificationService.createOrderNotification(order);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return order;
+    }
+
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems)
             throws IllegalArgumentException {
