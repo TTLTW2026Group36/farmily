@@ -57,6 +57,11 @@
                         <label>Mật khẩu <span>*</span></label>
                         <input type="password" name="password" placeholder="Mật khẩu" style="margin-top: 8px;" required>
 
+                        <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">
+                            <input type="checkbox" id="rememberMe" name="rememberMe" value="true" style="width: auto; margin: 0;">
+                            <label for="rememberMe" style="margin: 0; font-weight: normal; cursor: pointer;">Ghi nhớ đăng nhập</label>
+                        </div>
+
                         <div class="quenmk">
                             <small>Quên mật khẩu? Nhấn vào
                                 <a href="${pageContext.request.contextPath}/forgot-password">đây</a></small>

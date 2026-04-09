@@ -9,7 +9,10 @@ public class AuthDao extends BaseDao {
                         .mapToBean(User.class).stream().findFirst().orElse(null));
 
     }
-
+    public User getUserById(int id) {
+        return get().withHandle(h -> h.createQuery("select * from users where id = :id")
+                .bind("id", id).mapToBean(User.class).stream().findFirst().orElse(null));
+    }
     public void updatePassword(int userId, String hashedPassword) {
         get().useHandle(h -> h.createUpdate("UPDATE users SET password = :password WHERE id = :id")
                 .bind("password", hashedPassword)
