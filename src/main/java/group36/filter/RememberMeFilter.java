@@ -53,23 +53,23 @@ public class RememberMeFilter implements Filter {
 
                 if (rt != null) {
                     if (rt.isRevoked()) {
-                        refreshTokenDao.revokeAllByUserId(rt.getUserId());
+                        refreshTokenDao.revokeAllByUserId(rt.getUser_id());
 
                         Cookie deleteCookie = new Cookie("remember_me", "");
                         deleteCookie.setMaxAge(0);
                         deleteCookie.setPath("/");
                         res.addCookie(deleteCookie);
 
-                    } else if (rt.getExpireAt().after(new Timestamp(System.currentTimeMillis()))) {
+                    } else if (rt.getExpires_at().after(new Timestamp(System.currentTimeMillis()))) {
                         String newToken = UUID.randomUUID().toString();
                         long newExpiry = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000);
                         Timestamp newExpiresAt = new Timestamp(newExpiry);
 
-                        refreshTokenDao.rotakeToken(rememberMeToken, newToken, rt.getUserId(), newExpiresAt);
+                        refreshTokenDao.rotateToken(rememberMeToken, newToken, rt.getUser_id(), newExpiresAt);
 
                         User u = null;
                         try {
-                            u = authDao.getUserById(rt.getUserId());
+                            u = authDao.getUserById(rt.getUser_id());
                         } catch(Exception e) {}
 
                         if (u != null) {

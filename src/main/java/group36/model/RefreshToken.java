@@ -4,21 +4,23 @@ import java.sql.Timestamp;
 
 public class RefreshToken {
     private int id;
-    private int userId;
+    private int user_id;
     private String token;
-    private Timestamp expireAt;
+    private Timestamp expires_at;
     private boolean revoked;
-    private String replacedByToken;
-    private Timestamp issueAt;
+    private String replaced_by_token;
+    private Timestamp issued_at;
 
-    public RefreshToken(int id, int userId, String token, Timestamp expireAt, boolean revoked, String replacedByToken, Timestamp issueAt) {
+    public RefreshToken() {}
+
+    public RefreshToken(int id, int user_id, String token, Timestamp expires_at, boolean revoked, String replaced_by_token, Timestamp issued_at) {
         this.id = id;
-        this.userId = userId;
+        this.user_id = user_id;
         this.token = token;
-        this.expireAt = expireAt;
+        this.expires_at = expires_at;
         this.revoked = revoked;
-        this.replacedByToken = replacedByToken;
-        this.issueAt = issueAt;
+        this.replaced_by_token = replaced_by_token;
+        this.issued_at = issued_at;
     }
 
     public int getId() {
@@ -29,12 +31,12 @@ public class RefreshToken {
         this.id = id;
     }
 
-    public int getUserId() {
-        return userId;
+    public int getUser_id() {
+        return user_id;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public void setUser_id(int user_id) {
+        this.user_id = user_id;
     }
 
     public String getToken() {
@@ -45,12 +47,12 @@ public class RefreshToken {
         this.token = token;
     }
 
-    public Timestamp getExpireAt() {
-        return expireAt;
+    public Timestamp getExpires_at() {
+        return expires_at;
     }
 
-    public void setExpireAt(Timestamp expireAt) {
-        this.expireAt = expireAt;
+    public void setExpires_at(Timestamp expires_at) {
+        this.expires_at = expires_at;
     }
 
     public boolean isRevoked() {
@@ -61,19 +63,19 @@ public class RefreshToken {
         this.revoked = revoked;
     }
 
-    public String getReplacedByToken() {
-        return replacedByToken;
+    public String getReplaced_by_token() {
+        return replaced_by_token;
     }
 
-    public void setReplacedByToken(String replacedByToken) {
-        this.replacedByToken = replacedByToken;
+    public void setReplaced_by_token(String replaced_by_token) {
+        this.replaced_by_token = replaced_by_token;
     }
 
-    public Timestamp getIssueAt() {
-        return issueAt;
+    public Timestamp getIssued_at() {
+        return issued_at;
     }
 
-    public void setIssueAt(Timestamp issueAt) {
-        this.issueAt = issueAt;
+    public void setIssued_at(Timestamp issued_at) {
+        this.issued_at = issued_at;
     }
 }
