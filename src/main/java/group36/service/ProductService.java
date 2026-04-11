@@ -41,14 +41,14 @@ public class ProductService {
         return products;
     }
 
-    public List<Product> getProductsFiltered(int categoryId, String status, String search, String sort, int page, int size) {
-        List<Product> products = productDAO.findFiltered(categoryId, status, search, sort, page, size);
+    public List<Product> getProductsFiltered(int categoryId, String status, String search, String popular, String sort, int page, int size) {
+        List<Product> products = productDAO.findFiltered(categoryId, status, search, popular, sort, page, size);
         loadProductDetails(products);
         return products;
     }
 
-    public int getTotalProductsFiltered(int categoryId, String status, String search) {
-        return productDAO.countFiltered(categoryId, status, search);
+    public int getTotalProductsFiltered(int categoryId, String status, String search, String popular) {
+        return productDAO.countFiltered(categoryId, status, search, popular);
     }
 
     public Product getProductById(int id) {
