@@ -115,8 +115,8 @@ public class AdminProductController extends HttpServlet {
         String search = request.getParameter("search");
         if (search != null) search = search.trim();
 
-        List<Product> products = productService.getProductsFiltered(categoryId, status, search, sort, page, PAGE_SIZE);
-        int totalProducts = productService.getTotalProductsFiltered(categoryId, status, search);
+        List<Product> products = productService.getProductsFiltered(categoryId, status, search, null, sort, page, PAGE_SIZE);
+        int totalProducts = productService.getTotalProductsFiltered(categoryId, status, search, null);
         int totalPages = (int) Math.ceil((double) totalProducts / PAGE_SIZE);
 
         List<Category> categories = categoryService.getAllCategories();
