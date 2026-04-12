@@ -1,5 +1,6 @@
 package group36.controller.auth;
 
+import group36.dao.RefreshTokenDao;
 import group36.service.*;
 import group36.util.FarmilyConstants;
 import jakarta.servlet.*;
@@ -86,6 +87,25 @@ public class LoginController extends HttpServlet {
         if (u != null) {
             HttpSession session = request.getSession();
             session.setAttribute("auth", u);
+
+            String rememberMe = request.getParameter("rememberMe");
+            if("true".equals(rememberMe)) {
+                String token = java.util.UUID.randomUUID().toString();
+                long expiryTime = System.currentTimeMillis() + (30L * 24 * 60 * 60 * 1000);//30 ngay
+                java.sql.Timestamp expireAt = new java.sql.Timestamp(expiryTime);
+
+                RefreshTokenDao tokenDao = new RefreshTokenDao();
+                tokenDao.insertToken(u.getId(), token, expireAt);
+
+                Cookie cookie = new Cookie("remember_me", token);
+                cookie.setMaxAge(30 * 24 * 60 * 60);
+                cookie.setPath("/");
+                cookie.setHttpOnly(true);
+                cookie.setSecure(true);
+                cookie.setAttribute("SameSite", "Strict");
+                response.addCookie(cookie);
+            }
+            session.setMaxInactiveInterval(15 * 60);
 
             try {
                 CartService cartService = new CartService();

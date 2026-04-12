@@ -1,5 +1,7 @@
 package group36.controller.auth;
 
+import group36.dao.RefreshTokenDao;
+import group36.model.RefreshToken;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -23,8 +25,21 @@ public class LogoutController extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
+        Cookie[] cookies = request.getCookies();
+        if(cookies != null) {
+            for (Cookie cookie : cookies) {
+                if("remember_me".equals(cookie.getName())) {
+                    String token = cookie.getValue();
+                    RefreshTokenDao tokenDao = new RefreshTokenDao();
+                    tokenDao.revokeToken(token);
+                    cookie.setMaxAge(0);
+                    cookie.setPath("/");
+                    response.addCookie(cookie);
+                    break;
+                }
+            }
+        }
 
-        
         response.sendRedirect(request.getContextPath());
     }
 
