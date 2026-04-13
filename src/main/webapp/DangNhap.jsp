@@ -52,10 +52,18 @@
                     <form action="${pageContext.request.contextPath}/login" method="post">
 
                         <label>Email <span>*</span> </label>
-                        <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" required>
+                        <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" value="${username}" required>
 
                         <label>Mật khẩu <span>*</span></label>
-                        <input type="password" name="password" placeholder="Mật khẩu" style="margin-top: 8px;" required>
+                        <div class="password-field" style="margin-top: 8px;">
+                            <input type="password" name="password" id="password" placeholder="Mật khẩu" value="${password}" required>
+                            <i class="fas fa-eye" id="togglePassword"></i>
+                        </div>
+
+                        <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">
+                            <input type="checkbox" id="rememberMe" name="rememberMe" value="true" style="width: auto; margin: 0;">
+                            <label for="rememberMe" style="margin: 0; font-weight: normal; cursor: pointer;">Ghi nhớ đăng nhập</label>
+                        </div>
 
                         <div class="quenmk">
                             <small>Quên mật khẩu? Nhấn vào
@@ -71,12 +79,10 @@
 
                     <p class="hoac">Hoặc đăng nhập bằng</p>
                     <div class="social-login">
-                        <a href="https://www.facebook.com/v19.0/dialog/oauth?client_id=962984642734580&redirect_uri=http://localhost:8080/farmily_v2_war_exploded/dang-nhap"
-                            class="fb">
+                        <a href="${facebookOAuthUrl}" class="fb">
                             <i class="fa-brands fa-facebook"></i> Facebook
                         </a>
-                        <a href="https://accounts.google.com/o/oauth2/auth?scope=email%20profile%20openid&redirect_uri=http://localhost:8080/farmily_v2_war_exploded/dang-nhap&response_type=code&client_id=281202711893-chnhob1qmodiuk43ct7sphrjs5thin4n.apps.googleusercontent.com&approval_prompt=force"
-                            class="gg">
+                        <a href="${googleOAuthUrl}" class="gg">
                             <i class="fa-brands fa-google"></i> Google</a>
                     </div>
                 </div>
@@ -84,6 +90,7 @@
 
 
             <jsp:include page="common/footer.jsp" />
+            <script src="${pageContext.request.contextPath}/js/DangNhap.js"></script>
         </body>
 
         </html>

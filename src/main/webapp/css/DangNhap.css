@@ -81,6 +81,30 @@ a:hover {
     box-sizing: border-box;
 }
 
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field input {
+    padding-right: 45px !important;
+}
+
+.password-field i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s;
+    font-size: 18px;
+}
+
+.password-field i:hover {
+    color: #333;
+}
+
 .quenmk {
     margin-top: 10px;
 }

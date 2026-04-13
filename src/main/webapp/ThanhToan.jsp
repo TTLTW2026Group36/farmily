@@ -95,7 +95,7 @@
               <div class="checkout-products">
                 <h2 class="section-heading">
                   <i class="fas fa-shopping-bag"></i>
-                  Sản phẩm đặt mua (<span id="itemCount">${cart.totalItems}</span> sản phẩm)
+                  Sản phẩm đặt mua (<span id="cartTitleCount">${cart.items.size()}</span> sản phẩm)
                 </h2>
 
                 <div class="checkout-table-wrap">
@@ -162,6 +162,7 @@
 
               <form class="checkout-form" id="checkoutForm" novalidate>
                 <input type="hidden" id="selectedAddressId" name="addressId" value="">
+                <input type="hidden" name="isBuyNow" value="${isBuyNow}">
 
                 <c:if test="${!isLoggedIn}">
                   <h2 class="section-heading"><i class="fas fa-user"></i> Thông tin người nhận</h2>
@@ -353,6 +354,7 @@
             </form>
           </div>
         </div>
+    <div id="sepay-form-container" style="display:none;"></div>
 
         <jsp:include page="common/footer.jsp" />
 
@@ -366,7 +368,7 @@
           window.userName = '${userName}';
           window.userPhone = '${userPhone}';
         </script>
-        <script src="${pageContext.request.contextPath}/js/ThanhToan.js"></script>
+        <script src="${pageContext.request.contextPath}/js/ThanhToan.js?v=2"></script>
       </body>
 
       </html>

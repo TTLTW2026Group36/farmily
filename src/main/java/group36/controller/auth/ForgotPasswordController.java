@@ -1,5 +1,8 @@
 package group36.controller.auth;
 
+import group36.dao.AuthDao;
+import group36.dao.RefreshTokenDao;
+import group36.model.User;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -40,6 +43,12 @@ public class ForgotPasswordController extends HttpServlet {
             
             String otp = passwordResetService.generateOTP(email.trim());
 
+            AuthDao authDao = new AuthDao();
+            User u = authDao.getUserByUsername(email.trim());
+            if(u != null){
+                RefreshTokenDao tokenDao =  new RefreshTokenDao();
+                tokenDao.revokeAllByUserId(u.getId());
+            }
             
             HttpSession session = request.getSession();
             session.setAttribute("resetEmail", email.trim().toLowerCase());

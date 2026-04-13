@@ -181,7 +181,7 @@
                     }
 
                     .thankyou-page .btn-primary:hover {
-                        transform: translateY(-2px);
+                        
                         box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
                     }
 
@@ -226,15 +226,45 @@
 
                 <main class="thankyou-container">
                     <div class="thankyou-card">
-                        <div class="success-icon">
-                            <i class="fas fa-check"></i>
-                        </div>
-
-                        <h1 class="thankyou-title">Đặt hàng thành công!</h1>
-                        <p class="thankyou-subtitle">
-                            Cảm ơn bạn đã mua hàng tại Nông Sản Farmily.
-                            Chúng tôi sẽ liên hệ với bạn sớm nhất.
-                        </p>
+                        <c:choose>
+                            <c:when test="${paymentCallback == 'success'}">
+                                <div class="success-icon" id="statusIcon" style="background:#f59e0b;">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                </div>
+                                <h1 class="thankyou-title" id="statusTitle">Đang xác nhận thanh toán...</h1>
+                                <p class="thankyou-subtitle" id="statusSubtitle">
+                                    Hệ thống đang xác nhận giao dịch của bạn. Vui lòng đợi trong giây lát.
+                                </p>
+                            </c:when>
+                            <c:when test="${paymentCallback == 'error'}">
+                                <div class="success-icon" style="background:#ef4444;">
+                                    <i class="fas fa-times"></i>
+                                </div>
+                                <h1 class="thankyou-title">Thanh toán thất bại</h1>
+                                <p class="thankyou-subtitle">
+                                    Giao dịch không thành công. Đơn hàng vẫn được giữ — bạn có thể thanh toán lại.
+                                </p>
+                            </c:when>
+                            <c:when test="${paymentCallback == 'cancel'}">
+                                <div class="success-icon" style="background:#6b7280;">
+                                    <i class="fas fa-ban"></i>
+                                </div>
+                                <h1 class="thankyou-title">Thanh toán đã hủy</h1>
+                                <p class="thankyou-subtitle">
+                                    Bạn đã hủy giao dịch. Đơn hàng vẫn được giữ — bạn có thể thanh toán lại.
+                                </p>
+                            </c:when>
+                            <c:otherwise>
+                                <div class="success-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <h1 class="thankyou-title">Đặt hàng thành công!</h1>
+                                <p class="thankyou-subtitle">
+                                    Cảm ơn bạn đã mua hàng tại Nông Sản Farmily.
+                                    Chúng tôi sẽ liên hệ với bạn sớm nhất.
+                                </p>
+                            </c:otherwise>
+                        </c:choose>
 
                         <div class="order-info">
                             <div class="order-info-header">
@@ -311,6 +341,54 @@
 
 
                 <jsp:include page="common/footer.jsp" />
+
+                <c:if test="${paymentCallback == 'success'}">
+                <script>
+                (function() {
+                    var orderId = ${order.id};
+                    var contextPath = '${pageContext.request.contextPath}';
+                    var pollCount = 0;
+                    var maxPolls = 60;
+
+                    function poll() {
+                        pollCount++;
+                        if (pollCount > maxPolls) {
+                            updateUI('fa-check', '#22c55e', 'Đặt hàng thành công!',
+                                'Hệ thống sẽ tự động cập nhật khi nhận được xác nhận từ ngân hàng.');
+                            return;
+                        }
+                        fetch(contextPath + '/api/payment/status?orderId=' + orderId)
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (data.paid) {
+                                    updateUI('fa-check', '#22c55e', 'Thanh toán thành công!',
+                                        'Cảm ơn bạn đã mua hàng tại Nông Sản Farmily.');
+                                } else if (data.expired) {
+                                    updateUI('fa-clock', '#ef4444', 'Thanh toán đã hết hạn',
+                                        'Phiên thanh toán đã quá hạn. Bạn có thể đặt hàng lại.');
+                                } else if (data.status === 'failed') {
+                                    updateUI('fa-times', '#ef4444', 'Thanh toán thất bại',
+                                        'Giao dịch không thành công. Đơn hàng vẫn được giữ.');
+                                } else {
+                                    setTimeout(poll, 3000);
+                                }
+                            })
+                            .catch(function() { setTimeout(poll, 3000); });
+                    }
+
+                    function updateUI(icon, color, title, subtitle) {
+                        var el = document.getElementById('statusIcon');
+                        if (el) { el.style.background = color; el.innerHTML = '<i class="fas ' + icon + '"></i>'; }
+                        var t = document.getElementById('statusTitle');
+                        if (t) t.textContent = title;
+                        var s = document.getElementById('statusSubtitle');
+                        if (s) s.textContent = subtitle;
+                    }
+
+                    setTimeout(poll, 1500);
+                })();
+                </script>
+                </c:if>
             </body>
 
             </html>

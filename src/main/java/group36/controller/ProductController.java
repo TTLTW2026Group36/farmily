@@ -44,6 +44,8 @@ public class ProductController extends HttpServlet {
         int size = parseIntParam(request, "size", DEFAULT_PAGE_SIZE);
         String sort = request.getParameter("sort");
         String keyword = request.getParameter("keyword");
+        String status = request.getParameter("status");
+        String popular = request.getParameter("popular");
 
         if (page < 1)
             page = 1;
@@ -57,27 +59,19 @@ public class ProductController extends HttpServlet {
         int totalProducts;
 
         if (keyword != null && !keyword.trim().isEmpty()) {
-
-            products = productService.searchProducts(keyword.trim());
-            totalProducts = products.size();
             request.setAttribute("keyword", keyword.trim());
-        } else if (categoryId > 0) {
-
-            products = productService.getProductsByCategoryPaginatedSorted(categoryId, page, size, sort);
-            totalProducts = productService.getTotalProductsByCategory(categoryId);
+        }
+        if (categoryId > 0) {
             request.setAttribute("selectedCategoryId", categoryId);
-
             try {
                 Category selectedCategory = categoryService.getCategoryById(categoryId);
                 request.setAttribute("selectedCategory", selectedCategory);
             } catch (Exception ignored) {
-
             }
-        } else {
-
-            products = productService.getProductsPaginatedSorted(page, size, sort);
-            totalProducts = productService.getTotalProducts();
         }
+
+        products = productService.getProductsFiltered(categoryId, status, keyword, popular, sort, page, size);
+        totalProducts = productService.getTotalProductsFiltered(categoryId, status, keyword, popular);
 
         int totalPages = (int) Math.ceil((double) totalProducts / size);
         if (totalPages < 1)
@@ -89,6 +83,8 @@ public class ProductController extends HttpServlet {
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("currentSort", sort != null ? sort : "default");
+        request.setAttribute("currentStatus", status != null ? status : "");
+        request.setAttribute("currentPopular", "true".equals(popular) ? "true" : "");
 
         HttpSession session = request.getSession(false);
         Set<Integer> wishlistProductIds = new HashSet<>();

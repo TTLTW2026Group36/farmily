@@ -197,11 +197,11 @@ public class ProductDAO extends BaseDao {
                 .one());
     }
 
-    public List<Product> findFiltered(int categoryId, String status, String search, String sort, int page, int size) {
+    public List<Product> findFiltered(int categoryId, String status, String search, String popular, String sort, int page, int size) {
         int offset = (page - 1) * size;
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT p.* FROM products p ");
-        if ("instock".equals(status) || "outofstock".equals(status) || "price_asc".equals(sort) || "price_desc".equals(sort)) {
+        if ("instock".equals(status) || "outofstock".equals(status) || "price-asc".equals(sort) || "price-desc".equals(sort)) {
             sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock, COALESCE(MIN(price), 0) AS min_price FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
         }
         sql.append("WHERE 1=1 ");
@@ -209,11 +209,14 @@ public class ProductDAO extends BaseDao {
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
         if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+        if ("true".equals(popular)) sql.append("AND p.soild_count > 0 ");
 
         switch (sort != null ? sort : "") {
-            case "name_asc": sql.append("ORDER BY p.name ASC "); break;
-            case "price_asc": sql.append("ORDER BY pv.min_price ASC "); break;
-            case "price_desc": sql.append("ORDER BY pv.min_price DESC "); break;
+            case "name-asc": sql.append("ORDER BY p.name ASC "); break;
+            case "name-desc": sql.append("ORDER BY p.name DESC "); break;
+            case "price-asc": sql.append("ORDER BY pv.min_price ASC "); break;
+            case "price-desc": sql.append("ORDER BY pv.min_price DESC "); break;
+            case "newest": sql.append("ORDER BY p.created_at DESC "); break;
             default: sql.append("ORDER BY p.id DESC "); break;
         }
         sql.append("LIMIT :size OFFSET :offset");
@@ -228,7 +231,7 @@ public class ProductDAO extends BaseDao {
         });
     }
 
-    public int countFiltered(int categoryId, String status, String search) {
+    public int countFiltered(int categoryId, String status, String search, String popular) {
         StringBuilder sql = new StringBuilder();
         sql.append("SELECT COUNT(*) FROM products p ");
         if ("instock".equals(status) || "outofstock".equals(status)) {
@@ -239,6 +242,7 @@ public class ProductDAO extends BaseDao {
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
         if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+        if ("true".equals(popular)) sql.append("AND p.soild_count > 0 ");
 
         return get().withHandle(handle -> {
             var query = handle.createQuery(sql.toString());

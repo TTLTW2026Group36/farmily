@@ -73,16 +73,22 @@
                             <div class="filter-divider"></div>
                             <ul class="filter-list category-list">
 
+                                <c:set var="baseParams" value="" />
+                                <c:if test="${not empty keyword}"><c:set var="baseParams" value="${baseParams}&keyword=${keyword}" /></c:if>
+                                <c:if test="${not empty currentSort && currentSort != 'default'}"><c:set var="baseParams" value="${baseParams}&sort=${currentSort}" /></c:if>
+                                <c:if test="${not empty currentStatus}"><c:set var="baseParams" value="${baseParams}&status=${currentStatus}" /></c:if>
+                                <c:if test="${currentPopular == 'true'}"><c:set var="baseParams" value="${baseParams}&popular=true" /></c:if>
+
                                 <li class="filter-item">
-                                    <a href="${pageContext.request.contextPath}/san-pham"
-                                        class="filter-link ${empty selectedCategoryId ? 'active' : ''}">
+                                    <a href="${pageContext.request.contextPath}/san-pham?${not empty baseParams ? baseParams.substring(1) : ''}"
+                                        class="filter-link ${empty selectedCategoryId || selectedCategoryId == 0 ? 'active' : ''}">
                                         <i class="fas fa-th-large"></i> Tất cả sản phẩm
                                     </a>
                                 </li>
 
                                 <c:forEach var="category" items="${categories}">
                                     <li class="filter-item">
-                                        <a href="${pageContext.request.contextPath}/san-pham?categoryId=${category.id}"
+                                        <a href="${pageContext.request.contextPath}/san-pham?categoryId=${category.id}${baseParams}"
                                             class="filter-link ${selectedCategoryId == category.id ? 'active' : ''}">
                                             ${category.name}
                                         </a>
@@ -119,6 +125,12 @@
                                         Sắp xếp:
                                     </span>
                                     <button
+                                        class="filter-toggle-btn"
+                                        id="filterToggleBtn">
+                                        <i class="fas fa-filter"></i> Lọc
+                                    </button>
+                                    <span class="toolbar-divider"></span>
+                                    <button
                                         class="sort-btn ${currentSort == 'default' || empty currentSort ? 'active' : ''}"
                                         data-sort="default">
                                         <i class="fas fa-th"></i>
@@ -144,13 +156,51 @@
                                         <i class="fas fa-arrow-down"></i>
                                         Giá giảm
                                     </button>
-                                    <button class="sort-btn ${currentSort == 'popular' ? 'active' : ''}"
-                                        data-sort="popular">
-                                        <i class="fas fa-fire"></i>
-                                        Bán chạy
-                                    </button>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="filter-panel" id="filterPanel" style="display: none;">
+                            <form id="advancedFilterForm" class="filter-form" action="${pageContext.request.contextPath}/san-pham" method="GET">
+                                <input type="hidden" name="sort" value="${currentSort}">
+                                
+                                <div class="filter-form-grid">
+                                    <div class="filter-group">
+                                        <label>Danh mục</label>
+                                        <select name="categoryId" class="filter-select">
+                                            <option value="0">Tất cả danh mục</option>
+                                            <c:forEach var="category" items="${categories}">
+                                                <option value="${category.id}" ${selectedCategoryId == category.id ? 'selected' : ''}>${category.name}</option>
+                                            </c:forEach>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="filter-group">
+                                        <label>Trạng thái</label>
+                                        <select name="status" class="filter-select">
+                                            <option value="">Tất cả trạng thái</option>
+                                            <option value="instock" ${currentStatus == 'instock' ? 'selected' : ''}>Còn hàng</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="filter-group">
+                                        <label>Từ khóa</label>
+                                        <input type="text" name="keyword" class="filter-input" placeholder="Tên sản phẩm..." value="${keyword}">
+                                    </div>
+
+                                    <div class="filter-group">
+                                        <label>Sản phẩm nổi bật</label>
+                                        <label class="filter-checkbox">
+                                            <input type="checkbox" name="popular" value="true" ${currentPopular == 'true' ? 'checked' : ''}> <i class="fas fa-fire" style="color: #e74c3c;"></i> Bán chạy nhất
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-actions">
+                                    <button type="button" class="btn-clear-filter" id="clearFilterBtn">Xóa bộ lọc</button>
+                                    <button type="submit" class="btn-apply-filter">Áp dụng</button>
+                                </div>
+                            </form>
                         </div>
 
                         <div class="products-grid">
@@ -230,15 +280,21 @@
 
                         <c:if test="${totalPages > 1}">
                             <div class="pagination">
+                                <c:set var="pageParams" value="" />
+                                <c:if test="${not empty selectedCategoryId && selectedCategoryId > 0}"><c:set var="pageParams" value="${pageParams}&categoryId=${selectedCategoryId}" /></c:if>
+                                <c:if test="${not empty keyword}"><c:set var="pageParams" value="${pageParams}&keyword=${keyword}" /></c:if>
+                                <c:if test="${not empty currentSort && currentSort != 'default'}"><c:set var="pageParams" value="${pageParams}&sort=${currentSort}" /></c:if>
+                                <c:if test="${not empty currentStatus}"><c:set var="pageParams" value="${pageParams}&status=${currentStatus}" /></c:if>
+                                <c:if test="${currentPopular == 'true'}"><c:set var="pageParams" value="${pageParams}&popular=true" /></c:if>
 
                                 <c:if test="${currentPage > 1}">
-                                    <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage - 1}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
+                                    <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage - 1}${pageParams}"
                                         class="page-btn prev-btn">‹</a>
                                 </c:if>
 
 
                                 <c:if test="${currentPage > 3}">
-                                    <a href="${pageContext.request.contextPath}/san-pham?page=1${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
+                                    <a href="${pageContext.request.contextPath}/san-pham?page=1${pageParams}"
                                         class="page-btn">1</a>
                                     <c:if test="${currentPage > 4}">
                                         <span class="page-dots">...</span>
@@ -248,7 +304,7 @@
 
                                 <c:forEach begin="${currentPage > 2 ? currentPage - 2 : 1}"
                                     end="${currentPage + 2 < totalPages ? currentPage + 2 : totalPages}" var="i">
-                                    <a href="${pageContext.request.contextPath}/san-pham?page=${i}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
+                                    <a href="${pageContext.request.contextPath}/san-pham?page=${i}${pageParams}"
                                         class="page-btn ${i == currentPage ? 'active' : ''}">${i}</a>
                                 </c:forEach>
 
@@ -257,13 +313,13 @@
                                     <c:if test="${currentPage < totalPages - 3}">
                                         <span class="page-dots">...</span>
                                     </c:if>
-                                    <a href="${pageContext.request.contextPath}/san-pham?page=${totalPages}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
+                                    <a href="${pageContext.request.contextPath}/san-pham?page=${totalPages}${pageParams}"
                                         class="page-btn">${totalPages}</a>
                                 </c:if>
 
 
                                 <c:if test="${currentPage < totalPages}">
-                                    <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage + 1}${not empty selectedCategoryId ? '&categoryId='.concat(selectedCategoryId) : ''}${not empty currentSort && currentSort != 'default' ? '&sort='.concat(currentSort) : ''}"
+                                    <a href="${pageContext.request.contextPath}/san-pham?page=${currentPage + 1}${pageParams}"
                                         class="page-btn next-btn">›</a>
                                 </c:if>
                             </div>

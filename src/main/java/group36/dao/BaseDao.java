@@ -18,7 +18,6 @@ public abstract class BaseDao {
 
     private void connect() {
         MysqlDataSource ds = new MysqlDataSource();
-        System.out.println("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname);
         ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname);
         ds.setUser(DBProperties.username);
         ds.setPassword(DBProperties.password);
@@ -31,8 +30,4 @@ public abstract class BaseDao {
         jdbi = Jdbi.create(ds);
     }
 
-    
-    
-    
-    
 }

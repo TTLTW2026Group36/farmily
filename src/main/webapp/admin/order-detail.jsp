@@ -119,119 +119,6 @@
                             <div class="detail-grid">
 
                                 <div class="detail-main">
-
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h3 class="card-title"><i class="fas fa-shopping-basket"
-                                                    style="color:var(--primary);margin-right:6px;"></i> Sản phẩm
-                                                (${order.orderDetails.size()})</h3>
-                                        </div>
-                                        <div class="card-body" style="padding:0;">
-                                            <table class="admin-table">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Sản phẩm</th>
-                                                        <th style="width:100px;">Đơn giá</th>
-                                                        <th style="width:70px;">SL</th>
-                                                        <th style="width:110px;">Thành tiền</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <c:forEach var="item" items="${order.orderDetails}">
-                                                        <tr>
-                                                            <td>
-                                                                <div class="product-cell">
-                                                                    <img src="${item.imageUrl.startsWith('http') ? item.imageUrl : pageContext.request.contextPath.concat(item.imageUrl)}"
-                                                                        alt="${item.productName}" class="product-img"
-                                                                        onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
-                                                                    <div>
-                                                                        <div class="product-name">${item.productName}
-                                                                            <c:if test="${not empty item.variantText}">
-                                                                                <span
-                                                                                    class="variant-badge">${item.variantText}</span>
-                                                                            </c:if>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </td>
-                                                            <td><span
-                                                                    class="price-value">${item.formattedUnitPrice}</span>
-                                                            </td>
-                                                            <td><span class="qty-badge">x${item.quantity}</span></td>
-                                                            <td><strong
-                                                                    class="price-total">${item.formattedSubtotal}</strong>
-                                                            </td>
-                                                        </tr>
-                                                    </c:forEach>
-                                                    <c:if test="${empty order.orderDetails}">
-                                                        <tr>
-                                                            <td colspan="4"
-                                                                style="text-align:center;color:#94a3b8;padding:24px;">
-                                                                Không có sản phẩm nào</td>
-                                                        </tr>
-                                                    </c:if>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="order-total-footer">
-                                            <div class="total-row">
-                                                <span>Tạm tính</span>
-                                                <span>${order.formattedSubtotal}</span>
-                                            </div>
-                                            <div class="total-row">
-                                                <span>Phí vận chuyển</span>
-                                                <span>${order.formattedShippingFee}</span>
-                                            </div>
-                                            <div class="total-row total-final">
-                                                <strong>Tổng cộng</strong>
-                                                <strong class="price-grand">${order.formattedTotalPrice}</strong>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- <div class="card shipping-block">
-                                        <div class="card-header">
-                                            <h3 class="card-title">
-                                                <i class="fas fa-truck" style="color:#7c3aed;margin-right:6px;"></i>
-                                                Thông tin vận chuyển
-                                            </h3>
-                                            <span class="placeholder-badge"><i class="fas fa-code-branch"></i> Sẵn sàng
-                                                tích hợp API</span>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="shipping-manual">
-                                                <div class="shipping-field">
-                                                    <label class="field-label">Đơn vị vận chuyển</label>
-                                                    <select class="form-control" id="shippingCarrier"
-                                                        style="max-width:280px;">
-                                                        <option value="">— Chọn đơn vị —</option>
-                                                        <option value="ghn">GHN (Giao Hàng Nhanh)</option>
-                                                        <option value="ghtk">GHTK (Giao Hàng Tiết Kiệm)</option>
-                                                        <option value="viettel">Viettel Post</option>
-                                                        <option value="vnpost">Vietnam Post</option>
-                                                        <option value="other">Khác</option>
-                                                    </select>
-                                                </div>
-                                                <div class="shipping-field">
-                                                    <label class="field-label">Mã vận đơn</label>
-                                                    <div
-                                                        style="display:flex;gap:8px;align-items:center;max-width:400px;">
-                                                        <input type="text" class="form-control" id="trackingCode"
-                                                            placeholder="Nhập mã vận đơn thủ công..." style="flex:1;">
-                                                        <button class="btn btn-secondary btn-sm"
-                                                            onclick="saveTracking()"><i class="fas fa-save"></i>
-                                                            Lưu</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="api-notice">
-                                                <i class="fas fa-plug"></i>
-                                                <span>Tích hợp API GHN/GHTK để tạo vận đơn và theo dõi tự động sẽ được
-                                                    thêm vào đây trong phiên bản tiếp theo.</span>
-                                            </div>
-                                        </div>
-                                    </div> -->
-
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-history"
@@ -345,6 +232,119 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-shopping-basket"
+                                                    style="color:var(--primary);margin-right:6px;"></i> Sản phẩm
+                                                (${order.orderDetails.size()})</h3>
+                                        </div>
+                                        <div class="card-body" style="padding:0;">
+                                            <table class="admin-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Sản phẩm</th>
+                                                        <th style="width:150px;">Phân loại</th>
+                                                        <th style="width:100px;">Đơn giá</th>
+                                                        <th style="width:70px;">SL</th>
+                                                        <th style="width:110px;">Thành tiền</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <c:forEach var="item" items="${order.orderDetails}">
+                                                        <tr>
+                                                            <td>
+                                                                <div class="product-cell">
+                                                                    <img src="${item.imageUrl.startsWith('http') ? item.imageUrl : pageContext.request.contextPath.concat(item.imageUrl)}"
+                                                                        alt="${item.productName}" class="product-img"
+                                                                        onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                    <div>
+                                                                        <div class="product-name">${item.productName}</div>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <c:choose>
+                                                                    <c:when test="${not empty item.variantText}">
+                                                                        <span class="variant-badge">${item.variantText}</span>
+                                                                    </c:when>
+                                                                    <c:otherwise><span class="empty-val">—</span></c:otherwise>
+                                                                </c:choose>
+                                                            </td>
+                                                            <td><span class="price-value">${item.formattedUnitPrice}</span></td>
+                                                            <td><span class="qty-badge">x${item.quantity}</span></td>
+                                                            <td><strong class="price-total">${item.formattedSubtotal}</strong></td>
+                                                        </tr>
+                                                    </c:forEach>
+                                                    <c:if test="${empty order.orderDetails}">
+                                                        <tr>
+                                                            <td colspan="5"
+                                                                style="text-align:center;color:#94a3b8;padding:24px;">
+                                                                Không có sản phẩm nào</td>
+                                                        </tr>
+                                                    </c:if>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="order-total-footer">
+                                            <div class="total-row">
+                                                <span>Tạm tính</span>
+                                                <span>${order.formattedSubtotal}</span>
+                                            </div>
+                                            <div class="total-row">
+                                                <span>Phí vận chuyển</span>
+                                                <span>${order.formattedShippingFee}</span>
+                                            </div>
+                                            <div class="total-row total-final">
+                                                <strong>Tổng cộng</strong>
+                                                <strong class="price-grand">${order.formattedTotalPrice}</strong>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- <div class="card shipping-block">
+                                        <div class="card-header">
+                                            <h3 class="card-title">
+                                                <i class="fas fa-truck" style="color:#7c3aed;margin-right:6px;"></i>
+                                                Thông tin vận chuyển
+                                            </h3>
+                                            <span class="placeholder-badge"><i class="fas fa-code-branch"></i> Sẵn sàng
+                                                tích hợp API</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="shipping-manual">
+                                                <div class="shipping-field">
+                                                    <label class="field-label">Đơn vị vận chuyển</label>
+                                                    <select class="form-control" id="shippingCarrier"
+                                                        style="max-width:280px;">
+                                                        <option value="">— Chọn đơn vị —</option>
+                                                        <option value="ghn">GHN (Giao Hàng Nhanh)</option>
+                                                        <option value="ghtk">GHTK (Giao Hàng Tiết Kiệm)</option>
+                                                        <option value="viettel">Viettel Post</option>
+                                                        <option value="vnpost">Vietnam Post</option>
+                                                        <option value="other">Khác</option>
+                                                    </select>
+                                                </div>
+                                                <div class="shipping-field">
+                                                    <label class="field-label">Mã vận đơn</label>
+                                                    <div
+                                                        style="display:flex;gap:8px;align-items:center;max-width:400px;">
+                                                        <input type="text" class="form-control" id="trackingCode"
+                                                            placeholder="Nhập mã vận đơn thủ công..." style="flex:1;">
+                                                        <button class="btn btn-secondary btn-sm"
+                                                            onclick="saveTracking()"><i class="fas fa-save"></i>
+                                                            Lưu</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="api-notice">
+                                                <i class="fas fa-plug"></i>
+                                                <span>Tích hợp API GHN/GHTK để tạo vận đơn và theo dõi tự động sẽ được
+                                                    thêm vào đây trong phiên bản tiếp theo.</span>
+                                            </div>
+                                        </div>
+                                    </div> -->
+
+                                    
                                 </div>
 
                                 <div class="detail-sidebar">
@@ -423,7 +423,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Payment Info -->
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-credit-card"
@@ -432,25 +431,40 @@
                                         <div class="card-body">
                                             <div class="info-row">
                                                 <span class="info-label">Phương thức</span>
-                                                <strong class="info-value">
-                                                    <c:choose>
-                                                        <c:when test="${order.paymentMethod != null}">
-                                                            ${order.paymentMethod.name}</c:when>
-                                                        <c:otherwise>COD (Tiền mặt)</c:otherwise>
-                                                    </c:choose>
-                                                </strong>
+                                                <strong class="info-value">${order.paymentMethodText}</strong>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="info-label">Trạng thái TT</span>
+                                                <span class="pay-badge ${order.paymentStatusBadgeClass}">${order.paymentStatusText}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày đặt</span>
                                                 <span class="info-value">
-                                                    <fmt:formatDate value="${order.orderDate}"
-                                                        pattern="dd/MM/yyyy HH:mm" />
+                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" />
                                                 </span>
                                             </div>
-                                            <div class="info-row">
-                                                <span class="info-label">Trạng thái TT</span>
-                                                <span class="pay-status unpaid">Chưa thanh toán</span>
-                                            </div>
+                                            <c:if test="${order.latestPayment != null}">
+                                                <c:if test="${not empty order.latestPayment.provider}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Nhà cung cấp</span>
+                                                        <span class="info-value">${order.latestPayment.provider}</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty order.latestPayment.transactionId}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Mã giao dịch</span>
+                                                        <span class="info-value payment-txn">${order.latestPayment.transactionId}</span>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${order.latestPayment.paidAt != null}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Thanh toán lúc</span>
+                                                        <span class="info-value">
+                                                            <fmt:formatDate value="${order.latestPayment.paidAt}" pattern="dd/MM/yyyy HH:mm" />
+                                                        </span>
+                                                    </div>
+                                                </c:if>
+                                            </c:if>
                                         </div>
                                     </div>
 

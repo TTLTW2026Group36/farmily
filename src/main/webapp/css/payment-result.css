@@ -1,0 +1,259 @@
+:root {
+  --pr-success: #22c55e;
+  --pr-error: #ef4444;
+  --pr-warning: #f59e0b;
+  --pr-cancel: #6b7280;
+  --pr-verifying: #3b82f6;
+  --font-main: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.payment-result-page {
+  background: #f3f4f6;
+  min-height: 100vh;
+}
+
+.pr-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+.pr-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 48px 40px;
+  text-align: center;
+}
+
+.pr-icon {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  animation: prScaleIn 0.5s ease;
+}
+
+.pr-icon i {
+  font-size: 40px;
+  color: #fff;
+}
+
+.pr-icon-success {
+  background: var(--pr-success);
+}
+
+.pr-icon-error {
+  background: var(--pr-error);
+}
+
+.pr-icon-cancel {
+  background: var(--pr-cancel);
+}
+
+.pr-icon-verifying {
+  background: var(--pr-verifying);
+}
+
+.pr-icon-verifying i {
+  animation: prSpin 1.2s linear infinite;
+}
+
+@keyframes prScaleIn {
+  from {
+    transform: scale(0);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes prSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pr-title {
+  font-family: var(--font-main);
+  font-weight: 700;
+  font-size: 26px;
+  color: #1f2937;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.pr-subtitle {
+  color: #6b7280;
+  font-size: 15px;
+  margin-bottom: 32px;
+  line-height: 1.6;
+  transition: all 0.3s ease;
+}
+
+.pr-order-info {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 32px;
+  text-align: left;
+}
+
+.pr-order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.pr-order-number {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.pr-payment-badge {
+  background: #fef3c7;
+  color: #92400e;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.pr-badge-paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.pr-order-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.pr-detail-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pr-detail-label {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.pr-detail-value {
+  color: #1f2937;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.pr-amount {
+  color: var(--pr-success);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.pr-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pr-btn {
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.pr-btn-primary {
+  background: var(--pr-success);
+  color: #fff;
+}
+
+.pr-btn-primary:hover {
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4);
+  transform: translateY(-1px);
+}
+
+.pr-btn-secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.pr-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.pr-polling-status {
+  color: var(--pr-verifying);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pr-polling-status i {
+  animation: prSpin 1.2s linear infinite;
+}
+
+@media (max-width: 600px) {
+  .pr-card {
+    padding: 32px 20px;
+  }
+
+  .pr-order-details {
+    grid-template-columns: 1fr;
+  }
+
+  .pr-actions {
+    flex-direction: column;
+  }
+
+  .pr-btn {
+    justify-content: center;
+    width: 100%;
+  }
+}
+
+.is-embedded {
+  background: #fff !important;
+}
+
+.is-embedded .pr-container {
+  margin: 0 !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 0 !important;
+}
+
+.is-embedded .pr-card {
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 32px 20px !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}

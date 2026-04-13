@@ -372,6 +372,39 @@ a {
     filter: none;
 }
 
+.btn-buy-now {
+    flex: 1;
+    padding: 14px 8px;
+    font-size: 15px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 700;
+    background: var(--c-primary);
+    color: #fff;
+    border: none;
+    transition: filter 0.2s;
+    box-shadow: 0 6px 14px rgba(255, 90, 31, .2);
+}
+
+.btn-buy-now:hover {
+    filter: brightness(.95);
+}
+
+.btn-buy-now:disabled {
+    background: #6b7280;
+    cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.8;
+}
+
+.btn-buy-now:disabled:hover {
+    filter: none;
+}
+
 .msg {
     min-height: 20px;
     font-size: 14px;

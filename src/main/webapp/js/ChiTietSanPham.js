@@ -22,7 +22,7 @@
         const qtyInput = document.getElementById('qtyInput');
         const purchaseForm = document.getElementById('purchaseForm');
         const msgEl = document.getElementById('msg');
-
+        const btnBuyNow = document.getElementById('btnBuyNow');
 
         if (!purchaseForm) {
             console.log('purchaseForm not found, exiting init');
@@ -147,16 +147,13 @@
         initFlashSale();
 
 
-        purchaseForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            console.log('Submit handler triggered!');
-
+        const handlePurchase = (isBuyNow) => {
+            console.log('handlePurchase triggered! isBuyNow:', isBuyNow);
 
             let selectedVariant = document.querySelector('input[name="variantId"]:checked');
             if (!selectedVariant) {
                 selectedVariant = document.querySelector('input[name="weight"]:checked');
             }
-
 
             const variantInputs = document.querySelectorAll('input[name="variantId"], input[name="weight"]');
             const hasVariants = variantInputs.length > 0;
@@ -174,7 +171,6 @@
             const variantText = selectedVariant?.nextElementSibling?.textContent?.trim() || '';
             const productName = document.querySelector('.sp-title')?.textContent?.trim() || '';
 
-
             console.log('Add to cart:', { productId, variantId, qty, hasVariants });
 
             if (!productId) {
@@ -187,14 +183,44 @@
                 return;
             }
 
-
             const submitBtn = purchaseForm.querySelector('button[type="submit"]');
             const originalText = submitBtn ? submitBtn.textContent : '';
             if (submitBtn) {
                 submitBtn.disabled = true;
-                submitBtn.textContent = 'Đang xử lý...';
+                if (!isBuyNow) submitBtn.textContent = 'Đang xử lý...';
             }
 
+            const originalBuyNowText = btnBuyNow ? btnBuyNow.textContent : '';
+            if (btnBuyNow) {
+                btnBuyNow.disabled = true;
+                if (isBuyNow) btnBuyNow.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
+            }
+
+            if (isBuyNow) {
+                if (window.isLoggedIn === false) {
+                    if (confirm('Vui lòng đăng nhập để mua hàng.\n\nBấm OK để chuyển đến trang đăng nhập.')) {
+                        window.location.href = (window.contextPath || '') + '/DangNhap.jsp';
+                    }
+                    if (btnBuyNow) {
+                        btnBuyNow.disabled = false;
+                        btnBuyNow.innerHTML = originalBuyNowText;
+                    }
+                    const submitBtn = purchaseForm.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = originalText;
+                    }
+                    return;
+                }
+
+                const url = new URL((window.contextPath || '') + '/thanh-toan', window.location.origin);
+                url.searchParams.append('buyNow', 'true');
+                url.searchParams.append('productId', productId);
+                if (variantId) url.searchParams.append('variantId', variantId);
+                url.searchParams.append('quantity', qty);
+                window.location.href = url.pathname + url.search;
+                return;
+            }
 
             const params = new URLSearchParams();
             params.append('productId', productId);
@@ -209,14 +235,12 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-
                         if (typeof updateCartBadge === 'function') {
                             updateCartBadge(data.cartCount);
                         } else {
                             const cartBadge = document.getElementById('cartCount');
                             if (cartBadge) cartBadge.textContent = data.cartCount;
                         }
-
 
                         if (msgEl) {
                             const msg = variantText
@@ -227,10 +251,8 @@
                             setTimeout(() => { msgEl.textContent = ''; }, 4000);
                         }
 
-
                         showToast('Đã thêm vào giỏ hàng!', 'success');
                     } else {
-
                         if (data.requireLogin) {
                             if (confirm('Vui lòng đăng nhập để thêm vào giỏ hàng.\n\nBấm OK để chuyển đến trang đăng nhập.')) {
                                 window.location.href = (window.contextPath || '') + '/DangNhap.jsp';
@@ -241,16 +263,32 @@
                     }
                 })
                 .catch(error => {
-                    console.error('Add to cart error:', error);
+                    console.error('Purchase error:', error);
                     alert('Có lỗi xảy ra, vui lòng thử lại!');
                 })
                 .finally(() => {
                     if (submitBtn) {
                         submitBtn.disabled = false;
-                        submitBtn.textContent = originalText;
+                        if (!isBuyNow) submitBtn.textContent = originalText;
+                    }
+                    if (btnBuyNow) {
+                        btnBuyNow.disabled = false;
+                        if (isBuyNow) btnBuyNow.textContent = originalBuyNowText;
                     }
                 });
+        };
+
+        purchaseForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handlePurchase(false);
         });
+
+        if (btnBuyNow) {
+            btnBuyNow.addEventListener('click', (e) => {
+                e.preventDefault();
+                handlePurchase(true);
+            });
+        }
 
         function showToast(message, type) {
             type = type || 'info';

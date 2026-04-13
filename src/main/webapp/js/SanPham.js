@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     initSortButtons();
     initWishlistButtons();
     initPriceFilter();
+    initFilterPanel();
 });
 
 
@@ -139,3 +140,36 @@ function formatPrice(price) {
     `;
     document.head.appendChild(s);
 })();
+
+function initFilterPanel() {
+    const toggleBtn = document.getElementById('filterToggleBtn');
+    const panel = document.getElementById('filterPanel');
+    const clearBtn = document.getElementById('clearFilterBtn');
+
+    if (toggleBtn && panel) {
+        toggleBtn.addEventListener('click', function () {
+            if (panel.style.display === 'none') {
+                panel.style.display = 'block';
+                toggleBtn.classList.add('active');
+            } else {
+                panel.style.display = 'none';
+                toggleBtn.classList.remove('active');
+            }
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearFilters);
+    }
+}
+
+window.clearFilters = function () {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('categoryId');
+    url.searchParams.delete('status');
+    url.searchParams.delete('keyword');
+    url.searchParams.delete('popular');
+    url.searchParams.delete('sort');
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+};
