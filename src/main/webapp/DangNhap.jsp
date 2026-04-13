@@ -52,11 +52,11 @@
                     <form action="${pageContext.request.contextPath}/login" method="post">
 
                         <label>Email <span>*</span> </label>
-                        <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" required>
+                        <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" value="${username}" required>
 
                         <label>Mật khẩu <span>*</span></label>
                         <div class="password-field" style="margin-top: 8px;">
-                            <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+                            <input type="password" name="password" id="password" placeholder="Mật khẩu" value="${password}" required>
                             <i class="fas fa-eye" id="togglePassword"></i>
                         </div>
 

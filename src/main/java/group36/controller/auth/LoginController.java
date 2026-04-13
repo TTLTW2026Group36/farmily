@@ -125,7 +125,9 @@ public class LoginController extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/home");
         } else {
-            request.setAttribute("error", "Invalid username or password");
+            request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+            request.setAttribute("username", username);
+            request.setAttribute("password", pass);
             request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
         }
 
