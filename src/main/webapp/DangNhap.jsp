@@ -55,7 +55,10 @@
                         <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" required>
 
                         <label>Mật khẩu <span>*</span></label>
-                        <input type="password" name="password" placeholder="Mật khẩu" style="margin-top: 8px;" required>
+                        <div class="password-field" style="margin-top: 8px;">
+                            <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+                            <i class="fas fa-eye" id="togglePassword"></i>
+                        </div>
 
                         <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">
                             <input type="checkbox" id="rememberMe" name="rememberMe" value="true" style="width: auto; margin: 0;">
@@ -87,6 +90,7 @@
 
 
             <jsp:include page="common/footer.jsp" />
+            <script src="${pageContext.request.contextPath}/js/DangNhap.js"></script>
         </body>
 
         </html>
