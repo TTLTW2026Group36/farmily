@@ -78,8 +78,16 @@
     window.changeQuantity = function (itemId, delta) {
         var input = document.getElementById('qty-' + itemId);
         if (!input) return;
+        var row = document.querySelector('.cart-row[data-item-id="' + itemId + '"]');
+        var stock = row ? parseInt(row.dataset.stock, 10) : 999;
         var newQty = parseInt(input.value, 10) + delta;
         if (newQty < 1) newQty = 1;
+        if (stock > 0 && newQty > stock) {
+            newQty = stock;
+            input.value = newQty;
+            showToast('Số lượng bạn chọn đã đạt mức tối đa của sản phẩm này');
+            return;
+        }
         if (newQty > 999) newQty = 999;
         input.value = newQty;
         updateCartQuantity(itemId, newQty);
@@ -96,9 +104,16 @@
             }
             return;
         }
+        var row = document.querySelector('.cart-row[data-item-id="' + itemId + '"]');
+        var stock = row ? parseInt(row.dataset.stock, 10) : 999;
+        if (stock > 0 && quantity > stock) {
+            quantity = stock;
+            var inp = document.getElementById('qty-' + itemId);
+            if (inp) inp.value = stock;
+            showToast('Số lượng bạn chọn đã đạt mức tối đa của sản phẩm này');
+        }
         if (quantity > 999) quantity = 999;
 
-        var row = document.querySelector('.cart-row[data-item-id="' + itemId + '"]');
         var buttons = row ? row.querySelectorAll('.qty-btn') : [];
         buttons.forEach(function (b) { b.disabled = true; });
 
@@ -110,11 +125,11 @@
                     updateCartTotals();
                     updateCartBadge(data.cartCount);
                 } else {
-                    alert(data.message || 'Có lỗi xảy ra');
+                    showToast(data.message || 'Có lỗi xảy ra');
                     location.reload();
                 }
             })
-            .catch(function () { alert('Có lỗi xảy ra, vui lòng thử lại!'); })
+            .catch(function () { showToast('Có lỗi xảy ra, vui lòng thử lại!'); })
             .finally(function () {
                 buttons.forEach(function (b) {
                     b.disabled = false;
@@ -189,6 +204,31 @@
 
         var minusBtn = row.querySelector('.qty-btn.minus');
         if (minusBtn) minusBtn.disabled = item.quantity <= 1;
+
+        if (typeof item.stock !== 'undefined') {
+            row.dataset.stock = item.stock;
+            updateStockWarning(itemId, item.stock);
+        }
+    }
+
+    function updateStockWarning(itemId, stock) {
+        var row = document.querySelector('.cart-row[data-item-id="' + itemId + '"]');
+        if (!row) return;
+        var td = row.querySelector('td.col-qty');
+        if (!td) return;
+        var warn = document.getElementById('stock-warn-' + itemId);
+
+        if (stock > 0 && stock <= 5) {
+            if (!warn) {
+                warn = document.createElement('span');
+                warn.className = 'low-stock-warn';
+                warn.id = 'stock-warn-' + itemId;
+                td.appendChild(warn);
+            }
+            warn.textContent = 'Còn lại ' + stock + ' sản phẩm';
+        } else if (warn) {
+            warn.remove();
+        }
     }
 
     window.removeCartItem = function (itemId) {

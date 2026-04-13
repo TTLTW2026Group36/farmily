@@ -179,7 +179,8 @@ public class AddToCartController extends HttpServlet {
                     "\"variantText\":\"" + escapeJson(item.getVariantText()) + "\"," +
                     "\"quantity\":" + item.getQuantity() + "," +
                     "\"unitPrice\":" + item.getUnitPrice() + "," +
-                    "\"subtotal\":" + item.getSubtotal() +
+                    "\"subtotal\":" + item.getSubtotal() + "," +
+                    "\"stock\":" + item.getStock() +
                     "}," +
                     "\"cartCount\":" + cartCount + "}");
 

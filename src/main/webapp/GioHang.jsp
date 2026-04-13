@@ -65,7 +65,8 @@
                                 <tbody id="cartTableBody">
                                     <c:forEach var="item" items="${cart.items}">
                                         <tr class="cart-row row-selected" data-item-id="${item.id}"
-                                            data-product-id="${item.productId}" data-price="${item.unitPrice}">
+                                            data-product-id="${item.productId}" data-price="${item.unitPrice}"
+                                            data-stock="${item.stock}">
                                             <td class="col-check">
                                                 <div class="cb-wrap">
                                                     <input type="checkbox" class="cb cart-item-check"
@@ -140,6 +141,9 @@
                                                     <button class="qty-btn plus" aria-label="Tăng"
                                                         onclick="changeQuantity(${item.id}, 1)">+</button>
                                                 </div>
+                                                <c:if test="${item.stock > 0 && item.stock <= 5}">
+                                                    <span class="low-stock-warn" id="stock-warn-${item.id}">Còn lại ${item.stock} sản phẩm</span>
+                                                </c:if>
                                             </td>
                                             <td class="col-total">
                                                 <span class="subtotal-val" id="subtotal-${item.id}">
