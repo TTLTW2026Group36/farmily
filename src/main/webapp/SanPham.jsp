@@ -266,10 +266,19 @@
                                                             class="price-unit">/${product.minPriceVariant.optionsValue}</span>
                                                     </c:if>
                                                 </p>
-                                                <button class="add-to-cart-btn"
-                                                    onclick="addToCart(${product.id}, ${not empty product.minPriceVariant ? product.minPriceVariant.id : 0})">
-                                                    <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
-                                                </button>
+                                                <c:choose>
+                                                    <c:when test="${product.totalStock > 0}">
+                                                        <button class="add-to-cart-btn"
+                                                            onclick="addToCart(${product.id}, ${not empty product.minPriceVariant ? product.minPriceVariant.id : 0})">
+                                                            <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                                                        </button>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <button type="button" class="add-to-cart-btn" disabled>
+                                                            HẾT HÀNG
+                                                        </button>
+                                                    </c:otherwise>
+                                                </c:choose>
                                             </div>
                                         </div>
                                     </c:forEach>
