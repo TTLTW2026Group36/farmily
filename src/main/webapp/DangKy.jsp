@@ -8,8 +8,8 @@
         <head>
             <meta charset="UTF-8">
             <title>Đăng ký tài khoản | Farmily</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DangKy.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DangKy.css?v=<%= System.currentTimeMillis() %>">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=<%= System.currentTimeMillis() %>">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
 
@@ -42,7 +42,7 @@
 
                         <form action="${pageContext.request.contextPath}/register" method="post">
                             
-                                
+
 
                                     <label>Họ và Tên <span>*</span></label>
                                     <input type="text" name="name" placeholder="Tên" required value="${name}">
@@ -55,7 +55,22 @@
                                     <input type="email" name="email" placeholder="Email" required value="${email}">
 
                                     <label>Mật khẩu <span>*</span></label>
-                                    <input type="password" name="password" placeholder="Mật khẩu" required>
+                                    <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+
+                                    <div class="password-strength-container" id="strength-container" style="display: none;">
+                                        <div class="progress-bar">
+                                            <div id="strength-bar" class="strength-bar"></div>
+                                        </div>
+                                        <div id="strength-text" class="strength-text">Độ mạnh: Yếu</div>
+
+                                        <ul class="strength-criteria">
+                                            <li id="rule-length">Phải ít nhất 8 ký tự</li>
+                                            <li id="rule-upper">Phải có chữ viết hoa</li>
+                                            <li id="rule-lower">Phải có chữ viết thường</li>
+                                            <li id="rule-number">Phải có chữ số</li>
+                                            <li id="rule-special">Phải có ký tự đặc biệt</li>
+                                        </ul>
+                                    </div>
 
                                     <label>Nhập lại mật khẩu <span>*</span></label>
                                     <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu"
@@ -77,8 +92,7 @@
                     </div>
                 </main>
 
-                
-                
+                <script src="${pageContext.request.contextPath}/js/DangKy.js?v=<%= System.currentTimeMillis() %>"></script>
                     <jsp:include page="common/footer.jsp" />
         </body>
 
