@@ -93,6 +93,22 @@ public class OrderDetailDAO extends BaseDao {
     
 
 
+    public List<Integer> findTopPurchasedProductIdsByUserId(int userId, int limit) {
+        String sql = "SELECT od.product_id " +
+                "FROM order_details od " +
+                "JOIN orders o ON o.id = od.order_id " +
+                "WHERE o.user_id = :userId " +
+                "AND o.status NOT IN ('pending', 'cancelled') " +
+                "GROUP BY od.product_id " +
+                "ORDER BY MAX(o.order_date) DESC, SUM(od.quantity) DESC " +
+                "LIMIT :limit";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .bind("limit", limit)
+                .mapTo(Integer.class)
+                .list());
+    }
+
     public int deleteByOrderId(int orderId) {
         String sql = "DELETE FROM order_details WHERE order_id = :orderId";
         return get().withHandle(handle -> handle.createUpdate(sql)

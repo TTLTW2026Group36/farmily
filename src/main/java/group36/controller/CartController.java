@@ -7,10 +7,15 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import group36.model.Cart;
+import group36.model.CartItem;
+import group36.model.Product;
 import group36.model.User;
 import group36.service.CartService;
+import group36.service.OrderService;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 
@@ -20,10 +25,12 @@ import java.io.IOException;
 public class CartController extends HttpServlet {
 
     private CartService cartService;
+    private OrderService orderService;
 
     @Override
     public void init() throws ServletException {
         cartService = new CartService();
+        orderService = new OrderService();
     }
 
     @Override
@@ -48,10 +55,18 @@ public class CartController extends HttpServlet {
             session.setAttribute("cartCount", cart.getTotalItems());
 
             
+            List<Integer> excludedProductIds = new ArrayList<>();
+            for (CartItem item : cart.getItems()) {
+                excludedProductIds.add(item.getProductId());
+            }
+
+            List<Product> recommendations = orderService.getBestSellerRecommendations(excludedProductIds, 6);
+
             request.setAttribute("cart", cart);
+            request.setAttribute("recommendations", recommendations);
+            request.setAttribute("recommendationSource", "best_seller");
             request.setAttribute("pageTitle", "Giỏ hàng");
 
-            
             request.getRequestDispatcher("/GioHang.jsp").forward(request, response);
 
         } catch (Exception e) {

@@ -158,6 +158,35 @@
                     </tbody>
                   </table>
                 </div>
+
+                <c:if test="${not empty recommendations}">
+                  <section class="checkout-recommendations checkout-recommendations-under-table" aria-label="Gợi ý sản phẩm">
+                    <h3>Gợi ý mua thêm</h3>
+                    <p>
+                      <c:choose>
+                        <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng mua</c:when>
+                        <c:otherwise>Sản phẩm bán chạy</c:otherwise>
+                      </c:choose>
+                    </p>
+                    <div class="recommend-grid">
+                      <c:forEach var="rec" items="${recommendations}" varStatus="st">
+                        <c:if test="${st.count <= 2}">
+                          <article class="recommend-card">
+                            <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                              <img class="ct-prod-img"
+                                src="${not empty rec.primaryImageUrl ? rec.primaryImageUrl : pageContext.request.contextPath.concat('/images/placeholder.jpg')}"
+                                alt="${rec.name}">
+                            </a>
+                            <a class="ct-prod-name" href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                              <c:out value="${rec.name}" />
+                            </a>
+                            <p>Từ <fmt:formatNumber value="${rec.minPrice}" pattern="#,###" />đ</p>
+                          </article>
+                        </c:if>
+                      </c:forEach>
+                    </div>
+                  </section>
+                </c:if>
               </div>
 
               <form class="checkout-form" id="checkoutForm" novalidate>
@@ -297,6 +326,7 @@
                   <i class="fas fa-lock"></i> ĐẶT HÀNG
                 </button>
               </div>
+
             </aside>
           </div>
         </main>

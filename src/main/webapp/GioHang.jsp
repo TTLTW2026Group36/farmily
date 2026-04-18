@@ -191,6 +191,49 @@
                             </div>
                         </div>
                     </c:if>
+
+                    <c:if test="${not empty recommendations}">
+                        <section class="gh-recommendations" aria-label="Gợi ý sản phẩm">
+                            <h2 class="gh-title">Gợi ý mua thêm</h2>
+                            <p>
+                                <c:choose>
+                                    <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng mua</c:when>
+                                    <c:otherwise>Sản phẩm bán chạy</c:otherwise>
+                                </c:choose>
+                            </p>
+                            <div class="recommend-grid">
+                                <c:forEach var="rec" items="${recommendations}">
+                                    <article class="product-card recommend-card">
+                                        <div class="product-image">
+                                            <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                                                <img src="${not empty rec.primaryImageUrl ? rec.primaryImageUrl : pageContext.request.contextPath.concat('/images/no-image.jpg')}"
+                                                    alt="${rec.name}" />
+                                            </a>
+                                        </div>
+                                        <div class="product-info">
+                                            <h3 class="product-title">
+                                                <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                                                    <c:out value="${rec.name}" />
+                                                </a>
+                                            </h3>
+                                            <p class="product-price">
+                                                <span class="price-current">
+                                                    <fmt:formatNumber value="${rec.minPrice}" type="number" groupingUsed="true" />đ
+                                                </span>
+                                                <c:if test="${not empty rec.minPriceVariant}">
+                                                    <span class="price-unit">/${rec.minPriceVariant.optionsValue}</span>
+                                                </c:if>
+                                            </p>
+                                            <button class="add-to-cart-btn"
+                                                onclick="addToCart(${rec.id}, ${not empty rec.minPriceVariant ? rec.minPriceVariant.id : 0})">
+                                                <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                                            </button>
+                                        </div>
+                                    </article>
+                                </c:forEach>
+                            </div>
+                        </section>
+                    </c:if>
                 </div>
 
                 <jsp:include page="common/footer.jsp" />
