@@ -1,31 +1,29 @@
-    # --- Java & Maven ---
+# Java / Gradle build artifacts
+.gradle/
+build/
+out/
+bin/
 target/
-*.class
-*.jar
-*.war
-*.ear
-*.log
 
-# --- IntelliJ IDEA (Cực kỳ quan trọng để không bị xung đột cấu hình máy mỗi đứa) ---
-.agent
+# Bytecode and runtime logs
+*.class
+*.log
+hs_err_pid*
+replay_pid*
+
+# IDE / Editor files
 .idea/
 *.iml
-out/
-gen/
-.agent
-
-# --- VS Code (Nếu có đứa nào dùng VS Code) ---
 .vscode/
 .history/
 
-# --- OS rác ---
+# OS-generated files
 .DS_Store
 Thumbs.db
 
-# --- Frontend (Nếu sau này mày cài node_modules vào project Java) ---
-node_modules/
-dist/
+# Environment / local secrets
 .env
-
+*.env
 src/main/resources/config.properties
 src/main/resources/payment.properties
+src/main/resources/db.properties
