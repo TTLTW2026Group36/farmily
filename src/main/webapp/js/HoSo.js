@@ -869,11 +869,55 @@ document.addEventListener('DOMContentLoaded', function () {
     if (urlParams.get('tab') === 'wishlist') {
         loadWishlist();
     }
+    
+    const selectAllCb = document.getElementById('wishlist-select-all');
+    if (selectAllCb) {
+        selectAllCb.addEventListener('change', function() {
+            const checkboxes = document.querySelectorAll('.wishlist-item-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = this.checked;
+            });
+            updateWishlistSelectionState();
+        });
+    }
+
+    const btnDeleteSelected = document.getElementById('btn-delete-selected');
+    if (btnDeleteSelected) {
+        btnDeleteSelected.addEventListener('click', function() {
+            deleteSelectedWishlistItems();
+        });
+    }
 });
+
+function updateWishlistSelectionState() {
+    const checkboxes = document.querySelectorAll('.wishlist-item-checkbox');
+    const selectAllCheckbox = document.getElementById('wishlist-select-all');
+    const btnDeleteSelected = document.getElementById('btn-delete-selected');
+    
+    if (checkboxes.length === 0) {
+        if(selectAllCheckbox) selectAllCheckbox.checked = false;
+        if(btnDeleteSelected) btnDeleteSelected.disabled = true;
+        return;
+    }
+    
+    let checkedCount = 0;
+    checkboxes.forEach(cb => {
+        if (cb.checked) checkedCount++;
+    });
+    
+    if(selectAllCheckbox) {
+        selectAllCheckbox.checked = (checkedCount === checkboxes.length);
+    }
+    
+    if(btnDeleteSelected) {
+        btnDeleteSelected.disabled = (checkedCount === 0);
+    }
+}
 
 function loadWishlist() {
     const container = document.getElementById('wishlist-container');
     const emptyState = document.getElementById('wishlist-empty');
+    const toolbar = document.getElementById('wishlist-toolbar');
     if (!container) return;
 
     fetch((window.contextPath || '') + '/api/wishlist', {
@@ -885,12 +929,15 @@ function loadWishlist() {
             if (data.success && data.items && data.items.length > 0) {
                 renderWishlistItems(data.items);
                 container.style.display = 'grid';
+                if (toolbar) toolbar.style.display = 'flex';
                 if (emptyState) emptyState.style.display = 'none';
             } else {
                 container.innerHTML = '';
                 container.style.display = 'none';
+                if (toolbar) toolbar.style.display = 'none';
                 if (emptyState) emptyState.style.display = 'flex';
             }
+            updateWishlistSelectionState();
         })
         .catch(error => {
             console.error('Error loading wishlist:', error);
@@ -916,45 +963,48 @@ function renderWishlistItems(items) {
             '<img src="' + imageUrl + '" alt="' + escapeHtml(product.name) + '">' +
             '</a>' +
             '</div>' +
+            '<input type="checkbox" class="wishlist-item-checkbox" value="' + product.id + '" onchange="updateWishlistSelectionState()">' +
             '<div class="wishlist-item-info">' +
             '<a href="' + (window.contextPath || '') + '/chi-tiet-san-pham?id=' + product.id + '" class="wishlist-item-name">' +
             escapeHtml(product.name) +
             '</a>' +
             '<p class="wishlist-item-price">' + price + '</p>' +
             '</div>' +
-            '<button class="btn-remove-wishlist" onclick="removeFromWishlist(' + item.id + ', ' + product.id + ')" title="Xóa khỏi yêu thích">' +
-            '<i class="fas fa-times"></i>' +
-            '</button>' +
             '</div>';
     });
 
     container.innerHTML = html;
 }
 
-function removeFromWishlist(wishlistId, productId) {
-    if (!confirm('Bạn có chắc muốn xóa sản phẩm này khỏi danh sách yêu thích?')) return;
-
-    fetch((window.contextPath || '') + '/api/wishlist?productId=' + productId, {
+function deleteSelectedWishlistItems() {
+    const checkedBoxes = document.querySelectorAll('.wishlist-item-checkbox:checked');
+    if (checkedBoxes.length === 0) return;
+    
+    if (!confirm('Bạn có chắc muốn xóa ' + checkedBoxes.length + ' sản phẩm đã chọn khỏi danh sách yêu thích?')) return;
+    
+    const productIds = Array.from(checkedBoxes).map(cb => cb.value).join(',');
+    
+    fetch((window.contextPath || '') + '/api/wishlist?productIds=' + productIds, {
         method: 'DELETE'
     })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Đã xóa khỏi yêu thích', 'success');
-                loadWishlist();
-
-                const badge = document.getElementById('wishlistCount');
-                if (badge && data.wishlistCount !== undefined) {
-                    badge.textContent = data.wishlistCount;
-                    if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
-                    else badge.classList.add('badge-hidden');
-                }
-            } else {
-                showToast(data.message || 'Có lỗi xảy ra', 'error');
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Đã xóa các sản phẩm khỏi yêu thích', 'success');
+            loadWishlist();
+            
+            const badge = document.getElementById('wishlistCount');
+            if (badge && data.wishlistCount !== undefined) {
+                badge.textContent = data.wishlistCount;
+                if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                else badge.classList.add('badge-hidden');
             }
-        })
-        .catch(error => {
-            console.error('Error removing from wishlist:', error);
-            showToast('Không thể xóa sản phẩm', 'error');
-        });
+        } else {
+            showToast(data.message || 'Có lỗi xảy ra', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error removing multiple from wishlist:', error);
+        showToast('Không thể xóa sản phẩm', 'error');
+    });
 }
