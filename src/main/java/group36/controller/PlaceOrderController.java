@@ -88,6 +88,44 @@ public class PlaceOrderController extends HttpServlet {
 
             boolean isBuyNow = "true".equals(request.getParameter("isBuyNow"));
 
+            String extraProductIdStr = request.getParameter("extraProductId");
+            if (extraProductIdStr != null && !extraProductIdStr.isEmpty()) {
+                try {
+                    int extraProductId = Integer.parseInt(extraProductIdStr);
+                    String vIdStr = request.getParameter("extraVariantId");
+                    Integer extraVariantId = (vIdStr != null && !vIdStr.trim().isEmpty() && !"null".equals(vIdStr))
+                            ? Integer.parseInt(vIdStr)
+                            : null;
+
+                    String qtyStr = request.getParameter("extraQuantity");
+                    int extraQuantity = 1;
+                    if (qtyStr != null && !qtyStr.isEmpty()) {
+                        try {
+                            extraQuantity = Integer.parseInt(qtyStr);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+
+                    if (user != null && !isBuyNow) {
+                        cartService.addToCart(user.getId(), extraProductId, extraVariantId, extraQuantity);
+                    } else {
+                        Cart targetCart = isBuyNow ? (Cart) session.getAttribute("buyNowCart")
+                                : (Cart) session.getAttribute("guestCart");
+                        if (targetCart != null) {
+                            CartItem extraItem = new CartItem(targetCart.getId(), extraProductId, extraVariantId,
+                                    extraQuantity);
+                            Cart tempCart = cartService.createBuyNowCart(user != null ? user.getId() : 0,
+                                    extraProductId, extraVariantId, extraQuantity);
+                            if (tempCart != null && !tempCart.getItems().isEmpty()) {
+                                targetCart.getItems().add(tempCart.getItems().get(0));
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to add extra product: " + e.getMessage());
+                }
+            }
+
             Order order;
 
             if (user != null) {
