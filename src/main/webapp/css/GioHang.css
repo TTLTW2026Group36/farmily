@@ -220,41 +220,28 @@ body {
 
 .gh-recommendations .recommend-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
 }
 
-.gh-recommendations .recommend-card {
-  min-height: 100%;
+@media (max-width: 1200px) {
+  .gh-recommendations .recommend-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
 }
 
-.gh-recommendations .recommend-card .product-image {
-  aspect-ratio: 1;
-}
-
-.gh-recommendations .recommend-card .product-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.gh-recommendations .recommend-card .product-info {
-  padding: 14px;
-  gap: 10px;
-}
-
-.gh-recommendations .recommend-card .product-title {
-  min-height: 2.8em;
-}
-
-.gh-recommendations .recommend-card .add-to-cart-btn {
-  font-size: 13px;
-  padding: 10px;
+@media (max-width: 768px) {
+  .gh-recommendations .recommend-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
 }
 
 @media (max-width: 640px) {
   .gh-recommendations .recommend-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
 

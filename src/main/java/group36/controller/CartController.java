@@ -15,22 +15,25 @@ import group36.service.OrderService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-
-
-
+import group36.dao.WishlistDAO;
+import group36.model.Wishlist;
 
 @WebServlet(name = "CartController", urlPatterns = { "/gio-hang", "/cart" })
 public class CartController extends HttpServlet {
 
     private CartService cartService;
     private OrderService orderService;
+    private WishlistDAO wishlistDAO;
 
     @Override
     public void init() throws ServletException {
         cartService = new CartService();
         orderService = new OrderService();
+        wishlistDAO = new WishlistDAO();
     }
 
     @Override
@@ -62,10 +65,17 @@ public class CartController extends HttpServlet {
 
             List<Product> recommendations = orderService.getBestSellerRecommendations(excludedProductIds, 6);
 
+            Set<Integer> wishlistProductIds = new HashSet<>();
+            List<Wishlist> wishlistItems = wishlistDAO.findByUserId(user.getId());
+            for (Wishlist item : wishlistItems) {
+                wishlistProductIds.add(item.getProductId());
+            }
+
             request.setAttribute("cart", cart);
             request.setAttribute("recommendations", recommendations);
             request.setAttribute("recommendationSource", "best_seller");
             request.setAttribute("pageTitle", "Giỏ hàng");
+            request.setAttribute("wishlistProductIds", wishlistProductIds);
 
             request.getRequestDispatcher("/GioHang.jsp").forward(request, response);
 
