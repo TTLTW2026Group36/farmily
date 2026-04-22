@@ -8,8 +8,8 @@
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Hồ sơ cá nhân | Farmily</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css?v=3">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <script>
                 window.contextPath = '${pageContext.request.contextPath}';
@@ -170,6 +170,15 @@
                     <c:if test="${param.tab == 'wishlist'}">
                         <div class="wishlist-section">
                             <h2>SẢN PHẨM YÊU THÍCH</h2>
+                            <div id="wishlist-toolbar" class="wishlist-toolbar" style="display: none;">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="wishlist-select-all">
+                                    <span>Chọn tất cả</span>
+                                </label>
+                                <button id="btn-delete-selected" class="btn-delete-selected" disabled>
+                                    <i class="fas fa-trash"></i> Xóa yêu thích
+                                </button>
+                            </div>
                             <div id="wishlist-container" class="wishlist-grid">
                                 <div class="loading-spinner">
                                     <i class="fas fa-spinner fa-spin"></i>
