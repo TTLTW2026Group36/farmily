@@ -954,21 +954,36 @@ function renderWishlistItems(items) {
         const product = item.product;
         if (!product) return;
 
-        const imageUrl = product.imageUrl || (window.contextPath || '') + '/images/placeholder.png';
-        const price = new Intl.NumberFormat('vi-VN').format(product.price) + 'đ';
+        const imageUrl = product.imageUrl || product.primaryImageUrl || (window.contextPath || '') + '/images/placeholder.png';
+        const displayPrice = product.minPrice || product.price || 0;
+        const price = new Intl.NumberFormat('vi-VN').format(displayPrice) + 'đ';
+        const unitHtml = product.minPriceVariant ? '<span class="price-unit">/' + escapeHtml(product.minPriceVariant.optionsValue) + '</span>' : '';
+        const variantId = product.minPriceVariant ? product.minPriceVariant.id : 0;
 
-        html += '<div class="wishlist-item" data-id="' + item.id + '">' +
-            '<div class="wishlist-item-image">' +
+        let stockHtml = '';
+        if (product.totalStock > 0 || product.totalStock === undefined) {
+            stockHtml = '<button class="add-to-cart-btn" onclick="addToCart(' + product.id + ', ' + variantId + ')"><i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng</button>';
+        } else {
+            stockHtml = '<button type="button" class="add-to-cart-btn" disabled>HẾT HÀNG</button>';
+        }
+
+        html += '<div class="wishlist-item product-card" data-id="' + item.id + '">' +
+            '<input type="checkbox" class="wishlist-item-checkbox" value="' + product.id + '" onchange="updateWishlistSelectionState()">' +
+            '<div class="product-image">' +
             '<a href="' + (window.contextPath || '') + '/chi-tiet-san-pham?id=' + product.id + '">' +
             '<img src="' + imageUrl + '" alt="' + escapeHtml(product.name) + '">' +
             '</a>' +
             '</div>' +
-            '<input type="checkbox" class="wishlist-item-checkbox" value="' + product.id + '" onchange="updateWishlistSelectionState()">' +
-            '<div class="wishlist-item-info">' +
-            '<a href="' + (window.contextPath || '') + '/chi-tiet-san-pham?id=' + product.id + '" class="wishlist-item-name">' +
+            '<div class="product-info">' +
+            '<h3 class="product-title">' +
+            '<a href="' + (window.contextPath || '') + '/chi-tiet-san-pham?id=' + product.id + '">' +
             escapeHtml(product.name) +
             '</a>' +
-            '<p class="wishlist-item-price">' + price + '</p>' +
+            '</h3>' +
+            '<p class="product-price">' +
+            '<span class="price-current">' + price + '</span>' + unitHtml +
+            '</p>' +
+            stockHtml +
             '</div>' +
             '</div>';
     });
