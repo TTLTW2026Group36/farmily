@@ -250,6 +250,18 @@ public class WishlistController extends HttpServlet {
                 } else {
                     sb.append("\"price\":0,");
                 }
+                
+                sb.append("\"minPrice\":").append(product.getMinPrice()).append(",");
+                sb.append("\"totalStock\":").append(product.getTotalStock()).append(",");
+                
+                group36.model.ProductVariant minVariant = product.getMinPriceVariant();
+                if (minVariant != null) {
+                    sb.append("\"minPriceVariant\":{");
+                    sb.append("\"id\":").append(minVariant.getId()).append(",");
+                    sb.append("\"optionsValue\":\"").append(escapeJson(minVariant.getOptionsValue())).append("\"");
+                    sb.append("},");
+                }
+
                 if (product.getImages() != null && !product.getImages().isEmpty()) {
                     sb.append("\"imageUrl\":\"").append(escapeJson(product.getImages().get(0).getImageUrl()))
                             .append("\"");

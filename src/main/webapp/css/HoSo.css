@@ -837,17 +837,10 @@ body {
 }
 
 .wishlist-item {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 12px;
   position: relative;
-  transition: background 0.1s;
 }
 
-.wishlist-item:hover {
-  background: #f8fafc;
-}
+
 
 .wishlist-item-image {
   width: 100%;
