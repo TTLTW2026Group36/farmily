@@ -4,8 +4,10 @@ import group36.dao.*;
 import group36.model.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public class OrderService {
 
@@ -295,6 +297,131 @@ public class OrderService {
             loadOrderDetails(order);
         }
         return orders;
+    }
+
+    public List<Product> getPreviouslyPurchasedRecommendations(int userId, List<Integer> excludedProductIds, int limit) {
+        if (limit <= 0) {
+            return new ArrayList<>();
+        }
+
+        Set<Integer> excluded = toExcludedSet(excludedProductIds);
+        List<Integer> purchasedIds = orderDetailDAO.findTopPurchasedProductIdsByUserId(userId, limit * 3);
+
+        List<Product> recommendations = new ArrayList<>();
+        for (Integer productId : purchasedIds) {
+            if (productId == null || excluded.contains(productId)) {
+                continue;
+            }
+            Optional<Product> productOpt = productDAO.findById(productId);
+            if (productOpt.isEmpty()) {
+                continue;
+            }
+
+            Product product = productOpt.get();
+            enrichProductForRecommendation(product);
+
+            if (product.getTotalStock() <= 0) {
+                continue;
+            }
+
+            recommendations.add(product);
+            excluded.add(product.getId());
+
+            if (recommendations.size() >= limit) {
+                break;
+            }
+        }
+
+        return recommendations;
+    }
+
+    public List<Product> getBestSellerRecommendations(List<Integer> excludedProductIds, int limit) {
+        if (limit <= 0) {
+            return new ArrayList<>();
+        }
+
+        Set<Integer> excluded = toExcludedSet(excludedProductIds);
+        List<Product> bestSellers = productDAO.findBestSelling(limit * 3);
+
+        List<Product> recommendations = new ArrayList<>();
+        for (Product product : bestSellers) {
+            if (product == null || excluded.contains(product.getId())) {
+                continue;
+            }
+
+            enrichProductForRecommendation(product);
+
+            if (product.getTotalStock() <= 0) {
+                continue;
+            }
+
+            recommendations.add(product);
+            excluded.add(product.getId());
+
+            if (recommendations.size() >= limit) {
+                break;
+            }
+        }
+
+        return recommendations;
+    }
+
+    public List<Product> getCheckoutRecommendations(Integer userId, List<Integer> excludedProductIds, int limit) {
+        List<Product> recommendations = new ArrayList<>();
+        Set<Integer> excluded = toExcludedSet(excludedProductIds);
+
+        if (limit <= 0) {
+            return recommendations;
+        }
+
+        if (userId != null) {
+            recommendations.addAll(getPreviouslyPurchasedRecommendations(userId, new ArrayList<>(excluded), limit));
+            for (Product product : recommendations) {
+                excluded.add(product.getId());
+            }
+        }
+
+        int remaining = limit - recommendations.size();
+        if (remaining > 0) {
+            recommendations.addAll(getBestSellerRecommendations(new ArrayList<>(excluded), remaining));
+        }
+
+        return recommendations;
+    }
+
+    public String getCheckoutRecommendationSource(Integer userId, List<Product> recommendations) {
+        if (userId == null || recommendations == null || recommendations.isEmpty()) {
+            return "best_seller";
+        }
+
+        List<Integer> purchasedIds = orderDetailDAO.findTopPurchasedProductIdsByUserId(userId, 200);
+        Set<Integer> purchasedSet = toExcludedSet(purchasedIds);
+
+        for (Product product : recommendations) {
+            if (product != null && purchasedSet.contains(product.getId())) {
+                return "purchased";
+            }
+        }
+
+        return "best_seller";
+    }
+
+    private Set<Integer> toExcludedSet(List<Integer> excludedProductIds) {
+        Set<Integer> excluded = new HashSet<>();
+        if (excludedProductIds == null) {
+            return excluded;
+        }
+        for (Integer id : excludedProductIds) {
+            if (id != null) {
+                excluded.add(id);
+            }
+        }
+        return excluded;
+    }
+
+    private void enrichProductForRecommendation(Product product) {
+        product.setImages(productImageDAO.findByProductId(product.getId()));
+        product.setVariants(productVariantDAO.findByProductId(product.getId()));
     }
 
     public List<Order> getAllOrders() {

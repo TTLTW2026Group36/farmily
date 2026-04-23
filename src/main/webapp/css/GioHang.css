@@ -204,6 +204,47 @@ body {
   text-decoration: underline;
 }
 
+.gh-recommendations {
+  margin-top: 20px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.gh-recommendations > p {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.gh-recommendations .recommend-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1200px) {
+  .gh-recommendations .recommend-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .gh-recommendations .recommend-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .gh-recommendations .recommend-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
 @media (max-width: 900px) {
   .cart {
     flex-direction: column;
