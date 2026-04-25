@@ -55,7 +55,7 @@
                                     <input type="email" name="email" placeholder="Email" required value="${email}">
 
                                     <label>Mật khẩu <span>*</span></label>
-                                    <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+                                    <input type="text" name="password" id="password" placeholder="Mật khẩu" required>
 
                                     <div class="password-strength-container" id="strength-container" style="display: none;">
                                         <div class="progress-bar">
@@ -73,7 +73,7 @@
                                     </div>
 
                                     <label>Nhập lại mật khẩu <span>*</span></label>
-                                    <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu"
+                                    <input type="text" name="confirmPassword" placeholder="Nhập lại mật khẩu"
                                         required>
 
                                     <c:if test="${not empty error}">

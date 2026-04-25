@@ -2,11 +2,16 @@ var diemMatKhau = 0;
 document.querySelector("form").addEventListener("submit", function (e) {
     e.preventDefault();
 
-    const ho = document.querySelectorAll('input[type="text"]')[0].value.trim();
-    const ten = document.querySelectorAll('input[type="text"]')[1].value.trim();
-    const sdt = document.querySelectorAll('input[type="text"]')[2].value.trim();
-    const email = document.querySelector('input[type="email"]').value.trim();
-    const password = document.querySelector('input[type="password"]').value.trim();
+    const tenInput = document.querySelector('input[name="name"]');
+    const sdtInput = document.querySelector('input[name="phone"]');
+    const emailInput = document.querySelector('input[name="email"]');
+    const pwdInput = document.querySelector('input[name="password"]');
+
+    const ho = tenInput ? tenInput.value.trim() : "";
+    const ten = ho; 
+    const sdt = sdtInput ? sdtInput.value.trim() : "";
+    const email = emailInput ? emailInput.value.trim() : "";
+    const password = pwdInput ? pwdInput.value.trim() : "";
 
     if (!ho || !ten || !sdt || !email || !password) {
         alert("Vui lòng nhập đầy đủ thông tin!");
@@ -15,7 +20,7 @@ document.querySelector("form").addEventListener("submit", function (e) {
 
     if (diemMatKhau < 3) {
         alert("Mật khẩu quá yếu! Vui lòng nhập mật khẩu từ mức trung bình trở lên");
-        document.querySelector('input[type="password"]').focus();
+        if(pwdInput) pwdInput.focus();
         return;
     }
 
