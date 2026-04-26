@@ -6,9 +6,12 @@ import jakarta.servlet.annotation.*;
 import group36.model.User;
 import group36.service.AuthService;
 
+import group36.util.RecaptchaUtil;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.sql.Timestamp;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -57,22 +60,66 @@ public class AdminLoginController extends HttpServlet {
         }
 
         
+        AuthService as = new AuthService();
+        User existingUser = as.findUserByEmail(username);
+
+        // ktra Lockout
+        if (existingUser != null && existingUser.getLockoutUntil() != null && 
+            existingUser.getLockoutUntil().after(new Timestamp(System.currentTimeMillis()))) {
+            request.setAttribute("error", "Tài khoản Admin bị tạm khóa. Vui lòng thử lại sau!");
+            request.setAttribute("username", username);
+            request.getRequestDispatcher("/admin/login.jsp").forward(request, response);
+            return;
+        }
+
+        // ktra co can Captcha (sau 3 lan)
+        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+        if (existingUser != null && existingUser.getLoginAttempts() >= 3) {
+            if (!RecaptchaUtil.verify(gRecaptchaResponse)) {
+                request.setAttribute("error", "Vui lòng xác minh mã Captcha!");
+                request.setAttribute("showCaptcha", true);
+                request.setAttribute("username", username);
+                request.getRequestDispatcher("/admin/login.jsp").forward(request, response);
+                return;
+            }
+        }
+
         User user = authService.checkLogin(username.trim(), password);
+
 
         
         
         if (user == null || !isAuthorized(user)) {
-            
+            //Tang so lan
+            if (existingUser != null) {
+                as.incrementLoginAttempts(existingUser.getId());
+                if (existingUser.getLoginAttempts() + 1 >= 5) {
+                    as.lockAccount(existingUser.getId());
+                    request.setAttribute("error", "Đăng nhập sai quá nhiều lần. Tài khoản Admin bị khóa 30 phút!");
+                } else {
+                    request.setAttribute("error", "Sai tên đăng nhập hoặc mật khẩu");
+                }
+
+                // show captcha nếu lần đăng nhập hiện tại thất bại và >=3
+                if (existingUser.getLoginAttempts() + 1 >= 3) {
+                    request.setAttribute("showCaptcha", true);
+                }
+            } else {
+                request.setAttribute("error", "Sai tên đăng nhập hoặc mật khẩu");
+            }
+
             if (user != null && !isAuthorized(user)) {
                 System.out.println("[ADMIN LOGIN DENIED] User '" + username
                         + "' attempted admin access without permission. Role: " + user.getRole());
             }
 
-            request.setAttribute("error", "Sai tên đăng nhập hoặc mật khẩu");
             request.setAttribute("username", username);
             request.getRequestDispatcher("/admin/login.jsp").forward(request, response);
             return;
         }
+
+        as.resetLoginAttempts(user.getId());
+
 
         
         

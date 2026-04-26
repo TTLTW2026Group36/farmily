@@ -11,6 +11,7 @@
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DangNhap.css">
+            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         </head>
 
         <body>
@@ -57,7 +58,7 @@
                         <label>Mật khẩu <span>*</span></label>
                         <div class="password-field" style="margin-top: 8px;">
                             <input type="password" name="password" id="password" placeholder="Mật khẩu" value="${password}" required>
-                            <i class="fas fa-eye" id="togglePassword"></i>
+                            <i class="fas fa-eye-slash" id="togglePassword"></i>
                         </div>
 
                         <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">
@@ -69,6 +70,10 @@
                             <small>Quên mật khẩu? Nhấn vào
                                 <a href="${pageContext.request.contextPath}/forgot-password">đây</a></small>
                         </div>
+
+                        <c:if test="${showCaptcha}">
+                            <div class="g-recaptcha" data-sitekey="<%= group36.util.FarmilyConstants.RECAPTCHA_SITE_KEY %>" style="margin-bottom: 15px;"></div>
+                        </c:if>
 
                         <c:if test="${not empty error}">
                             <p style="color: red; text-align: center;">${error}</p>
