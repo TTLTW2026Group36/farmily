@@ -58,7 +58,7 @@
                         <label>Mật khẩu <span>*</span></label>
                         <div class="password-field" style="margin-top: 8px;">
                             <input type="password" name="password" id="password" placeholder="Mật khẩu" value="${password}" required>
-                            <i class="fas fa-eye" id="togglePassword"></i>
+                            <i class="fas fa-eye-slash" id="togglePassword"></i>
                         </div>
 
                         <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">

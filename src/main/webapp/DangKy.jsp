@@ -55,7 +55,10 @@
                                     <input type="email" name="email" placeholder="Email" required value="${email}">
 
                                     <label>Mật khẩu <span>*</span></label>
-                                    <input type="text" name="password" id="password" placeholder="Mật khẩu" required>
+                                    <div class="password-field">
+                                        <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+                                        <i class="fas fa-eye-slash" id="togglePassword"></i>
+                                    </div>
 
                                     <div class="password-strength-container" id="strength-container" style="display: none;">
                                         <div class="progress-bar">
@@ -73,8 +76,11 @@
                                     </div>
 
                                     <label>Nhập lại mật khẩu <span>*</span></label>
-                                    <input type="text" name="confirmPassword" placeholder="Nhập lại mật khẩu"
-                                        required>
+                                    <div class="password-field">
+                                        <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Nhập lại mật khẩu"
+                                            required>
+                                        <i class="fas fa-eye-slash" id="toggleConfirmPassword"></i>
+                                    </div>
 
                                     <c:if test="${not empty error}">
                                         <div style="color: red; margin-top: 10px; text-align: center;">
