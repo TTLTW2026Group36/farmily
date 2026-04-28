@@ -414,8 +414,91 @@
         setTimeout(function () { toast.remove(); }, 2500);
     }
 
+    function bindWishlistEvents() {
+        document.querySelectorAll('.wishlist-btn').forEach(function (btn) {
+            var newBtn = btn.cloneNode(true);
+            if (btn.parentNode) {
+                btn.parentNode.replaceChild(newBtn, btn);
+            }
+            newBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                var productId = this.getAttribute('data-product-id');
+                var icon = this.querySelector('i');
+                var currentBtn = this;
+
+                currentBtn.disabled = true;
+
+                fetch((window.contextPath || '') + '/api/wishlist', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'same-origin',
+                    body: 'productId=' + productId
+                })
+                    .then(function (response) { return response.json(); })
+                    .then(function (data) {
+                        if (data.success) {
+                            if (data.added) {
+                                currentBtn.classList.add('active');
+                                if (icon) { icon.classList.remove('far'); icon.classList.add('fas'); }
+                                currentBtn.style.animation = 'heartBeat 0.5s';
+                                setTimeout(function () { currentBtn.style.animation = ''; }, 500);
+                            } else {
+                                currentBtn.classList.remove('active');
+                                if (icon) { icon.classList.remove('fas'); icon.classList.add('far'); }
+                            }
+                            var badge = document.getElementById('wishlistCount');
+                            if (badge) {
+                                badge.textContent = data.wishlistCount;
+                                if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                                else badge.classList.add('badge-hidden');
+                            }
+                        } else if (data.requireLogin) {
+                            if (confirm('Vui lòng đăng nhập để thêm vào yêu thích.')) {
+                                window.location.href = (window.contextPath || '') + '/DangNhap.jsp';
+                            }
+                        } else {
+                            alert(data.message || 'Có lỗi xảy ra');
+                        }
+                    })
+                    .catch(function (error) {
+                        console.error('Wishlist error:', error);
+                        alert('Có lỗi xảy ra, vui lòng thử lại!');
+                    })
+                    .finally(function () {
+                        currentBtn.disabled = false;
+                    });
+            });
+        });
+    }
+
+    window.refreshCartPageHTML = function () {
+        fetch(window.location.href)
+            .then(function (res) { return res.text(); })
+            .then(function (html) {
+                var parser = new DOMParser();
+                var doc = parser.parseFromString(html, 'text/html');
+
+                var newCartWrap = doc.querySelector('.gh-wrap');
+                var oldCartWrap = document.querySelector('.gh-wrap');
+
+                if (newCartWrap && oldCartWrap) {
+                    oldCartWrap.innerHTML = newCartWrap.innerHTML;
+                    updateSelectionUI();
+                    bindWishlistEvents();
+                } else {
+                    window.location.reload();
+                }
+            })
+            .catch(function () {
+                window.location.reload();
+            });
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
         updateSelectionUI();
+        bindWishlistEvents();
     });
 
 })();

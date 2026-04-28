@@ -614,6 +614,19 @@
         params.append('isBuyNow', isBuyNowInput.value);
       }
 
+      const extraCb = document.getElementById('extraProductCb');
+      if (extraCb && extraCb.checked) {
+        params.append('extraProductId', extraCb.value);
+        const extraVarId = document.getElementById('extraVariantId');
+        if (extraVarId && extraVarId.value) {
+            params.append('extraVariantId', extraVarId.value);
+        }
+        const extraQty = document.getElementById('extraQuantity');
+        if (extraQty && extraQty.value) {
+            params.append('extraQuantity', extraQty.value);
+        }
+      }
+
       const url = window.contextPath + '/place-order';
       const response = await fetch(url, {
         method: 'POST',
@@ -714,6 +727,101 @@
     const placeOrderBtn = document.getElementById('placeOrder');
     if (placeOrderBtn) {
       placeOrderBtn.addEventListener('click', placeOrder);
+    }
+
+    const extraCb = document.getElementById('extraProductCb');
+    const extraVariantSelect = document.getElementById('extraVariantId');
+    const extraQtyInput = document.getElementById('extraQuantity');
+    const recPriceDisplay = document.getElementById('rec-price-display');
+    const qtyMinus = document.querySelector('.rec-qty-btn.minus');
+    const qtyPlus = document.querySelector('.rec-qty-btn.plus');
+
+    function updateRecommendationTotals() {
+      if (!extraCb) return;
+      
+      let unitPrice = parseFloat(extraCb.getAttribute('data-base-price')) || 0;
+      if (extraVariantSelect && extraVariantSelect.tagName.toLowerCase() === 'select') {
+        const selectedOpt = extraVariantSelect.options[extraVariantSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.getAttribute('data-price')) {
+          unitPrice = parseFloat(selectedOpt.getAttribute('data-price')) || 0;
+        }
+      }
+      
+      let qty = 1;
+      if (extraQtyInput) {
+        qty = parseInt(extraQtyInput.value, 10) || 1;
+      }
+      
+      let addPrice = unitPrice * qty;
+      if (recPriceDisplay) {
+        recPriceDisplay.innerHTML = '+' + new Intl.NumberFormat('vi-VN').format(addPrice) + 'đ';
+      }
+      
+      let currentSub = window.subtotal;
+      if (extraCb.checked) {
+        currentSub += addPrice;
+      }
+      
+      const subtotalText = document.getElementById('subtotalText');
+      if (subtotalText) {
+          subtotalText.innerHTML = new Intl.NumberFormat('vi-VN').format(currentSub) + 'đ';
+      }
+      
+      let shippingFee = window.standardShippingFee;
+      if (currentSub >= window.freeShippingThreshold) {
+        shippingFee = 0;
+      }
+      
+      let currentTotal = currentSub + shippingFee;
+      
+      const shippingText = document.getElementById('shippingFeeText');
+      if (shippingText) {
+        shippingText.innerHTML = shippingFee === 0 ? '<span class="free-shipping">Miễn phí</span>' : new Intl.NumberFormat('vi-VN').format(shippingFee) + 'đ';
+      }
+      
+      const grandTotal = document.getElementById('grandTotalText');
+      if (grandTotal) {
+        grandTotal.innerHTML = new Intl.NumberFormat('vi-VN').format(currentTotal) + 'đ';
+      }
+      
+      const notice = document.querySelector('.free-ship-notice');
+      if (shippingFee === 0) {
+        if (notice) notice.style.display = 'none';
+      } else {
+        if (notice) {
+          notice.style.display = 'block';
+          notice.innerHTML = '<i class="fas fa-truck"></i> Mua thêm <strong>' + new Intl.NumberFormat('vi-VN').format(window.freeShippingThreshold - currentSub) + 'đ</strong> để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>';
+        }
+      }
+    }
+
+    if (extraCb) {
+      extraCb.addEventListener('change', updateRecommendationTotals);
+    }
+    if (extraVariantSelect && extraVariantSelect.tagName.toLowerCase() === 'select') {
+      extraVariantSelect.addEventListener('change', updateRecommendationTotals);
+    }
+    if (qtyMinus && extraQtyInput) {
+      qtyMinus.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          let current = parseInt(extraQtyInput.value, 10) || 1;
+          if (current > 1) {
+              extraQtyInput.value = current - 1;
+              updateRecommendationTotals();
+          }
+      });
+    }
+    if (qtyPlus && extraQtyInput) {
+      qtyPlus.addEventListener('click', function(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          let current = parseInt(extraQtyInput.value, 10) || 1;
+          if (current < 99) {
+              extraQtyInput.value = current + 1;
+              updateRecommendationTotals();
+          }
+      });
     }
   }
 

@@ -9,6 +9,7 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Giỏ Hàng - Nông Sản Farmily</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/GioHang.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -190,6 +191,60 @@
                                 </div>
                             </div>
                         </div>
+                    </c:if>
+
+                    <c:if test="${not empty recommendations}">
+                        <section class="gh-recommendations" aria-label="Gợi ý sản phẩm">
+                            <h2 class="gh-title">Gợi ý mua thêm</h2>
+                            <p>
+                                <c:choose>
+                                    <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng mua</c:when>
+                                    <c:otherwise>Sản phẩm bán chạy</c:otherwise>
+                                </c:choose>
+                            </p>
+                            <div class="recommend-grid">
+                                <c:forEach var="rec" items="${recommendations}">
+                                    <article class="product-card recommend-card">
+                                        <c:if test="${rec.soldCount > 50}">
+                                            <div class="product-badges">
+                                                <span class="badge badge-hot">HOT</span>
+                                            </div>
+                                        </c:if>
+                                        <button
+                                            class="wishlist-btn ${wishlistProductIds.contains(rec.id) ? 'active' : ''}"
+                                            aria-label="Yêu thích" data-product-id="${rec.id}">
+                                            <i
+                                                class="${wishlistProductIds.contains(rec.id) ? 'fas' : 'far'} fa-heart"></i>
+                                        </button>
+                                        <div class="product-image">
+                                            <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                                                <img src="${not empty rec.primaryImageUrl ? rec.primaryImageUrl : pageContext.request.contextPath.concat('/images/no-image.jpg')}"
+                                                    alt="${rec.name}" />
+                                            </a>
+                                        </div>
+                                        <div class="product-info">
+                                            <h3 class="product-title">
+                                                <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                                                    <c:out value="${rec.name}" />
+                                                </a>
+                                            </h3>
+                                            <p class="product-price">
+                                                <span class="price-current">
+                                                    <fmt:formatNumber value="${rec.minPrice}" type="number" groupingUsed="true" />đ
+                                                </span>
+                                                <c:if test="${not empty rec.minPriceVariant}">
+                                                    <span class="price-unit">/${rec.minPriceVariant.optionsValue}</span>
+                                                </c:if>
+                                            </p>
+                                            <button class="add-to-cart-btn"
+                                                onclick="addToCart(${rec.id}, ${not empty rec.minPriceVariant ? rec.minPriceVariant.id : 0})">
+                                                <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+                                            </button>
+                                        </div>
+                                    </article>
+                                </c:forEach>
+                            </div>
+                        </section>
                     </c:if>
                 </div>
 
