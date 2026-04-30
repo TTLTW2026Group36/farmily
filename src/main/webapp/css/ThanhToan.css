@@ -651,6 +651,68 @@ textarea {
   margin-top: 20px;
 }
 
+.checkout-recommendations {
+  margin-top: 18px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.checkout-recommendations-under-table {
+  margin-top: 14px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.checkout-recommendations h3 {
+  font-size: 15px;
+  margin: 0 0 6px;
+}
+
+.checkout-recommendations > p {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.checkout-recommendations .recommend-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.checkout-recommendations .recommend-card {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 10px;
+  align-items: start;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+}
+
+.checkout-recommendations .recommend-card .ct-prod-img {
+  width: 56px;
+  height: 56px;
+  border-radius: 6px;
+}
+
+.checkout-recommendations .recommend-card .ct-prod-name {
+  display: block;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.checkout-recommendations .recommend-card p {
+  grid-column: 2;
+  font-size: 13px;
+  color: var(--primary);
+  margin: 2px 0 0;
+  font-weight: 600;
+}
+
 .back-link {
   color: var(--secondary);
   text-decoration: none;

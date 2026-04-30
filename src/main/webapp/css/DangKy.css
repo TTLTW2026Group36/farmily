@@ -84,6 +84,30 @@ a:hover {
     box-sizing: border-box;
 }
 
+.password-field {
+    position: relative;
+    width: 100%;
+}
+
+.password-field input {
+    padding-right: 45px !important;
+}
+
+.password-field i {
+    position: absolute;
+    right: 15px;
+    top: 60%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    transition: color 0.3s;
+    font-size: 18px;
+}
+
+.password-field i:hover {
+    color: #333;
+}
+
 .quenmk {
     margin-top: 10px;
 }
@@ -142,4 +166,69 @@ button.submit:hover {
 
 .gg {
     background-color: #dd4b39;
+}
+
+/* CSS cho thanh đo độ mạnh mật khẩu */
+.password-strength-container {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #e0e0e0;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.strength-text {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.strength-criteria {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.strength-criteria li {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.strength-criteria li i {
+    width: 12px;
+    text-align: center;
+}
+
+.strength-criteria li.valid {
+    color: #28a745;
+}
+
+/* Thay đổi mầu nếu nút submit bị vô hiệu hóa */
+button.submit:disabled {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+}
+
+button.submit:disabled:hover {
+    background-color: #cccccc;
 }

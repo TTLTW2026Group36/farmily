@@ -1,0 +1,53 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'Group36'
+version = '1.0-SNAPSHOT'
+
+base {
+    archivesName = 'NongSanFarmily'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+
+    implementation 'org.jdbi:jdbi3-core:3.48.0'
+    implementation 'com.mysql:mysql-connector-j:9.3.0'
+    implementation 'com.google.protobuf:protobuf-java:4.28.2'
+    implementation 'com.google.code.gson:gson:2.12.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.14'
+    implementation 'org.apache.httpcomponents:fluent-hc:4.5.14'
+
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api:3.0.0'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:3.0.1'
+    compileOnly 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1'
+    compileOnly 'jakarta.el:jakarta.el-api:5.0.1'
+
+    implementation 'org.slf4j:slf4j-simple:2.0.16'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+tasks.war {
+    archiveFileName = 'ROOT.war'
+}

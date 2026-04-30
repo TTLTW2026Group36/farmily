@@ -85,12 +85,74 @@
         };
 
 
+        let currentStock = null;
+        let stockFetched = false;
+
+        const updatePlusButtonState = () => {
+            const plusBtn = document.querySelector('.qty-btn[data-step="1"]');
+            if (!plusBtn || !qtyInput) return;
+            const currentQty = Number(qtyInput.value);
+            if (stockFetched && currentQty >= currentStock) {
+                plusBtn.disabled = false; // keep enabled to allow click event
+                plusBtn.style.opacity = '0.5';
+                plusBtn.style.cursor = 'not-allowed';
+            } else {
+                plusBtn.disabled = false;
+                plusBtn.style.opacity = '1';
+                plusBtn.style.cursor = 'pointer';
+            }
+        };
+
+        const fetchStock = () => {
+            const productId = document.getElementById('productId')?.value;
+            let selectedVariant = document.querySelector('input[name="variantId"]:checked');
+            if (!selectedVariant) {
+                selectedVariant = document.querySelector('input[name="weight"]:checked');
+            }
+            if (!productId) return;
+            
+            const variantId = selectedVariant ? selectedVariant.value : '';
+            
+            const url = new URL((window.contextPath || '') + '/api/product/stock', window.location.origin);
+            url.searchParams.append('productId', productId);
+            if (variantId) url.searchParams.append('variantId', variantId);
+            
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        currentStock = data.stock;
+                        stockFetched = true;
+                        
+                        if (qtyInput && Number(qtyInput.value) > currentStock) {
+                            qtyInput.value = Math.max(1, currentStock);
+                        }
+                        updatePlusButtonState();
+                    }
+                })
+                .catch(err => console.error('Error fetching stock:', err));
+        };
+
         document.querySelectorAll('input[name="variantId"]').forEach(radio => {
-            radio.addEventListener('change', updatePrice);
+            radio.addEventListener('change', () => {
+                updatePrice();
+                fetchStock();
+                if (qtyInput) {
+                    qtyInput.value = 1;
+                    updatePlusButtonState();
+                }
+            });
         });
 
         document.querySelectorAll('input[name="weight"]').forEach(radio => {
-            radio.addEventListener('change', updatePrice);
+            radio.addEventListener('change', () => {
+                updatePrice();
+                fetchStock();
+                if (qtyInput) {
+                    qtyInput.value = 1;
+                    updatePlusButtonState();
+                }
+            });
         });
 
 
@@ -98,19 +160,33 @@
             btn.addEventListener('click', () => {
                 const step = Number(btn.dataset.step);
                 if (qtyInput) {
+                    if (step === 1 && stockFetched) {
+                        if (Number(qtyInput.value) >= currentStock) {
+                            showToast('Số lượng tồn kho không đủ. Chỉ còn ' + currentStock + ' sản phẩm.', 'warning');
+                            return;
+                        }
+                    }
                     qtyInput.value = clampQty(Number(qtyInput.value) + step);
+                    updatePlusButtonState();
                 }
             });
         });
 
         if (qtyInput) {
             qtyInput.addEventListener('input', () => {
-                qtyInput.value = clampQty(qtyInput.value);
+                let val = clampQty(qtyInput.value);
+                if (stockFetched && val > currentStock) {
+                    val = Math.max(1, currentStock);
+                    showToast('Số lượng tồn kho không đủ. Chỉ còn ' + currentStock + ' sản phẩm.', 'warning');
+                }
+                qtyInput.value = val;
+                updatePlusButtonState();
             });
         }
 
 
         updatePrice();
+        fetchStock();
 
 
         const initFlashSale = () => {
@@ -294,9 +370,16 @@
             type = type || 'info';
             const toast = document.createElement('div');
             toast.className = 'toast-notification toast-' + type;
-            toast.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+            let icon = 'fa-check-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+            toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + message;
+            
+            let bgColor = '#3b82f6';
+            if (type === 'success') bgColor = '#16a34a';
+            else if (type === 'warning') bgColor = '#f59e0b';
+            
             toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:' +
-                (type === 'success' ? '#16a34a' : '#3b82f6') +
+                bgColor +
                 ';color:#fff;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:9999;display:flex;align-items:center;gap:8px;font-weight:500;animation:slideIn .3s ease;';
             document.body.appendChild(toast);
             setTimeout(() => {

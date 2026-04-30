@@ -158,6 +158,57 @@
                     </tbody>
                   </table>
                 </div>
+
+                <c:if test="${not empty recommendations}">
+                  <c:set var="rec" value="${recommendations[0]}" />
+                  <section class="checkout-recommendations checkout-recommendations-under-table" aria-label="Gợi ý sản phẩm">
+                    <h3>Gợi ý mua thêm</h3>
+                    <p>
+                      <c:choose>
+                        <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng mua</c:when>
+                        <c:otherwise>Sản phẩm bán chạy</c:otherwise>
+                      </c:choose>
+                    </p>
+                    <div class="recommend-single" style="margin-top: 15px; border: 1px dashed #ccc; padding: 10px; border-radius: 8px;">
+                      <div class="recommend-checkbox" style="display: flex; align-items: center; gap: 15px; width: 100%;">
+                        <input type="checkbox" id="extraProductCb" name="extraProductId" value="${rec.id}" data-base-price="${empty rec.variants ? rec.minPrice : rec.variants[0].price}" style="width: 20px; height: 20px; cursor: pointer; flex-shrink: 0;">
+                        <label for="extraProductCb" style="display: flex; align-items: center; cursor: pointer; flex-shrink: 0; margin: 0;">
+                          <img class="ct-prod-img"
+                            src="${not empty rec.primaryImageUrl ? rec.primaryImageUrl : pageContext.request.contextPath.concat('/images/placeholder.jpg')}"
+                            alt="${rec.name}" style="width: 60px; height: 60px; border-radius: 4px; object-fit: cover;">
+                        </label>
+                        <div class="rec-info" style="flex: 1; overflow: hidden;">
+                          <label for="extraProductCb" style="font-weight: 600; color: #333; cursor: pointer; display: block; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                            <c:out value="${rec.name}" />
+                          </label>
+                          
+                          <c:if test="${not empty rec.variants}">
+                             <select id="extraVariantId" name="extraVariantId" class="rec-variant-select" style="margin-bottom: 8px; padding: 4px; border-radius: 4px; border: 1px solid #ddd; max-width: 100%; font-size: 13px;">
+                                <c:forEach var="v" items="${rec.variants}">
+                                   <option value="${v.id}" data-price="${v.price}">${v.optionsValue}</option>
+                                </c:forEach>
+                             </select>
+                          </c:if>
+                          <c:if test="${empty rec.variants}">
+                             <input type="hidden" id="extraVariantId" name="extraVariantId" value="">
+                          </c:if>
+
+                          <div style="display: flex; align-items: center; justify-content: space-between;">
+                              <span class="rec-price" id="rec-price-display" style="color: #d32f2f; font-weight: bold; font-size: 14px;">
+                                +<fmt:formatNumber value="${empty rec.variants ? rec.minPrice : rec.variants[0].price}" pattern="#,###" />đ
+                              </span>
+                              
+                              <div class="rec-qty-control" style="display: flex; align-items: center; border: 1px solid #ddd; border-radius: 4px; overflow: hidden; height: 24px;">
+                                <button type="button" class="rec-qty-btn minus" style="background: #f5f5f5; border: none; width: 24px; height: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555;">-</button>
+                                <input type="number" id="extraQuantity" name="extraQuantity" value="1" min="1" max="99" style="width: 30px; height: 100%; text-align: center; border: none; border-left: 1px solid #ddd; border-right: 1px solid #ddd; padding: 0; margin: 0; font-size: 13px; -moz-appearance: textfield;" readonly>
+                                <button type="button" class="rec-qty-btn plus" style="background: #f5f5f5; border: none; width: 24px; height: 100%; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #555;">+</button>
+                              </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </section>
+                </c:if>
               </div>
 
               <form class="checkout-form" id="checkoutForm" novalidate>
@@ -297,6 +348,7 @@
                   <i class="fas fa-lock"></i> ĐẶT HÀNG
                 </button>
               </div>
+
             </aside>
           </div>
         </main>

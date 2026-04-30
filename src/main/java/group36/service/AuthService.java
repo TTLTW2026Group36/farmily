@@ -1,6 +1,7 @@
 package group36.service;
 
 import group36.dao.AuthDao;
+import group36.dao.UserDAO;
 import group36.model.User;
 import group36.util.PasswordUtil;
 
@@ -58,4 +59,20 @@ public class AuthService {
         return authDao.insertUser(user);
     }
 
+    public User findUserByEmail(String email) {
+        return authDao.getUserByUsername(email);
+    }
+
+    public void incrementLoginAttempts(int userId) {
+        new UserDAO().incrementLoginAttempts(userId);
+    }
+
+    public void resetLoginAttempts(int userId) {
+        new UserDAO().resetLoginAttempts(userId);
+    }
+
+    public void lockAccount(int userId) {
+        new UserDAO().lockAccount(userId, 30); // Lock for 30 minutes
+    }
 }
+

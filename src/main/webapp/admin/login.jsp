@@ -11,6 +11,7 @@
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/login.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <script src="https://www.google.com/recaptcha/api.js" async defer></script>
             <style>
                 .alert-error {
                     background: #fee2e2;
@@ -82,6 +83,10 @@
                             <input type="checkbox" id="remember" name="remember" value="true">
                             <label for="remember">Ghi nhớ đăng nhập</label>
                         </div>
+
+                        <c:if test="${showCaptcha}">
+                            <div class="g-recaptcha" data-sitekey="<%= group36.util.FarmilyConstants.RECAPTCHA_SITE_KEY %>" style="margin-bottom: 20px;"></div>
+                        </c:if>
 
                         <input type="hidden" name="redirect" value="${param.redirect}">
 

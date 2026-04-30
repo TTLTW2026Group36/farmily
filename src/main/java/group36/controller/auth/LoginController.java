@@ -3,12 +3,16 @@ package group36.controller.auth;
 import group36.dao.RefreshTokenDao;
 import group36.service.*;
 import group36.util.FarmilyConstants;
+import group36.util.RecaptchaUtil;
+
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.User;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
+
 
 @WebServlet(name = "LoginController", value = { "/login", "/dang-nhap" })
 public class LoginController extends HttpServlet {
@@ -81,12 +85,43 @@ public class LoginController extends HttpServlet {
             throws ServletException, IOException {
         String username = request.getParameter("username");
         String pass = request.getParameter("password");
+        String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+
         AuthService as = new AuthService();
+        User existingUser = as.findUserByEmail(username);
+
+        // ktra Lockout
+        if (existingUser != null && existingUser.getLockoutUntil() != null && 
+            existingUser.getLockoutUntil().after(new Timestamp(System.currentTimeMillis()))) {
+            request.setAttribute("error", "Tài khoản bị tạm khóa. Vui lòng thử lại sau!");
+            request.setAttribute("username", username);
+            request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
+            return;
+        }
+
+        // ktra co can Captcha (sau 3 lan)
+        if (existingUser != null && existingUser.getLoginAttempts() >= 3) {
+            if (!RecaptchaUtil.verify(gRecaptchaResponse)) {
+                request.setAttribute("error", "Vui lòng xác minh mã Captcha!");
+                request.setAttribute("showCaptcha", true);
+                request.setAttribute("username", username);
+                request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
+                return;
+            }
+        }
+
         User u = as.checkLogin(username, pass);
 
         if (u != null) {
-            HttpSession session = request.getSession();
+            as.resetLoginAttempts(u.getId());
+
+            HttpSession oldSession = request.getSession(false);
+            if (oldSession != null) {
+                oldSession.invalidate();
+            }
+            HttpSession session = request.getSession(true);
             session.setAttribute("auth", u);
+
 
             String rememberMe = request.getParameter("rememberMe");
             if("true".equals(rememberMe)) {
@@ -125,9 +160,25 @@ public class LoginController extends HttpServlet {
 
             response.sendRedirect(request.getContextPath() + "/home");
         } else {
-            request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+            //Tang so lan
+            if (existingUser != null) {
+                as.incrementLoginAttempts(existingUser.getId());
+                if (existingUser.getLoginAttempts() + 1 >= 5) {
+                    as.lockAccount(existingUser.getId());
+                    request.setAttribute("error", "Đăng nhập sai quá nhiều lần. Tài khoản bị khóa 30 phút!");
+                } else {
+                    request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+                }
+                
+                // show captcha nếu lần đăng nhập hiện tại thất bại và >=3
+                if (existingUser.getLoginAttempts() + 1 >= 3) {
+                    request.setAttribute("showCaptcha", true);
+                }
+            } else {
+                request.setAttribute("error", "Email hoặc mật khẩu không chính xác!");
+            }
+
             request.setAttribute("username", username);
-            request.setAttribute("password", pass);
             request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
         }
 

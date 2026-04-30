@@ -89,6 +89,9 @@ function addToCart(productId, variantId) {
             if (data.success) {
                 updateCartBadge(data.cartCount);
                 showToast('Đã thêm vào giỏ hàng!', 'success');
+                if (typeof window.refreshCartPageHTML === 'function') {
+                    window.refreshCartPageHTML();
+                }
             } else {
                 if (data.requireLogin) {
                     window.location.href = ctx + '/dang-nhap';

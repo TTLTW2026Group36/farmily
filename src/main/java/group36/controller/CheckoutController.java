@@ -80,6 +80,15 @@ public class CheckoutController extends HttpServlet {
                 }
             }
 
+            List<Integer> excludedProductIds = new java.util.ArrayList<>();
+            for (CartItem item : cart.getItems()) {
+                excludedProductIds.add(item.getProductId());
+            }
+
+            Integer recommendationUserId = user != null ? user.getId() : null;
+            List<Product> recommendations = orderService.getCheckoutRecommendations(recommendationUserId, excludedProductIds, 6);
+            String recommendationSource = orderService.getCheckoutRecommendationSource(recommendationUserId, recommendations);
+
             // Still load addresses if logged in
             if (user != null) {
                 addresses = addressService.getAddressesByUserId(user.getId());
@@ -91,7 +100,6 @@ public class CheckoutController extends HttpServlet {
                 request.setAttribute("isLoggedIn", false);
             }
 
-            
             List<PaymentMethod> paymentMethods = paymentMethodService.getActivePaymentMethods();
 
             
@@ -101,6 +109,8 @@ public class CheckoutController extends HttpServlet {
 
             
             request.setAttribute("cart", cart);
+            request.setAttribute("recommendations", recommendations);
+            request.setAttribute("recommendationSource", recommendationSource);
             request.setAttribute("addresses", addresses);
             request.setAttribute("paymentMethods", paymentMethods);
             request.setAttribute("subtotal", subtotal);

@@ -151,15 +151,38 @@ public class WishlistController extends HttpServlet {
         }
 
         try {
-            int productId = parseIntParam(request, "productId", 0);
+            String productIdsParam = request.getParameter("productIds");
+            if (productIdsParam != null && !productIdsParam.trim().isEmpty()) {
+                String[] parts = productIdsParam.split(",");
+                int count = 0;
+                for (String part : parts) {
+                    try {
+                        int pId = Integer.parseInt(part.trim());
+                        if (pId > 0) {
+                            wishlistService.removeFromWishlist(user.getId(), pId);
+                            count++;
+                        }
+                    } catch (Exception e) {
+                        // ignore invalid id in multiple deletion list to let others proceed
+                    }
+                }
+                
+                if (count == 0) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"success\":false,\"message\":\"Không có sản phẩm nào hợp lệ để xóa\"}");
+                    return;
+                }
+            } else {
+                int productId = parseIntParam(request, "productId", 0);
 
-            if (productId <= 0) {
-                response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-                out.print("{\"success\":false,\"message\":\"ID sản phẩm không hợp lệ\"}");
-                return;
+                if (productId <= 0) {
+                    response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+                    out.print("{\"success\":false,\"message\":\"ID sản phẩm không hợp lệ\"}");
+                    return;
+                }
+
+                wishlistService.removeFromWishlist(user.getId(), productId);
             }
-
-            wishlistService.removeFromWishlist(user.getId(), productId);
 
             int wishlistCount = wishlistService.getWishlistCount(user.getId());
             session.setAttribute("wishlistCount", wishlistCount);
@@ -227,6 +250,18 @@ public class WishlistController extends HttpServlet {
                 } else {
                     sb.append("\"price\":0,");
                 }
+                
+                sb.append("\"minPrice\":").append(product.getMinPrice()).append(",");
+                sb.append("\"totalStock\":").append(product.getTotalStock()).append(",");
+                
+                group36.model.ProductVariant minVariant = product.getMinPriceVariant();
+                if (minVariant != null) {
+                    sb.append("\"minPriceVariant\":{");
+                    sb.append("\"id\":").append(minVariant.getId()).append(",");
+                    sb.append("\"optionsValue\":\"").append(escapeJson(minVariant.getOptionsValue())).append("\"");
+                    sb.append("},");
+                }
+
                 if (product.getImages() != null && !product.getImages().isEmpty()) {
                     sb.append("\"imageUrl\":\"").append(escapeJson(product.getImages().get(0).getImageUrl()))
                             .append("\"");
