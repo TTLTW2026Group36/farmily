@@ -19,7 +19,12 @@ public class FarmilyConstants {
     public static final String GOOGLE_LINK_GET_USER_INFO = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
     public static String RECAPTCHA_SITE_KEY;
     public static String RECAPTCHA_SECRET_KEY;
-
+    public static String MAIL_HOST;
+    public static String MAIL_PORT;
+    public static String MAIL_AUTH;
+    public static String MAIL_STARTTLS;
+    public static String MAIL_USER;
+    public static String MAIL_PASSWORD;
 
     static {
         Properties pro = new Properties();
@@ -32,7 +37,12 @@ public class FarmilyConstants {
                 FACEBOOK_CLIENT_SECRET = pro.getProperty("facebook.client.secret");
                 RECAPTCHA_SITE_KEY = pro.getProperty("recaptcha.site.key");
                 RECAPTCHA_SECRET_KEY = pro.getProperty("recaptcha.secret.key");
-
+                MAIL_HOST = pro.getProperty("mail.smtp.host");
+                MAIL_PORT = pro.getProperty("mail.smtp.port");
+                MAIL_AUTH = pro.getProperty("mail.smtp.auth");
+                MAIL_STARTTLS = pro.getProperty("mail.smtp.starttls.enable");
+                MAIL_USER = pro.getProperty("mail.user");
+                MAIL_PASSWORD = pro.getProperty("mail.password");
 
                 String baseUrl = pro.getProperty("app.base.url", "http://localhost:8080");
                 FACEBOOK_REDIRECT_URI = baseUrl + "/dang-nhap";
