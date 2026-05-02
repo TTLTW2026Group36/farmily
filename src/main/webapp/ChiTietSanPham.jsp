@@ -454,8 +454,12 @@
                                                     </div>
                                                 </c:if>
                                                 <div class="review-actions">
-                                                    <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu
-                                                        ích</button>
+                                                    <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu ích</button>
+                                                    <button class="action-btn report-btn" 
+                                                            data-review-id="${review.id}"
+                                                            title="Báo cáo đánh giá không phù hợp">
+                                                        <i class="far fa-flag"></i> Báo cáo
+                                                    </button>
                                                 </div>
                                             </div>
                                         </article>

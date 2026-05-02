@@ -722,6 +722,10 @@ a {
     background: #f0fdf4;
 }
 
+.report-btn { color: #9ca3af; }
+.report-btn:hover { color: #ef4444; border-color: #ef4444; background: #fef2f2; }
+.report-btn.reported { color: #ef4444; border-color: #ef4444; background: #fef2f2; cursor: default; }
+
 
 .shop-response {
     margin-top: 16px;

@@ -389,6 +389,39 @@
             }, 3000);
         }
 
+        document.querySelectorAll('.report-btn').forEach(btn => {
+            btn.addEventListener('click', async function() {
+                if (!window.isLoggedIn) {
+                    alert('Vui lòng đăng nhập để báo cáo');
+                    return;
+                }
+                if (!confirm('Bạn có chắc muốn báo cáo đánh giá này?')) return;
+                
+                const reviewId = this.dataset.reviewId;
+                try {
+                    const res = await fetch((window.contextPath || '') + '/api/review/report', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'reviewId=' + reviewId
+                    });
+                    
+                    if (res.ok) {
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-flag"></i> Đã báo cáo';
+                        this.classList.add('reported');
+                        if (typeof showToast === 'function') {
+                            showToast('Đã báo cáo đánh giá!', 'success');
+                        }
+                    } else {
+                        alert('Có lỗi xảy ra khi báo cáo.');
+                    }
+                } catch (err) {
+                    console.error('Report error:', err);
+                    alert('Có lỗi xảy ra, vui lòng thử lại.');
+                }
+            });
+        });
+
 
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
