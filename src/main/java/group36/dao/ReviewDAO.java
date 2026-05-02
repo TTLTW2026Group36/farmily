@@ -29,6 +29,8 @@ public class ReviewDAO extends BaseDao {
                         review.setReviewText(rs.getString("review_text"));
                         review.setImageUrl(rs.getString("image_url"));
                         review.setCreatedAt(rs.getTimestamp("created_at"));
+                        review.setStatus(rs.getString("status"));
+                        review.setReportCount(rs.getInt("report_count"));
                         return review;
                 }
         }
