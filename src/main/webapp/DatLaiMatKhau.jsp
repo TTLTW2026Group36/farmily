@@ -177,6 +177,7 @@
                         </c:if>
 
                         <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm">
+                            <input type="hidden" name="token" value="${token}">
                             <label>Mật khẩu mới <span>*</span></label>
                             <div class="password-wrapper">
                                 <input type="password" name="newPassword" id="newPassword"
@@ -192,7 +193,7 @@
 
                             <ul class="requirements-list" id="requirements">
                                 <li id="req-length" class="invalid">
-                                    <i class="fas fa-circle"></i> Ít nhất 6 ký tự
+                                    <i class="fas fa-circle"></i> Ít nhất 8 ký tự
                                 </li>
                                 <li id="req-letter" class="invalid">
                                     <i class="fas fa-circle"></i> Chứa chữ cái

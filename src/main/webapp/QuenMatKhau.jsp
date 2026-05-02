@@ -67,7 +67,7 @@
                 <main>
                     <div class="forgot-container">
                         <h1><i class="fas fa-lock"></i> QUÊN MẬT KHẨU</h1>
-                        <p>Nhập địa chỉ email đã đăng ký để nhận mã OTP đặt lại mật khẩu.</p>
+                        <p>Nhập địa chỉ email đã đăng ký để nhận liên kết đặt lại mật khẩu.</p>
 
 
                         <c:if test="${not empty error}">
@@ -83,7 +83,7 @@
                                 autofocus>
 
                             <button class="submit" type="submit">
-                                <i class="fas fa-paper-plane"></i> Gửi mã OTP
+                                <i class="fas fa-paper-plane"></i> Gửi liên kết
                             </button>
 
                             <a class="back" href="${pageContext.request.contextPath}/dang-nhap">
