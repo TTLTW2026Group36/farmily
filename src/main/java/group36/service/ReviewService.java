@@ -4,6 +4,7 @@ import group36.dao.ReviewDAO;
 import group36.dao.ReviewImageDAO;
 import group36.dao.UserDAO;
 import group36.dao.ProductVariantDAO;
+import group36.dao.ProductDAO;
 import group36.model.Review;
 import group36.model.ReviewImage;
 import group36.model.User;
@@ -127,6 +128,41 @@ public class ReviewService {
 
     public int getTotalReviews(int productId) {
         return reviewDAO.countByProductId(productId);
+    }
+
+    public boolean approveReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_APPROVED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean rejectReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_REJECTED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean hideReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_HIDDEN);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    private void recalculateProductRating(int productId) {
+        double avgRating = reviewDAO.getAverageRating(productId); 
+        int reviewCount = reviewDAO.countByProductId(productId);   
+        
+        ProductDAO productDAO = new ProductDAO();
+        productDAO.updateRatingStats(productId, avgRating, reviewCount);
     }
 
     

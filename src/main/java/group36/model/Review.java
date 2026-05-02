@@ -18,6 +18,9 @@ public class Review implements Serializable {
     private String reviewText;
     private String imageUrl; 
     private Timestamp createdAt;
+    
+    private String status; // "pending", "approved", "rejected", "hidden"
+    private int reportCount;
 
     
     private User user;
@@ -123,6 +126,47 @@ public class Review implements Serializable {
 
     public void setCreatedAt(Timestamp createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public int getReportCount() { return reportCount; }
+    public void setReportCount(int reportCount) { this.reportCount = reportCount; }
+
+    public static final String STATUS_PENDING = "pending";
+    public static final String STATUS_APPROVED = "approved";
+    public static final String STATUS_REJECTED = "rejected";
+    public static final String STATUS_HIDDEN = "hidden";
+
+    public boolean isApproved() {
+        return STATUS_APPROVED.equals(status);
+    }
+
+    public boolean isPending() {
+        return STATUS_PENDING.equals(status);
+    }
+
+    public String getStatusDisplayText() {
+        if (status == null) return "Không rõ";
+        switch (status) {
+            case STATUS_PENDING: return "Chờ duyệt";
+            case STATUS_APPROVED: return "Đã duyệt";
+            case STATUS_REJECTED: return "Từ chối";
+            case STATUS_HIDDEN: return "Đã ẩn";
+            default: return status;
+        }
+    }
+
+    public String getStatusBadgeClass() {
+        if (status == null) return "badge-secondary";
+        switch (status) {
+            case STATUS_PENDING: return "badge-warning";
+            case STATUS_APPROVED: return "badge-success";
+            case STATUS_REJECTED: return "badge-danger";
+            case STATUS_HIDDEN: return "badge-secondary";
+            default: return "badge-secondary";
+        }
     }
 
     public User getUser() {
