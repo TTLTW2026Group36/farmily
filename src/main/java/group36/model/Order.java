@@ -49,7 +49,7 @@ public class Order implements Serializable {
     public static final Map<String, Set<String>> ALLOWED_TRANSITIONS = new HashMap<>();
 
     static {
-        // From pending
+        // pending
         Set<String> pendingNext = new HashSet<>();
         pendingNext.add(STATUS_CONFIRMED);
         pendingNext.add(STATUS_CANCELLED);
@@ -57,41 +57,40 @@ public class Order implements Serializable {
         pendingNext.add(STATUS_PAYMENT_EXPIRED);
         ALLOWED_TRANSITIONS.put(STATUS_PENDING, pendingNext);
 
-        // From confirmed
+        // confirmed
         Set<String> confirmedNext = new HashSet<>();
         confirmedNext.add(STATUS_PROCESSING);
         confirmedNext.add(STATUS_CANCELLED_BY_ADMIN);
         ALLOWED_TRANSITIONS.put(STATUS_CONFIRMED, confirmedNext);
 
-        // From processing
+        // processing
         Set<String> processingNext = new HashSet<>();
         processingNext.add(STATUS_SHIPPING);
         processingNext.add(STATUS_CANCELLED_BY_ADMIN);
         ALLOWED_TRANSITIONS.put(STATUS_PROCESSING, processingNext);
 
-        // From shipping
+        // shipping
         Set<String> shippingNext = new HashSet<>();
         shippingNext.add(STATUS_DELIVERED);
         shippingNext.add(STATUS_DELIVERY_FAILED);
         ALLOWED_TRANSITIONS.put(STATUS_SHIPPING, shippingNext);
 
-        // From delivered
+        // delivered
         Set<String> deliveredNext = new HashSet<>();
         deliveredNext.add(STATUS_RETURNED);
         ALLOWED_TRANSITIONS.put(STATUS_DELIVERED, deliveredNext);
-        
-        // From delivery_failed
+
+        // delivery_failed
         Set<String> deliveryFailedNext = new HashSet<>();
         deliveryFailedNext.add(STATUS_RETURNED);
         deliveryFailedNext.add(STATUS_REFUNDED);
         ALLOWED_TRANSITIONS.put(STATUS_DELIVERY_FAILED, deliveryFailedNext);
 
-        // From returned
+        // returned
         Set<String> returnedNext = new HashSet<>();
         returnedNext.add(STATUS_REFUNDED);
         ALLOWED_TRANSITIONS.put(STATUS_RETURNED, returnedNext);
 
-        // Terminal states
         ALLOWED_TRANSITIONS.put(STATUS_CANCELLED, new HashSet<>());
         ALLOWED_TRANSITIONS.put(STATUS_CANCELLED_BY_ADMIN, new HashSet<>());
         ALLOWED_TRANSITIONS.put(STATUS_PAYMENT_EXPIRED, new HashSet<>());
@@ -116,8 +115,10 @@ public class Order implements Serializable {
     }
 
     public static boolean isTransitionAllowed(String currentStatus, String newStatus) {
-        if (currentStatus == null || newStatus == null) return false;
-        if (currentStatus.equals(newStatus)) return true;
+        if (currentStatus == null || newStatus == null)
+            return false;
+        if (currentStatus.equals(newStatus))
+            return true;
         Set<String> allowed = ALLOWED_TRANSITIONS.get(currentStatus);
         return allowed != null && allowed.contains(newStatus);
     }
