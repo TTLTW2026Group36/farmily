@@ -9,6 +9,7 @@ import group36.model.Review;
 import group36.model.ReviewImage;
 import group36.model.User;
 import group36.model.ProductVariant;
+import group36.model.Product;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -212,6 +213,29 @@ public class ReviewService {
             }
 
             review.setImages(imageMap.getOrDefault(review.getId(), Collections.emptyList()));
+        }
+    }
+
+    public void loadReviewDetailsForAdmin(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return;
+        }
+
+        loadReviewDetails(reviews);
+
+        Set<Integer> productIds = new HashSet<>();
+        for (Review review : reviews) {
+            productIds.add(review.getProductId());
+        }
+
+        ProductDAO productDAO = new ProductDAO();
+        Map<Integer, Product> productMap = new HashMap<>();
+        for (Integer productId : productIds) {
+            productDAO.findById(productId).ifPresent(product -> productMap.put(productId, product));
+        }
+
+        for (Review review : reviews) {
+            review.setProduct(productMap.get(review.getProductId()));
         }
     }
 

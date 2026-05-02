@@ -298,4 +298,11 @@ public class ReviewDAO extends BaseDao {
                                 .map(new ReviewMapper())
                                 .list());
         }
+
+        public int countReported() {
+                String sql = "SELECT COUNT(*) FROM review WHERE report_count > 0";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .mapTo(Integer.class)
+                                .one());
+        }
 }
