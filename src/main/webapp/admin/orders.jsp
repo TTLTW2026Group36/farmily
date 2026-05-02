@@ -89,9 +89,22 @@
 
                 <section class="bento-filter-section">
                     <form action="${pageContext.request.contextPath}/admin/orders" method="get" class="bento-filter-grid">
-                        <c:if test="${not empty selectedStatus}">
-                            <input type="hidden" name="status" value="${selectedStatus}">
-                        </c:if>
+                        <div class="bento-filter-group">
+                            <label>Trạng thái</label>
+                            <select name="status" class="bento-input">
+                                <option value="" ${empty selectedStatus ? 'selected' : ''}>Tất cả</option>
+                                <option value="pending" ${selectedStatus == 'pending' ? 'selected' : ''}>Chờ xác nhận</option>
+                                <option value="processing" ${selectedStatus == 'processing' ? 'selected' : ''}>Đang xử lý</option>
+                                <option value="shipping" ${selectedStatus == 'shipping' ? 'selected' : ''}>Đang giao</option>
+                                <option value="completed" ${selectedStatus == 'completed' ? 'selected' : ''}>Hoàn thành</option>
+                                <option value="cancelled" ${selectedStatus == 'cancelled' ? 'selected' : ''}>Đã hủy (Khách)</option>
+                                <option value="cancelled_by_admin" ${selectedStatus == 'cancelled_by_admin' ? 'selected' : ''}>Đã hủy (Admin)</option>
+                                <option value="payment_expired" ${selectedStatus == 'payment_expired' ? 'selected' : ''}>Hết hạn thanh toán</option>
+                                <option value="delivery_failed" ${selectedStatus == 'delivery_failed' ? 'selected' : ''}>Giao thất bại</option>
+                                <option value="returned" ${selectedStatus == 'returned' ? 'selected' : ''}>Đã hoàn hàng</option>
+                                <option value="refunded" ${selectedStatus == 'refunded' ? 'selected' : ''}>Đã hoàn tiền</option>
+                            </select>
+                        </div>
                         <div class="bento-filter-group">
                             <label>Tìm kiếm</label>
                             <div class="search-input-wrapper">
@@ -180,7 +193,11 @@
                                                         <c:when test="${order.status == 'confirmed' || order.status == 'processing'}"><span class="bento-status-badge bento-badge-processing">Đang xử lý</span></c:when>
                                                         <c:when test="${order.status == 'shipping'}"><span class="bento-status-badge bento-badge-shipping">Đang giao</span></c:when>
                                                         <c:when test="${order.status == 'completed'}"><span class="bento-status-badge bento-badge-completed">Hoàn thành</span></c:when>
-                                                        <c:when test="${order.status == 'cancelled'}"><span class="bento-status-badge bento-badge-cancelled">Đã hủy</span></c:when>
+                                                        <c:when test="${order.status == 'cancelled' || order.status == 'cancelled_by_admin'}"><span class="bento-status-badge bento-badge-cancelled">Đã hủy</span></c:when>
+                                                        <c:when test="${order.status == 'payment_expired'}"><span class="bento-status-badge bento-badge-cancelled">Hết hạn thanh toán</span></c:when>
+                                                        <c:when test="${order.status == 'delivery_failed'}"><span class="bento-status-badge bento-badge-cancelled">Giao thất bại</span></c:when>
+                                                        <c:when test="${order.status == 'returned'}"><span class="bento-status-badge bento-badge-cancelled">Đã hoàn hàng</span></c:when>
+                                                        <c:when test="${order.status == 'refunded'}"><span class="bento-status-badge bento-badge-cancelled">Đã hoàn tiền</span></c:when>
                                                         <c:otherwise><span class="bento-status-badge">${order.status}</span></c:otherwise>
                                                     </c:choose>
                                                 </td>
@@ -193,29 +210,15 @@
                                                         <a href="${pageContext.request.contextPath}/admin/orders/detail?id=${order.id}" class="btn-bento-icon" title="Xem chi tiết">
                                                             <i class="fas fa-eye"></i>
                                                         </a>
-                                                        <c:choose>
-                                                            <c:when test="${order.status == 'pending'}">
-                                                                <button class="btn-bento-icon bento-icon-primary" onclick="confirmNextStep(${order.id}, 'processing', 'Xác nhận đơn hàng #${order.id}?', 'Đơn hàng sẽ được chuyển sang Đang xử lý.')" title="Xác nhận">
-                                                                    <i class="fas fa-check"></i>
+                                                        <c:if test="${not empty order.allowedNextStatuses}">
+                                                            <c:forEach var="nextStatus" items="${order.allowedNextStatuses}">
+                                                                <button class="btn-bento-icon ${nextStatus == 'cancelled' || nextStatus == 'cancelled_by_admin' || nextStatus == 'delivery_failed' || nextStatus == 'returned' || nextStatus == 'refunded' ? 'bento-icon-danger' : 'bento-icon-primary'}"
+                                                                    onclick="confirmNextStep(${order.id}, '${nextStatus}', 'Cập nhật trạng thái', 'Đơn hàng sẽ được chuyển sang: ${nextStatus}')"
+                                                                    title="${nextStatus}">
+                                                                    <i class="fas fa-arrow-right"></i>
                                                                 </button>
-                                                                <button class="btn-bento-icon bento-icon-danger" onclick="confirmNextStep(${order.id}, 'cancelled', 'Hủy đơn hàng #${order.id}?', 'Đơn hàng này sẽ bị hủy bỏ.')" title="Hủy đơn">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </c:when>
-                                                            <c:when test="${order.status == 'confirmed' || order.status == 'processing'}">
-                                                                <button class="btn-bento-icon bento-icon-primary" onclick="confirmNextStep(${order.id}, 'shipping', 'Bàn giao vận chuyển #${order.id}?', 'Đơn hàng sẽ được chuyển sang Đang giao.')" title="Giao hàng">
-                                                                    <i class="fas fa-truck"></i>
-                                                                </button>
-                                                                <button class="btn-bento-icon bento-icon-danger" onclick="confirmNextStep(${order.id}, 'cancelled', 'Hủy đơn hàng #${order.id}?', 'Đơn hàng này sẽ bị hủy bỏ.')" title="Hủy đơn">
-                                                                    <i class="fas fa-times"></i>
-                                                                </button>
-                                                            </c:when>
-                                                            <c:when test="${order.status == 'shipping'}">
-                                                                <button class="btn-bento-icon bento-icon-primary" onclick="confirmNextStep(${order.id}, 'completed', 'Xác nhận hoàn thành #${order.id}?', 'Khách đã nhận hàng thành công.')" title="Hoàn thành">
-                                                                    <i class="fas fa-check-double"></i>
-                                                                </button>
-                                                            </c:when>
-                                                        </c:choose>
+                                                            </c:forEach>
+                                                        </c:if>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -261,6 +264,7 @@
         <div class="modal-box">
             <h3 class="modal-title" id="modalTitle">Xác nhận cập nhật?</h3>
             <p style="margin-top:8px;font-size:14px;color:var(--bento-on-surface-variant);" id="modalDesc"></p>
+            <textarea id="modalNoteInput" class="bento-input" rows="2" placeholder="Lý do/ghi chú (không bắt buộc)" style="margin-top:16px;width:100%;"></textarea>
             <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:24px;">
                 <button class="btn-bento-secondary" style="height:36px;padding:0 12px;font-size:13px;" onclick="closeModal()">Hủy bỏ</button>
                 <button class="btn-bento-primary" style="height:36px;padding:0 12px;font-size:13px;" id="modalConfirmBtn" onclick="doUpdateStatus()">Xác nhận</button>
@@ -296,10 +300,11 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
+            var noteInput = document.getElementById('modalNoteInput').value;
             fetch(contextPath + '/admin/orders/update-status', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: 'orderId=' + pendingOrderId + '&status=' + encodeURIComponent(pendingStatus)
+                body: 'orderId=' + pendingOrderId + '&status=' + encodeURIComponent(pendingStatus) + '&note=' + encodeURIComponent(noteInput)
             })
             .then(function (res) { return res.json(); })
             .then(function (data) {

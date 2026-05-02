@@ -587,6 +587,9 @@ public class OrderService {
 
     public void loadOrderDetailsForAdmin(Order order) {
         List<OrderDetail> details = orderDetailDAO.findByOrderId(order.getId());
+        for (OrderDetail detail : details) {
+            loadOrderDetailProducts(detail);
+        }
         order.setOrderDetails(details);
 
         if (!order.isGuestOrder() && order.getUserId() != null) {

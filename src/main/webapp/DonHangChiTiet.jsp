@@ -15,6 +15,66 @@
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                     <link rel="stylesheet"
                         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                    <style>
+                        .timeline-vertical {
+                            position: relative;
+                            padding: 20px 0 20px 40px;
+                            margin: 20px 0;
+                        }
+                        .timeline-vertical::before {
+                            content: '';
+                            position: absolute;
+                            top: 0;
+                            bottom: 0;
+                            left: 19px;
+                            width: 2px;
+                            background: #e2e8f0;
+                        }
+                        .timeline-v-item {
+                            position: relative;
+                            margin-bottom: 24px;
+                        }
+                        .timeline-v-item:last-child {
+                            margin-bottom: 0;
+                        }
+                        .timeline-v-dot {
+                            position: absolute;
+                            left: -40px;
+                            top: 0;
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            background: #f8fafc;
+                            border: 2px solid #e2e8f0;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            color: #64748b;
+                            z-index: 1;
+                        }
+                        .timeline-v-item.completed .timeline-v-dot {
+                            background: #10b981;
+                            border-color: #10b981;
+                            color: white;
+                        }
+                        .timeline-v-content {
+                            background: #f8fafc;
+                            padding: 16px;
+                            border-radius: 8px;
+                            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                            border: 1px solid #e2e8f0;
+                        }
+                        .timeline-v-title {
+                            font-weight: 600;
+                            color: #0f172a;
+                            margin-bottom: 4px;
+                            font-size: 15px;
+                        }
+                        .timeline-v-date {
+                            font-size: 13px;
+                            color: #64748b;
+                        }
+                    </style>
                 </head>
 
                 <body>
@@ -87,82 +147,54 @@
 
 
                             <c:if test="${order.status != 'cancelled'}">
-                                <div class="order-progress-tracker">
-                                    <div class="progress-steps">
-
-                                        <div
-                                            class="progress-step ${order.status == 'pending' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active completed' : ''}">
-                                            <div class="step-icon">
-                                                <i class="fas fa-clipboard-check"></i>
+                                <div class="timeline-vertical">
+                                    <c:choose>
+                                        <c:when test="${not empty order.statusHistory}">
+                                            <c:forEach var="history" items="${order.statusHistory}">
+                                                <div class="timeline-v-item completed">
+                                                    <div class="timeline-v-dot"><i class="fas fa-check"></i></div>
+                                                    <div class="timeline-v-content">
+                                                        <div class="timeline-v-title">${history.newStatusText}</div>
+                                                        <div class="timeline-v-date">
+                                                            <fmt:formatDate value="${history.createdAt}" pattern="dd/MM/yyyy HH:mm" />
+                                                        </div>
+                                                        <c:if test="${not empty history.note}">
+                                                            <div class="timeline-v-date" style="margin-top:4px;">Ghi chú: ${fn:escapeXml(history.note)}</div>
+                                                        </c:if>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <div class="timeline-v-item completed">
+                                                <div class="timeline-v-dot"><i class="fas fa-check"></i></div>
+                                                <div class="timeline-v-content">
+                                                    <div class="timeline-v-title">Đơn hàng đã đặt</div>
+                                                    <div class="timeline-v-date">
+                                                        <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" />
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="step-info">
-                                                <span class="step-title">Đơn hàng đã đặt</span>
-                                                <span class="step-date">
-                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd/MM HH:mm" />
-                                                </span>
-                                            </div>
-                                        </div>
-
-
-                                        <div
-                                            class="progress-connector ${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''}">
-                                        </div>
-
-
-                                        <div
-                                            class="progress-step ${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''} ${order.status == 'shipping' || order.status == 'completed' ? 'completed' : ''}">
-                                            <div class="step-icon">
-                                                <i class="fas fa-boxes-stacking"></i>
-                                            </div>
-                                            <div class="step-info">
-                                                <span class="step-title">Đang xử lý</span>
-                                                <span class="step-date">Chuẩn bị hàng</span>
-                                            </div>
-                                        </div>
-
-
-                                        <div
-                                            class="progress-connector ${order.status == 'shipping' || order.status == 'completed' ? 'active' : ''}">
-                                        </div>
-
-
-                                        <div
-                                            class="progress-step ${order.status == 'shipping' || order.status == 'completed' ? 'active' : ''} ${order.status == 'completed' ? 'completed' : ''}">
-                                            <div class="step-icon">
-                                                <i class="fas fa-truck-fast"></i>
-                                            </div>
-                                            <div class="step-info">
-                                                <span class="step-title">Đang giao hàng</span>
-                                                <span class="step-date">Đang vận chuyển</span>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="progress-connector ${order.status == 'completed' ? 'active' : ''}">
-                                        </div>
-
-
-                                        <div
-                                            class="progress-step ${order.status == 'completed' ? 'active completed' : ''}">
-                                            <div class="step-icon">
-                                                <i class="fas fa-circle-check"></i>
-                                            </div>
-                                            <div class="step-info">
-                                                <span class="step-title">Hoàn thành</span>
-                                                <span class="step-date">Đã nhận hàng</span>
-                                            </div>
-                                        </div>
-                                    </div>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
                             </c:if>
 
-
-                            <c:if test="${order.status == 'cancelled'}">
+                            <c:if test="${order.status == 'cancelled' || order.status == 'cancelled_by_admin'}">
                                 <div class="order-cancelled-banner">
                                     <i class="fas fa-circle-xmark"></i>
                                     <div class="cancelled-info">
                                         <span class="cancelled-title">Đơn hàng đã bị hủy</span>
                                         <span class="cancelled-desc">Đơn hàng này không còn hiệu lực</span>
+                                    </div>
+                                </div>
+                            </c:if>
+                            <c:if test="${order.status == 'delivery_failed'}">
+                                <div class="order-cancelled-banner" style="background:#fff1f2; color:#be123c;">
+                                    <i class="fas fa-truck-slash" style="color:#be123c;"></i>
+                                    <div class="cancelled-info">
+                                        <span class="cancelled-title" style="color:#be123c;">Giao hàng thất bại</span>
+                                        <span class="cancelled-desc" style="color:#e11d48;">Đơn hàng không thể giao đến bạn.</span>
                                     </div>
                                 </div>
                             </c:if>
@@ -181,14 +213,16 @@
                                         <p class="info-value">
                                             <span class="status-badge status-${order.status}">
                                                 <c:choose>
-                                                    <c:when test="${order.status == 'pending'}">Chờ xác nhận
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'processing'}">Đang xử lý
-                                                    </c:when>
+                                                    <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
+                                                    <c:when test="${order.status == 'processing'}">Đang xử lý</c:when>
                                                     <c:when test="${order.status == 'shipping'}">Đang giao</c:when>
-                                                    <c:when test="${order.status == 'completed'}">Hoàn thành
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'cancelled'}">Đã hủy</c:when>
+                                                    <c:when test="${order.status == 'completed'}">Hoàn thành</c:when>
+                                                    <c:when test="${order.status == 'cancelled'}">Đã hủy (Khách)</c:when>
+                                                    <c:when test="${order.status == 'cancelled_by_admin'}">Đã hủy (Hệ thống)</c:when>
+                                                    <c:when test="${order.status == 'payment_expired'}">Hết hạn thanh toán</c:when>
+                                                    <c:when test="${order.status == 'delivery_failed'}">Giao thất bại</c:when>
+                                                    <c:when test="${order.status == 'returned'}">Đã hoàn hàng</c:when>
+                                                    <c:when test="${order.status == 'refunded'}">Đã hoàn tiền</c:when>
                                                     <c:otherwise>${order.status}</c:otherwise>
                                                 </c:choose>
                                             </span>

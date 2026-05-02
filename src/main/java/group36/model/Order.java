@@ -127,6 +127,10 @@ public class Order implements Serializable {
         return allowed != null ? allowed : new HashSet<>();
     }
 
+    public Set<String> getAllowedNextStatuses() {
+        return getAllowedNextStatuses(this.status);
+    }
+
     public static boolean isTerminalStatus(String status) {
         Set<String> allowed = ALLOWED_TRANSITIONS.get(status);
         return allowed == null || allowed.isEmpty();

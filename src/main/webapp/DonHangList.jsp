@@ -304,16 +304,16 @@
                                                     <div class="order-status">
                                                         <span class="status-badge status-${order.status}">
                                                             <c:choose>
-                                                                <c:when test="${order.status == 'pending'}">Chờ xác
-                                                                    nhận</c:when>
-                                                                <c:when test="${order.status == 'processing'}">Đang
-                                                                    xử lý</c:when>
-                                                                <c:when test="${order.status == 'shipping'}">Đang
-                                                                    giao</c:when>
-                                                                <c:when test="${order.status == 'completed'}">Hoàn
-                                                                    thành</c:when>
-                                                                <c:when test="${order.status == 'cancelled'}">Đã hủy
-                                                                </c:when>
+                                                                <c:when test="${order.status == 'pending'}">Chờ xác nhận</c:when>
+                                                                <c:when test="${order.status == 'processing'}">Đang xử lý</c:when>
+                                                                <c:when test="${order.status == 'shipping'}">Đang giao</c:when>
+                                                                <c:when test="${order.status == 'completed'}">Hoàn thành</c:when>
+                                                                <c:when test="${order.status == 'cancelled'}">Đã hủy (Khách)</c:when>
+                                                                <c:when test="${order.status == 'cancelled_by_admin'}">Đã hủy (Hệ thống)</c:when>
+                                                                <c:when test="${order.status == 'payment_expired'}">Hết hạn thanh toán</c:when>
+                                                                <c:when test="${order.status == 'delivery_failed'}">Giao thất bại</c:when>
+                                                                <c:when test="${order.status == 'returned'}">Đã hoàn hàng</c:when>
+                                                                <c:when test="${order.status == 'refunded'}">Đã hoàn tiền</c:when>
                                                                 <c:otherwise>${order.status}</c:otherwise>
                                                             </c:choose>
                                                         </span>

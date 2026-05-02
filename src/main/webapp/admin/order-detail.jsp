@@ -68,50 +68,19 @@
                                 </div>
                             </div>
 
-                            <!-- Next-step action bar -->
-                            <c:if test="${order.status != 'completed' && order.status != 'cancelled'}">
+                            <c:if test="${not empty allowedStatuses}">
                                 <div class="action-bar">
                                     <div class="action-bar-left">
                                         <i class="fas fa-info-circle" style="color:#3b82f6;"></i>
-                                        <span>
-                                            <c:choose>
-                                                <c:when test="${order.status == 'pending'}">Đơn vừa đặt — Gọi xác nhận
-                                                    với khách rồi bấm xác nhận bên dưới.</c:when>
-                                                <c:when
-                                                    test="${order.status == 'confirmed' || order.status == 'processing'}">
-                                                    Đơn đang được đóng gói — Bấm "Giao hàng" khi đã bàn giao cho vận
-                                                    chuyển.</c:when>
-                                                <c:when test="${order.status == 'shipping'}">Đơn đang trên đường giao —
-                                                    Bấm "Hoàn thành" khi khách đã nhận hàng.</c:when>
-                                            </c:choose>
-                                        </span>
+                                        <span>Chọn thao tác xử lý tiếp theo cho đơn hàng này.</span>
                                     </div>
                                     <div class="action-bar-right">
-                                        <c:choose>
-                                            <c:when test="${order.status == 'pending'}">
-                                                <button class="btn btn-primary"
-                                                    onclick="openStatusModal('processing', 'Xác nhận đơn hàng?', 'Đơn hàng sẽ chuyển sang trạng thái Đang xử lý (đóng gói).')">
-                                                    <i class="fas fa-check"></i> Xác nhận đơn
-                                                </button>
-                                            </c:when>
-                                            <c:when
-                                                test="${order.status == 'confirmed' || order.status == 'processing'}">
-                                                <button class="btn btn-shipping"
-                                                    onclick="openStatusModal('shipping', 'Bàn giao vận chuyển?', 'Đơn hàng sẽ chuyển sang trạng thái Đang giao hàng.')">
-                                                    <i class="fas fa-truck"></i> Giao hàng
-                                                </button>
-                                            </c:when>
-                                            <c:when test="${order.status == 'shipping'}">
-                                                <button class="btn btn-complete"
-                                                    onclick="openStatusModal('completed', 'Xác nhận hoàn thành?', 'Đơn hàng sẽ được đánh dấu là đã giao thành công.')">
-                                                    <i class="fas fa-check-double"></i> Đã nhận hàng
-                                                </button>
-                                            </c:when>
-                                        </c:choose>
-                                        <button class="btn btn-cancel-order"
-                                            onclick="openStatusModal('cancelled', 'Hủy đơn hàng này?', 'Thao tác này không thể hoàn tác. Đơn hàng sẽ bị hủy.')">
-                                            <i class="fas fa-ban"></i> Hủy đơn
-                                        </button>
+                                        <c:forEach var="nextStatus" items="${allowedStatuses}">
+                                            <button class="btn btn-outline"
+                                                onclick="openStatusModal('${nextStatus}', 'Cập nhật trạng thái', 'Đơn hàng sẽ chuyển sang trạng thái: ${nextStatus}')">
+                                                <i class="fas fa-arrow-right"></i> ${nextStatus}
+                                            </button>
+                                        </c:forEach>
                                     </div>
                                 </div>
                             </c:if>
@@ -127,108 +96,36 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="order-timeline">
-
-                                                <div class="timeline-step done">
-                                                    <div class="timeline-dot"><i class="fas fa-check"></i></div>
-                                                    <div class="timeline-content">
-                                                        <div class="timeline-title">Đơn hàng được đặt</div>
-                                                        <div class="timeline-desc">Khách hàng xác nhận đơn và hệ thống
-                                                            ghi nhận</div>
-                                                        <div class="timeline-time">
-                                                            <fmt:formatDate value="${order.orderDate}"
-                                                                pattern="dd/MM/yyyy HH:mm" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <c:set var="step2done"
-                                                    value="${order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed'}" />
-                                                <div
-                                                    class="timeline-step ${step2done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
-                                                    <div class="timeline-dot"><i
-                                                            class="fas fa-${step2done ? 'check' : 'clock'}"></i></div>
-                                                    <div class="timeline-content">
-                                                        <div class="timeline-title">Nhân viên xác nhận đơn</div>
-                                                        <div class="timeline-desc">Gọi điện xác nhận với khách hàng
-                                                        </div>
-                                                        <c:if test="${!step2done}">
-                                                            <div class="timeline-time pending-label">Chưa thực hiện
-                                                            </div>
-                                                        </c:if>
-                                                    </div>
-                                                </div>
-
-                                                <c:set var="step3done"
-                                                    value="${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed'}" />
-                                                <div
-                                                    class="timeline-step ${step3done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
-                                                    <div class="timeline-dot"><i
-                                                            class="fas fa-${step3done ? 'check' : 'box'}"></i></div>
-                                                    <div class="timeline-content">
-                                                        <div class="timeline-title">Đóng gói sản phẩm</div>
-                                                        <div class="timeline-desc">Kiểm tra và đóng gói đơn hàng để giao
-                                                        </div>
-                                                        <c:if test="${!step3done}">
-                                                            <div class="timeline-time pending-label">Chưa thực hiện
-                                                            </div>
-                                                        </c:if>
-                                                    </div>
-                                                </div>
-
-                                                <c:set var="step4done"
-                                                    value="${order.status == 'shipping' || order.status == 'completed'}" />
-                                                <div
-                                                    class="timeline-step ${step4done ? 'done' : (order.status == 'cancelled' ? 'skipped' : 'pending')}">
-                                                    <div class="timeline-dot"><i
-                                                            class="fas fa-${step4done ? 'check' : 'truck'}"></i></div>
-                                                    <div class="timeline-content">
-                                                        <div class="timeline-title">Bàn giao vận chuyển</div>
-                                                        <div class="timeline-desc">Đã bàn giao cho đơn vị giao hàng
-                                                        </div>
-                                                        <c:if test="${!step4done}">
-                                                            <div class="timeline-time pending-label">Chưa thực hiện
-                                                            </div>
-                                                        </c:if>
-                                                    </div>
-                                                </div>
-
                                                 <c:choose>
-                                                    <c:when test="${order.status == 'completed'}">
-                                                        <div class="timeline-step done final">
-                                                            <div class="timeline-dot"><i
-                                                                    class="fas fa-check-double"></i></div>
-                                                            <div class="timeline-content">
-                                                                <div class="timeline-title">Giao hàng thành công ✅</div>
-                                                                <div class="timeline-desc">Khách hàng đã nhận được hàng
+                                                    <c:when test="${not empty order.statusHistory}">
+                                                        <c:forEach var="history" items="${order.statusHistory}">
+                                                            <div class="timeline-step done">
+                                                                <div class="timeline-dot"><i class="fas fa-circle"></i></div>
+                                                                <div class="timeline-content">
+                                                                    <div class="timeline-title">${history.newStatusText}</div>
+                                                                    <div class="timeline-desc">Thực hiện bởi: ${history.changedByText}</div>
+                                                                    <c:if test="${not empty history.note}">
+                                                                        <div class="timeline-desc" style="color:var(--text-secondary);font-style:italic;">Ghi chú: ${fn:escapeXml(history.note)}</div>
+                                                                    </c:if>
+                                                                    <div class="timeline-time">
+                                                                        <fmt:formatDate value="${history.createdAt}" pattern="dd/MM/yyyy HH:mm" />
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'cancelled'}">
-                                                        <div class="timeline-step cancelled final">
-                                                            <div class="timeline-dot"><i class="fas fa-ban"></i></div>
-                                                            <div class="timeline-content">
-                                                                <div class="timeline-title">Đơn hàng đã bị hủy ❌</div>
-                                                                <div class="timeline-desc">Đơn hàng không được tiếp tục
-                                                                    xử lý</div>
-                                                            </div>
-                                                        </div>
+                                                        </c:forEach>
                                                     </c:when>
                                                     <c:otherwise>
-                                                        <div class="timeline-step pending final">
-                                                            <div class="timeline-dot"><i
-                                                                    class="fas fa-flag-checkered"></i></div>
+                                                        <div class="timeline-step done">
+                                                            <div class="timeline-dot"><i class="fas fa-check"></i></div>
                                                             <div class="timeline-content">
-                                                                <div class="timeline-title">Hoàn thành</div>
-                                                                <div class="timeline-desc">Khách hàng xác nhận đã nhận
-                                                                    được hàng</div>
-                                                                <div class="timeline-time pending-label">Chưa hoàn thành
+                                                                <div class="timeline-title">Đơn hàng được đặt</div>
+                                                                <div class="timeline-time">
+                                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" />
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </c:otherwise>
                                                 </c:choose>
-
                                             </div>
                                         </div>
                                     </div>
@@ -468,16 +365,29 @@
                                         </div>
                                     </div>
 
-                                    <!-- Note -->
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-sticky-note"
-                                                    style="color:#64748b;margin-right:6px;"></i> Ghi chú</h3>
+                                                    style="color:#64748b;margin-right:6px;"></i> Ghi chú nội bộ (Admin)</h3>
+                                        </div>
+                                        <div class="card-body">
+                                            <div style="display:flex;flex-direction:column;gap:8px;">
+                                                <textarea id="adminNoteArea" class="form-control" rows="3" placeholder="Nhập ghi chú nội bộ...">${fn:escapeXml(order.adminNote)}</textarea>
+                                                <button class="btn btn-secondary btn-sm" style="align-self:flex-start;" onclick="saveAdminNote()">
+                                                    <i class="fas fa-save"></i> Lưu ghi chú
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-comment-alt"
+                                                    style="color:#64748b;margin-right:6px;"></i> Ghi chú khách hàng</h3>
                                         </div>
                                         <div class="card-body">
                                             <c:choose>
                                                 <c:when test="${not empty order.note}">
-                                                    <p class="note-text">${order.note}</p>
+                                                    <p class="note-text">${fn:escapeXml(order.note)}</p>
                                                 </c:when>
                                                 <c:otherwise>
                                                     <p class="empty-val" style="font-style:italic;">Không có ghi chú</p>
@@ -497,10 +407,10 @@
                         <div class="modal-icon" id="modalIconEl"><i class="fas fa-sync-alt"></i></div>
                         <h3 class="modal-title" id="modalTitleEl">Xác nhận?</h3>
                         <p class="modal-desc" id="modalDescEl"></p>
+                        <textarea id="statusNoteInput" class="form-control" rows="2" placeholder="Lý do/ghi chú (không bắt buộc)" style="margin-top:16px;width:100%;"></textarea>
                         <div class="modal-actions">
                             <button class="btn btn-outline" onclick="closeModal()">Hủy bỏ</button>
-                            <button class="btn btn-primary" id="modalConfirmBtn" onclick="doUpdateStatus()">Xác
-                                nhận</button>
+                            <button class="btn btn-primary" id="modalConfirmBtn" onclick="doUpdateStatus()">Xác nhận</button>
                         </div>
                     </div>
                 </div>
@@ -537,10 +447,11 @@
                         btn.disabled = true;
                         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
 
+                        var noteInput = document.getElementById('statusNoteInput').value;
                         fetch(window.contextPath + '/admin/orders/update-status', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: 'orderId=' + orderId + '&status=' + encodeURIComponent(pendingStatus)
+                            body: 'orderId=' + orderId + '&status=' + encodeURIComponent(pendingStatus) + '&note=' + encodeURIComponent(noteInput)
                         })
                             .then(function (r) { return r.json(); })
                             .then(function (data) {
@@ -563,6 +474,24 @@
                     document.getElementById('statusModal').addEventListener('click', function (e) {
                         if (e.target === this) closeModal();
                     });
+
+                    function saveAdminNote() {
+                        var note = document.getElementById('adminNoteArea').value;
+                        fetch(window.contextPath + '/admin/orders/update-note', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'orderId=' + orderId + '&adminNote=' + encodeURIComponent(note)
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast('Đã lưu ghi chú', 'success');
+                            } else {
+                                showToast(data.message, 'error');
+                            }
+                        })
+                        .catch(() => showToast('Lỗi kết nối', 'error'));
+                    }
 
                     function saveTracking() {
                         var code = document.getElementById('trackingCode').value.trim();
