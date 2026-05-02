@@ -17,6 +17,9 @@ public class FarmilyConstants {
     public static final String GOOGLE_GRANT_TYPE = "authorization_code";
     public static final String GOOGLE_LINK_GET_TOKEN = "https://accounts.google.com/o/oauth2/token";
     public static final String GOOGLE_LINK_GET_USER_INFO = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
+    public static String RECAPTCHA_SITE_KEY;
+    public static String RECAPTCHA_SECRET_KEY;
+
 
     static {
         Properties pro = new Properties();
@@ -27,6 +30,9 @@ public class FarmilyConstants {
                 GOOGLE_CLIENT_SECRET = pro.getProperty("google.client.secret");
                 FACEBOOK_CLIENT_ID = pro.getProperty("facebook.client.id");
                 FACEBOOK_CLIENT_SECRET = pro.getProperty("facebook.client.secret");
+                RECAPTCHA_SITE_KEY = pro.getProperty("recaptcha.site.key");
+                RECAPTCHA_SECRET_KEY = pro.getProperty("recaptcha.secret.key");
+
 
                 String baseUrl = pro.getProperty("app.base.url", "http://localhost:8080");
                 FACEBOOK_REDIRECT_URI = baseUrl + "/dang-nhap";

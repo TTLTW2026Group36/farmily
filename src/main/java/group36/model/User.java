@@ -14,6 +14,9 @@ public class User implements Serializable {
     private Timestamp updated_at;
     private String facebookId;
     private String googleId;
+    private int loginAttempts;
+    private Timestamp lockoutUntil;
+
 
     public User() {
     }
@@ -105,6 +108,23 @@ public class User implements Serializable {
     public void setUpdated_at(Timestamp updated_at) {
         this.updated_at = updated_at;
     }
+
+    public int getLoginAttempts() {
+        return loginAttempts;
+    }
+
+    public void setLoginAttempts(int loginAttempts) {
+        this.loginAttempts = loginAttempts;
+    }
+
+    public Timestamp getLockoutUntil() {
+        return lockoutUntil;
+    }
+
+    public void setLockoutUntil(Timestamp lockoutUntil) {
+        this.lockoutUntil = lockoutUntil;
+    }
+
 
     @Override
     public String toString() {

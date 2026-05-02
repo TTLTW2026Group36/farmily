@@ -23,6 +23,8 @@ public class UserDAO extends BaseDao {
             user.setRole(rs.getString("role"));
             user.setCreated_at(rs.getTimestamp("created_at"));
             user.setUpdated_at(rs.getTimestamp("updated_at"));
+            user.setLoginAttempts(rs.getInt("login_attempts"));
+            user.setLockoutUntil(rs.getTimestamp("lockout_until"));
             return user;
         }
     }
@@ -141,4 +143,21 @@ public class UserDAO extends BaseDao {
                 .mapTo(Integer.class)
                 .one());
     }
+
+    public void incrementLoginAttempts(int userId) {
+        String sql = "UPDATE users SET login_attempts = login_attempts + 1 WHERE id = :id";
+        get().useHandle(handle -> handle.createUpdate(sql).bind("id", userId).execute());
+    }
+
+    public void resetLoginAttempts(int userId) {
+        String sql = "UPDATE users SET login_attempts = 0, lockout_until = NULL WHERE id = :id";
+        get().useHandle(handle -> handle.createUpdate(sql).bind("id", userId).execute());
+    }
+
+    public void lockAccount(int userId, int minutes) {
+        String sql = "UPDATE users SET lockout_until = :until WHERE id = :id";
+        java.sql.Timestamp until = new java.sql.Timestamp(System.currentTimeMillis() + (long) minutes * 60 * 1000);
+        get().useHandle(handle -> handle.createUpdate(sql).bind("id", userId).bind("until", until).execute());
+    }
 }
+
