@@ -214,13 +214,18 @@ public class UserOrderController extends HttpServlet {
                 return;
             }
 
-            if (!"pending".equals(order.getStatus())) {
-                request.getSession().setAttribute("errorMessage", "Chỉ có thể hủy đơn hàng đang chờ xác nhận");
+            String reason = request.getParameter("reason");
+            if (reason == null || reason.trim().isEmpty()) {
+                reason = "Người dùng hủy đơn hàng";
+            }
+
+            boolean updated = orderService.cancelOrderByUser(orderId, user.getId(), reason);
+
+            if (!updated) {
+                request.getSession().setAttribute("errorMessage", "Không thể hủy đơn hàng (trạng thái không cho phép)");
                 response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
                 return;
             }
-
-            orderService.updateOrderStatus(orderId, "cancelled");
 
             try {
                 notificationService.createOrderCancelledNotification(order);
@@ -351,13 +356,13 @@ public class UserOrderController extends HttpServlet {
                 return;
             }
 
-            if (!"shipping".equals(order.getStatus())) {
-                request.getSession().setAttribute("errorMessage", "Chỉ xác nhận nhận hàng khi đơn đang giao");
+            boolean updated = orderService.confirmReceivedByUser(orderId, user.getId());
+
+            if (!updated) {
+                request.getSession().setAttribute("errorMessage", "Không thể xác nhận nhận hàng (trạng thái không cho phép)");
                 response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
                 return;
             }
-
-            orderService.updateOrderStatus(orderId, "completed");
 
             request.getSession().setAttribute("successMessage",
                     "Xác nhận nhận hàng thành công! Bạn có thể đánh giá sản phẩm.");

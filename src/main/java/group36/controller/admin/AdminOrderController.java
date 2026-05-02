@@ -4,6 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.Order;
+import group36.model.User;
 import group36.service.OrderService;
 
 import java.io.IOException;
@@ -51,6 +52,8 @@ public class AdminOrderController extends HttpServlet {
         try {
             if (pathInfo != null && pathInfo.equals("/update-status")) {
                 updateOrderStatus(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/update-note")) {
+                updateAdminNote(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -159,7 +162,11 @@ public class AdminOrderController extends HttpServlet {
                 return;
             }
 
-            request.setAttribute("order", orderOpt.get());
+            Order order = orderOpt.get();
+            orderService.loadOrderDetailsForAdmin(order);
+            
+            request.setAttribute("order", order);
+            request.setAttribute("allowedStatuses", Order.getAllowedNextStatuses(order.getStatus()));
             request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);
         } catch (NumberFormatException e) {
             HttpSession session = request.getSession();
@@ -183,18 +190,48 @@ public class AdminOrderController extends HttpServlet {
 
         try {
             int orderId = Integer.parseInt(orderIdParam);
+            String note = request.getParameter("note");
+            
+            HttpSession session = request.getSession();
+            User admin = (User) session.getAttribute("auth");
+            Integer adminId = admin != null ? admin.getId() : null;
 
-            if (!isValidStatus(newStatus)) {
-                out.print("{\"success\": false, \"message\": \"Trạng thái không hợp lệ\"}");
-                return;
-            }
-
-            boolean updated = orderService.updateOrderStatus(orderId, newStatus);
+            boolean updated = orderService.updateOrderStatus(orderId, newStatus, "admin", adminId, note);
 
             if (updated) {
                 out.print("{\"success\": true, \"message\": \"Cập nhật trạng thái thành công\"}");
             } else {
                 out.print("{\"success\": false, \"message\": \"Không thể cập nhật trạng thái\"}");
+            }
+        } catch (IllegalStateException e) {
+            out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+        } catch (NumberFormatException e) {
+            out.print("{\"success\": false, \"message\": \"ID đơn hàng không hợp lệ\"}");
+        }
+    }
+
+    private void updateAdminNote(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+
+        String orderIdParam = request.getParameter("orderId");
+        String adminNote = request.getParameter("adminNote");
+
+        if (orderIdParam == null) {
+            out.print("{\"success\": false, \"message\": \"Thiếu ID đơn hàng\"}");
+            return;
+        }
+
+        try {
+            int orderId = Integer.parseInt(orderIdParam);
+            group36.dao.OrderDAO dao = new group36.dao.OrderDAO();
+            int result = dao.updateAdminNote(orderId, adminNote);
+
+            if (result > 0) {
+                out.print("{\"success\": true, \"message\": \"Cập nhật ghi chú thành công\"}");
+            } else {
+                out.print("{\"success\": false, \"message\": \"Không thể cập nhật ghi chú\"}");
             }
         } catch (NumberFormatException e) {
             out.print("{\"success\": false, \"message\": \"ID đơn hàng không hợp lệ\"}");
@@ -207,6 +244,11 @@ public class AdminOrderController extends HttpServlet {
                 status.equals("processing") ||
                 status.equals("shipping") ||
                 status.equals("completed") ||
-                status.equals("cancelled");
+                status.equals("cancelled") ||
+                status.equals("payment_expired") ||
+                status.equals("delivery_failed") ||
+                status.equals("returned") ||
+                status.equals("refunded") ||
+                status.equals("cancelled_by_admin");
     }
 }
