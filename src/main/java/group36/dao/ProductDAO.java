@@ -358,4 +358,13 @@ public class ProductDAO extends BaseDao {
                 return "id";
         }
     }
+
+    public int updateRatingStats(int productId, double avgRating, int reviewCount) {
+        String sql = "UPDATE products SET avg_rating = :avgRating, review_count = :reviewCount WHERE id = :id";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", productId)
+                .bind("avgRating", avgRating)
+                .bind("reviewCount", reviewCount)
+                .execute());
+    }
 }
