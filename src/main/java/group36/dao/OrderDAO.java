@@ -41,6 +41,11 @@ public class OrderDAO extends BaseDao {
                         } catch (SQLException e) {
                         }
 
+                        try {
+                                order.setAdminNote(rs.getString("admin_note"));
+                        } catch (SQLException e) {
+                        }
+
                         return order;
                 }
         }
@@ -98,15 +103,16 @@ public class OrderDAO extends BaseDao {
         }
 
         public int insert(Order order) {
-                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, shipping_fee, total_price) "
+                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price) "
                                 +
-                                "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :shippingFee, :totalPrice)";
+                                "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice)";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("userId", order.getUserId())
                                 .bind("addressId", order.getAddressId())
                                 .bind("paymentMethodId", order.getPaymentMethodId())
                                 .bind("status", order.getStatus())
                                 .bind("note", order.getNote())
+                                .bind("adminNote", order.getAdminNote())
                                 .bind("shippingFee", order.getShippingFee())
                                 .bind("totalPrice", order.getTotalPrice())
                                 .executeAndReturnGeneratedKeys("id")
@@ -115,9 +121,9 @@ public class OrderDAO extends BaseDao {
         }
 
         public int insertGuestOrder(Order order) {
-                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, " +
+                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, " +
                                 "shipping_fee, total_price, guest_email, guest_name, guest_phone) " +
-                                "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :shippingFee, :totalPrice, "
+                                "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, "
                                 +
                                 ":guestEmail, :guestName, :guestPhone)";
                 return get().withHandle(handle -> handle.createUpdate(sql)
@@ -125,6 +131,7 @@ public class OrderDAO extends BaseDao {
                                 .bind("paymentMethodId", order.getPaymentMethodId())
                                 .bind("status", order.getStatus())
                                 .bind("note", order.getNote())
+                                .bind("adminNote", order.getAdminNote())
                                 .bind("shippingFee", order.getShippingFee())
                                 .bind("totalPrice", order.getTotalPrice())
                                 .bind("guestEmail", order.getGuestEmail())
@@ -140,6 +147,14 @@ public class OrderDAO extends BaseDao {
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", orderId)
                                 .bind("status", status)
+                                .execute());
+        }
+
+        public int updateAdminNote(int orderId, String adminNote) {
+                String sql = "UPDATE orders SET admin_note = :adminNote WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", orderId)
+                                .bind("adminNote", adminNote)
                                 .execute());
         }
 

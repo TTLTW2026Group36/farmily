@@ -27,6 +27,8 @@ public class Order implements Serializable {
     private User user;
     private List<OrderDetail> orderDetails;
     private Payment latestPayment;
+    private String adminNote;
+    private List<OrderStatusHistory> statusHistory;
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_CONFIRMED = "confirmed";
@@ -34,6 +36,11 @@ public class Order implements Serializable {
     public static final String STATUS_SHIPPING = "shipping";
     public static final String STATUS_DELIVERED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
+    public static final String STATUS_PAYMENT_EXPIRED = "payment_expired";
+    public static final String STATUS_DELIVERY_FAILED = "delivery_failed";
+    public static final String STATUS_RETURNED = "returned";
+    public static final String STATUS_REFUNDED = "refunded";
+    public static final String STATUS_CANCELLED_BY_ADMIN = "cancelled_by_admin";
 
     public static final double FREE_SHIPPING_THRESHOLD = 100000;
     public static final double STANDARD_SHIPPING_FEE = 30000;
@@ -98,6 +105,22 @@ public class Order implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public List<OrderStatusHistory> getStatusHistory() {
+        return statusHistory;
+    }
+
+    public void setStatusHistory(List<OrderStatusHistory> statusHistory) {
+        this.statusHistory = statusHistory != null ? statusHistory : new ArrayList<>();
     }
 
     public double getShippingFee() {
@@ -301,6 +324,16 @@ public class Order implements Serializable {
                 return "Hoàn thành";
             case STATUS_CANCELLED:
                 return "Đã hủy";
+            case STATUS_PAYMENT_EXPIRED:
+                return "Thanh toán hết hạn";
+            case STATUS_DELIVERY_FAILED:
+                return "Giao thất bại";
+            case STATUS_RETURNED:
+                return "Hoàn hàng";
+            case STATUS_REFUNDED:
+                return "Hoàn tiền";
+            case STATUS_CANCELLED_BY_ADMIN:
+                return "Hủy bởi admin";
             default:
                 return status;
         }
@@ -318,7 +351,15 @@ public class Order implements Serializable {
             case STATUS_DELIVERED:
                 return "badge-success";
             case STATUS_CANCELLED:
+            case STATUS_PAYMENT_EXPIRED:
+            case STATUS_CANCELLED_BY_ADMIN:
                 return "badge-danger";
+            case STATUS_DELIVERY_FAILED:
+                return "badge-warning";
+            case STATUS_RETURNED:
+                return "badge-info";
+            case STATUS_REFUNDED:
+                return "badge-secondary";
             default:
                 return "badge-secondary";
         }
