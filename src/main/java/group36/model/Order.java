@@ -52,6 +52,7 @@ public class Order implements Serializable {
         // From pending
         Set<String> pendingNext = new HashSet<>();
         pendingNext.add(STATUS_CONFIRMED);
+        pendingNext.add(STATUS_PROCESSING);
         pendingNext.add(STATUS_CANCELLED);
         pendingNext.add(STATUS_CANCELLED_BY_ADMIN);
         pendingNext.add(STATUS_PAYMENT_EXPIRED);
@@ -60,6 +61,7 @@ public class Order implements Serializable {
         // From confirmed
         Set<String> confirmedNext = new HashSet<>();
         confirmedNext.add(STATUS_PROCESSING);
+        confirmedNext.add(STATUS_SHIPPING);
         confirmedNext.add(STATUS_CANCELLED_BY_ADMIN);
         ALLOWED_TRANSITIONS.put(STATUS_CONFIRMED, confirmedNext);
 
