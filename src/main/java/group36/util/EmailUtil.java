@@ -19,13 +19,13 @@ public class EmailUtil {
             }
         });
 
-        Message message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         message.setFrom(new InternetAddress(FarmilyConstants.MAIL_USER));
         message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        message.setSubject(subject);
-        message.setText(content);
+        message.setSubject(subject, "UTF-8");
+        message.setContent(content, "text/plain; charset=UTF-8");
 
         Transport.send(message);
-        System.out.println("✅ Email sent successfully to: " + to);
+        System.out.println("Email sent successfully to: " + to);
     }
 }
