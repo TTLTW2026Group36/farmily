@@ -24,6 +24,7 @@ public class Review implements Serializable {
 
     
     private User user;
+    private Product product;
     private ProductVariant variant;
     private List<ReviewImage> images;
 
@@ -175,6 +176,14 @@ public class Review implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public ProductVariant getVariant() {
