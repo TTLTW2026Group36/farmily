@@ -7,7 +7,6 @@ import group36.model.User;
 import group36.util.PasswordUtil;
 import java.security.SecureRandom;
 import java.sql.Timestamp;
-import java.util.UUID;
 
 public class PasswordResetService {
     private final PasswordResetTokenDAO tokenDAO;
@@ -19,8 +18,25 @@ public class PasswordResetService {
         this.userDAO = new UserDAO();
     }
 
-    public String resetPassword(String tokenStr, String newPassword) {
-        PasswordResetToken tokenObj = validateToken(tokenStr);
+    public String generateOTP(String email) {
+        User user = userDAO.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Email không tồn tại"));
+        tokenDAO.invalidateAllByEmail(email);
+
+        int otpValue = 100000 + random.nextInt(900000);
+        String otp = String.valueOf(otpValue);
+
+        Timestamp expiresAt = new Timestamp(System.currentTimeMillis() + (5 * 60 * 1000)); 
+        PasswordResetToken resetToken = new PasswordResetToken(user.getId(), email, otp, expiresAt);
+        tokenDAO.insert(resetToken);
+        return otp;
+    }
+
+    public String resetPassword(String otp, String newPassword) {
+        PasswordResetToken tokenObj = tokenDAO.findByToken(otp)
+                .orElseThrow(() -> new IllegalArgumentException("Mã xác nhận không hợp lệ"));
+        if (!tokenObj.isValid()) {
+            throw new IllegalArgumentException("Mã xác nhận đã hết hạn hoặc đã dùng rồi");
+        }
         if (newPassword == null || newPassword.length() < 8) {
             throw new IllegalArgumentException("Mật khẩu mới phải có ít nhất 8 ký tự");
         }
@@ -28,35 +44,29 @@ public class PasswordResetService {
         userDAO.updatePassword(tokenObj.getUserId(), hashedPassword);
         tokenDAO.markAsUsed(tokenObj.getId());
 
-        System.out.println("Password reset successful for user: " + tokenObj.getEmail());
         return tokenObj.getEmail();
     }
 
-    public void cleanupExpiredTokens() {
-        int deleted = tokenDAO.deleteExpired();
-        if (deleted > 0) {
-            System.out.println("Cleaned up " + deleted + " expired password reset tokens");
+    public void validateOTP(String email, String otp) {
+        PasswordResetToken t = tokenDAO.findLatestByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu đổi mật khẩu"));
+
+        if (!t.getToken().equals(otp)) {
+            throw new IllegalArgumentException("Mã OTP bạn nhập không đúng");
         }
-    }
-
-    public String createResetLink(String email, String baseUrl) {
-        User user = userDAO.findByEmail(email).orElseThrow(() -> new IllegalArgumentException("Email không tồn tại"));
-
-        tokenDAO.invalidateAllByEmail(email);
-
-        String token = UUID.randomUUID().toString();
-        Timestamp expiresAt = new Timestamp(System.currentTimeMillis() + (30 * 60 * 1000)); // 30p
-        PasswordResetToken resetToken = new PasswordResetToken(user.getId(), email, token, expiresAt);
-        tokenDAO.insert(resetToken);
-        return baseUrl + "/reset-password?token=" + token;
-    }
-    public PasswordResetToken validateToken(String token) {
-        PasswordResetToken t = tokenDAO.findByToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("Liên kết không hợp lệ"));
 
         if (!t.isValid()) {
-            throw new IllegalArgumentException("Liên kết đã hết hạn hoặc đã được sử dụng");
+            throw new IllegalArgumentException("Mã OTP đã hết hạn");
         }
-        return t;
+    }
+
+    public void validateRateLimit(String email) {
+        tokenDAO.findLatestByEmail(email).ifPresent(token -> {
+            long diff = System.currentTimeMillis() - token.getCreatedAt().getTime();
+            if (diff < 60 * 1000) { 
+                long wait = 60 - (diff / 1000);
+                throw new IllegalArgumentException("Vui lòng đợi " + wait + " giây nữa mới được gửi lại mã");
+            }
+        });
     }
 }

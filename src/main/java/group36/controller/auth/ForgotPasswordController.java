@@ -1,8 +1,5 @@
 package group36.controller.auth;
 
-import group36.dao.AuthDao;
-import group36.dao.RefreshTokenDao;
-import group36.model.User;
 import group36.util.EmailUtil;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.*;
@@ -11,7 +8,7 @@ import jakarta.servlet.annotation.*;
 import group36.service.PasswordResetService;
 import java.io.IOException;
 
-@WebServlet(name = "ForgotPasswordController", value = { "/forgot-password", "/quen-mat-khau" })
+@WebServlet(name = "ForgotPasswordController", value = "/forgot-password")
 public class ForgotPasswordController extends HttpServlet {
     private final PasswordResetService passwordResetService = new PasswordResetService();
 
@@ -27,9 +24,7 @@ public class ForgotPasswordController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        String email = request.getParameter("email") != null ? request.getParameter("email").trim() : null;
-        String baseUrl = request.getScheme() + "://" + request.getServerName() + (request.getServerPort() == 80 ? "" : ":" + request.getServerPort()) + request.getContextPath();
-        
+        String email = request.getParameter("email");
         if (email == null || email.trim().isEmpty()) {
             request.setAttribute("error", "Vui lòng nhập địa chỉ email");
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
@@ -37,22 +32,15 @@ public class ForgotPasswordController extends HttpServlet {
         }
         try {
             passwordResetService.validateRateLimit(email);
-            String resetLink = passwordResetService.createResetLink(email, baseUrl);
-            String content = "Chào bạn, vui lòng click vào link sau để đặt lại mật khẩu: " + resetLink;
-            EmailUtil.sendEmail(email, "Đặt lại mật khẩu Farmily", content);
-            try {
-                AuthDao authDao = new AuthDao();
-                User u = authDao.getUserByUsername(email.trim());
-                if(u != null){
-                    RefreshTokenDao tokenDao =  new RefreshTokenDao();
-                    tokenDao.revokeAllByUserId(u.getId());
-                }
-            } catch (Exception e) {
-                System.err.println("Session revocation failed: " + e.getMessage());
-            }
-            request.setAttribute("message", "Vui lòng kiểm tra email để đặt lại mật khẩu.");
+            String otp = passwordResetService.generateOTP(email); // tao OTP 6 số
+            String title = "Mã xác nhận bảo mật Farmily";
+            String content = "Chào bạn, mã OTP để đặt lại mật khẩu của bạn là: " + otp 
+                           + "\n(Mã này có tác dụng trong 5 phút, đừng chia sẻ cho ai nhé!)";
+            
+            EmailUtil.sendEmail(email, title, content);
             request.setAttribute("emailSent", email);
-            request.getRequestDispatcher("/Notice.jsp").forward(request, response);
+            request.setAttribute("message", "Chúng tôi đã gửi mã OTP vào email của bạn.");
+            request.getRequestDispatcher("/XacNhanOTP.jsp").forward(request, response);
 
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
@@ -61,7 +49,6 @@ public class ForgotPasswordController extends HttpServlet {
         } catch (MessagingException e) {
             e.printStackTrace();
             request.setAttribute("error", "Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP (Email/Mật khẩu ứng dụng).");
-            request.setAttribute("email", email);
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
