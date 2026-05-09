@@ -27,7 +27,7 @@ public class ForgotPasswordController extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        String email = request.getParameter("email");
+        String email = request.getParameter("email") != null ? request.getParameter("email").trim() : null;
         String baseUrl = request.getScheme() + "://" + request.getServerName() + (request.getServerPort() == 80 ? "" : ":" + request.getServerPort()) + request.getContextPath();
         
         if (email == null || email.trim().isEmpty()) {
@@ -36,6 +36,7 @@ public class ForgotPasswordController extends HttpServlet {
             return;
         }
         try {
+            passwordResetService.validateRateLimit(email);
             String resetLink = passwordResetService.createResetLink(email, baseUrl);
             String content = "Chào bạn, vui lòng click vào link sau để đặt lại mật khẩu: " + resetLink;
             EmailUtil.sendEmail(email, "Đặt lại mật khẩu Farmily", content);
@@ -50,6 +51,7 @@ public class ForgotPasswordController extends HttpServlet {
                 System.err.println("Session revocation failed: " + e.getMessage());
             }
             request.setAttribute("message", "Vui lòng kiểm tra email để đặt lại mật khẩu.");
+            request.setAttribute("emailSent", email);
             request.getRequestDispatcher("/Notice.jsp").forward(request, response);
 
         } catch (IllegalArgumentException e) {
