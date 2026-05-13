@@ -24,6 +24,7 @@ public class OrderService {
     private final AdminNotificationService adminNotificationService;
     private final UserDAO userDAO;
     private final FlashSaleDAO flashSaleDAO;
+    private final OrderStatusHistoryDAO orderStatusHistoryDAO;
 
     public static final double FREE_SHIPPING_THRESHOLD = 100000;
     public static final double STANDARD_SHIPPING_FEE = 30000;
@@ -42,6 +43,7 @@ public class OrderService {
         this.adminNotificationService = new AdminNotificationService();
         this.userDAO = new UserDAO();
         this.flashSaleDAO = new FlashSaleDAO();
+        this.orderStatusHistoryDAO = new OrderStatusHistoryDAO();
     }
 
     public double calculateShippingFee(double subtotal) {
@@ -432,9 +434,55 @@ public class OrderService {
         return orderDAO.findAllPaginated(page, size);
     }
 
+    @Deprecated
     public boolean updateOrderStatus(int orderId, String status) {
-        int result = orderDAO.updateStatus(orderId, status);
-        return result > 0;
+        return updateOrderStatus(orderId, status, "system", null, null);
+    }
+
+    public boolean updateOrderStatus(int orderId, String newStatus, String changedBy, Integer changedById, String note) {
+        Optional<Order> orderOpt = orderDAO.findById(orderId);
+        if (orderOpt.isEmpty()) {
+            return false;
+        }
+        Order order = orderOpt.get();
+        String oldStatus = order.getStatus();
+
+        if (!Order.isTransitionAllowed(oldStatus, newStatus)) {
+            throw new IllegalStateException("Không thể chuyển trạng thái từ " + oldStatus + " sang " + newStatus);
+        }
+
+        boolean updated = orderDAO.updateStatus(orderId, newStatus) > 0;
+        if (updated) {
+            OrderStatusHistory history = new OrderStatusHistory();
+            history.setOrderId(orderId);
+            history.setOldStatus(oldStatus);
+            history.setNewStatus(newStatus);
+            history.setChangedBy(changedBy);
+            history.setChangedById(changedById);
+            history.setNote(note);
+            orderStatusHistoryDAO.insert(history);
+        }
+        return updated;
+    }
+
+    public boolean cancelOrderByUser(int orderId, int userId, String reason) {
+        Optional<Order> orderOpt = orderDAO.findById(orderId);
+        if (orderOpt.isEmpty() || !orderOpt.get().getUserId().equals(userId)) {
+            return false;
+        }
+        return updateOrderStatus(orderId, Order.STATUS_CANCELLED, "user", userId, reason);
+    }
+
+    public boolean cancelOrderByAdmin(int orderId, int adminId, String reason) {
+        return updateOrderStatus(orderId, Order.STATUS_CANCELLED_BY_ADMIN, "admin", adminId, reason);
+    }
+
+    public boolean confirmReceivedByUser(int orderId, int userId) {
+        Optional<Order> orderOpt = orderDAO.findById(orderId);
+        if (orderOpt.isEmpty() || !orderOpt.get().getUserId().equals(userId)) {
+            return false;
+        }
+        return updateOrderStatus(orderId, Order.STATUS_DELIVERED, "user", userId, "Khách hàng xác nhận đã nhận hàng");
     }
 
     public int countOrders() {
@@ -455,6 +503,9 @@ public class OrderService {
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
         paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
         paymentDAO.findLatestByOrderId(order.getId()).ifPresent(order::setLatestPayment);
+
+        List<OrderStatusHistory> history = orderStatusHistoryDAO.findByOrderId(order.getId());
+        order.setStatusHistory(history);
 
         if (!order.isGuestOrder() && order.getUserId() != null) {
             userDAO.findById(order.getUserId()).ifPresent(order::setUser);
@@ -545,6 +596,9 @@ public class OrderService {
         addressDAO.findById(order.getAddressId()).ifPresent(order::setAddress);
         paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
         paymentDAO.findLatestByOrderId(order.getId()).ifPresent(order::setLatestPayment);
+
+        List<OrderStatusHistory> history = orderStatusHistoryDAO.findByOrderId(order.getId());
+        order.setStatusHistory(history);
     }
 
     public double getTotalRevenue() {
