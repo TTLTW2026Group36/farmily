@@ -1,0 +1,29 @@
+name: Đề xuất tính năng mới (Feature Request)
+description: Đề xuất ý tưởng hoặc tính năng mới cho dự án
+title: "[FEAT] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Chúng tôi rất hoan nghênh các ý tưởng đóng góp để cải tiến sản phẩm!
+  - type: textarea
+    id: problem
+    attributes:
+      label: Vấn đề cần giải quyết
+      description: Tính năng này giải quyết vấn đề hoặc nhu cầu gì?
+      placeholder: Hiện tại khi làm việc X, người dùng gặp khó khăn vì...
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Giải pháp đề xuất
+      description: Mô tả chi tiết về cách tính năng mới nên hoạt động.
+      placeholder: Bổ sung thêm chức năng/giao diện cho phép...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Các giải pháp thay thế đã cân nhắc (Tùy chọn)
+      description: Có giải pháp nào khác mà bạn đã nghĩ tới không?
