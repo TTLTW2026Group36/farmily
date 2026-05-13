@@ -1,0 +1,51 @@
+name: Báo cáo lỗi (Bug Report)
+description: Tạo báo cáo chi tiết về lỗi hoặc sự cố hệ thống
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Cảm ơn bạn đã dành thời gian báo cáo lỗi để giúp dự án hoàn thiện hơn!
+  - type: input
+    id: overview
+    attributes:
+      label: Tóm tắt lỗi
+      description: Một câu ngắn gọn mô tả vấn đề bạn gặp phải.
+      placeholder: "Ví dụ: Nút thanh toán không hoạt động trên trang giỏ hàng"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Các bước tái hiện (Steps to Reproduce)
+      description: Vui lòng liệt kê các bước chi tiết để chúng tôi có thể tái hiện lại lỗi này.
+      placeholder: |
+        1. Truy cập vào trang...
+        2. Bấm vào...
+        3. Nhập thông tin...
+        4. Thấy lỗi...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Kết quả mong muốn (Expected Behavior)
+      description: Hệ thống đáng lẽ ra phải hoạt động như thế nào?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Kết quả thực tế (Actual Behavior)
+      description: Điều gì đã thực sự xảy ra? (Có thể đính kèm thông báo lỗi hoặc log)
+    validations:
+      required: true
+  - type: checkboxes
+    id: environment
+    attributes:
+      label: Môi trường xảy ra lỗi
+      description: Lỗi này xuất hiện trên môi trường nào?
+      options:
+        - label: Local (Môi trường phát triển)
+        - label: Staging / Test
+        - label: Production (Môi trường thực tế)
