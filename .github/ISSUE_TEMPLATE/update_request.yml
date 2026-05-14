@@ -1,0 +1,32 @@
+name: Đề xuất cập nhật/cải tiến (Update Request)
+description: Đề xuất thay đổi, nâng cấp hoặc tối ưu hóa một chức năng hiện có
+title: "[UPDATE] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: Sử dụng mẫu này để đề xuất cải tiến hoặc thay đổi cho các chức năng đang có trong hệ thống.
+  - type: input
+    id: feature
+    attributes:
+      label: Chức năng cần cập nhật
+      description: Tên chức năng hoặc module bạn muốn đề xuất thay đổi là gì?
+      placeholder: "Ví dụ: Quy trình thanh toán đơn hàng hoặc Giao diện danh sách sản phẩm"
+    validations:
+      required: true
+  - type: textarea
+    id: current_state
+    attributes:
+      label: Hiện trạng hiện tại
+      description: Chức năng này hiện tại đang hoạt động như thế nào? Có hạn chế hay bất cập gì không?
+      placeholder: Hiện tại hệ thống đang xử lý...
+    validations:
+      required: true
+  - type: textarea
+    id: expected_outcome
+    attributes:
+      label: Kết quả mong đợi
+      description: Sau khi cập nhật, chức năng này nên hoạt động hoặc hiển thị ra sao? Mang lại lợi ích gì?
+      placeholder: Mong muốn hệ thống sẽ hỗ trợ/tối ưu...
+    validations:
+      required: true
