@@ -42,6 +42,11 @@
                         <span>Đơn hàng</span>
                     </a></li>
 
+                <li><a href="${pageContext.request.contextPath}/admin/reviews" data-page="reviews">
+                        <i class="fas fa-star"></i>
+                        <span>Đánh giá</span>
+                    </a></li>
+
                 <li><a href="${pageContext.request.contextPath}/admin/users" data-page="customers">
                         <i class="fas fa-users"></i>
                         <span>Khách hàng</span>

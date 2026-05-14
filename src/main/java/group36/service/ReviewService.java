@@ -4,10 +4,12 @@ import group36.dao.ReviewDAO;
 import group36.dao.ReviewImageDAO;
 import group36.dao.UserDAO;
 import group36.dao.ProductVariantDAO;
+import group36.dao.ProductDAO;
 import group36.model.Review;
 import group36.model.ReviewImage;
 import group36.model.User;
 import group36.model.ProductVariant;
+import group36.model.Product;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -129,6 +131,41 @@ public class ReviewService {
         return reviewDAO.countByProductId(productId);
     }
 
+    public boolean approveReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_APPROVED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean rejectReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_REJECTED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean hideReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_HIDDEN);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    private void recalculateProductRating(int productId) {
+        double avgRating = reviewDAO.getAverageRating(productId); 
+        int reviewCount = reviewDAO.countByProductId(productId);   
+        
+        ProductDAO productDAO = new ProductDAO();
+        productDAO.updateRatingStats(productId, avgRating, reviewCount);
+    }
+
     
 
 
@@ -176,6 +213,29 @@ public class ReviewService {
             }
 
             review.setImages(imageMap.getOrDefault(review.getId(), Collections.emptyList()));
+        }
+    }
+
+    public void loadReviewDetailsForAdmin(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return;
+        }
+
+        loadReviewDetails(reviews);
+
+        Set<Integer> productIds = new HashSet<>();
+        for (Review review : reviews) {
+            productIds.add(review.getProductId());
+        }
+
+        ProductDAO productDAO = new ProductDAO();
+        Map<Integer, Product> productMap = new HashMap<>();
+        for (Integer productId : productIds) {
+            productDAO.findById(productId).ifPresent(product -> productMap.put(productId, product));
+        }
+
+        for (Review review : reviews) {
+            review.setProduct(productMap.get(review.getProductId()));
         }
     }
 

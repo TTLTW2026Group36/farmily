@@ -359,13 +359,13 @@ public class UserOrderController extends HttpServlet {
             boolean updated = orderService.confirmReceivedByUser(orderId, user.getId());
 
             if (!updated) {
-                request.getSession().setAttribute("errorMessage", "Không thể xác nhận nhận hàng (trạng thái không cho phép)");
+                request.getSession().setAttribute("errorMessage",
+                        "Không thể xác nhận nhận hàng (trạng thái không cho phép)");
                 response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
                 return;
             }
 
-            request.getSession().setAttribute("successMessage",
-                    "Xác nhận nhận hàng thành công! Bạn có thể đánh giá sản phẩm.");
+            request.getSession().setAttribute("successMessage", "Xác nhận nhận hàng thành công!");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
 
         } catch (NumberFormatException e) {
