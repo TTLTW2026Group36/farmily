@@ -181,7 +181,7 @@
                             <label>Mật khẩu mới <span>*</span></label>
                             <div class="password-wrapper">
                                 <input type="password" name="newPassword" id="newPassword"
-                                    placeholder="Nhập mật khẩu mới" required minlength="6">
+                                    placeholder="Nhập mật khẩu mới" required minlength="8">
                                 <button type="button" class="toggle-password"
                                     onclick="togglePassword('newPassword', this)">
                                     <i class="fas fa-eye"></i>
@@ -195,11 +195,17 @@
                                 <li id="req-length" class="invalid">
                                     <i class="fas fa-circle"></i> Ít nhất 8 ký tự
                                 </li>
-                                <li id="req-letter" class="invalid">
-                                    <i class="fas fa-circle"></i> Chứa chữ cái
+                                <li id="req-upper" class="invalid">
+                                    <i class="fas fa-circle"></i> Phải có chữ viết hoa
+                                </li>
+                                <li id="req-lower" class="invalid">
+                                    <i class="fas fa-circle"></i> Phải có chữ viết thường
                                 </li>
                                 <li id="req-number" class="invalid">
-                                    <i class="fas fa-circle"></i> Chứa số
+                                    <i class="fas fa-circle"></i> Phải có chữ số
+                                </li>
+                                <li id="req-special" class="invalid">
+                                    <i class="fas fa-circle"></i> Phải có ký tự đặc biệt
                                 </li>
                             </ul>
 
@@ -255,28 +261,30 @@
                             const value = this.value;
                             let strength = 0;
 
-                            // Check requirements
-                            const hasLength = value.length >= 6;
-                            const hasLetter = /[a-zA-Z]/.test(value);
+                            const hasLength = value.length >= 8;
+                            const hasUpper = /[A-Z]/.test(value);
+                            const hasLower = /[a-z]/.test(value);
                             const hasNumber = /[0-9]/.test(value);
+                            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
-                            // Update requirements UI
                             updateRequirement('req-length', hasLength);
-                            updateRequirement('req-letter', hasLetter);
+                            updateRequirement('req-upper', hasUpper);
+                            updateRequirement('req-lower', hasLower);
                             updateRequirement('req-number', hasNumber);
+                            updateRequirement('req-special', hasSpecial);
 
-                            // Calculate strength
                             if (hasLength) strength++;
-                            if (hasLetter && hasNumber) strength++;
-                            if (value.length >= 8 && /[!@#$%^&*]/.test(value)) strength++;
+                            if (hasUpper) strength++;
+                            if (hasLower) strength++;
+                            if (hasNumber) strength++;
+                            if (hasSpecial) strength++;
 
-                            // Update strength bar
                             strengthBar.className = 'password-strength-bar';
-                            if (strength === 1) {
+                            if (strength <= 2) {
                                 strengthBar.classList.add('strength-weak');
-                            } else if (strength === 2) {
+                            } else if (strength <= 4) {
                                 strengthBar.classList.add('strength-medium');
-                            } else if (strength >= 3) {
+                            } else if (strength === 5) {
                                 strengthBar.classList.add('strength-strong');
                             }
 
@@ -326,9 +334,9 @@
                             const pass = newPassword.value;
                             const confirm = confirmPassword.value;
 
-                            if (pass.length < 6) {
+                            if (pass.length < 8) {
                                 e.preventDefault();
-                                alert('Mật khẩu phải có ít nhất 6 ký tự');
+                                alert('Mật khẩu phải có ít nhất 8 ký tự');
                                 return;
                             }
 
