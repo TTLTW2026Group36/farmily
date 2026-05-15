@@ -51,8 +51,20 @@ public class PasswordResetService {
         PasswordResetToken t = tokenDAO.findLatestByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy yêu cầu đổi mật khẩu"));
 
+        if (t.getSoLanSai() >= 5) {
+            tokenDAO.markAsUsed(t.getId());
+            throw new IllegalArgumentException("Mã OTP đã bị khóa do nhập sai quá 5 lần. Vui lòng gửi lại mã mới.");
+        }
+
         if (!t.getToken().equals(otp)) {
-            throw new IllegalArgumentException("Mã OTP bạn nhập không đúng");
+            tokenDAO.tangSoLanSai(t.getId());
+            int con_lai = 5 - (t.getSoLanSai() + 1);
+            if (con_lai > 0) {
+                throw new IllegalArgumentException("Mã OTP không đúng. Bạn còn " + con_lai + " lần thử.");
+            } else {
+                tokenDAO.markAsUsed(t.getId());
+                throw new IllegalArgumentException("Mã OTP đã bị khóa do nhập sai quá 5 lần.");
+            }
         }
 
         if (!t.isValid()) {

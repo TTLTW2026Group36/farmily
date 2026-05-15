@@ -11,6 +11,7 @@ public class PasswordResetToken implements Serializable {
     private Timestamp createdAt;
     private Timestamp expiresAt;
     private boolean used;
+    private int so_lan_sai;
 
     public PasswordResetToken() {
     }
@@ -77,6 +78,14 @@ public class PasswordResetToken implements Serializable {
 
     public void setUsed(boolean used) {
         this.used = used;
+    }
+
+    public int getSoLanSai() {
+        return so_lan_sai;
+    }
+
+    public void setSoLanSai(int so_lan_sai) {
+        this.so_lan_sai = so_lan_sai;
     }
 
     public boolean isExpired() {

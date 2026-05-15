@@ -19,14 +19,15 @@ public class PasswordResetTokenDAO extends BaseDao {
             token.setCreatedAt(rs.getTimestamp("created_at"));
             token.setExpiresAt(rs.getTimestamp("expires_at"));
             token.setUsed(rs.getBoolean("is_used"));
+            token.setSoLanSai(rs.getInt("so_lan_sai"));
             return token;
         }
     }
 
     public int insert(PasswordResetToken token) {
         String sql = """
-                INSERT INTO password_reset_tokens (user_id, email, token, expires_at, is_used)
-                VALUES (:userId, :email, :token, :expiresAt, :isUsed)
+                INSERT INTO password_reset_tokens (user_id, email, token, expires_at, is_used, so_lan_sai)
+                VALUES (:userId, :email, :token, :expiresAt, :isUsed, :soLanSai)
                 """;
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("userId", token.getUserId())
@@ -34,6 +35,7 @@ public class PasswordResetTokenDAO extends BaseDao {
                 .bind("token", token.getToken())
                 .bind("expiresAt", token.getExpiresAt())
                 .bind("isUsed", token.isUsed())
+                .bind("soLanSai", token.getSoLanSai())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -62,6 +64,13 @@ public class PasswordResetTokenDAO extends BaseDao {
     public int markAsUsed(int id) {
         String sql = "UPDATE password_reset_tokens SET is_used = TRUE WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", id)
+                .execute());
+    }
+
+    public void tangSoLanSai(int id) {
+        String sql = "UPDATE password_reset_tokens SET so_lan_sai = so_lan_sai + 1 WHERE id = :id";
+        get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", id)
                 .execute());
     }

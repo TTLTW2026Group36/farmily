@@ -96,7 +96,7 @@
 
             <div class="resend-box">
                 Bạn chưa nhận được mã? 
-                <a href="${pageContext.request.contextPath}/quen-mat-khau" class="resend-link">Gửi lại ngay</a>
+                <a href="${pageContext.request.contextPath}/forgot-password" class="resend-link">Gửi lại ngay</a>
             </div>
         </div>
     </main>
