@@ -144,6 +144,25 @@ public class ProductVariantDAO extends BaseDao {
 
 
 
+    public int decreaseStockWithLock(org.jdbi.v3.core.Handle h, int id, int quantity) {
+        String lockSql = "SELECT stock FROM product_variants WHERE id = :id FOR UPDATE";
+        Integer currentStock = h.createQuery(lockSql)
+                .bind("id", id)
+                .mapTo(Integer.class)
+                .findOne()
+                .orElseThrow(() -> new IllegalArgumentException("Variant không tồn tại: " + id));
+
+        if (currentStock < quantity) {
+            throw new IllegalArgumentException("Tồn kho không đủ. Còn " + currentStock + ", yêu cầu " + quantity);
+        }
+
+        String updateSql = "UPDATE product_variants SET stock = stock - :quantity WHERE id = :id";
+        return h.createUpdate(updateSql)
+                .bind("id", id)
+                .bind("quantity", quantity)
+                .execute();
+    }
+
     public int decreaseStock(int id, int quantity) {
         String sql = "UPDATE product_variants SET stock = stock - :quantity WHERE id = :id AND stock >= :quantity";
         return get().withHandle(handle -> handle.createUpdate(sql)

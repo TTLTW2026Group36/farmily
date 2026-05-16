@@ -25,13 +25,5 @@ public class DBProperties {
     public static String password = prop.getProperty("db.password");
     public static String dbname = prop.getProperty("db.name");
 
-    public static void main(String[] args) {
-        System.out.println(host);
-        System.out.println(port);
-        System.out.println(username);
-        System.out.println(password);
-        System.out.println(dbname);
-
-    }
 
 }

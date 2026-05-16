@@ -54,9 +54,13 @@ public class AddressDAO extends BaseDao {
     }
 
     public int insert(Address address) {
+        return get().withHandle(h -> insertWithHandle(h, address));
+    }
+
+    public int insertWithHandle(org.jdbi.v3.core.Handle h, Address address) {
         String sql = "INSERT INTO address (user_id, receiver, phone, address_detail, district, city, is_default) " +
                 "VALUES (:userId, :receiver, :phone, :addressDetail, :district, :city, :isDefault)";
-        return get().withHandle(handle -> handle.createUpdate(sql)
+        return h.createUpdate(sql)
                 .bind("userId", address.getUserId())
                 .bind("receiver", address.getReceiver())
                 .bind("phone", address.getPhone())
@@ -66,7 +70,7 @@ public class AddressDAO extends BaseDao {
                 .bind("isDefault", address.isDefault())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
-                .one());
+                .one();
     }
 
     public int update(Address address) {

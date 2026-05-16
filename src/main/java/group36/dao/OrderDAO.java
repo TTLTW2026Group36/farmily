@@ -103,10 +103,13 @@ public class OrderDAO extends BaseDao {
         }
 
         public int insert(Order order) {
+                return get().withHandle(h -> insertWithHandle(h, order));
+        }
+
+        public int insertWithHandle(org.jdbi.v3.core.Handle h, Order order) {
                 String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price) "
-                                +
-                                "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice)";
-                return get().withHandle(handle -> handle.createUpdate(sql)
+                                + "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice)";
+                return h.createUpdate(sql)
                                 .bind("userId", order.getUserId())
                                 .bind("addressId", order.getAddressId())
                                 .bind("paymentMethodId", order.getPaymentMethodId())
@@ -117,16 +120,19 @@ public class OrderDAO extends BaseDao {
                                 .bind("totalPrice", order.getTotalPrice())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
-                                .one());
+                                .one();
         }
 
         public int insertGuestOrder(Order order) {
+                return get().withHandle(h -> insertGuestOrderWithHandle(h, order));
+        }
+
+        public int insertGuestOrderWithHandle(org.jdbi.v3.core.Handle h, Order order) {
                 String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, " +
                                 "shipping_fee, total_price, guest_email, guest_name, guest_phone) " +
-                                "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, "
-                                +
+                                "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, " +
                                 ":guestEmail, :guestName, :guestPhone)";
-                return get().withHandle(handle -> handle.createUpdate(sql)
+                return h.createUpdate(sql)
                                 .bind("addressId", order.getAddressId())
                                 .bind("paymentMethodId", order.getPaymentMethodId())
                                 .bind("status", order.getStatus())
@@ -139,7 +145,7 @@ public class OrderDAO extends BaseDao {
                                 .bind("guestPhone", order.getGuestPhone())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
-                                .one());
+                                .one();
         }
 
         public int updateStatus(int orderId, String status) {

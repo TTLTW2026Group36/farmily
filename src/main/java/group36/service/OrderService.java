@@ -2,6 +2,7 @@ package group36.service;
 
 import group36.dao.*;
 import group36.model.*;
+import org.jdbi.v3.core.Handle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -83,40 +84,17 @@ public class OrderService {
         double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
-        Order order = new Order();
-        order.setUserId(userId);
-        order.setAddressId(addressId);
-        order.setPaymentMethodId(paymentMethodId);
-        order.setNote(note);
-        order.setShippingFee(shippingFee);
-        order.setTotalPrice(totalPrice);
-        order.setStatus(Order.STATUS_PENDING);
-
-        int orderId = orderDAO.insert(order);
-        order.setId(orderId);
-
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
-            orderDetails.add(detail);
-        }
-        orderDetailDAO.insertBatch(orderDetails);
-        order.setOrderDetails(orderDetails);
-
-        for (CartItem item : cartItems) {
-            if (item.getVariantId() != null) {
-                productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
-            }
-            productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
-
-            if (item.hasFlashSalePrice()) {
-                flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
-                    flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
-                });
-            }
-        }
-
-        cartItemDAO.deleteByCartId(cart.getId());
+        Order order = JdbiProvider.getInstance().inTransaction(handle -> {
+            Order o = new Order();
+            o.setUserId(userId);
+            o.setAddressId(addressId);
+            o.setPaymentMethodId(paymentMethodId);
+            o.setNote(note);
+            o.setShippingFee(shippingFee);
+            o.setTotalPrice(totalPrice);
+            o.setStatus(Order.STATUS_PENDING);
+            return executeOrderTransaction(handle, o, cartItems, cart.getId());
+        });
 
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
@@ -157,38 +135,17 @@ public class OrderService {
         double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
-        Order order = new Order();
-        order.setUserId(userId);
-        order.setAddressId(addressId);
-        order.setPaymentMethodId(paymentMethodId);
-        order.setNote(note);
-        order.setShippingFee(shippingFee);
-        order.setTotalPrice(totalPrice);
-        order.setStatus(Order.STATUS_PENDING);
-
-        int orderId = orderDAO.insert(order);
-        order.setId(orderId);
-
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
-            orderDetails.add(detail);
-        }
-        orderDetailDAO.insertBatch(orderDetails);
-        order.setOrderDetails(orderDetails);
-
-        for (CartItem item : cartItems) {
-            if (item.getVariantId() != null) {
-                productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
-            }
-            productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
-
-            if (item.hasFlashSalePrice()) {
-                flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
-                    flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
-                });
-            }
-        }
+        Order order = JdbiProvider.getInstance().inTransaction(handle -> {
+            Order o = new Order();
+            o.setUserId(userId);
+            o.setAddressId(addressId);
+            o.setPaymentMethodId(paymentMethodId);
+            o.setNote(note);
+            o.setShippingFee(shippingFee);
+            o.setTotalPrice(totalPrice);
+            o.setStatus(Order.STATUS_PENDING);
+            return executeOrderTransaction(handle, o, cartItems, null);
+        });
 
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
@@ -232,45 +189,47 @@ public class OrderService {
         double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
-        shippingAddress.setUserId(0);
-        int addressId = addressDAO.insert(shippingAddress);
-        shippingAddress.setId(addressId);
+        Order order = JdbiProvider.getInstance().inTransaction(handle -> {
+            shippingAddress.setUserId(0);
+            int addressId = addressDAO.insertWithHandle(handle, shippingAddress);
+            shippingAddress.setId(addressId);
 
-        Order order = new Order();
-        order.setUserId(null);
-        order.setAddressId(addressId);
-        order.setPaymentMethodId(paymentMethodId);
-        order.setNote(note);
-        order.setShippingFee(shippingFee);
-        order.setTotalPrice(totalPrice);
-        order.setStatus(Order.STATUS_PENDING);
-        order.setGuestEmail(guestInfo.getEmail());
-        order.setGuestName(guestInfo.getFullName());
-        order.setGuestPhone(guestInfo.getPhone());
+            Order o = new Order();
+            o.setUserId(null);
+            o.setAddressId(addressId);
+            o.setPaymentMethodId(paymentMethodId);
+            o.setNote(note);
+            o.setShippingFee(shippingFee);
+            o.setTotalPrice(totalPrice);
+            o.setStatus(Order.STATUS_PENDING);
+            o.setGuestEmail(guestInfo.getEmail());
+            o.setGuestName(guestInfo.getFullName());
+            o.setGuestPhone(guestInfo.getPhone());
 
-        int orderId = orderDAO.insertGuestOrder(order);
-        order.setId(orderId);
+            int orderId = orderDAO.insertGuestOrderWithHandle(handle, o);
+            o.setId(orderId);
 
-        List<OrderDetail> orderDetails = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            OrderDetail detail = OrderDetail.fromCartItem(item, orderId);
-            orderDetails.add(detail);
-        }
-        orderDetailDAO.insertBatch(orderDetails);
-        order.setOrderDetails(orderDetails);
-
-        for (CartItem item : cartItems) {
-            if (item.getVariantId() != null) {
-                productVariantDAO.decreaseStock(item.getVariantId(), item.getQuantity());
+            List<OrderDetail> orderDetails = new ArrayList<>();
+            for (CartItem item : cartItems) {
+                orderDetails.add(OrderDetail.fromCartItem(item, orderId));
             }
-            productDAO.incrementSoldCount(item.getProductId(), item.getQuantity());
+            orderDetailDAO.insertBatchWithHandle(handle, orderDetails);
+            o.setOrderDetails(orderDetails);
 
-            if (item.hasFlashSalePrice()) {
-                flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
-                    flashSaleDAO.incrementSoldCount(fs.getId(), item.getQuantity());
-                });
+            for (CartItem item : cartItems) {
+                if (item.getVariantId() != null) {
+                    productVariantDAO.decreaseStockWithLock(handle, item.getVariantId(), item.getQuantity());
+                }
+                productDAO.incrementSoldCountWithHandle(handle, item.getProductId(), item.getQuantity());
+                if (item.hasFlashSalePrice()) {
+                    flashSaleDAO.findActiveByProductIdWithHandle(handle, item.getProductId()).ifPresent(fs -> {
+                        flashSaleDAO.incrementSoldCountWithHandle(handle, fs.getId(), item.getQuantity());
+                    });
+                }
             }
-        }
+
+            return o;
+        });
 
         order.setAddress(shippingAddress);
         order.setPaymentMethod(paymentOpt.get());
@@ -279,6 +238,36 @@ public class OrderService {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+        return order;
+    }
+
+    private Order executeOrderTransaction(Handle handle, Order order, List<CartItem> cartItems, Integer cartIdToDelete) {
+        int orderId = orderDAO.insertWithHandle(handle, order);
+        order.setId(orderId);
+
+        List<OrderDetail> orderDetails = new ArrayList<>();
+        for (CartItem item : cartItems) {
+            orderDetails.add(OrderDetail.fromCartItem(item, orderId));
+        }
+        orderDetailDAO.insertBatchWithHandle(handle, orderDetails);
+        order.setOrderDetails(orderDetails);
+
+        for (CartItem item : cartItems) {
+            if (item.getVariantId() != null) {
+                productVariantDAO.decreaseStockWithLock(handle, item.getVariantId(), item.getQuantity());
+            }
+            productDAO.incrementSoldCountWithHandle(handle, item.getProductId(), item.getQuantity());
+            if (item.hasFlashSalePrice()) {
+                flashSaleDAO.findActiveByProductIdWithHandle(handle, item.getProductId()).ifPresent(fs -> {
+                    flashSaleDAO.incrementSoldCountWithHandle(handle, fs.getId(), item.getQuantity());
+                });
+            }
+        }
+
+        if (cartIdToDelete != null) {
+            cartItemDAO.deleteByCartIdWithHandle(handle, cartIdToDelete);
         }
 
         return order;
