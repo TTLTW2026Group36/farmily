@@ -131,6 +131,16 @@ public class ReviewService {
         return reviewDAO.countByProductId(productId);
     }
 
+    public List<Review> getReviewsFiltered(int productId, String filterType, Integer filterValue, int page, int size) {
+        List<Review> reviews = reviewDAO.findByProductIdFiltered(productId, filterType, filterValue, page, size);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public int countReviewsFiltered(int productId, String filterType, Integer filterValue) {
+        return reviewDAO.countByProductIdFiltered(productId, filterType, filterValue);
+    }
+
     public boolean approveReview(int reviewId) {
         Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
         if (reviewOpt.isEmpty()) return false;

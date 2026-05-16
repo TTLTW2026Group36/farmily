@@ -378,21 +378,16 @@
 
                         <div class="reviews-filter">
                             <button class="filter-btn active" data-filter="all">Tất cả</button>
-                            <button class="filter-btn" data-filter="5">5 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count5Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="4">4 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count4Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="3">3 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count3Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="with-images">Có hình ảnh (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.countWithImages : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="verified">Đã mua hàng (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.countVerified : 0}" />)
-                            </button>
+                            <button class="filter-btn" data-filter="5">5 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count5Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="4">4 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count4Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="3">3 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count3Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="with-images">Có hình ảnh (<c:out value="${not empty reviewSummary ? reviewSummary.countWithImages : 0}" />)</button>
+                            <button class="filter-btn" data-filter="verified">Đã mua hàng (<c:out value="${not empty reviewSummary ? reviewSummary.countVerified : 0}" />)</button>
+                            <c:forEach var="variant" items="${product.variants}">
+                                <button class="filter-btn" data-filter="variant" data-variant-id="${variant.id}">
+                                    <c:out value="${variant.optionsValue}" />
+                                </button>
+                            </c:forEach>
                         </div>
 
 
@@ -477,14 +472,16 @@
                         </div>
 
 
-                        <c:if test="${not empty reviews && totalReviewPages > 1}">
-                            <div class="reviews-loadmore">
-                                <c:if test="${currentReviewPage < totalReviewPages}">
-                                    <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}&reviewPage=${currentReviewPage + 1}"
-                                        class="btn-loadmore">Xem thêm đánh giá</a>
-                                </c:if>
-                            </div>
-                        </c:if>
+                        <div class="reviews-loadmore" id="loadMoreContainer">
+                            <c:if test="${totalReviewPages > 1}">
+                                <button id="btnLoadMore" class="btn-loadmore"
+                                        data-product-id="${product.id}"
+                                        data-current-page="1"
+                                        data-total-pages="${totalReviewPages}">
+                                    Xem thêm đánh giá
+                                </button>
+                            </c:if>
+                        </div>
                     </section>
                 </main>
 

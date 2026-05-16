@@ -183,6 +183,85 @@ public class ReviewDAO extends BaseDao {
                 return count > 0;
         }
 
+        public List<Review> findByProductIdFiltered(int productId, String filterType, Integer filterValue, int page, int size) {
+                int offset = (page - 1) * size;
+                StringBuilder sql = new StringBuilder(
+                        "SELECT DISTINCT r.* FROM review r ");
+
+                if ("with-images".equals(filterType)) {
+                        sql.append("LEFT JOIN review_images ri ON r.id = ri.review_id ");
+                }
+
+                sql.append("WHERE r.product_id = :productId AND r.status = 'approved' ");
+
+                switch (filterType == null ? "all" : filterType) {
+                        case "rating":
+                                sql.append("AND r.rating = :filterValue ");
+                                break;
+                        case "with-images":
+                                sql.append("AND (r.image_url IS NOT NULL OR ri.id IS NOT NULL) ");
+                                break;
+                        case "verified":
+                                sql.append("AND r.order_id IS NOT NULL ");
+                                break;
+                        case "variant":
+                                sql.append("AND r.variant_id = :filterValue ");
+                                break;
+                        default:
+                                break;
+                }
+
+                sql.append("ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset");
+
+                return get().withHandle(handle -> {
+                        var query = handle.createQuery(sql.toString())
+                                .bind("productId", productId)
+                                .bind("limit", size)
+                                .bind("offset", offset);
+                        if (filterValue != null && ("rating".equals(filterType) || "variant".equals(filterType))) {
+                                query.bind("filterValue", filterValue);
+                        }
+                        return query.map(new ReviewMapper()).list();
+                });
+        }
+
+        public int countByProductIdFiltered(int productId, String filterType, Integer filterValue) {
+                StringBuilder sql = new StringBuilder(
+                        "SELECT COUNT(DISTINCT r.id) FROM review r ");
+
+                if ("with-images".equals(filterType)) {
+                        sql.append("LEFT JOIN review_images ri ON r.id = ri.review_id ");
+                }
+
+                sql.append("WHERE r.product_id = :productId AND r.status = 'approved' ");
+
+                switch (filterType == null ? "all" : filterType) {
+                        case "rating":
+                                sql.append("AND r.rating = :filterValue ");
+                                break;
+                        case "with-images":
+                                sql.append("AND (r.image_url IS NOT NULL OR ri.id IS NOT NULL) ");
+                                break;
+                        case "verified":
+                                sql.append("AND r.order_id IS NOT NULL ");
+                                break;
+                        case "variant":
+                                sql.append("AND r.variant_id = :filterValue ");
+                                break;
+                        default:
+                                break;
+                }
+
+                return get().withHandle(handle -> {
+                        var query = handle.createQuery(sql.toString())
+                                .bind("productId", productId);
+                        if (filterValue != null && ("rating".equals(filterType) || "variant".equals(filterType))) {
+                                query.bind("filterValue", filterValue);
+                        }
+                        return query.mapTo(Integer.class).one();
+                });
+        }
+
         public List<Review> findByOrderIdAndUserId(int orderId, int userId) {
                 String sql = "SELECT * FROM review WHERE order_id = :orderId AND user_id = :userId ORDER BY created_at DESC";
                 return get().withHandle(handle -> handle.createQuery(sql)

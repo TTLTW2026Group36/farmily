@@ -223,6 +223,7 @@ public class Review implements Serializable {
 
     public String getUserInitial() {
         String name = getUserDisplayName();
+        if (name == null || name.isEmpty()) return "?";
         return name.substring(0, 1).toUpperCase();
     }
 
