@@ -389,8 +389,10 @@
             }, 3000);
         }
 
-        document.querySelectorAll('.report-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
+        function bindReportButtons() {
+            document.querySelectorAll('.report-btn:not([data-bound])').forEach(btn => {
+                btn.dataset.bound = 'true';
+                btn.addEventListener('click', async function() {
                 if (!window.isLoggedIn) {
                     alert('Vui lòng đăng nhập để báo cáo');
                     return;
@@ -419,37 +421,158 @@
                     console.error('Report error:', err);
                     alert('Có lỗi xảy ra, vui lòng thử lại.');
                 }
+                });
             });
-        });
+        }
+        bindReportButtons();
 
+
+        // Review filter + load-more (AJAX)
+        let activeFilter = 'all';
+        let activeVariantId = null;
+        let reviewCurrentPage = 1;
+        const productId = window.productData ? window.productData.id : 0;
+
+        function buildReviewHtml(review) {
+            const stars = Array.from({length: 5}, (_, i) =>
+                i < review.rating
+                    ? '<i class="fas fa-star"></i>'
+                    : '<i class="far fa-star"></i>'
+            ).join('');
+
+            const verified = review.verifiedPurchase
+                ? '<span class="verified"><i class="fas fa-check-circle"></i> Đã mua hàng</span>'
+                : '';
+
+            const variant = review.variantDisplayText
+                ? `<div class="review-variant">Phân loại: ${escapeHtml(review.variantDisplayText)}</div>`
+                : '';
+
+            let imagesHtml = '';
+            if (review.hasImages && review.images && review.images.length > 0) {
+                imagesHtml = '<div class="review-images">' +
+                    review.images.map(img => `<img src="${escapeHtml(img.imageUrl)}" alt="Ảnh đánh giá">`).join('') +
+                    '</div>';
+            }
+
+            return `<article class="review-item" data-rating="${review.rating}"
+                        data-verified="${review.verifiedPurchase}"
+                        data-has-images="${review.hasImages}">
+                        <div class="review-header">
+                            <div class="user-avatar">${escapeHtml(review.userInitial)}</div>
+                            <div class="user-info">
+                                <h4 class="user-name">${escapeHtml(review.userDisplayName)}</h4>
+                                <div class="review-meta">
+                                    <div class="stars">${stars}</div>
+                                    <span class="date">${escapeHtml(review.formattedDate)}</span>
+                                    ${verified}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p class="review-text">${escapeHtml(review.reviewText)}</p>
+                            ${variant}
+                            ${imagesHtml}
+                            <div class="review-actions">
+                                <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu ích</button>
+                                <button class="action-btn report-btn"
+                                        data-review-id="${review.id}"
+                                        title="Báo cáo đánh giá không phù hợp">
+                                    <i class="far fa-flag"></i> Báo cáo
+                                </button>
+                            </div>
+                        </div>
+                    </article>`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function buildReviewApiUrl(filter, variantId, page) {
+            let url = `${window.contextPath}/review-api?productId=${productId}&page=${page}`;
+            if (filter === 'variant' && variantId) {
+                url += `&filter=variant&variantId=${variantId}`;
+            } else if (filter && filter !== 'all') {
+                url += `&filter=${encodeURIComponent(filter)}`;
+                if (filter.match(/^[1-5]$/)) url += `&rating=${filter}`;
+            } else {
+                url += '&filter=all';
+            }
+            return url;
+        }
+
+        function loadReviews(filter, variantId, page, append) {
+            const list = document.querySelector('.reviews-list');
+            const btnLoadMore = document.getElementById('btnLoadMore');
+            if (!list) return;
+
+            if (!append) {
+                list.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;">Đang tải...</div>';
+            }
+            if (btnLoadMore) { btnLoadMore.disabled = true; btnLoadMore.textContent = 'Đang tải...'; }
+
+            fetch(buildReviewApiUrl(filter, variantId, page))
+                .then(r => r.json())
+                .then(data => {
+                    if (!append) {
+                        if (data.reviews && data.reviews.length > 0) {
+                            list.innerHTML = data.reviews.map(buildReviewHtml).join('');
+                        } else {
+                            list.innerHTML = '<div class="no-reviews" style="text-align:center;padding:40px;color:#6b7280;">' +
+                                '<i class="far fa-comment-dots" style="font-size:48px;margin-bottom:16px;"></i>' +
+                                '<p>Không có đánh giá nào phù hợp.</p></div>';
+                        }
+                    } else {
+                        if (data.reviews && data.reviews.length > 0) {
+                            list.insertAdjacentHTML('beforeend', data.reviews.map(buildReviewHtml).join(''));
+                        }
+                    }
+
+                    reviewCurrentPage = data.page;
+                    const container = document.getElementById('loadMoreContainer');
+                    if (btnLoadMore && container) {
+                        if (data.hasMore) {
+                            btnLoadMore.disabled = false;
+                            btnLoadMore.textContent = 'Xem thêm đánh giá';
+                            container.style.display = '';
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    }
+
+                    // Re-bind report buttons on newly added items
+                    bindReportButtons();
+                })
+                .catch(() => {
+                    if (!append) list.innerHTML = '<div style="text-align:center;padding:20px;color:#e53e3e;">Có lỗi xảy ra khi tải đánh giá.</div>';
+                    if (btnLoadMore) { btnLoadMore.disabled = false; btnLoadMore.textContent = 'Xem thêm đánh giá'; }
+                });
+        }
 
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
-                const filter = btn.dataset.filter;
-                const reviewItems = document.querySelectorAll('.review-item');
-
-                reviewItems.forEach(item => {
-                    const rating = item.dataset.rating;
-                    const verified = item.dataset.verified === 'true';
-                    const hasImages = item.dataset.hasImages === 'true';
-                    let show = false;
-
-                    switch (filter) {
-                        case 'all': show = true; break;
-                        case '5': case '4': case '3': case '2': case '1':
-                            show = rating === filter; break;
-                        case 'with-images': show = hasImages; break;
-                        case 'verified': show = verified; break;
-                        default: show = true;
-                    }
-
-                    item.style.display = show ? 'block' : 'none';
-                });
+                activeFilter = btn.dataset.filter;
+                activeVariantId = btn.dataset.variantId || null;
+                reviewCurrentPage = 1;
+                loadReviews(activeFilter, activeVariantId, 1, false);
             });
         });
+
+        const btnLoadMore = document.getElementById('btnLoadMore');
+        if (btnLoadMore) {
+            btnLoadMore.addEventListener('click', () => {
+                loadReviews(activeFilter, activeVariantId, reviewCurrentPage + 1, true);
+            });
+        }
     };
 
 
