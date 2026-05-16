@@ -595,6 +595,8 @@ a {
     flex-direction: column;
     gap: 20px;
     padding: 0 40px;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .review-item {
@@ -603,10 +605,18 @@ a {
     border-radius: 12px;
     background: white;
     transition: background 0.1s;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .review-item:hover {
     border-color: #16a34a;
+}
+
+.review-content {
+    min-width: 0;
+    overflow: hidden;
+    word-break: break-word;
 }
 
 .review-header {
@@ -678,23 +688,29 @@ a {
 }
 
 .review-images {
-    display: flex;
-    gap: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 72px);
+    gap: 6px;
     margin-bottom: 12px;
+    max-width: 100%;
 }
 
-.review-images img {
-    width: 80px;
-    height: 80px;
+.review-images img,
+.review-images video {
+    width: 72px;
+    height: 72px;
     object-fit: cover;
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     border: 1px solid #e2e8f0;
-    transition: opacity 0.1s;
+    transition: opacity 0.15s;
+    display: block;
+    background: #000;
 }
 
-.review-images img:hover {
-    opacity: 0.8;
+.review-images img:hover,
+.review-images video:hover {
+    opacity: 0.75;
 }
 
 .review-actions {
@@ -1135,3 +1151,52 @@ a {
         font-size: 15px;
     }
 }
+
+/* Lightbox for review images */
+.review-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+.review-lightbox.active { display: flex; }
+.review-lightbox img,
+.review-lightbox video {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    object-fit: contain;
+}
+.review-lightbox-close {
+    position: absolute;
+    top: 16px; right: 20px;
+    font-size: 32px;
+    color: #fff;
+    cursor: pointer;
+    line-height: 1;
+    background: none;
+    border: none;
+}
+
+.review-lightbox-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,.15);
+    border: none;
+    color: #fff;
+    font-size: 48px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 8px 16px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    z-index: 1;
+}
+.review-lightbox-nav:hover { background: rgba(255,255,255,.3); }
+.review-lightbox-nav.prev { left: 16px; }
+.review-lightbox-nav.next { right: 16px; }
+.review-lightbox-nav[style*="display:none"] { display: none !important; }

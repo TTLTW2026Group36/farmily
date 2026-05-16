@@ -155,6 +155,7 @@ public class ReviewApiController extends HttpServlet {
                     if (img.getImageUrl() != null && addedUrls.add(img.getImageUrl())) {
                         JsonObject imgObj = new JsonObject();
                         imgObj.addProperty("imageUrl", img.getImageUrl());
+                        imgObj.addProperty("mediaType", img.getMediaType() != null ? img.getMediaType() : "image");
                         images.add(imgObj);
                     }
                 }
@@ -163,6 +164,7 @@ public class ReviewApiController extends HttpServlet {
                     && addedUrls.add(r.getImageUrl())) {
                 JsonObject imgObj = new JsonObject();
                 imgObj.addProperty("imageUrl", r.getImageUrl());
+                imgObj.addProperty("mediaType", "image");
                 images.add(imgObj);
             }
             obj.add("images", images);

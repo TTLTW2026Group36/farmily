@@ -32,6 +32,7 @@ public class ReviewDAO extends BaseDao {
                         review.setStatus(rs.getString("status"));
                         review.setReportCount(rs.getInt("report_count"));
                         review.setHelpfulCount(rs.getInt("helpful_count"));
+                        review.setEditCount(rs.getInt("edit_count"));
                         return review;
                 }
         }
@@ -276,7 +277,7 @@ public class ReviewDAO extends BaseDao {
                                         String search, int page, int size) {
                 int offset = (page - 1) * size;
                 StringBuilder sql = new StringBuilder("SELECT r.* FROM review r WHERE 1=1 ");
-                
+
                 if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
                         sql.append("AND r.status = :status ");
                 }
@@ -289,9 +290,9 @@ public class ReviewDAO extends BaseDao {
                 if (search != null && !search.isEmpty()) {
                         sql.append("AND r.review_text LIKE :search ");
                 }
-                
+
                 sql.append("ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset");
-                
+
                 return get().withHandle(handle -> {
                         var query = handle.createQuery(sql.toString());
                         if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
@@ -314,7 +315,7 @@ public class ReviewDAO extends BaseDao {
 
         public int countAllForAdmin(String statusFilter, Integer productId, Integer rating, String search) {
                 StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM review r WHERE 1=1 ");
-                
+
                 if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
                         sql.append("AND r.status = :status ");
                 }
@@ -327,7 +328,7 @@ public class ReviewDAO extends BaseDao {
                 if (search != null && !search.isEmpty()) {
                         sql.append("AND r.review_text LIKE :search ");
                 }
-                
+
                 return get().withHandle(handle -> {
                         var query = handle.createQuery(sql.toString());
                         if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
@@ -374,6 +375,18 @@ public class ReviewDAO extends BaseDao {
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", reviewId)
                                 .bind("count", count)
+                                .execute());
+        }
+
+
+        public int updateIfNotEdited(int reviewId, int rating, String reviewText) {
+                String sql = "UPDATE review SET rating = :rating, review_text = :reviewText, " +
+                                "edit_count = edit_count + 1, status = 'pending' " +
+                                "WHERE id = :id AND edit_count = 0";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", reviewId)
+                                .bind("rating", rating)
+                                .bind("reviewText", reviewText)
                                 .execute());
         }
 

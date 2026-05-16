@@ -441,10 +441,20 @@
                                                 <c:if test="${review.hasImages()}">
                                                     <div class="review-images">
                                                         <c:forEach var="img" items="${review.images}">
-                                                            <img src="${img.imageUrl}" alt="Ảnh đánh giá">
+                                                            <c:choose>
+                                                                <c:when test="${img.mediaType eq 'video'}">
+                                                                    <video src="${img.imageUrl}" controls preload="metadata"
+                                                                           onclick="openReviewLightbox(this, '${img.imageUrl}', true)"></video>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá"
+                                                                         onclick="openReviewLightbox(this, '${img.imageUrl}', false)">
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </c:forEach>
                                                         <c:if test="${not empty review.imageUrl}">
-                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá">
+                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá"
+                                                                 onclick="openReviewLightbox(this, '${review.imageUrl}', false)">
                                                         </c:if>
                                                     </div>
                                                 </c:if>
@@ -456,7 +466,7 @@
                                                         <i class="${review.helpfulByCurrentUser ? 'fas' : 'far'} fa-thumbs-up"></i>
                                                         Hữu ích<c:if test="${review.helpfulCount > 0}"> (<span class="helpful-count">${review.helpfulCount}</span>)</c:if>
                                                     </button>
-                                                    <button class="action-btn report-btn" 
+                                                    <button class="action-btn report-btn"
                                                             data-review-id="${review.id}"
                                                             title="Báo cáo đánh giá không phù hợp">
                                                         <i class="far fa-flag"></i> Báo cáo
@@ -537,6 +547,15 @@
                 </c:if>
 
                 <jsp:include page="common/footer.jsp" />
+
+                <!-- Lightbox for review images -->
+                <div class="review-lightbox" id="reviewLightbox" onclick="closeReviewLightbox()">
+                    <button class="review-lightbox-close" onclick="closeReviewLightbox()">&times;</button>
+                    <button class="review-lightbox-nav prev" id="lightboxPrev" onclick="event.stopPropagation();navigateLightbox(-1)">&#8249;</button>
+                    <img id="lightboxImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
+                    <video id="lightboxVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
+                    <button class="review-lightbox-nav next" id="lightboxNext" onclick="event.stopPropagation();navigateLightbox(1)">&#8250;</button>
+                </div>
 
                 <script>
                     window.contextPath = "<c:out value='${pageContext.request.contextPath}'/>";

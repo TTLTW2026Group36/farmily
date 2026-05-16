@@ -15,10 +15,6 @@ import group36.model.Product;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-
-
-
 public class ReviewService {
 
     private final ReviewDAO reviewDAO;
@@ -35,25 +31,11 @@ public class ReviewService {
         this.variantDAO = new ProductVariantDAO();
     }
 
-    
-
-
-
-
-
     public List<Review> getReviewsByProduct(int productId) {
         List<Review> reviews = reviewDAO.findByProductId(productId);
         loadReviewDetails(reviews);
         return reviews;
     }
-
-    
-
-
-
-
-
-
 
     public List<Review> getReviewsByProductPaginated(int productId, int page, int size) {
         List<Review> reviews = reviewDAO.findByProductIdPaginated(productId, page, size);
@@ -61,24 +43,11 @@ public class ReviewService {
         return reviews;
     }
 
-    
-
-
-
-
-
-
     public List<Review> getReviewsByProductAndRating(int productId, int rating) {
         List<Review> reviews = reviewDAO.findByProductIdAndRating(productId, rating);
         loadReviewDetails(reviews);
         return reviews;
     }
-
-    
-
-
-
-
 
     public List<Review> getReviewsWithImages(int productId) {
         List<Review> reviews = reviewDAO.findByProductIdWithImages(productId);
@@ -86,23 +55,11 @@ public class ReviewService {
         return reviews;
     }
 
-    
-
-
-
-
-
     public List<Review> getVerifiedReviews(int productId) {
         List<Review> reviews = reviewDAO.findVerifiedByProductId(productId);
         loadReviewDetails(reviews);
         return reviews;
     }
-
-    
-
-
-
-
 
     public ReviewSummary getReviewSummary(int productId) {
         ReviewSummary summary = new ReviewSummary();
@@ -110,25 +67,17 @@ public class ReviewService {
         summary.setTotalReviews(reviewDAO.countByProductId(productId));
         summary.setAverageRating(reviewDAO.getAverageRating(productId));
 
-        
         summary.setCount5Star(reviewDAO.countByProductIdAndRating(productId, 5));
         summary.setCount4Star(reviewDAO.countByProductIdAndRating(productId, 4));
         summary.setCount3Star(reviewDAO.countByProductIdAndRating(productId, 3));
         summary.setCount2Star(reviewDAO.countByProductIdAndRating(productId, 2));
         summary.setCount1Star(reviewDAO.countByProductIdAndRating(productId, 1));
 
-        
         summary.setCountWithImages(reviewDAO.countWithImagesByProductId(productId));
         summary.setCountVerified(reviewDAO.countVerifiedByProductId(productId));
 
         return summary;
     }
-
-    
-
-
-
-
 
     public int getTotalReviews(int productId) {
         return reviewDAO.countByProductId(productId);
@@ -217,9 +166,6 @@ public class ReviewService {
         productDAO.updateRatingStats(productId, avgRating, reviewCount);
     }
 
-    
-
-
     private void loadReviewDetails(List<Review> reviews) {
         loadReviewDetailsForUser(reviews, null);
     }
@@ -287,9 +233,6 @@ public class ReviewService {
         }
     }
 
-    
-
-
     public static class ReviewSummary {
         private int totalReviews;
         private double averageRating;
@@ -301,7 +244,6 @@ public class ReviewService {
         private int countWithImages;
         private int countVerified;
 
-        
         public int getTotalReviews() {
             return totalReviews;
         }
@@ -374,9 +316,6 @@ public class ReviewService {
             this.countVerified = countVerified;
         }
 
-        
-
-
         public int getPercentage(int star) {
             if (totalReviews == 0)
                 return 0;
@@ -400,9 +339,6 @@ public class ReviewService {
             }
             return (int) Math.round((count * 100.0) / totalReviews);
         }
-
-        
-
 
         public String getFormattedAvgRating() {
             return String.format("%.1f", averageRating);

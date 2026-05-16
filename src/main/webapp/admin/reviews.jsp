@@ -21,6 +21,36 @@
                         border-radius: 4px;
                         margin-right: 4px;
                         cursor: pointer;
+                        transition: opacity 0.15s;
+                    }
+                    .review-image-thumbnail:hover { opacity: 0.75; }
+
+                    /* Admin lightbox */
+                    .admin-lightbox {
+                        display: none;
+                        position: fixed;
+                        inset: 0;
+                        background: rgba(0,0,0,.85);
+                        z-index: 9999;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    .admin-lightbox.active { display: flex; }
+                    .admin-lightbox img {
+                        max-width: 90vw;
+                        max-height: 85vh;
+                        border-radius: 8px;
+                        object-fit: contain;
+                    }
+                    .admin-lightbox-close {
+                        position: absolute;
+                        top: 16px; right: 20px;
+                        font-size: 32px;
+                        color: #fff;
+                        cursor: pointer;
+                        background: none;
+                        border: none;
+                        line-height: 1;
                     }
 
                     .stars {
@@ -228,7 +258,10 @@
                                                             <td>#${r.id}</td>
                                                             <td>
                                                                 <c:if test="${not empty r.product}">
-                                                                    <strong>${r.product.name}</strong>
+                                                                    <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${r.product.id}"
+                                                                       target="_blank" style="font-weight:600;color:#16a34a;">
+                                                                        ${r.product.name} <i class="fas fa-external-link-alt" style="font-size:11px;"></i>
+                                                                    </a>
                                                                 </c:if>
                                                             </td>
                                                             <td>
@@ -251,11 +284,13 @@
                                                             <td>
                                                                 <c:if test="${not empty r.imageUrl}">
                                                                     <img src="${r.imageUrl}"
-                                                                        class="review-image-thumbnail">
+                                                                        class="review-image-thumbnail"
+                                                                        onclick="openAdminLightbox('${r.imageUrl}')">
                                                                 </c:if>
                                                                 <c:forEach var="img" items="${r.images}">
                                                                     <img src="${img.imageUrl}"
-                                                                        class="review-image-thumbnail">
+                                                                        class="review-image-thumbnail"
+                                                                        onclick="openAdminLightbox('${img.imageUrl}')">
                                                                 </c:forEach>
                                                             </td>
                                                             <td>
@@ -427,6 +462,28 @@
                         }, 3000);
                     </script>
                 </c:if>
+
+                <!-- Admin lightbox -->
+                <div class="admin-lightbox" id="adminLightbox" onclick="closeAdminLightbox()">
+                    <button class="admin-lightbox-close" onclick="closeAdminLightbox()">&times;</button>
+                    <img id="adminLightboxImg" src="" alt="" onclick="event.stopPropagation()">
+                </div>
+                <script>
+                    function openAdminLightbox(src) {
+                        var lb = document.getElementById('adminLightbox');
+                        var img = document.getElementById('adminLightboxImg');
+                        img.src = src;
+                        lb.classList.add('active');
+                        document.body.style.overflow = 'hidden';
+                    }
+                    function closeAdminLightbox() {
+                        document.getElementById('adminLightbox').classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                    document.addEventListener('keydown', function(e) {
+                        if (e.key === 'Escape') closeAdminLightbox();
+                    });
+                </script>
             </body>
 
             </html>

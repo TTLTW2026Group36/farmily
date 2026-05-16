@@ -1216,6 +1216,9 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
 }
 
 .review-order-card {
@@ -1292,4 +1295,134 @@ a.review-product-name:hover {
   .review-products-list {
     padding: 12px;
   }
+}
+
+
+.review-media-section {
+    margin: 12px 0;
+}
+.media-upload-label {
+    display: inline-flex;
+    gap: 6px;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px dashed #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #16a34a;
+    font-size: 14px;
+    transition: background 0.15s;
+}
+.media-upload-label:hover {
+    background: #f0fdf4;
+}
+.media-preview {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+.media-preview-item {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+.media-preview-item img,
+.media-preview-item video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.media-preview-item .remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.media-preview-item .remove-btn:hover {
+    background: rgba(220, 38, 38, 0.9);
+}
+.media-hint {
+    display: block;
+    color: #6b7280;
+    font-size: 12px;
+    margin-top: 6px;
+}
+
+
+.review-images-display {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 72px);
+    gap: 6px;
+    margin: 8px 0;
+    max-width: 100%;
+}
+.review-images-display img,
+.review-images-display video {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid #e5e7eb;
+    display: block;
+    background: #000;
+    cursor: pointer;
+}
+.review-images-display img:hover,
+.review-images-display video:hover {
+    opacity: 0.75;
+}
+.btn-edit-review {
+    margin-top: 8px;
+    padding: 6px 14px;
+    background: none;
+    border: 1px solid #16a34a;
+    color: #16a34a;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.15s;
+}
+.btn-edit-review:hover {
+    background: #16a34a;
+    color: #fff;
+}
+.review-edit-locked {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 6px 14px;
+    color: #6b7280;
+    font-size: 13px;
+}
+.review-edit-form {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e5e7eb;
+}
+.btn-cancel-edit {
+    padding: 6px 14px;
+    background: #f3f4f6;
+    border: 1px solid #d1d5db;
+    color: #374151;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-right: 8px;
+}
+.btn-cancel-edit:hover {
+    background: #e5e7eb;
 }

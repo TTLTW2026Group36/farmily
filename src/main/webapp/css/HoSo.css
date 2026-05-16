@@ -96,6 +96,8 @@ body {
 
 .profile-info {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
   background: #fff;
   border-radius: 8px;
   padding: 28px 32px;

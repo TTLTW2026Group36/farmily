@@ -200,6 +200,84 @@
                                                                                 <p class="review-text-display">
                                                                                     ${fn:escapeXml(existingReview.reviewText)}
                                                                                 </p>
+                                                                                <c:if test="${not empty existingReview.images}">
+                                                                                    <div class="review-images-display">
+                                                                                        <c:forEach var="img" items="${existingReview.images}">
+                                                                                            <c:choose>
+                                                                                                <c:when test="${img.mediaType eq 'video'}">
+                                                                                                    <video src="${img.imageUrl}" controls preload="metadata"></video>
+                                                                                                </c:when>
+                                                                                                <c:otherwise>
+                                                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá">
+                                                                                                </c:otherwise>
+                                                                                            </c:choose>
+                                                                                        </c:forEach>
+                                                                                    </div>
+                                                                                </c:if>
+                                                                                <c:choose>
+                                                                                    <c:when test="${existingReview.editable}">
+                                                                                        <button type="button"
+                                                                                            class="btn-edit-review"
+                                                                                            onclick="toggleEditReviewForm(${existingReview.id})">
+                                                                                            <i class="fas fa-edit"></i> Sửa đánh giá (1 lần)
+                                                                                        </button>
+                                                                                    </c:when>
+                                                                                    <c:otherwise>
+                                                                                        <span class="review-edit-locked">
+                                                                                            <i class="fas fa-lock"></i> Đã chỉnh sửa
+                                                                                        </span>
+                                                                                    </c:otherwise>
+                                                                                </c:choose>
+
+                                                                                <c:if test="${existingReview.editable}">
+                                                                                    <form id="editReviewForm-${existingReview.id}"
+                                                                                        class="review-form review-edit-form"
+                                                                                        method="post"
+                                                                                        enctype="multipart/form-data"
+                                                                                        action="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet"
+                                                                                        onsubmit="return validateReviewForm(this)"
+                                                                                        style="display:none;">
+                                                                                        <input type="hidden" name="action" value="editReview">
+                                                                                        <input type="hidden" name="reviewId" value="${existingReview.id}">
+                                                                                        <input type="hidden" name="orderId" value="${order.id}">
+                                                                                        <input type="hidden" name="rating" value="${existingReview.rating}" class="rating-input">
+
+                                                                                        <div class="star-rating-input">
+                                                                                            <span class="star-label">Đánh giá:</span>
+                                                                                            <div class="stars-interactive">
+                                                                                                <c:forEach var="i" begin="1" end="5">
+                                                                                                    <i class="fa-star ${i <= existingReview.rating ? 'fas' : 'far'}" data-value="${i}"></i>
+                                                                                                </c:forEach>
+                                                                                            </div>
+                                                                                            <span class="star-text"></span>
+                                                                                        </div>
+
+                                                                                        <textarea name="reviewText" class="review-textarea"
+                                                                                            rows="3" maxlength="500">${fn:escapeXml(existingReview.reviewText)}</textarea>
+
+                                                                                        <div class="review-media-section">
+                                                                                            <label class="media-upload-label">
+                                                                                                <i class="fas fa-camera"></i> Thay ảnh/video
+                                                                                                <input type="file" name="mediaFiles" multiple
+                                                                                                    accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                                                                                                    class="media-file-input" hidden>
+                                                                                            </label>
+                                                                                            <div class="media-preview"></div>
+                                                                                            <small class="media-hint">Chọn ảnh/video mới sẽ thay toàn bộ media cũ. Tối đa 5 ảnh + 1 video, ≤ 10MB.</small>
+                                                                                        </div>
+
+                                                                                        <div class="review-form-actions">
+                                                                                            <span class="char-count">0/500</span>
+                                                                                            <button type="button" class="btn-cancel-edit"
+                                                                                                onclick="toggleEditReviewForm(${existingReview.id})">
+                                                                                                Hủy
+                                                                                            </button>
+                                                                                            <button type="submit" class="btn-submit-review">
+                                                                                                <i class="fas fa-save"></i> Lưu thay đổi
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    </form>
+                                                                                </c:if>
                                                                             </div>
                                                                         </c:when>
                                                                         <c:otherwise>
@@ -214,6 +292,7 @@
                                                                                 </div>
                                                                                 <form class="review-form" method="post"
                                                                                     action="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet"
+                                                                                    enctype="multipart/form-data"
                                                                                     onsubmit="return validateReviewForm(this)">
                                                                                     <input type="hidden" name="action"
                                                                                         value="review">
@@ -256,6 +335,17 @@
                                                                                         placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
                                                                                         rows="3"
                                                                                         maxlength="500"></textarea>
+
+                                                                                    <div class="review-media-section">
+                                                                                        <label class="media-upload-label">
+                                                                                            <i class="fas fa-camera"></i> Thêm ảnh/video
+                                                                                            <input type="file" name="mediaFiles" multiple
+                                                                                                accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                                                                                                class="media-file-input" hidden>
+                                                                                        </label>
+                                                                                        <div class="media-preview"></div>
+                                                                                        <small class="media-hint">Tối đa 5 ảnh + 1 video, mỗi file ≤ 10MB</small>
+                                                                                    </div>
 
                                                                                     <div class="review-form-actions">
                                                                                         <span
@@ -450,6 +540,7 @@
                         window.contextPath = '${pageContext.request.contextPath}';
                     </script>
                     <script src="${pageContext.request.contextPath}/js/DonHang.js"></script>
+                    <script src="${pageContext.request.contextPath}/js/review-media-upload.js?v=<%= System.currentTimeMillis() %>"></script>
                     <script>
                         var starLabels = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Rất tốt'];
 
@@ -512,9 +603,17 @@
                                 alert('Vui lòng nhập nội dung đánh giá');
                                 return false;
                             }
-                            form.querySelector('button[type="submit"]').disabled = true;
-                            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+                            var btn = form.querySelector('button[type="submit"]');
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
                             return true;
+                        }
+
+                        function toggleEditReviewForm(reviewId) {
+                            const form = document.getElementById('editReviewForm-' + reviewId);
+                            if (!form) return;
+                            const isVisible = form.style.display !== 'none';
+                            form.style.display = isVisible ? 'none' : 'block';
                         }
                     </script>
                 </body>
