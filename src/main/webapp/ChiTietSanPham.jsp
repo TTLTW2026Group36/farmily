@@ -449,7 +449,13 @@
                                                     </div>
                                                 </c:if>
                                                 <div class="review-actions">
-                                                    <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu ích</button>
+                                                    <button class="action-btn helpful-btn ${review.helpfulByCurrentUser ? 'is-helpful' : ''}"
+                                                            data-review-id="${review.id}"
+                                                            data-helpful-count="${review.helpfulCount}"
+                                                            data-helpful-by-user="${review.helpfulByCurrentUser}">
+                                                        <i class="${review.helpfulByCurrentUser ? 'fas' : 'far'} fa-thumbs-up"></i>
+                                                        Hữu ích<c:if test="${review.helpfulCount > 0}"> (<span class="helpful-count">${review.helpfulCount}</span>)</c:if>
+                                                    </button>
                                                     <button class="action-btn report-btn" 
                                                             data-review-id="${review.id}"
                                                             title="Báo cáo đánh giá không phù hợp">

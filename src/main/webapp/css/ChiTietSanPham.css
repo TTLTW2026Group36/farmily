@@ -722,6 +722,16 @@ a {
     background: #f0fdf4;
 }
 
+.helpful-btn.is-helpful {
+    color: #16a34a;
+    border-color: #16a34a;
+    background: #f0fdf4;
+}
+
+.helpful-btn.is-helpful i {
+    color: #16a34a;
+}
+
 .report-btn { color: #9ca3af; }
 .report-btn:hover { color: #ef4444; border-color: #ef4444; background: #fef2f2; }
 .report-btn.reported { color: #ef4444; border-color: #ef4444; background: #fef2f2; cursor: default; }

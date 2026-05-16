@@ -31,6 +31,7 @@ public class ReviewDAO extends BaseDao {
                         review.setCreatedAt(rs.getTimestamp("created_at"));
                         review.setStatus(rs.getString("status"));
                         review.setReportCount(rs.getInt("report_count"));
+                        review.setHelpfulCount(rs.getInt("helpful_count"));
                         return review;
                 }
         }
@@ -365,6 +366,14 @@ public class ReviewDAO extends BaseDao {
                 String sql = "UPDATE review SET report_count = report_count + 1 WHERE id = :id";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", reviewId)
+                                .execute());
+        }
+
+        public int updateHelpfulCount(int reviewId, int count) {
+                String sql = "UPDATE review SET helpful_count = :count WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", reviewId)
+                                .bind("count", count)
                                 .execute());
         }
 

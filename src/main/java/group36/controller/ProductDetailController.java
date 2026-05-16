@@ -51,9 +51,13 @@ public class ProductDetailController extends HttpServlet {
         try {
             Product product = productService.getProductById(productId);
 
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("auth");
+            Integer currentUserId = user != null ? user.getId() : null;
+
             int reviewPage = parseIntParam(request, "reviewPage", 1);
-            List<Review> reviews = reviewService.getReviewsByProductPaginated(
-                    productId, reviewPage, REVIEWS_PER_PAGE);
+            List<Review> reviews = reviewService.getReviewsByProductPaginatedForUser(
+                    productId, reviewPage, REVIEWS_PER_PAGE, currentUserId);
 
             ReviewSummary reviewSummary = reviewService.getReviewSummary(productId);
 
@@ -67,8 +71,6 @@ public class ProductDetailController extends HttpServlet {
             request.setAttribute("totalReviewPages", totalReviewPages);
             request.setAttribute("reviewsPerPage", REVIEWS_PER_PAGE);
 
-            HttpSession session = request.getSession();
-            User user = (User) session.getAttribute("auth");
             boolean inWishlist = false;
             if (user != null) {
                 inWishlist = wishlistService.isInWishlist(user.getId(), productId);

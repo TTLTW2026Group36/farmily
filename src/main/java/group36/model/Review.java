@@ -21,6 +21,8 @@ public class Review implements Serializable {
     
     private String status; // "pending", "approved", "rejected", "hidden"
     private int reportCount;
+    private int helpfulCount;
+    private boolean helpfulByCurrentUser;
 
     
     private User user;
@@ -134,6 +136,12 @@ public class Review implements Serializable {
 
     public int getReportCount() { return reportCount; }
     public void setReportCount(int reportCount) { this.reportCount = reportCount; }
+
+    public int getHelpfulCount() { return helpfulCount; }
+    public void setHelpfulCount(int helpfulCount) { this.helpfulCount = helpfulCount; }
+
+    public boolean isHelpfulByCurrentUser() { return helpfulByCurrentUser; }
+    public void setHelpfulByCurrentUser(boolean helpfulByCurrentUser) { this.helpfulByCurrentUser = helpfulByCurrentUser; }
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_APPROVED = "approved";

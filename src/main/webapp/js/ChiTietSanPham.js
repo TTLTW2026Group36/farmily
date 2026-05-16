@@ -110,20 +110,20 @@
                 selectedVariant = document.querySelector('input[name="weight"]:checked');
             }
             if (!productId) return;
-            
+
             const variantId = selectedVariant ? selectedVariant.value : '';
-            
+
             const url = new URL((window.contextPath || '') + '/api/product/stock', window.location.origin);
             url.searchParams.append('productId', productId);
             if (variantId) url.searchParams.append('variantId', variantId);
-            
+
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         currentStock = data.stock;
                         stockFetched = true;
-                        
+
                         if (qtyInput && Number(qtyInput.value) > currentStock) {
                             qtyInput.value = Math.max(1, currentStock);
                         }
@@ -373,11 +373,11 @@
             let icon = 'fa-check-circle';
             if (type === 'warning') icon = 'fa-exclamation-triangle';
             toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + message;
-            
+
             let bgColor = '#3b82f6';
             if (type === 'success') bgColor = '#16a34a';
             else if (type === 'warning') bgColor = '#f59e0b';
-            
+
             toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:' +
                 bgColor +
                 ';color:#fff;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:9999;display:flex;align-items:center;gap:8px;font-weight:500;animation:slideIn .3s ease;';
@@ -392,39 +392,95 @@
         function bindReportButtons() {
             document.querySelectorAll('.report-btn:not([data-bound])').forEach(btn => {
                 btn.dataset.bound = 'true';
-                btn.addEventListener('click', async function() {
-                if (!window.isLoggedIn) {
-                    alert('Vui lòng đăng nhập để báo cáo');
-                    return;
-                }
-                if (!confirm('Bạn có chắc muốn báo cáo đánh giá này?')) return;
-                
-                const reviewId = this.dataset.reviewId;
-                try {
-                    const res = await fetch((window.contextPath || '') + '/api/review/report', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'reviewId=' + reviewId
-                    });
-                    
-                    if (res.ok) {
-                        this.disabled = true;
-                        this.innerHTML = '<i class="fas fa-flag"></i> Đã báo cáo';
-                        this.classList.add('reported');
-                        if (typeof showToast === 'function') {
-                            showToast('Đã báo cáo đánh giá!', 'success');
-                        }
-                    } else {
-                        alert('Có lỗi xảy ra khi báo cáo.');
+                btn.addEventListener('click', async function () {
+                    if (!window.isLoggedIn) {
+                        alert('Vui lòng đăng nhập để báo cáo');
+                        return;
                     }
-                } catch (err) {
-                    console.error('Report error:', err);
-                    alert('Có lỗi xảy ra, vui lòng thử lại.');
-                }
+                    if (!confirm('Bạn có chắc muốn báo cáo đánh giá này?')) return;
+
+                    const reviewId = this.dataset.reviewId;
+                    try {
+                        const res = await fetch((window.contextPath || '') + '/api/review/report', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'reviewId=' + reviewId
+                        });
+
+                        if (res.ok) {
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-flag"></i> Đã báo cáo';
+                            this.classList.add('reported');
+                            if (typeof showToast === 'function') {
+                                showToast('Đã báo cáo đánh giá!', 'success');
+                            }
+                        } else {
+                            alert('Có lỗi xảy ra khi báo cáo.');
+                        }
+                    } catch (err) {
+                        console.error('Report error:', err);
+                        alert('Có lỗi xảy ra, vui lòng thử lại.');
+                    }
                 });
             });
         }
         bindReportButtons();
+
+        function bindHelpfulButtons() {
+            document.querySelectorAll('.helpful-btn:not([data-bound])').forEach(btn => {
+                btn.dataset.bound = 'true';
+                btn.addEventListener('click', function () {
+                    if (!window.isLoggedIn) {
+                        alert('Vui lòng đăng nhập để đánh dấu hữu ích');
+                        return;
+                    }
+
+                    const reviewId = this.dataset.reviewId;
+                    const wasHelpful = this.dataset.helpfulByUser === 'true';
+                    const currentCount = parseInt(this.dataset.helpfulCount) || 0;
+                    const countEl = this.querySelector('.helpful-count');
+                    const icon = this.querySelector('i');
+                    const newCount = wasHelpful ? currentCount - 1 : currentCount + 1;
+
+                    // Optimistic update
+                    this.dataset.helpfulByUser = String(!wasHelpful);
+                    this.dataset.helpfulCount = String(newCount);
+                    this.classList.toggle('is-helpful');
+                    if (icon) icon.className = !wasHelpful ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+                    if (newCount > 0) {
+                        if (countEl) countEl.textContent = newCount;
+                        else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${newCount}</span>)`);
+                    } else if (countEl) {
+                        countEl.parentNode.removeChild(countEl);
+                    }
+
+                    fetch(`${window.contextPath || ''}/review-api/helpful?reviewId=${reviewId}`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(data => {
+                            this.dataset.helpfulByUser = String(data.helpful);
+                            this.dataset.helpfulCount = String(data.count);
+                            const syncEl = this.querySelector('.helpful-count');
+                            if (data.count > 0) {
+                                if (syncEl) syncEl.textContent = data.count;
+                                else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${data.count}</span>)`);
+                            } else if (syncEl) syncEl.parentNode.removeChild(syncEl);
+                        })
+                        .catch(() => {
+                            // Rollback
+                            this.dataset.helpfulByUser = String(wasHelpful);
+                            this.dataset.helpfulCount = String(currentCount);
+                            this.classList.toggle('is-helpful');
+                            if (icon) icon.className = wasHelpful ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+                            const rollbackEl = this.querySelector('.helpful-count');
+                            if (currentCount > 0) {
+                                if (rollbackEl) rollbackEl.textContent = currentCount;
+                                else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${currentCount}</span>)`);
+                            } else if (rollbackEl) rollbackEl.parentNode.removeChild(rollbackEl);
+                        });
+                });
+            });
+        }
+        bindHelpfulButtons();
 
 
         // Review filter + load-more (AJAX)
@@ -434,7 +490,7 @@
         const productId = window.productData ? window.productData.id : 0;
 
         function buildReviewHtml(review) {
-            const stars = Array.from({length: 5}, (_, i) =>
+            const stars = Array.from({ length: 5 }, (_, i) =>
                 i < review.rating
                     ? '<i class="fas fa-star"></i>'
                     : '<i class="far fa-star"></i>'
@@ -474,7 +530,13 @@
                             ${variant}
                             ${imagesHtml}
                             <div class="review-actions">
-                                <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu ích</button>
+                                <button class="action-btn helpful-btn ${review.helpfulByCurrentUser ? 'is-helpful' : ''}"
+                                        data-review-id="${review.id}"
+                                        data-helpful-count="${review.helpfulCount || 0}"
+                                        data-helpful-by-user="${review.helpfulByCurrentUser || false}">
+                                    <i class="${review.helpfulByCurrentUser ? 'fas' : 'far'} fa-thumbs-up"></i>
+                                    Hữu ích${review.helpfulCount > 0 ? ` (<span class="helpful-count">${review.helpfulCount}</span>)` : ''}
+                                </button>
                                 <button class="action-btn report-btn"
                                         data-review-id="${review.id}"
                                         title="Báo cáo đánh giá không phù hợp">
@@ -547,8 +609,8 @@
                         }
                     }
 
-                    // Re-bind report buttons on newly added items
                     bindReportButtons();
+                    bindHelpfulButtons();
                 })
                 .catch(() => {
                     if (!append) list.innerHTML = '<div style="text-align:center;padding:20px;color:#e53e3e;">Có lỗi xảy ra khi tải đánh giá.</div>';

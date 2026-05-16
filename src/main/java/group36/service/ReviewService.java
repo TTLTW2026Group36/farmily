@@ -1,6 +1,7 @@
 package group36.service;
 
 import group36.dao.ReviewDAO;
+import group36.dao.ReviewHelpfulDAO;
 import group36.dao.ReviewImageDAO;
 import group36.dao.UserDAO;
 import group36.dao.ProductVariantDAO;
@@ -22,12 +23,14 @@ public class ReviewService {
 
     private final ReviewDAO reviewDAO;
     private final ReviewImageDAO reviewImageDAO;
+    private final ReviewHelpfulDAO reviewHelpfulDAO;
     private final UserDAO userDAO;
     private final ProductVariantDAO variantDAO;
 
     public ReviewService() {
         this.reviewDAO = new ReviewDAO();
         this.reviewImageDAO = new ReviewImageDAO();
+        this.reviewHelpfulDAO = new ReviewHelpfulDAO();
         this.userDAO = new UserDAO();
         this.variantDAO = new ProductVariantDAO();
     }
@@ -141,6 +144,44 @@ public class ReviewService {
         return reviewDAO.countByProductIdFiltered(productId, filterType, filterValue);
     }
 
+    public boolean reviewExists(int reviewId) {
+        return reviewDAO.findById(reviewId).isPresent();
+    }
+
+    public Map<String, Object> toggleHelpful(int reviewId, int userId) {
+        return reviewHelpfulDAO.jdbi().inTransaction(handle -> {
+            int deleted = handle.createUpdate(
+                    "DELETE FROM review_helpful WHERE review_id = :r AND user_id = :u")
+                    .bind("r", reviewId).bind("u", userId).execute();
+            boolean nowHelpful = false;
+            if (deleted == 0) {
+                handle.createUpdate(
+                        "INSERT IGNORE INTO review_helpful (review_id, user_id) VALUES (:r, :u)")
+                        .bind("r", reviewId).bind("u", userId).execute();
+                nowHelpful = true;
+            }
+            int newCount = handle.createQuery(
+                    "SELECT COUNT(*) FROM review_helpful WHERE review_id = :r")
+                    .bind("r", reviewId).mapTo(Integer.class).one();
+            handle.createUpdate(
+                    "UPDATE review SET helpful_count = :c WHERE id = :r")
+                    .bind("c", newCount).bind("r", reviewId).execute();
+            return Map.of("helpful", nowHelpful, "count", newCount);
+        });
+    }
+
+    public List<Review> getReviewsByProductPaginatedForUser(int productId, int page, int size, Integer userId) {
+        List<Review> reviews = reviewDAO.findByProductIdPaginated(productId, page, size);
+        loadReviewDetailsForUser(reviews, userId);
+        return reviews;
+    }
+
+    public List<Review> getReviewsFilteredForUser(int productId, String filterType, Integer filterValue, int page, int size, Integer userId) {
+        List<Review> reviews = reviewDAO.findByProductIdFiltered(productId, filterType, filterValue, page, size);
+        loadReviewDetailsForUser(reviews, userId);
+        return reviews;
+    }
+
     public boolean approveReview(int reviewId) {
         Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
         if (reviewOpt.isEmpty()) return false;
@@ -180,49 +221,46 @@ public class ReviewService {
 
 
     private void loadReviewDetails(List<Review> reviews) {
-        if (reviews == null || reviews.isEmpty()) {
-            return;
-        }
+        loadReviewDetailsForUser(reviews, null);
+    }
 
-        
+    private void loadReviewDetailsForUser(List<Review> reviews, Integer userId) {
+        if (reviews == null || reviews.isEmpty()) return;
+
         Set<Integer> userIds = new HashSet<>();
         Set<Integer> variantIds = new HashSet<>();
         List<Integer> reviewIds = new ArrayList<>();
 
         for (Review review : reviews) {
             userIds.add(review.getUserId());
-            if (review.getVariantId() != null) {
-                variantIds.add(review.getVariantId());
-            }
+            if (review.getVariantId() != null) variantIds.add(review.getVariantId());
             reviewIds.add(review.getId());
         }
 
-        
         Map<Integer, User> userMap = new HashMap<>();
-        for (Integer userId : userIds) {
-            userDAO.findById(userId).ifPresent(user -> userMap.put(userId, user));
+        for (Integer uid : userIds) {
+            userDAO.findById(uid).ifPresent(u -> userMap.put(uid, u));
         }
 
-        
         Map<Integer, ProductVariant> variantMap = new HashMap<>();
         for (Integer variantId : variantIds) {
-            variantDAO.findById(variantId).ifPresent(variant -> variantMap.put(variantId, variant));
+            variantDAO.findById(variantId).ifPresent(v -> variantMap.put(variantId, v));
         }
 
-        
         List<ReviewImage> allImages = reviewImageDAO.findByReviewIds(reviewIds);
         Map<Integer, List<ReviewImage>> imageMap = allImages.stream()
                 .collect(Collectors.groupingBy(ReviewImage::getReviewId));
 
-        
+        Set<Integer> helpfulReviewIds = new HashSet<>();
+        if (userId != null) {
+            helpfulReviewIds.addAll(reviewHelpfulDAO.findReviewIdsByUser(userId, reviewIds));
+        }
+
         for (Review review : reviews) {
             review.setUser(userMap.get(review.getUserId()));
-
-            if (review.getVariantId() != null) {
-                review.setVariant(variantMap.get(review.getVariantId()));
-            }
-
+            if (review.getVariantId() != null) review.setVariant(variantMap.get(review.getVariantId()));
             review.setImages(imageMap.getOrDefault(review.getId(), Collections.emptyList()));
+            review.setHelpfulByCurrentUser(helpfulReviewIds.contains(review.getId()));
         }
     }
 
