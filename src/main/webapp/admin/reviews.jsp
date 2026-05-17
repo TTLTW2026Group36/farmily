@@ -15,15 +15,22 @@
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <style>
                     .review-image-thumbnail {
-                        width: 40px;
-                        height: 40px;
+                        width: 48px;
+                        height: 48px;
                         object-fit: cover;
                         border-radius: 4px;
-                        margin-right: 4px;
                         cursor: pointer;
                         transition: opacity 0.15s;
+                        display: block;
+                        background: #000;
                     }
                     .review-image-thumbnail:hover { opacity: 0.75; }
+                    .review-images-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, 48px);
+                        gap: 4px;
+                        max-width: 160px;
+                    }
 
                     /* Admin lightbox */
                     .admin-lightbox {
@@ -36,6 +43,23 @@
                         justify-content: center;
                     }
                     .admin-lightbox.active { display: flex; }
+                    .admin-lightbox-nav {
+                        position: absolute;
+                        top: 50%;
+                        transform: translateY(-50%);
+                        background: rgba(255,255,255,.15);
+                        border: none;
+                        color: #fff;
+                        font-size: 48px;
+                        line-height: 1;
+                        cursor: pointer;
+                        padding: 4px 14px;
+                        border-radius: 6px;
+                        transition: background 0.15s;
+                    }
+                    .admin-lightbox-nav:hover { background: rgba(255,255,255,.3); }
+                    .admin-lightbox-nav.prev { left: 16px; }
+                    .admin-lightbox-nav.next { right: 16px; }
                     .admin-lightbox img {
                         max-width: 90vw;
                         max-height: 85vh;
@@ -282,16 +306,18 @@
                                                                 </div>
                                                             </td>
                                                             <td>
+                                                                <div class="review-images-grid">
                                                                 <c:if test="${not empty r.imageUrl}">
                                                                     <img src="${r.imageUrl}"
                                                                         class="review-image-thumbnail"
-                                                                        onclick="openAdminLightbox('${r.imageUrl}')">
+                                                                        onclick="openAdminLightbox(this)">
                                                                 </c:if>
                                                                 <c:forEach var="img" items="${r.images}">
                                                                     <img src="${img.imageUrl}"
                                                                         class="review-image-thumbnail"
-                                                                        onclick="openAdminLightbox('${img.imageUrl}')">
+                                                                        onclick="openAdminLightbox(this)">
                                                                 </c:forEach>
+                                                                </div>
                                                             </td>
                                                             <td>
                                                                 <c:if test="${r.reportCount > 0}">
@@ -466,15 +492,38 @@
                 <!-- Admin lightbox -->
                 <div class="admin-lightbox" id="adminLightbox" onclick="closeAdminLightbox()">
                     <button class="admin-lightbox-close" onclick="closeAdminLightbox()">&times;</button>
-                    <img id="adminLightboxImg" src="" alt="" onclick="event.stopPropagation()">
+                    <button class="admin-lightbox-nav prev" id="adminLbPrev" onclick="event.stopPropagation();adminLbNav(-1)">&#8249;</button>
+                    <img id="adminLightboxImg" src="" alt="" onclick="event.stopPropagation()" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain;">
+                    <button class="admin-lightbox-nav next" id="adminLbNext" onclick="event.stopPropagation();adminLbNav(1)">&#8250;</button>
                 </div>
                 <script>
-                    function openAdminLightbox(src) {
-                        var lb = document.getElementById('adminLightbox');
-                        var img = document.getElementById('adminLightboxImg');
-                        img.src = src;
-                        lb.classList.add('active');
+                    var _albItems = [], _albIdx = 0;
+                    function openAdminLightbox(el) {
+                        var src = el.getAttribute('src') || el.src;
+                        var container = el.closest('.review-images-grid');
+                        _albItems = [];
+                        if (container) {
+                            container.querySelectorAll('.review-image-thumbnail').forEach(function(m) {
+                                _albItems.push(m.getAttribute('src') || m.src);
+                            });
+                            _albIdx = _albItems.indexOf(src);
+                            if (_albIdx < 0) _albIdx = 0;
+                        } else {
+                            _albItems = [src];
+                            _albIdx = 0;
+                        }
+                        albShow(_albIdx);
+                        document.getElementById('adminLightbox').classList.add('active');
                         document.body.style.overflow = 'hidden';
+                    }
+                    function albShow(idx) {
+                        document.getElementById('adminLightboxImg').src = _albItems[idx];
+                        document.getElementById('adminLbPrev').style.display = _albItems.length > 1 ? '' : 'none';
+                        document.getElementById('adminLbNext').style.display = _albItems.length > 1 ? '' : 'none';
+                    }
+                    function adminLbNav(dir) {
+                        _albIdx = (_albIdx + dir + _albItems.length) % _albItems.length;
+                        albShow(_albIdx);
                     }
                     function closeAdminLightbox() {
                         document.getElementById('adminLightbox').classList.remove('active');
@@ -482,6 +531,8 @@
                     }
                     document.addEventListener('keydown', function(e) {
                         if (e.key === 'Escape') closeAdminLightbox();
+                        if (e.key === 'ArrowLeft') adminLbNav(-1);
+                        if (e.key === 'ArrowRight') adminLbNav(1);
                     });
                 </script>
             </body>

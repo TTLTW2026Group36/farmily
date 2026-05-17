@@ -205,10 +205,10 @@
                                                                                         <c:forEach var="img" items="${existingReview.images}">
                                                                                             <c:choose>
                                                                                                 <c:when test="${img.mediaType eq 'video'}">
-                                                                                                    <video src="${img.imageUrl}" controls preload="metadata"></video>
+                                                                                                    <video src="${img.imageUrl}" preload="metadata" class="review-media-thumb"></video>
                                                                                                 </c:when>
                                                                                                 <c:otherwise>
-                                                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá">
+                                                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá" class="review-media-thumb">
                                                                                                 </c:otherwise>
                                                                                             </c:choose>
                                                                                         </c:forEach>
@@ -615,6 +615,69 @@
                             const isVisible = form.style.display !== 'none';
                             form.style.display = isVisible ? 'none' : 'block';
                         }
+                    </script>
+
+                    <!-- Lightbox -->
+                    <div id="donhangLightbox" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;align-items:center;justify-content:center;" onclick="this.style.display='none';document.body.style.overflow='';">
+                        <button onclick="event.stopPropagation();document.getElementById('donhangLightbox').style.display='none';document.body.style.overflow='';" style="position:absolute;top:16px;right:20px;font-size:32px;color:#fff;background:none;border:none;cursor:pointer;">&times;</button>
+                        <button id="dlbPrev" onclick="event.stopPropagation();dlbNav(-1)" style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:48px;color:#fff;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:4px 14px;cursor:pointer;">&#8249;</button>
+                        <img id="dlbImg" src="" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain;display:none;" onclick="event.stopPropagation()">
+                        <video id="dlbVideo" controls style="max-width:90vw;max-height:85vh;border-radius:8px;display:none;" onclick="event.stopPropagation()"></video>
+                        <button id="dlbNext" onclick="event.stopPropagation();dlbNav(1)" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:48px;color:#fff;background:rgba(255,255,255,.15);border:none;border-radius:6px;padding:4px 14px;cursor:pointer;">&#8250;</button>
+                    </div>
+                    <script>
+                        var _dlbItems = [], _dlbIdx = 0;
+                        document.addEventListener('click', function(e) {
+                            var el = e.target.closest('.review-media-thumb');
+                            if (!el) return;
+                            e.preventDefault();
+                            var src = el.getAttribute('src') || el.src;
+                            var isVideo = el.tagName === 'VIDEO';
+                            var container = el.closest('.review-images-display');
+                            _dlbItems = [];
+                            if (container) {
+                                container.querySelectorAll('.review-media-thumb').forEach(function(m) {
+                                    _dlbItems.push({ src: m.getAttribute('src') || m.src, isVideo: m.tagName === 'VIDEO' });
+                                });
+                                _dlbIdx = _dlbItems.findIndex(function(m) { return m.src === src; });
+                                if (_dlbIdx < 0) _dlbIdx = 0;
+                            } else {
+                                _dlbItems = [{ src: src, isVideo: isVideo }];
+                                _dlbIdx = 0;
+                            }
+                            dlbShow(_dlbIdx);
+                            var lb = document.getElementById('donhangLightbox');
+                            lb.style.display = 'flex';
+                            document.body.style.overflow = 'hidden';
+                        });
+                        function dlbShow(idx) {
+                            var item = _dlbItems[idx];
+                            if (!item) return;
+                            var img = document.getElementById('dlbImg');
+                            var video = document.getElementById('dlbVideo');
+                            var prev = document.getElementById('dlbPrev');
+                            var next = document.getElementById('dlbNext');
+                            if (item.isVideo) {
+                                img.style.display = 'none';
+                                video.src = item.src; video.style.display = 'block';
+                            } else {
+                                if (video) { video.pause(); video.src = ''; video.style.display = 'none'; }
+                                img.src = item.src; img.style.display = 'block';
+                            }
+                            prev.style.display = _dlbItems.length > 1 ? '' : 'none';
+                            next.style.display = _dlbItems.length > 1 ? '' : 'none';
+                        }
+                        function dlbNav(dir) {
+                            _dlbIdx = (_dlbIdx + dir + _dlbItems.length) % _dlbItems.length;
+                            dlbShow(_dlbIdx);
+                        }
+                        document.addEventListener('keydown', function(e) {
+                            var lb = document.getElementById('donhangLightbox');
+                            if (!lb || lb.style.display === 'none') return;
+                            if (e.key === 'Escape') { lb.style.display = 'none'; document.body.style.overflow = ''; }
+                            if (e.key === 'ArrowLeft') dlbNav(-1);
+                            if (e.key === 'ArrowRight') dlbNav(1);
+                        });
                     </script>
                 </body>
 

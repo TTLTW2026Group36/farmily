@@ -443,18 +443,15 @@
                                                         <c:forEach var="img" items="${review.images}">
                                                             <c:choose>
                                                                 <c:when test="${img.mediaType eq 'video'}">
-                                                                    <video src="${img.imageUrl}" controls preload="metadata"
-                                                                           onclick="openReviewLightbox(this, '${img.imageUrl}', true)"></video>
+                                                                    <video src="${img.imageUrl}" preload="metadata" class="review-media-thumb"></video>
                                                                 </c:when>
                                                                 <c:otherwise>
-                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá"
-                                                                         onclick="openReviewLightbox(this, '${img.imageUrl}', false)">
+                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá" class="review-media-thumb">
                                                                 </c:otherwise>
                                                             </c:choose>
                                                         </c:forEach>
                                                         <c:if test="${not empty review.imageUrl}">
-                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá"
-                                                                 onclick="openReviewLightbox(this, '${review.imageUrl}', false)">
+                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá" class="review-media-thumb">
                                                         </c:if>
                                                     </div>
                                                 </c:if>

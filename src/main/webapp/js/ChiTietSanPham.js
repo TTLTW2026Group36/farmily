@@ -509,9 +509,9 @@
                 imagesHtml = '<div class="review-images">' +
                     review.images.map(m => {
                         if (m.mediaType === 'video') {
-                            return `<video src="${escapeHtml(m.imageUrl)}" controls preload="metadata" onclick="openReviewLightbox(this, '${escapeHtml(m.imageUrl)}', true)"></video>`;
+                            return `<video src="${escapeHtml(m.imageUrl)}" preload="metadata" class="review-media-thumb"></video>`;
                         }
-                        return `<img src="${escapeHtml(m.imageUrl)}" alt="Ảnh đánh giá" onclick="openReviewLightbox(this, '${escapeHtml(m.imageUrl)}', false)">`;
+                        return `<img src="${escapeHtml(m.imageUrl)}" alt="Ảnh đánh giá" class="review-media-thumb">`;
                     }).join('') +
                     '</div>';
             }
@@ -714,18 +714,20 @@
 })();
 
 // Review image lightbox
-var _lightboxItems = [];
-var _lightboxIndex = 0;
-
-function openReviewLightbox(el, src, isVideo) {
-    var container = el ? el.closest('.review-images') : null;
+// Review image lightbox — event delegation
+document.addEventListener('click', function(e) {
+    var el = e.target.closest('.review-media-thumb');
+    if (!el) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var src = el.src || el.currentSrc || el.getAttribute('src');
+    var isVideo = el.tagName === 'VIDEO';
+    var container = el.closest('.review-images');
+    _lightboxItems = [];
     if (container) {
-        _lightboxItems = [];
-        container.querySelectorAll('img, video').forEach(function(m) {
-            _lightboxItems.push({
-                src: m.src || m.currentSrc,
-                isVideo: m.tagName === 'VIDEO'
-            });
+        container.querySelectorAll('.review-media-thumb').forEach(function(m) {
+            var s = m.src || m.currentSrc || m.getAttribute('src');
+            _lightboxItems.push({ src: s, isVideo: m.tagName === 'VIDEO' });
         });
         _lightboxIndex = _lightboxItems.findIndex(function(m) { return m.src === src; });
         if (_lightboxIndex < 0) _lightboxIndex = 0;
@@ -737,7 +739,10 @@ function openReviewLightbox(el, src, isVideo) {
     var lb = document.getElementById('reviewLightbox');
     if (lb) lb.classList.add('active');
     document.body.style.overflow = 'hidden';
-}
+});
+
+var _lightboxItems = [];
+var _lightboxIndex = 0;
 
 function _showLightboxItem(idx) {
     var item = _lightboxItems[idx];

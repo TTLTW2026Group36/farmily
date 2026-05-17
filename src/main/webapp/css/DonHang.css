@@ -1372,7 +1372,8 @@ a.review-product-name:hover {
     max-width: 100%;
 }
 .review-images-display img,
-.review-images-display video {
+.review-images-display video,
+.review-images-display .review-media-thumb {
     width: 72px;
     height: 72px;
     object-fit: cover;
@@ -1383,7 +1384,8 @@ a.review-product-name:hover {
     cursor: pointer;
 }
 .review-images-display img:hover,
-.review-images-display video:hover {
+.review-images-display video:hover,
+.review-images-display .review-media-thumb:hover {
     opacity: 0.75;
 }
 .btn-edit-review {

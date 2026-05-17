@@ -596,7 +596,6 @@ a {
     gap: 20px;
     padding: 0 40px;
     min-width: 0;
-    overflow: hidden;
 }
 
 .review-item {
@@ -606,7 +605,6 @@ a {
     background: white;
     transition: background 0.1s;
     min-width: 0;
-    overflow: hidden;
 }
 
 .review-item:hover {
@@ -696,7 +694,8 @@ a {
 }
 
 .review-images img,
-.review-images video {
+.review-images video,
+.review-media-thumb {
     width: 72px;
     height: 72px;
     object-fit: cover;
@@ -709,7 +708,8 @@ a {
 }
 
 .review-images img:hover,
-.review-images video:hover {
+.review-images video:hover,
+.review-media-thumb:hover {
     opacity: 0.75;
 }
 
