@@ -12,71 +12,9 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/sidebar.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/orders.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/review-shared.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <style>
-                    .review-image-thumbnail {
-                        width: 48px;
-                        height: 48px;
-                        object-fit: cover;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        transition: opacity 0.15s;
-                        display: block;
-                        background: #000;
-                    }
-                    .review-image-thumbnail:hover { opacity: 0.75; }
-                    .review-images-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, 48px);
-                        gap: 4px;
-                        max-width: 160px;
-                    }
-
-                    /* Admin lightbox */
-                    .admin-lightbox {
-                        display: none;
-                        position: fixed;
-                        inset: 0;
-                        background: rgba(0,0,0,.85);
-                        z-index: 9999;
-                        align-items: center;
-                        justify-content: center;
-                    }
-                    .admin-lightbox.active { display: flex; }
-                    .admin-lightbox-nav {
-                        position: absolute;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        background: rgba(255,255,255,.15);
-                        border: none;
-                        color: #fff;
-                        font-size: 48px;
-                        line-height: 1;
-                        cursor: pointer;
-                        padding: 4px 14px;
-                        border-radius: 6px;
-                        transition: background 0.15s;
-                    }
-                    .admin-lightbox-nav:hover { background: rgba(255,255,255,.3); }
-                    .admin-lightbox-nav.prev { left: 16px; }
-                    .admin-lightbox-nav.next { right: 16px; }
-                    .admin-lightbox img {
-                        max-width: 90vw;
-                        max-height: 85vh;
-                        border-radius: 8px;
-                        object-fit: contain;
-                    }
-                    .admin-lightbox-close {
-                        position: absolute;
-                        top: 16px; right: 20px;
-                        font-size: 32px;
-                        color: #fff;
-                        cursor: pointer;
-                        background: none;
-                        border: none;
-                        line-height: 1;
-                    }
-
                     .stars {
                         color: #f59e0b;
                     }
@@ -306,15 +244,15 @@
                                                                 </div>
                                                             </td>
                                                             <td>
-                                                                <div class="review-images-grid">
+                                                                <div class="review-media-grid review-media-grid--compact">
                                                                 <c:if test="${not empty r.imageUrl}">
                                                                     <img src="${r.imageUrl}"
-                                                                        class="review-image-thumbnail"
+                                                                        class="review-media-thumb"
                                                                         onclick="openAdminLightbox(this)">
                                                                 </c:if>
                                                                 <c:forEach var="img" items="${r.images}">
                                                                     <img src="${img.imageUrl}"
-                                                                        class="review-image-thumbnail"
+                                                                        class="review-media-thumb"
                                                                         onclick="openAdminLightbox(this)">
                                                                 </c:forEach>
                                                                 </div>
@@ -489,51 +427,19 @@
                     </script>
                 </c:if>
 
-                <!-- Admin lightbox -->
-                <div class="admin-lightbox" id="adminLightbox" onclick="closeAdminLightbox()">
-                    <button class="admin-lightbox-close" onclick="closeAdminLightbox()">&times;</button>
-                    <button class="admin-lightbox-nav prev" id="adminLbPrev" onclick="event.stopPropagation();adminLbNav(-1)">&#8249;</button>
-                    <img id="adminLightboxImg" src="" alt="" onclick="event.stopPropagation()" style="max-width:90vw;max-height:85vh;border-radius:8px;object-fit:contain;">
-                    <button class="admin-lightbox-nav next" id="adminLbNext" onclick="event.stopPropagation();adminLbNav(1)">&#8250;</button>
+                <!-- Shared review lightbox -->
+                <div id="reviewSharedLightbox" onclick="reviewLightbox.close()">
+                    <button class="rsl-close" onclick="reviewLightbox.close()">&times;</button>
+                    <button class="rsl-nav prev" id="rslPrev" onclick="event.stopPropagation();reviewLightbox.navigate(-1)">&#8249;</button>
+                    <img id="rslImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
+                    <video id="rslVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
+                    <button class="rsl-nav next" id="rslNext" onclick="event.stopPropagation();reviewLightbox.navigate(1)">&#8250;</button>
                 </div>
+                <script src="${pageContext.request.contextPath}/js/review-lightbox.js"></script>
                 <script>
-                    var _albItems = [], _albIdx = 0;
                     function openAdminLightbox(el) {
-                        var src = el.getAttribute('src') || el.src;
-                        var container = el.closest('.review-images-grid');
-                        _albItems = [];
-                        if (container) {
-                            container.querySelectorAll('.review-image-thumbnail').forEach(function(m) {
-                                _albItems.push(m.getAttribute('src') || m.src);
-                            });
-                            _albIdx = _albItems.indexOf(src);
-                            if (_albIdx < 0) _albIdx = 0;
-                        } else {
-                            _albItems = [src];
-                            _albIdx = 0;
-                        }
-                        albShow(_albIdx);
-                        document.getElementById('adminLightbox').classList.add('active');
-                        document.body.style.overflow = 'hidden';
+                        el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
                     }
-                    function albShow(idx) {
-                        document.getElementById('adminLightboxImg').src = _albItems[idx];
-                        document.getElementById('adminLbPrev').style.display = _albItems.length > 1 ? '' : 'none';
-                        document.getElementById('adminLbNext').style.display = _albItems.length > 1 ? '' : 'none';
-                    }
-                    function adminLbNav(dir) {
-                        _albIdx = (_albIdx + dir + _albItems.length) % _albItems.length;
-                        albShow(_albIdx);
-                    }
-                    function closeAdminLightbox() {
-                        document.getElementById('adminLightbox').classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                    document.addEventListener('keydown', function(e) {
-                        if (e.key === 'Escape') closeAdminLightbox();
-                        if (e.key === 'ArrowLeft') adminLbNav(-1);
-                        if (e.key === 'ArrowRight') adminLbNav(1);
-                    });
                 </script>
             </body>
 

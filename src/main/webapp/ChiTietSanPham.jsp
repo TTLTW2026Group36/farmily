@@ -13,6 +13,7 @@
                 </title>
 
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ChiTietSanPham.css?v=<%= System.currentTimeMillis() %>">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/review-shared.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
@@ -439,7 +440,7 @@
                                                     </div>
                                                 </c:if>
                                                 <c:if test="${review.hasImages()}">
-                                                    <div class="review-images">
+                                                    <div class="review-media-grid">
                                                         <c:forEach var="img" items="${review.images}">
                                                             <c:choose>
                                                                 <c:when test="${img.mediaType eq 'video'}">
@@ -545,13 +546,13 @@
 
                 <jsp:include page="common/footer.jsp" />
 
-                <!-- Lightbox for review images -->
-                <div class="review-lightbox" id="reviewLightbox" onclick="closeReviewLightbox()">
-                    <button class="review-lightbox-close" onclick="closeReviewLightbox()">&times;</button>
-                    <button class="review-lightbox-nav prev" id="lightboxPrev" onclick="event.stopPropagation();navigateLightbox(-1)">&#8249;</button>
-                    <img id="lightboxImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
-                    <video id="lightboxVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
-                    <button class="review-lightbox-nav next" id="lightboxNext" onclick="event.stopPropagation();navigateLightbox(1)">&#8250;</button>
+                <!-- Shared review lightbox -->
+                <div id="reviewSharedLightbox" onclick="reviewLightbox.close()">
+                    <button class="rsl-close" onclick="reviewLightbox.close()">&times;</button>
+                    <button class="rsl-nav prev" id="rslPrev" onclick="event.stopPropagation();reviewLightbox.navigate(-1)">&#8249;</button>
+                    <img id="rslImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
+                    <video id="rslVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
+                    <button class="rsl-nav next" id="rslNext" onclick="event.stopPropagation();reviewLightbox.navigate(1)">&#8250;</button>
                 </div>
 
                 <script>
@@ -583,6 +584,7 @@
     };
                 </script>
 
+                <script src="${pageContext.request.contextPath}/js/review-lightbox.js"></script>
                 <script src="${pageContext.request.contextPath}/js/ChiTietSanPham.js?v=<%= System.currentTimeMillis() %>"></script>
             </body>
 
