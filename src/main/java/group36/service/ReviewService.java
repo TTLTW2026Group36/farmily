@@ -1,0 +1,347 @@
+package group36.service;
+
+import group36.dao.ReviewDAO;
+import group36.dao.ReviewHelpfulDAO;
+import group36.dao.ReviewImageDAO;
+import group36.dao.UserDAO;
+import group36.dao.ProductVariantDAO;
+import group36.dao.ProductDAO;
+import group36.model.Review;
+import group36.model.ReviewImage;
+import group36.model.User;
+import group36.model.ProductVariant;
+import group36.model.Product;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+public class ReviewService {
+
+    private final ReviewDAO reviewDAO;
+    private final ReviewImageDAO reviewImageDAO;
+    private final ReviewHelpfulDAO reviewHelpfulDAO;
+    private final UserDAO userDAO;
+    private final ProductVariantDAO variantDAO;
+
+    public ReviewService() {
+        this.reviewDAO = new ReviewDAO();
+        this.reviewImageDAO = new ReviewImageDAO();
+        this.reviewHelpfulDAO = new ReviewHelpfulDAO();
+        this.userDAO = new UserDAO();
+        this.variantDAO = new ProductVariantDAO();
+    }
+
+    public List<Review> getReviewsByProduct(int productId) {
+        List<Review> reviews = reviewDAO.findByProductId(productId);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public List<Review> getReviewsByProductPaginated(int productId, int page, int size) {
+        List<Review> reviews = reviewDAO.findByProductIdPaginated(productId, page, size);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public List<Review> getReviewsByProductAndRating(int productId, int rating) {
+        List<Review> reviews = reviewDAO.findByProductIdAndRating(productId, rating);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public List<Review> getReviewsWithImages(int productId) {
+        List<Review> reviews = reviewDAO.findByProductIdWithImages(productId);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public List<Review> getVerifiedReviews(int productId) {
+        List<Review> reviews = reviewDAO.findVerifiedByProductId(productId);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public ReviewSummary getReviewSummary(int productId) {
+        ReviewSummary summary = new ReviewSummary();
+
+        summary.setTotalReviews(reviewDAO.countByProductId(productId));
+        summary.setAverageRating(reviewDAO.getAverageRating(productId));
+
+        summary.setCount5Star(reviewDAO.countByProductIdAndRating(productId, 5));
+        summary.setCount4Star(reviewDAO.countByProductIdAndRating(productId, 4));
+        summary.setCount3Star(reviewDAO.countByProductIdAndRating(productId, 3));
+        summary.setCount2Star(reviewDAO.countByProductIdAndRating(productId, 2));
+        summary.setCount1Star(reviewDAO.countByProductIdAndRating(productId, 1));
+
+        summary.setCountWithImages(reviewDAO.countWithImagesByProductId(productId));
+        summary.setCountVerified(reviewDAO.countVerifiedByProductId(productId));
+
+        return summary;
+    }
+
+    public int getTotalReviews(int productId) {
+        return reviewDAO.countByProductId(productId);
+    }
+
+    public List<Review> getReviewsFiltered(int productId, String filterType, Integer filterValue, int page, int size) {
+        List<Review> reviews = reviewDAO.findByProductIdFiltered(productId, filterType, filterValue, page, size);
+        loadReviewDetails(reviews);
+        return reviews;
+    }
+
+    public int countReviewsFiltered(int productId, String filterType, Integer filterValue) {
+        return reviewDAO.countByProductIdFiltered(productId, filterType, filterValue);
+    }
+
+    public boolean reviewExists(int reviewId) {
+        return reviewDAO.findById(reviewId).isPresent();
+    }
+
+    public Map<String, Object> toggleHelpful(int reviewId, int userId) {
+        return reviewHelpfulDAO.jdbi().inTransaction(handle -> {
+            int deleted = handle.createUpdate(
+                    "DELETE FROM review_helpful WHERE review_id = :r AND user_id = :u")
+                    .bind("r", reviewId).bind("u", userId).execute();
+            boolean nowHelpful = false;
+            if (deleted == 0) {
+                handle.createUpdate(
+                        "INSERT IGNORE INTO review_helpful (review_id, user_id) VALUES (:r, :u)")
+                        .bind("r", reviewId).bind("u", userId).execute();
+                nowHelpful = true;
+            }
+            int newCount = handle.createQuery(
+                    "SELECT COUNT(*) FROM review_helpful WHERE review_id = :r")
+                    .bind("r", reviewId).mapTo(Integer.class).one();
+            handle.createUpdate(
+                    "UPDATE review SET helpful_count = :c WHERE id = :r")
+                    .bind("c", newCount).bind("r", reviewId).execute();
+            return Map.of("helpful", nowHelpful, "count", newCount);
+        });
+    }
+
+    public List<Review> getReviewsByProductPaginatedForUser(int productId, int page, int size, Integer userId) {
+        List<Review> reviews = reviewDAO.findByProductIdPaginated(productId, page, size);
+        loadReviewDetailsForUser(reviews, userId);
+        return reviews;
+    }
+
+    public List<Review> getReviewsFilteredForUser(int productId, String filterType, Integer filterValue, int page, int size, Integer userId) {
+        List<Review> reviews = reviewDAO.findByProductIdFiltered(productId, filterType, filterValue, page, size);
+        loadReviewDetailsForUser(reviews, userId);
+        return reviews;
+    }
+
+    public boolean approveReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_APPROVED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean rejectReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_REJECTED);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    public boolean hideReview(int reviewId) {
+        Optional<Review> reviewOpt = reviewDAO.findById(reviewId);
+        if (reviewOpt.isEmpty()) return false;
+        
+        reviewDAO.updateStatus(reviewId, Review.STATUS_HIDDEN);
+        recalculateProductRating(reviewOpt.get().getProductId());
+        return true;
+    }
+
+    private void recalculateProductRating(int productId) {
+        double avgRating = reviewDAO.getAverageRating(productId); 
+        int reviewCount = reviewDAO.countByProductId(productId);   
+        
+        ProductDAO productDAO = new ProductDAO();
+        productDAO.updateRatingStats(productId, avgRating, reviewCount);
+    }
+
+    private void loadReviewDetails(List<Review> reviews) {
+        loadReviewDetailsForUser(reviews, null);
+    }
+
+    private void loadReviewDetailsForUser(List<Review> reviews, Integer userId) {
+        if (reviews == null || reviews.isEmpty()) return;
+
+        Set<Integer> userIds = new HashSet<>();
+        Set<Integer> variantIds = new HashSet<>();
+        List<Integer> reviewIds = new ArrayList<>();
+
+        for (Review review : reviews) {
+            userIds.add(review.getUserId());
+            if (review.getVariantId() != null) variantIds.add(review.getVariantId());
+            reviewIds.add(review.getId());
+        }
+
+        Map<Integer, User> userMap = new HashMap<>();
+        for (Integer uid : userIds) {
+            userDAO.findById(uid).ifPresent(u -> userMap.put(uid, u));
+        }
+
+        Map<Integer, ProductVariant> variantMap = new HashMap<>();
+        for (Integer variantId : variantIds) {
+            variantDAO.findById(variantId).ifPresent(v -> variantMap.put(variantId, v));
+        }
+
+        List<ReviewImage> allImages = reviewImageDAO.findByReviewIds(reviewIds);
+        Map<Integer, List<ReviewImage>> imageMap = allImages.stream()
+                .collect(Collectors.groupingBy(ReviewImage::getReviewId));
+
+        Set<Integer> helpfulReviewIds = new HashSet<>();
+        if (userId != null) {
+            helpfulReviewIds.addAll(reviewHelpfulDAO.findReviewIdsByUser(userId, reviewIds));
+        }
+
+        for (Review review : reviews) {
+            review.setUser(userMap.get(review.getUserId()));
+            if (review.getVariantId() != null) review.setVariant(variantMap.get(review.getVariantId()));
+            review.setImages(imageMap.getOrDefault(review.getId(), Collections.emptyList()));
+            review.setHelpfulByCurrentUser(helpfulReviewIds.contains(review.getId()));
+        }
+    }
+
+    public void loadReviewDetailsForAdmin(List<Review> reviews) {
+        if (reviews == null || reviews.isEmpty()) {
+            return;
+        }
+
+        loadReviewDetails(reviews);
+
+        Set<Integer> productIds = new HashSet<>();
+        for (Review review : reviews) {
+            productIds.add(review.getProductId());
+        }
+
+        ProductDAO productDAO = new ProductDAO();
+        Map<Integer, Product> productMap = new HashMap<>();
+        for (Integer productId : productIds) {
+            productDAO.findById(productId).ifPresent(product -> productMap.put(productId, product));
+        }
+
+        for (Review review : reviews) {
+            review.setProduct(productMap.get(review.getProductId()));
+        }
+    }
+
+    public static class ReviewSummary {
+        private int totalReviews;
+        private double averageRating;
+        private int count5Star;
+        private int count4Star;
+        private int count3Star;
+        private int count2Star;
+        private int count1Star;
+        private int countWithImages;
+        private int countVerified;
+
+        public int getTotalReviews() {
+            return totalReviews;
+        }
+
+        public void setTotalReviews(int totalReviews) {
+            this.totalReviews = totalReviews;
+        }
+
+        public double getAverageRating() {
+            return averageRating;
+        }
+
+        public void setAverageRating(double averageRating) {
+            this.averageRating = averageRating;
+        }
+
+        public int getCount5Star() {
+            return count5Star;
+        }
+
+        public void setCount5Star(int count5Star) {
+            this.count5Star = count5Star;
+        }
+
+        public int getCount4Star() {
+            return count4Star;
+        }
+
+        public void setCount4Star(int count4Star) {
+            this.count4Star = count4Star;
+        }
+
+        public int getCount3Star() {
+            return count3Star;
+        }
+
+        public void setCount3Star(int count3Star) {
+            this.count3Star = count3Star;
+        }
+
+        public int getCount2Star() {
+            return count2Star;
+        }
+
+        public void setCount2Star(int count2Star) {
+            this.count2Star = count2Star;
+        }
+
+        public int getCount1Star() {
+            return count1Star;
+        }
+
+        public void setCount1Star(int count1Star) {
+            this.count1Star = count1Star;
+        }
+
+        public int getCountWithImages() {
+            return countWithImages;
+        }
+
+        public void setCountWithImages(int countWithImages) {
+            this.countWithImages = countWithImages;
+        }
+
+        public int getCountVerified() {
+            return countVerified;
+        }
+
+        public void setCountVerified(int countVerified) {
+            this.countVerified = countVerified;
+        }
+
+        public int getPercentage(int star) {
+            if (totalReviews == 0)
+                return 0;
+            int count = 0;
+            switch (star) {
+                case 5:
+                    count = count5Star;
+                    break;
+                case 4:
+                    count = count4Star;
+                    break;
+                case 3:
+                    count = count3Star;
+                    break;
+                case 2:
+                    count = count2Star;
+                    break;
+                case 1:
+                    count = count1Star;
+                    break;
+            }
+            return (int) Math.round((count * 100.0) / totalReviews);
+        }
+
+        public String getFormattedAvgRating() {
+            return String.format("%.1f", averageRating);
+        }
+    }
+}
