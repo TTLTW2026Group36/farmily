@@ -239,32 +239,33 @@ public class AdminUserController extends HttpServlet {
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
-
         if (idParam == null || idParam.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/admin/users");
             return;
         }
-
         try {
             int id = Integer.parseInt(idParam);
+            HttpSession session = request.getSession();
+            User currentUser = (User) session.getAttribute("adminUser");
+            if (currentUser == null) {
+                currentUser = (User) session.getAttribute("auth");
+            }
+            if (currentUser == null) {
+                throw new IllegalStateException("Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn");
+            }
+            int currentUserId = currentUser.getId();
+
             User user = userService.getUserById(id);
             String userName = user.getName();
 
-            userService.deleteUser(id);
+            userService.deleteUser(id, currentUserId);
 
-            HttpSession session = request.getSession();
-            session.setAttribute("success", "Xóa khách hàng '" + userName + "' thành công!");
-
-            response.sendRedirect(request.getContextPath() + "/admin/users");
-        } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("error", "ID người dùng không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/admin/users");
-        } catch (IllegalArgumentException e) {
+            session.setAttribute("success", "Đã xóa khách hàng '" + userName + "' thành công!");
+        } catch (IllegalArgumentException | IllegalStateException e) {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/users");
         }
+        response.sendRedirect(request.getContextPath() + "/admin/users");
     }
 
     private void resetPassword(HttpServletRequest request, HttpServletResponse response)

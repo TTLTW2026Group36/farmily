@@ -5,7 +5,7 @@ import group36.model.User;
 public class AuthDao extends BaseDao {
     public User getUserByUsername(String username) {
         return get()
-                .withHandle(h -> h.createQuery("select * from users where email = :username").bind("username", username)
+                .withHandle(h -> h.createQuery("select * from users where email = :username AND status = 'active'").bind("username", username)
                         .mapToBean(User.class).stream().findFirst().orElse(null));
 
     }
@@ -39,7 +39,7 @@ public class AuthDao extends BaseDao {
 
     public User getUserByFacebookId(String facebookId) {
         return get()
-                .withHandle(h -> h.createQuery("select * from users where facebook_id = :facebookId").bind("facebookId", facebookId)
+                .withHandle(h -> h.createQuery("select * from users where facebook_id = :facebookId AND status = 'active'").bind("facebookId", facebookId)
                         .mapToBean(User.class).stream().findFirst().orElse(null));
     }
 
@@ -61,7 +61,7 @@ public class AuthDao extends BaseDao {
     }
 
     public User getUserByGoogleId(String googleId) {
-        return get().withHandle(h -> h.createQuery("select * from users where google_id = :googleId").bind("googleId", googleId)
+        return get().withHandle(h -> h.createQuery("select * from users where google_id = :googleId AND status = 'active'").bind("googleId", googleId)
                 .mapToBean(User.class).stream().findFirst().orElse(null));
     }
 
