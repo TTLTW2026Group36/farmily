@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class ReviewImageDAO extends BaseDao {
 
-    
+
 
 
     private static class ReviewImageMapper implements RowMapper<ReviewImage> {
@@ -27,11 +27,13 @@ public class ReviewImageDAO extends BaseDao {
             image.setReviewId(rs.getInt("review_id"));
             image.setImageUrl(rs.getString("image_url"));
             image.setCreatedAt(rs.getTimestamp("created_at"));
+            image.setMediaType(rs.getString("media_type"));
+            image.setCloudinaryPublicId(rs.getString("cloudinary_public_id"));
             return image;
         }
     }
 
-    
+
 
 
 
@@ -45,7 +47,7 @@ public class ReviewImageDAO extends BaseDao {
                 .list());
     }
 
-    
+
 
 
 
@@ -71,23 +73,26 @@ public class ReviewImageDAO extends BaseDao {
         });
     }
 
-    
+
 
 
 
 
 
     public int insert(ReviewImage image) {
-        String sql = "INSERT INTO review_images (review_id, image_url) VALUES (:reviewId, :imageUrl)";
+        String sql = "INSERT INTO review_images (review_id, image_url, media_type, cloudinary_public_id) " +
+                "VALUES (:reviewId, :imageUrl, :mediaType, :publicId)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("reviewId", image.getReviewId())
                 .bind("imageUrl", image.getImageUrl())
+                .bind("mediaType", image.getMediaType() != null ? image.getMediaType() : "image")
+                .bind("publicId", image.getCloudinaryPublicId())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
     }
 
-    
+
 
 
 
@@ -100,7 +105,7 @@ public class ReviewImageDAO extends BaseDao {
                 .execute());
     }
 
-    
+
 
 
 
@@ -113,7 +118,7 @@ public class ReviewImageDAO extends BaseDao {
                 .execute());
     }
 
-    
+
 
 
 

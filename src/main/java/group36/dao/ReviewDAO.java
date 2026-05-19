@@ -31,6 +31,8 @@ public class ReviewDAO extends BaseDao {
                         review.setCreatedAt(rs.getTimestamp("created_at"));
                         review.setStatus(rs.getString("status"));
                         review.setReportCount(rs.getInt("report_count"));
+                        review.setHelpfulCount(rs.getInt("helpful_count"));
+                        review.setEditCount(rs.getInt("edit_count"));
                         return review;
                 }
         }
@@ -183,6 +185,85 @@ public class ReviewDAO extends BaseDao {
                 return count > 0;
         }
 
+        public List<Review> findByProductIdFiltered(int productId, String filterType, Integer filterValue, int page, int size) {
+                int offset = (page - 1) * size;
+                StringBuilder sql = new StringBuilder(
+                        "SELECT DISTINCT r.* FROM review r ");
+
+                if ("with-images".equals(filterType)) {
+                        sql.append("LEFT JOIN review_images ri ON r.id = ri.review_id ");
+                }
+
+                sql.append("WHERE r.product_id = :productId AND r.status = 'approved' ");
+
+                switch (filterType == null ? "all" : filterType) {
+                        case "rating":
+                                sql.append("AND r.rating = :filterValue ");
+                                break;
+                        case "with-images":
+                                sql.append("AND (r.image_url IS NOT NULL OR ri.id IS NOT NULL) ");
+                                break;
+                        case "verified":
+                                sql.append("AND r.order_id IS NOT NULL ");
+                                break;
+                        case "variant":
+                                sql.append("AND r.variant_id = :filterValue ");
+                                break;
+                        default:
+                                break;
+                }
+
+                sql.append("ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset");
+
+                return get().withHandle(handle -> {
+                        var query = handle.createQuery(sql.toString())
+                                .bind("productId", productId)
+                                .bind("limit", size)
+                                .bind("offset", offset);
+                        if (filterValue != null && ("rating".equals(filterType) || "variant".equals(filterType))) {
+                                query.bind("filterValue", filterValue);
+                        }
+                        return query.map(new ReviewMapper()).list();
+                });
+        }
+
+        public int countByProductIdFiltered(int productId, String filterType, Integer filterValue) {
+                StringBuilder sql = new StringBuilder(
+                        "SELECT COUNT(DISTINCT r.id) FROM review r ");
+
+                if ("with-images".equals(filterType)) {
+                        sql.append("LEFT JOIN review_images ri ON r.id = ri.review_id ");
+                }
+
+                sql.append("WHERE r.product_id = :productId AND r.status = 'approved' ");
+
+                switch (filterType == null ? "all" : filterType) {
+                        case "rating":
+                                sql.append("AND r.rating = :filterValue ");
+                                break;
+                        case "with-images":
+                                sql.append("AND (r.image_url IS NOT NULL OR ri.id IS NOT NULL) ");
+                                break;
+                        case "verified":
+                                sql.append("AND r.order_id IS NOT NULL ");
+                                break;
+                        case "variant":
+                                sql.append("AND r.variant_id = :filterValue ");
+                                break;
+                        default:
+                                break;
+                }
+
+                return get().withHandle(handle -> {
+                        var query = handle.createQuery(sql.toString())
+                                .bind("productId", productId);
+                        if (filterValue != null && ("rating".equals(filterType) || "variant".equals(filterType))) {
+                                query.bind("filterValue", filterValue);
+                        }
+                        return query.mapTo(Integer.class).one();
+                });
+        }
+
         public List<Review> findByOrderIdAndUserId(int orderId, int userId) {
                 String sql = "SELECT * FROM review WHERE order_id = :orderId AND user_id = :userId ORDER BY created_at DESC";
                 return get().withHandle(handle -> handle.createQuery(sql)
@@ -196,7 +277,7 @@ public class ReviewDAO extends BaseDao {
                                         String search, int page, int size) {
                 int offset = (page - 1) * size;
                 StringBuilder sql = new StringBuilder("SELECT r.* FROM review r WHERE 1=1 ");
-                
+
                 if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
                         sql.append("AND r.status = :status ");
                 }
@@ -209,9 +290,9 @@ public class ReviewDAO extends BaseDao {
                 if (search != null && !search.isEmpty()) {
                         sql.append("AND r.review_text LIKE :search ");
                 }
-                
+
                 sql.append("ORDER BY r.created_at DESC LIMIT :limit OFFSET :offset");
-                
+
                 return get().withHandle(handle -> {
                         var query = handle.createQuery(sql.toString());
                         if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
@@ -234,7 +315,7 @@ public class ReviewDAO extends BaseDao {
 
         public int countAllForAdmin(String statusFilter, Integer productId, Integer rating, String search) {
                 StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM review r WHERE 1=1 ");
-                
+
                 if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
                         sql.append("AND r.status = :status ");
                 }
@@ -247,7 +328,7 @@ public class ReviewDAO extends BaseDao {
                 if (search != null && !search.isEmpty()) {
                         sql.append("AND r.review_text LIKE :search ");
                 }
-                
+
                 return get().withHandle(handle -> {
                         var query = handle.createQuery(sql.toString());
                         if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
@@ -286,6 +367,26 @@ public class ReviewDAO extends BaseDao {
                 String sql = "UPDATE review SET report_count = report_count + 1 WHERE id = :id";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", reviewId)
+                                .execute());
+        }
+
+        public int updateHelpfulCount(int reviewId, int count) {
+                String sql = "UPDATE review SET helpful_count = :count WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", reviewId)
+                                .bind("count", count)
+                                .execute());
+        }
+
+
+        public int updateIfNotEdited(int reviewId, int rating, String reviewText) {
+                String sql = "UPDATE review SET rating = :rating, review_text = :reviewText, " +
+                                "edit_count = edit_count + 1, status = 'pending' " +
+                                "WHERE id = :id AND edit_count = 0";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", reviewId)
+                                .bind("rating", rating)
+                                .bind("reviewText", reviewText)
                                 .execute());
         }
 

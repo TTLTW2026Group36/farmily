@@ -13,6 +13,7 @@
                 </title>
 
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/ChiTietSanPham.css?v=<%= System.currentTimeMillis() %>">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/review-shared.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             </head>
@@ -378,21 +379,16 @@
 
                         <div class="reviews-filter">
                             <button class="filter-btn active" data-filter="all">Tất cả</button>
-                            <button class="filter-btn" data-filter="5">5 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count5Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="4">4 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count4Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="3">3 sao (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.count3Star : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="with-images">Có hình ảnh (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.countWithImages : 0}" />)
-                            </button>
-                            <button class="filter-btn" data-filter="verified">Đã mua hàng (
-                                <c:out value="${not empty reviewSummary ? reviewSummary.countVerified : 0}" />)
-                            </button>
+                            <button class="filter-btn" data-filter="5">5 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count5Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="4">4 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count4Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="3">3 sao (<c:out value="${not empty reviewSummary ? reviewSummary.count3Star : 0}" />)</button>
+                            <button class="filter-btn" data-filter="with-images">Có hình ảnh (<c:out value="${not empty reviewSummary ? reviewSummary.countWithImages : 0}" />)</button>
+                            <button class="filter-btn" data-filter="verified">Đã mua hàng (<c:out value="${not empty reviewSummary ? reviewSummary.countVerified : 0}" />)</button>
+                            <c:forEach var="variant" items="${product.variants}">
+                                <button class="filter-btn" data-filter="variant" data-variant-id="${variant.id}">
+                                    <c:out value="${variant.optionsValue}" />
+                                </button>
+                            </c:forEach>
                         </div>
 
 
@@ -444,18 +440,31 @@
                                                     </div>
                                                 </c:if>
                                                 <c:if test="${review.hasImages()}">
-                                                    <div class="review-images">
+                                                    <div class="review-media-grid">
                                                         <c:forEach var="img" items="${review.images}">
-                                                            <img src="${img.imageUrl}" alt="Ảnh đánh giá">
+                                                            <c:choose>
+                                                                <c:when test="${img.mediaType eq 'video'}">
+                                                                    <video src="${img.imageUrl}" preload="metadata" class="review-media-thumb"></video>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <img src="${img.imageUrl}" alt="Ảnh đánh giá" class="review-media-thumb">
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </c:forEach>
                                                         <c:if test="${not empty review.imageUrl}">
-                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá">
+                                                            <img src="${review.imageUrl}" alt="Ảnh đánh giá" class="review-media-thumb">
                                                         </c:if>
                                                     </div>
                                                 </c:if>
                                                 <div class="review-actions">
-                                                    <button class="action-btn"><i class="far fa-thumbs-up"></i> Hữu ích</button>
-                                                    <button class="action-btn report-btn" 
+                                                    <button class="action-btn helpful-btn ${review.helpfulByCurrentUser ? 'is-helpful' : ''}"
+                                                            data-review-id="${review.id}"
+                                                            data-helpful-count="${review.helpfulCount}"
+                                                            data-helpful-by-user="${review.helpfulByCurrentUser}">
+                                                        <i class="${review.helpfulByCurrentUser ? 'fas' : 'far'} fa-thumbs-up"></i>
+                                                        Hữu ích<c:if test="${review.helpfulCount > 0}"> (<span class="helpful-count">${review.helpfulCount}</span>)</c:if>
+                                                    </button>
+                                                    <button class="action-btn report-btn"
                                                             data-review-id="${review.id}"
                                                             title="Báo cáo đánh giá không phù hợp">
                                                         <i class="far fa-flag"></i> Báo cáo
@@ -477,14 +486,16 @@
                         </div>
 
 
-                        <c:if test="${not empty reviews && totalReviewPages > 1}">
-                            <div class="reviews-loadmore">
-                                <c:if test="${currentReviewPage < totalReviewPages}">
-                                    <a href="${pageContext.request.contextPath}/product-detail?id=${product.id}&reviewPage=${currentReviewPage + 1}"
-                                        class="btn-loadmore">Xem thêm đánh giá</a>
-                                </c:if>
-                            </div>
-                        </c:if>
+                        <div class="reviews-loadmore" id="loadMoreContainer">
+                            <c:if test="${totalReviewPages > 1}">
+                                <button id="btnLoadMore" class="btn-loadmore"
+                                        data-product-id="${product.id}"
+                                        data-current-page="1"
+                                        data-total-pages="${totalReviewPages}">
+                                    Xem thêm đánh giá
+                                </button>
+                            </c:if>
+                        </div>
                     </section>
                 </main>
 
@@ -535,6 +546,15 @@
 
                 <jsp:include page="common/footer.jsp" />
 
+                <!-- Shared review lightbox -->
+                <div id="reviewSharedLightbox" onclick="reviewLightbox.close()">
+                    <button class="rsl-close" onclick="reviewLightbox.close()">&times;</button>
+                    <button class="rsl-nav prev" id="rslPrev" onclick="event.stopPropagation();reviewLightbox.navigate(-1)">&#8249;</button>
+                    <img id="rslImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
+                    <video id="rslVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
+                    <button class="rsl-nav next" id="rslNext" onclick="event.stopPropagation();reviewLightbox.navigate(1)">&#8250;</button>
+                </div>
+
                 <script>
                     window.contextPath = "<c:out value='${pageContext.request.contextPath}'/>";
                     window.isLoggedIn = ${sessionScope.auth != null};
@@ -564,6 +584,7 @@
     };
                 </script>
 
+                <script src="${pageContext.request.contextPath}/js/review-lightbox.js"></script>
                 <script src="${pageContext.request.contextPath}/js/ChiTietSanPham.js?v=<%= System.currentTimeMillis() %>"></script>
             </body>
 
