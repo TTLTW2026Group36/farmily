@@ -139,6 +139,39 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
+    public List<User> findDeletedPaginated(int page, int size) {
+        int offset = (page - 1) * size;
+        String sql = "SELECT * FROM users WHERE status = 'deleted' "
+                   + "ORDER BY deleted_at DESC LIMIT :size OFFSET :offset";
+        return get().withHandle(handle ->
+            handle.createQuery(sql)
+                .bind("size", size).bind("offset", offset)
+                .map(new UserMapper()).list());
+    }
+
+    public int countDeleted() {
+        String sql = "SELECT COUNT(*) FROM users WHERE status = 'deleted'";
+        return get().withHandle(handle ->
+            handle.createQuery(sql).mapTo(Integer.class).one());
+    }
+
+    public List<User> searchDeletedByNameOrEmail(String keyword) {
+        String sql = "SELECT * FROM users WHERE status = 'deleted' "
+                   + "AND (name LIKE :keyword OR email LIKE :keyword) "
+                   + "ORDER BY deleted_at DESC";
+        return get().withHandle(handle ->
+            handle.createQuery(sql)
+                .bind("keyword", "%" + keyword + "%")
+                .map(new UserMapper()).list());
+    }
+
+    public int restore(int id) {
+        String sql = "UPDATE users SET status = 'active', deleted_at = NULL "
+                   + "WHERE id = :id AND status = 'deleted'";
+        return get().withHandle(handle ->
+            handle.createUpdate(sql).bind("id", id).execute());
+    }
+
     public int count() {
         String sql = "SELECT COUNT(*) FROM users WHERE status = 'active'";
         return get().withHandle(handle -> handle.createQuery(sql)
