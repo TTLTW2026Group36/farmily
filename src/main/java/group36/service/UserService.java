@@ -153,6 +153,35 @@ public class UserService {
         }
     }
 
+    public List<User> getDeletedUsersPaginated(int page, int size) {
+        return userDAO.findDeletedPaginated(page, size);
+    }
+
+    public int getTotalDeletedUsers() {
+        return userDAO.countDeleted();
+    }
+
+    public List<User> searchDeletedUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return userDAO.findDeletedPaginated(1, Integer.MAX_VALUE);
+        }
+        return userDAO.searchDeletedByNameOrEmail(keyword.trim());
+    }
+
+    public void restoreUser(int id) {
+        User user = getUserById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng");
+        }
+        if ("active".equals(user.getStatus())) {
+            throw new IllegalStateException("Người dùng đang hoạt động, không cần khôi phục");
+        }
+        int rowsAffected = userDAO.restore(id);
+        if (rowsAffected == 0) {
+            throw new IllegalStateException("Không thể khôi phục người dùng");
+        }
+    }
+
     private void validateEmail(String email) {
         if (email == null || email.trim().isEmpty()) {
             throw new IllegalArgumentException("Email cannot be empty");
