@@ -12,6 +12,18 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/customers.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+                <style>
+                    .status-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+                    .tab-btn {
+                        padding: 8px 16px; border-radius: 6px;
+                        text-decoration: none; color: #666;
+                        border: 1px solid #ddd; transition: all 0.2s;
+                    }
+                    .tab-btn.active {
+                        background: var(--primary-color, #4caf50); color: white;
+                        border-color: var(--primary-color, #4caf50);
+                    }
+                </style>
             </head>
 
             <body data-page="customers">
@@ -40,10 +52,21 @@
                                 </div>
                             </div>
 
+                            <div class="status-tabs">
+                                <a href="${pageContext.request.contextPath}/admin/users"
+                                   class="tab-btn ${statusFilter != 'deleted' ? 'active' : ''}">
+                                    <i class="fas fa-users"></i> Đang hoạt động
+                                </a>
+                                <a href="${pageContext.request.contextPath}/admin/users?status=deleted"
+                                   class="tab-btn ${statusFilter == 'deleted' ? 'active' : ''}">
+                                    <i class="fas fa-user-slash"></i> Đã xóa
+                                </a>
+                            </div>
 
                             <div class="toolbar-bar">
                                 <form method="get" action="${pageContext.request.contextPath}/admin/users"
                                     class="toolbar-search-form">
+                                    <input type="hidden" name="status" value="${statusFilter}">
                                     <div class="search-group">
                                         <i class="fas fa-search search-icon"></i>
                                         <input type="text" name="search" class="search-input"
@@ -71,7 +94,7 @@
 
                             <div class="card">
                                 <div class="card-header">
-                                    <h3 class="card-title">Danh sách khách hàng &nbsp;<span
+                                    <h3 class="card-title">${statusFilter == 'deleted' ? 'Khách hàng đã xóa' : 'Danh sách khách hàng'} &nbsp;<span
                                             class="count-badge">${totalUsers}</span></h3>
                                     <span class="selected-count-msg" id="selectedMsg" style="display:none;">
                                         Đã chọn <strong id="selectedCount">0</strong> khách hàng
@@ -91,7 +114,14 @@
                                                 <th>Số điện thoại</th>
                                                 <th>Địa chỉ</th>
                                                 <th>Vai trò</th>
-                                                <th>Ngày đăng ký</th>
+                                                <c:choose>
+                                                    <c:when test="${statusFilter == 'deleted'}">
+                                                        <th>Ngày xóa</th>
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <th>Ngày đăng ký</th>
+                                                    </c:otherwise>
+                                                </c:choose>
                                                 <th>Thao tác</th>
                                             </tr>
                                         </thead>
@@ -153,16 +183,34 @@
                                                                 </c:choose>
                                                             </td>
                                                             <td>
-                                                                <fmt:formatDate value="${user.created_at}"
-                                                                    pattern="dd/MM/yyyy" />
+                                                                <c:choose>
+                                                                    <c:when test="${statusFilter == 'deleted'}">
+                                                                        <fmt:formatDate value="${user.deletedAt}" pattern="dd/MM/yyyy HH:mm"/>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <fmt:formatDate value="${user.created_at}" pattern="dd/MM/yyyy" />
+                                                                    </c:otherwise>
+                                                                </c:choose>
                                                             </td>
                                                             <td>
                                                                 <div class="action-buttons">
-                                                                    <a href="${pageContext.request.contextPath}/admin/users/edit?id=${user.id}"
-                                                                        class="btn btn-sm btn-outline"
-                                                                        title="Chỉnh sửa">
-                                                                        <i class="fas fa-edit"></i>
-                                                                    </a>
+                                                                    <c:choose>
+                                                                        <c:when test="${statusFilter == 'deleted'}">
+                                                                            <form method="post" action="${pageContext.request.contextPath}/admin/users/restore" style="display:inline;">
+                                                                                <input type="hidden" name="id" value="${user.id}">
+                                                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Khôi phục khách hàng này?')" style="background-color: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                                                                                    <i class="fas fa-undo"></i> Khôi phục
+                                                                                </button>
+                                                                            </form>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <a href="${pageContext.request.contextPath}/admin/users/edit?id=${user.id}"
+                                                                                class="btn btn-sm btn-outline"
+                                                                                title="Chỉnh sửa">
+                                                                                <i class="fas fa-edit"></i>
+                                                                            </a>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
                                                                 </div>
                                                             </td>
                                                         </tr>
@@ -182,7 +230,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <a
-                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}">
+                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${statusFilter}">
                                                         <i class="fas fa-chevron-left"></i>
                                                     </a>
                                                 </c:otherwise>
@@ -194,7 +242,7 @@
                                                     <c:when
                                                         test="${i <= 3 || i > totalPages - 2 || (i >= currentPage - 1 && i <= currentPage + 1)}">
                                                         <a
-                                                            href="${pageContext.request.contextPath}/admin/users?page=${i}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}">${i}</a>
+                                                            href="${pageContext.request.contextPath}/admin/users?page=${i}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${statusFilter}">${i}</a>
                                                     </c:when>
                                                     <c:when test="${i == 4 && currentPage > 5}"><span>...</span>
                                                     </c:when>
@@ -210,7 +258,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <a
-                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}">
+                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${statusFilter}">
                                                         <i class="fas fa-chevron-right"></i>
                                                     </a>
                                                 </c:otherwise>

@@ -64,6 +64,8 @@ public class AdminUserController extends HttpServlet {
                 deleteUser(request, response);
             } else if (pathInfo.equals("/reset-password")) {
                 resetPassword(request, response);
+            } else if (pathInfo.equals("/restore")) {
+                restoreUser(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -92,6 +94,9 @@ public class AdminUserController extends HttpServlet {
 
         String keyword = request.getParameter("search");
 
+        String statusFilter = request.getParameter("status");
+        boolean showDeleted = "deleted".equals(statusFilter);
+
         String role = request.getParameter("role");
         if (role == null || role.isEmpty()) {
             role = "all";
@@ -100,33 +105,50 @@ public class AdminUserController extends HttpServlet {
         List<User> users;
         int totalUsers;
 
-        if (keyword != null && !keyword.trim().isEmpty()) {
-
-            users = userService.searchUsers(keyword);
-
-            if (!"all".equals(role)) {
-                String finalRole = role;
-                users = users.stream()
-                        .filter(u -> finalRole.equals(u.getRole()))
-                        .toList();
-            }
-            totalUsers = users.size();
-
-            int start = (page - 1) * PAGE_SIZE;
-            int end = Math.min(start + PAGE_SIZE, users.size());
-            if (start < users.size()) {
-                users = users.subList(start, end);
+        if (showDeleted) {
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                users = userService.searchDeletedUsers(keyword);
+                totalUsers = users.size();
+                int start = (page - 1) * PAGE_SIZE;
+                int end = Math.min(start + PAGE_SIZE, users.size());
+                if (start < users.size()) {
+                    users = users.subList(start, end);
+                } else {
+                    users = List.of();
+                }
             } else {
-                users = List.of();
+                users = userService.getDeletedUsersPaginated(page, PAGE_SIZE);
+                totalUsers = userService.getTotalDeletedUsers();
             }
         } else {
+            if (keyword != null && !keyword.trim().isEmpty()) {
 
-            if ("all".equals(role)) {
-                users = userService.getUsersPaginated(page, PAGE_SIZE);
-                totalUsers = userService.getTotalUsers();
+                users = userService.searchUsers(keyword);
+
+                if (!"all".equals(role)) {
+                    String finalRole = role;
+                    users = users.stream()
+                            .filter(u -> finalRole.equals(u.getRole()))
+                            .toList();
+                }
+                totalUsers = users.size();
+
+                int start = (page - 1) * PAGE_SIZE;
+                int end = Math.min(start + PAGE_SIZE, users.size());
+                if (start < users.size()) {
+                    users = users.subList(start, end);
+                } else {
+                    users = List.of();
+                }
             } else {
-                users = userService.getCustomersPaginated(page, PAGE_SIZE);
-                totalUsers = userService.getTotalCustomers();
+
+                if ("all".equals(role)) {
+                    users = userService.getUsersPaginated(page, PAGE_SIZE);
+                    totalUsers = userService.getTotalUsers();
+                } else {
+                    users = userService.getCustomersPaginated(page, PAGE_SIZE);
+                    totalUsers = userService.getTotalCustomers();
+                }
             }
         }
 
@@ -145,6 +167,7 @@ public class AdminUserController extends HttpServlet {
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedRole", role);
         request.setAttribute("pageSize", PAGE_SIZE);
+        request.setAttribute("statusFilter", showDeleted ? "deleted" : "active");
 
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {
@@ -239,32 +262,33 @@ public class AdminUserController extends HttpServlet {
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
-
         if (idParam == null || idParam.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/admin/users");
             return;
         }
-
         try {
             int id = Integer.parseInt(idParam);
+            HttpSession session = request.getSession();
+            User currentUser = (User) session.getAttribute("adminUser");
+            if (currentUser == null) {
+                currentUser = (User) session.getAttribute("auth");
+            }
+            if (currentUser == null) {
+                throw new IllegalStateException("Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn");
+            }
+            int currentUserId = currentUser.getId();
+
             User user = userService.getUserById(id);
             String userName = user.getName();
 
-            userService.deleteUser(id);
+            userService.deleteUser(id, currentUserId);
 
-            HttpSession session = request.getSession();
-            session.setAttribute("success", "Xóa khách hàng '" + userName + "' thành công!");
-
-            response.sendRedirect(request.getContextPath() + "/admin/users");
-        } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("error", "ID người dùng không hợp lệ");
-            response.sendRedirect(request.getContextPath() + "/admin/users");
-        } catch (IllegalArgumentException e) {
+            session.setAttribute("success", "Đã xóa khách hàng '" + userName + "' thành công!");
+        } catch (IllegalArgumentException | IllegalStateException e) {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/users");
         }
+        response.sendRedirect(request.getContextPath() + "/admin/users");
     }
 
     private void resetPassword(HttpServletRequest request, HttpServletResponse response)
@@ -295,5 +319,31 @@ public class AdminUserController extends HttpServlet {
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/users/edit?id=" + idParam);
         }
+    }
+
+    private void restoreUser(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/users?status=deleted");
+            return;
+        }
+        try {
+            int id = Integer.parseInt(idParam);
+            User user = userService.getUserById(id);
+            String userName = user.getName();
+
+            userService.restoreUser(id);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Đã khôi phục khách hàng '" + userName + "' thành công!");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "ID người dùng không hợp lệ");
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", e.getMessage());
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/users?status=deleted");
     }
 }

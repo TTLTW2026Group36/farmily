@@ -137,13 +137,48 @@ public class UserService {
         return getUserById(id);
     }
 
-    public void deleteUser(int id) {
+    public void deleteUser(int id, int currentUserId) {
+        if (id == currentUserId) {
+            throw new IllegalArgumentException("Không thể xóa chính mình");
+        }
 
-        getUserById(id);
+        User user = getUserById(id);
+        if ("deleted".equals(user.getStatus())) {
+            throw new IllegalStateException("Người dùng này đã bị xóa");
+        }
 
-        int rowsAffected = userDAO.delete(id);
+        int rowsAffected = userDAO.softDelete(id);
         if (rowsAffected == 0) {
-            throw new IllegalStateException("Failed to delete user");
+            throw new IllegalStateException("Không thể xóa người dùng");
+        }
+    }
+
+    public List<User> getDeletedUsersPaginated(int page, int size) {
+        return userDAO.findDeletedPaginated(page, size);
+    }
+
+    public int getTotalDeletedUsers() {
+        return userDAO.countDeleted();
+    }
+
+    public List<User> searchDeletedUsers(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return userDAO.findDeletedPaginated(1, Integer.MAX_VALUE);
+        }
+        return userDAO.searchDeletedByNameOrEmail(keyword.trim());
+    }
+
+    public void restoreUser(int id) {
+        User user = getUserById(id);
+        if (user == null) {
+            throw new IllegalArgumentException("Không tìm thấy người dùng");
+        }
+        if ("active".equals(user.getStatus())) {
+            throw new IllegalStateException("Người dùng đang hoạt động, không cần khôi phục");
+        }
+        int rowsAffected = userDAO.restore(id);
+        if (rowsAffected == 0) {
+            throw new IllegalStateException("Không thể khôi phục người dùng");
         }
     }
 

@@ -38,6 +38,7 @@ dependencies {
     compileOnly 'jakarta.el:jakarta.el-api:5.0.1'
 
     implementation 'org.slf4j:slf4j-simple:2.0.16'
+    implementation 'com.sun.mail:jakarta.mail:2.0.1'
 }
 
 tasks.withType(JavaCompile).configureEach {

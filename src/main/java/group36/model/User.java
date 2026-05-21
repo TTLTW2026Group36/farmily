@@ -10,12 +10,14 @@ public class User implements Serializable {
     private String password;
     private String phone;
     private String role;
+    private String status;
     private Timestamp created_at;
     private Timestamp updated_at;
     private String facebookId;
     private String googleId;
     private int loginAttempts;
     private Timestamp lockoutUntil;
+    private Timestamp deletedAt;
 
 
     public User() {
@@ -81,6 +83,14 @@ public class User implements Serializable {
         this.role = role;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public String getFacebookId() {
         return facebookId;
     }
@@ -123,6 +133,14 @@ public class User implements Serializable {
 
     public void setLockoutUntil(Timestamp lockoutUntil) {
         this.lockoutUntil = lockoutUntil;
+    }
+
+    public Timestamp getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
 
