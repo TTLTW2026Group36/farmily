@@ -869,10 +869,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (urlParams.get('tab') === 'wishlist') {
         loadWishlist();
     }
-    
+
     const selectAllCb = document.getElementById('wishlist-select-all');
     if (selectAllCb) {
-        selectAllCb.addEventListener('change', function() {
+        selectAllCb.addEventListener('change', function () {
             const checkboxes = document.querySelectorAll('.wishlist-item-checkbox');
             checkboxes.forEach(cb => {
                 cb.checked = this.checked;
@@ -883,7 +883,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const btnDeleteSelected = document.getElementById('btn-delete-selected');
     if (btnDeleteSelected) {
-        btnDeleteSelected.addEventListener('click', function() {
+        btnDeleteSelected.addEventListener('click', function () {
             deleteSelectedWishlistItems();
         });
     }
@@ -893,23 +893,23 @@ function updateWishlistSelectionState() {
     const checkboxes = document.querySelectorAll('.wishlist-item-checkbox');
     const selectAllCheckbox = document.getElementById('wishlist-select-all');
     const btnDeleteSelected = document.getElementById('btn-delete-selected');
-    
+
     if (checkboxes.length === 0) {
-        if(selectAllCheckbox) selectAllCheckbox.checked = false;
-        if(btnDeleteSelected) btnDeleteSelected.disabled = true;
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        if (btnDeleteSelected) btnDeleteSelected.disabled = true;
         return;
     }
-    
+
     let checkedCount = 0;
     checkboxes.forEach(cb => {
         if (cb.checked) checkedCount++;
     });
-    
-    if(selectAllCheckbox) {
+
+    if (selectAllCheckbox) {
         selectAllCheckbox.checked = (checkedCount === checkboxes.length);
     }
-    
-    if(btnDeleteSelected) {
+
+    if (btnDeleteSelected) {
         btnDeleteSelected.disabled = (checkedCount === 0);
     }
 }
@@ -994,32 +994,32 @@ function renderWishlistItems(items) {
 function deleteSelectedWishlistItems() {
     const checkedBoxes = document.querySelectorAll('.wishlist-item-checkbox:checked');
     if (checkedBoxes.length === 0) return;
-    
+
     if (!confirm('Bạn có chắc muốn xóa ' + checkedBoxes.length + ' sản phẩm đã chọn khỏi danh sách yêu thích?')) return;
-    
+
     const productIds = Array.from(checkedBoxes).map(cb => cb.value).join(',');
-    
+
     fetch((window.contextPath || '') + '/api/wishlist?productIds=' + productIds, {
         method: 'DELETE'
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('Đã xóa các sản phẩm khỏi yêu thích', 'success');
-            loadWishlist();
-            
-            const badge = document.getElementById('wishlistCount');
-            if (badge && data.wishlistCount !== undefined) {
-                badge.textContent = data.wishlistCount;
-                if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
-                else badge.classList.add('badge-hidden');
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showToast('Đã xóa các sản phẩm khỏi yêu thích', 'success');
+                loadWishlist();
+
+                const badge = document.getElementById('wishlistCount');
+                if (badge && data.wishlistCount !== undefined) {
+                    badge.textContent = data.wishlistCount;
+                    if (data.wishlistCount > 0) badge.classList.remove('badge-hidden');
+                    else badge.classList.add('badge-hidden');
+                }
+            } else {
+                showToast(data.message || 'Có lỗi xảy ra', 'error');
             }
-        } else {
-            showToast(data.message || 'Có lỗi xảy ra', 'error');
-        }
-    })
-    .catch(error => {
-        console.error('Error removing multiple from wishlist:', error);
-        showToast('Không thể xóa sản phẩm', 'error');
-    });
+        })
+        .catch(error => {
+            console.error('Error removing multiple from wishlist:', error);
+            showToast('Không thể xóa sản phẩm', 'error');
+        });
 }

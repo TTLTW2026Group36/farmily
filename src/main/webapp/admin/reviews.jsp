@@ -12,17 +12,9 @@
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/sidebar.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/orders.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/review-shared.css">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                 <style>
-                    .review-image-thumbnail {
-                        width: 40px;
-                        height: 40px;
-                        object-fit: cover;
-                        border-radius: 4px;
-                        margin-right: 4px;
-                        cursor: pointer;
-                    }
-
                     .stars {
                         color: #f59e0b;
                     }
@@ -228,7 +220,10 @@
                                                             <td>#${r.id}</td>
                                                             <td>
                                                                 <c:if test="${not empty r.product}">
-                                                                    <strong>${r.product.name}</strong>
+                                                                    <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${r.product.id}"
+                                                                       target="_blank" style="font-weight:600;color:#16a34a;">
+                                                                        ${r.product.name} <i class="fas fa-external-link-alt" style="font-size:11px;"></i>
+                                                                    </a>
                                                                 </c:if>
                                                             </td>
                                                             <td>
@@ -249,14 +244,18 @@
                                                                 </div>
                                                             </td>
                                                             <td>
+                                                                <div class="review-media-grid review-media-grid--compact">
                                                                 <c:if test="${not empty r.imageUrl}">
                                                                     <img src="${r.imageUrl}"
-                                                                        class="review-image-thumbnail">
+                                                                        class="review-media-thumb"
+                                                                        onclick="openAdminLightbox(this)">
                                                                 </c:if>
                                                                 <c:forEach var="img" items="${r.images}">
                                                                     <img src="${img.imageUrl}"
-                                                                        class="review-image-thumbnail">
+                                                                        class="review-media-thumb"
+                                                                        onclick="openAdminLightbox(this)">
                                                                 </c:forEach>
+                                                                </div>
                                                             </td>
                                                             <td>
                                                                 <c:if test="${r.reportCount > 0}">
@@ -427,6 +426,21 @@
                         }, 3000);
                     </script>
                 </c:if>
+
+                <!-- Shared review lightbox -->
+                <div id="reviewSharedLightbox" onclick="reviewLightbox.close()">
+                    <button class="rsl-close" onclick="reviewLightbox.close()">&times;</button>
+                    <button class="rsl-nav prev" id="rslPrev" onclick="event.stopPropagation();reviewLightbox.navigate(-1)">&#8249;</button>
+                    <img id="rslImg" src="" alt="" style="display:none;" onclick="event.stopPropagation()">
+                    <video id="rslVideo" controls style="display:none;" onclick="event.stopPropagation()"></video>
+                    <button class="rsl-nav next" id="rslNext" onclick="event.stopPropagation();reviewLightbox.navigate(1)">&#8250;</button>
+                </div>
+                <script src="${pageContext.request.contextPath}/js/review-lightbox.js"></script>
+                <script>
+                    function openAdminLightbox(el) {
+                        el.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+                    }
+                </script>
             </body>
 
             </html>
