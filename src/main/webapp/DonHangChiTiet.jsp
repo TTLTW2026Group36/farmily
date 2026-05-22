@@ -389,6 +389,7 @@
                                                         </div>
                                                         <form class="review-form" method="post"
                                                             action="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet"
+                                                            enctype="multipart/form-data"
                                                             onsubmit="return validateReviewForm(this)">
                                                             <input type="hidden" name="action" value="review">
                                                             <input type="hidden" name="orderId" value="${order.id}">
@@ -416,6 +417,17 @@
                                                             <textarea name="reviewText" class="review-textarea"
                                                                 placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
                                                                 rows="3" maxlength="500"></textarea>
+
+                                                            <div class="review-media-section">
+                                                                <label class="media-upload-label">
+                                                                    <i class="fas fa-camera"></i> Thêm ảnh/video
+                                                                    <input type="file" name="mediaFiles" multiple
+                                                                        accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/quicktime,video/webm"
+                                                                        class="media-file-input" hidden>
+                                                                </label>
+                                                                <div class="media-preview"></div>
+                                                                <small class="media-hint">Tối đa 5 ảnh + 1 video, mỗi file ≤ 10MB</small>
+                                                            </div>
 
                                                             <div class="review-form-actions">
                                                                 <span class="char-count">0/500</span>
@@ -501,11 +513,13 @@
                                 alert('Vui lòng nhập nội dung đánh giá');
                                 return false;
                             }
-                            form.querySelector('button[type="submit"]').disabled = true;
-                            form.querySelector('button[type="submit"]').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+                            var btn = form.querySelector('button[type="submit"]');
+                            btn.disabled = true;
+                            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
                             return true;
                         }
                     </script>
+                    <script src="${pageContext.request.contextPath}/js/review-media-upload.js?v=<%= System.currentTimeMillis() %>"></script>
                 </body>
 
                 </html>

@@ -1,20 +1,12 @@
 
 
-
-
 document.addEventListener('DOMContentLoaded', function () {
     console.log('DonHang.js loaded');
 
-
     animateOrderCards();
-
 
     initSmoothScroll();
 });
-
-
-
-
 
 function toggleProductList(orderId) {
     const hiddenProducts = document.getElementById(`hidden-products-${orderId}`);
@@ -44,10 +36,6 @@ function toggleProductList(orderId) {
     }
 }
 
-
-
-
-
 function animateOrderCards() {
     const orderCards = document.querySelectorAll('.order-card');
 
@@ -63,9 +51,6 @@ function animateOrderCards() {
         }, index * 100);
     });
 }
-
-
-
 
 function initSmoothScroll() {
     const links = document.querySelectorAll('a[href^="#"]');
@@ -87,21 +72,12 @@ function initSmoothScroll() {
     });
 }
 
-
-
-
-
-
 function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', {
         style: 'currency',
         currency: 'VND'
     }).format(amount);
 }
-
-
-
-
 
 function copyOrderId(orderId) {
     if (navigator.clipboard) {
@@ -121,11 +97,6 @@ function copyOrderId(orderId) {
         showNotification('Đã copy mã đơn hàng!', 'success');
     }
 }
-
-
-
-
-
 
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
@@ -153,7 +124,6 @@ function showNotification(message, type = 'info') {
         }, 300);
     }, 3000);
 }
-
 
 if (!document.getElementById('donhang-anim-style')) {
     const _donhangStyle = document.createElement('style');

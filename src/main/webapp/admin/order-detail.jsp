@@ -232,6 +232,62 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h3 class="card-title"><i class="fas fa-list-ul"
+                                                    style="color:#0ea5e9;margin-right:6px;"></i> Nhật ký hoạt động</h3>
+                                        </div>
+                                        <div class="card-body" style="padding:0;">
+                                            <c:choose>
+                                                <c:when test="${not empty order.statusHistory}">
+                                                    <table class="admin-table">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:160px;">Thời gian</th>
+                                                                <th style="width:140px;">Người thực hiện</th>
+                                                                <th style="width:200px;">Hành động</th>
+                                                                <th>Ghi chú</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <c:forEach var="history" items="${order.statusHistory}">
+                                                                <tr>
+                                                                    <td>
+                                                                        <span class="info-value" style="font-size: 0.9em; color: #64748b;"><fmt:formatDate value="${history.createdAt}" pattern="dd/MM/yyyy HH:mm:ss" /></span>
+                                                                    </td>
+                                                                    <td>
+                                                                        <span style="font-size: 0.85em; padding: 4px 8px; border-radius: 4px; font-weight: 500; ${history.changedBy == 'admin' ? 'background:#e0e7ff;color:#4338ca;' : (history.changedBy == 'user' ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#475569;')}">
+                                                                            ${history.changedByText}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td>
+                                                                        Chuyển sang <strong>${history.newStatusText}</strong>
+                                                                    </td>
+                                                                    <td>
+                                                                        <c:choose>
+                                                                            <c:when test="${not empty history.note}">
+                                                                                <span style="color: #334155;">${history.note}</span>
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <span class="empty-val">—</span>
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </td>
+                                                                </tr>
+                                                            </c:forEach>
+                                                        </tbody>
+                                                    </table>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <div style="padding:24px;text-align:center;color:#94a3b8; font-style: italic;">
+                                                        Chưa có nhật ký hoạt động nào.
+                                                    </div>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </div>
+                                    </div>
+
                                     <div class="card">
                                         <div class="card-header">
                                             <h3 class="card-title"><i class="fas fa-shopping-basket"

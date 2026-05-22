@@ -67,6 +67,23 @@ public class OrderDetailDAO extends BaseDao {
     
 
 
+    public void insertBatchWithHandle(org.jdbi.v3.core.Handle h, List<OrderDetail> details) {
+        if (details == null || details.isEmpty()) return;
+        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal) " +
+                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal)";
+        var batch = h.prepareBatch(sql);
+        for (OrderDetail detail : details) {
+            batch.bind("orderId", detail.getOrderId())
+                    .bind("productId", detail.getProductId())
+                    .bind("variantId", detail.getVariantId())
+                    .bind("quantity", detail.getQuantity())
+                    .bind("unitPrice", detail.getUnitPrice())
+                    .bind("subtotal", detail.getSubtotal())
+                    .add();
+        }
+        batch.execute();
+    }
+
     public void insertBatch(List<OrderDetail> details) {
         if (details == null || details.isEmpty()) {
             return;

@@ -3,7 +3,11 @@ package group36.model;
 import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Order implements Serializable {
     private int id;
@@ -27,6 +31,8 @@ public class Order implements Serializable {
     private User user;
     private List<OrderDetail> orderDetails;
     private Payment latestPayment;
+    private String adminNote;
+    private List<OrderStatusHistory> statusHistory;
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_CONFIRMED = "confirmed";
@@ -34,6 +40,65 @@ public class Order implements Serializable {
     public static final String STATUS_SHIPPING = "shipping";
     public static final String STATUS_DELIVERED = "completed";
     public static final String STATUS_CANCELLED = "cancelled";
+    public static final String STATUS_PAYMENT_EXPIRED = "payment_expired";
+    public static final String STATUS_DELIVERY_FAILED = "delivery_failed";
+    public static final String STATUS_RETURNED = "returned";
+    public static final String STATUS_REFUNDED = "refunded";
+    public static final String STATUS_CANCELLED_BY_ADMIN = "cancelled_by_admin";
+
+    public static final Map<String, Set<String>> ALLOWED_TRANSITIONS = new HashMap<>();
+
+    static {
+        // From pending
+        Set<String> pendingNext = new HashSet<>();
+        pendingNext.add(STATUS_CONFIRMED);
+        pendingNext.add(STATUS_PROCESSING);
+        pendingNext.add(STATUS_CANCELLED);
+        pendingNext.add(STATUS_CANCELLED_BY_ADMIN);
+        pendingNext.add(STATUS_PAYMENT_EXPIRED);
+        ALLOWED_TRANSITIONS.put(STATUS_PENDING, pendingNext);
+
+        // From confirmed
+        Set<String> confirmedNext = new HashSet<>();
+        confirmedNext.add(STATUS_PROCESSING);
+        confirmedNext.add(STATUS_SHIPPING);
+        confirmedNext.add(STATUS_CANCELLED_BY_ADMIN);
+        ALLOWED_TRANSITIONS.put(STATUS_CONFIRMED, confirmedNext);
+
+        // From processing
+        Set<String> processingNext = new HashSet<>();
+        processingNext.add(STATUS_SHIPPING);
+        processingNext.add(STATUS_CANCELLED_BY_ADMIN);
+        ALLOWED_TRANSITIONS.put(STATUS_PROCESSING, processingNext);
+
+        // From shipping
+        Set<String> shippingNext = new HashSet<>();
+        shippingNext.add(STATUS_DELIVERED);
+        shippingNext.add(STATUS_DELIVERY_FAILED);
+        ALLOWED_TRANSITIONS.put(STATUS_SHIPPING, shippingNext);
+
+        // From delivered
+        Set<String> deliveredNext = new HashSet<>();
+        deliveredNext.add(STATUS_RETURNED);
+        ALLOWED_TRANSITIONS.put(STATUS_DELIVERED, deliveredNext);
+        
+        // From delivery_failed
+        Set<String> deliveryFailedNext = new HashSet<>();
+        deliveryFailedNext.add(STATUS_RETURNED);
+        deliveryFailedNext.add(STATUS_REFUNDED);
+        ALLOWED_TRANSITIONS.put(STATUS_DELIVERY_FAILED, deliveryFailedNext);
+
+        // From returned
+        Set<String> returnedNext = new HashSet<>();
+        returnedNext.add(STATUS_REFUNDED);
+        ALLOWED_TRANSITIONS.put(STATUS_RETURNED, returnedNext);
+
+        // Terminal states
+        ALLOWED_TRANSITIONS.put(STATUS_CANCELLED, new HashSet<>());
+        ALLOWED_TRANSITIONS.put(STATUS_CANCELLED_BY_ADMIN, new HashSet<>());
+        ALLOWED_TRANSITIONS.put(STATUS_PAYMENT_EXPIRED, new HashSet<>());
+        ALLOWED_TRANSITIONS.put(STATUS_REFUNDED, new HashSet<>());
+    }
 
     public static final double FREE_SHIPPING_THRESHOLD = 100000;
     public static final double STANDARD_SHIPPING_FEE = 30000;
@@ -50,6 +115,23 @@ public class Order implements Serializable {
         this.totalPrice = totalPrice;
         this.status = STATUS_PENDING;
         this.orderDetails = new ArrayList<>();
+    }
+
+    public static boolean isTransitionAllowed(String currentStatus, String newStatus) {
+        if (currentStatus == null || newStatus == null) return false;
+        if (currentStatus.equals(newStatus)) return true;
+        Set<String> allowed = ALLOWED_TRANSITIONS.get(currentStatus);
+        return allowed != null && allowed.contains(newStatus);
+    }
+
+    public static Set<String> getAllowedNextStatuses(String currentStatus) {
+        Set<String> allowed = ALLOWED_TRANSITIONS.get(currentStatus);
+        return allowed != null ? allowed : new HashSet<>();
+    }
+
+    public static boolean isTerminalStatus(String status) {
+        Set<String> allowed = ALLOWED_TRANSITIONS.get(status);
+        return allowed == null || allowed.isEmpty();
     }
 
     public int getId() {
@@ -98,6 +180,22 @@ public class Order implements Serializable {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getAdminNote() {
+        return adminNote;
+    }
+
+    public void setAdminNote(String adminNote) {
+        this.adminNote = adminNote;
+    }
+
+    public List<OrderStatusHistory> getStatusHistory() {
+        return statusHistory;
+    }
+
+    public void setStatusHistory(List<OrderStatusHistory> statusHistory) {
+        this.statusHistory = statusHistory != null ? statusHistory : new ArrayList<>();
     }
 
     public double getShippingFee() {
@@ -301,6 +399,16 @@ public class Order implements Serializable {
                 return "Hoàn thành";
             case STATUS_CANCELLED:
                 return "Đã hủy";
+            case STATUS_PAYMENT_EXPIRED:
+                return "Thanh toán hết hạn";
+            case STATUS_DELIVERY_FAILED:
+                return "Giao thất bại";
+            case STATUS_RETURNED:
+                return "Hoàn hàng";
+            case STATUS_REFUNDED:
+                return "Hoàn tiền";
+            case STATUS_CANCELLED_BY_ADMIN:
+                return "Hủy bởi admin";
             default:
                 return status;
         }
@@ -318,7 +426,15 @@ public class Order implements Serializable {
             case STATUS_DELIVERED:
                 return "badge-success";
             case STATUS_CANCELLED:
+            case STATUS_PAYMENT_EXPIRED:
+            case STATUS_CANCELLED_BY_ADMIN:
                 return "badge-danger";
+            case STATUS_DELIVERY_FAILED:
+                return "badge-warning";
+            case STATUS_RETURNED:
+                return "badge-info";
+            case STATUS_REFUNDED:
+                return "badge-secondary";
             default:
                 return "badge-secondary";
         }
