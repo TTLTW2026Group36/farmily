@@ -27,3 +27,18 @@ Thumbs.db
 src/main/resources/config.properties
 src/main/resources/payment.properties
 src/main/resources/db.properties
+src/main/resources/cloudinary.properties
+src/test/
+github-issues-template.md
+production_readiness_report.md
+# CK-kit
+.claude
+.opencode
+.kiro
+.agent
+release-manifest.json
+plans/
+CLAUDE.md
+GEMINI.md
+AGENTS.md
+.repomixignore
