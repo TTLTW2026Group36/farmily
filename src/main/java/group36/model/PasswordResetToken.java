@@ -3,30 +3,26 @@ package group36.model;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-
-
-
-
 public class PasswordResetToken implements Serializable {
     private int id;
     private int userId;
     private String email;
-    private String otpCode;
+    private String token;
     private Timestamp createdAt;
     private Timestamp expiresAt;
     private boolean used;
+    private int so_lan_sai;
 
     public PasswordResetToken() {
     }
 
-    public PasswordResetToken(int userId, String email, String otpCode, Timestamp expiresAt) {
+    public PasswordResetToken(int userId, String email, String token, Timestamp expiresAt) {
         this.userId = userId;
         this.email = email;
-        this.otpCode = otpCode;
+        this.token = token;
         this.expiresAt = expiresAt;
         this.used = false;
     }
-
     
     public int getId() {
         return id;
@@ -52,12 +48,12 @@ public class PasswordResetToken implements Serializable {
         this.email = email;
     }
 
-    public String getOtpCode() {
-        return otpCode;
+    public String getToken() {
+        return token;
     }
 
-    public void setOtpCode(String otpCode) {
-        this.otpCode = otpCode;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Timestamp getCreatedAt() {
@@ -84,15 +80,17 @@ public class PasswordResetToken implements Serializable {
         this.used = used;
     }
 
-    
+    public int getSoLanSai() {
+        return so_lan_sai;
+    }
 
+    public void setSoLanSai(int so_lan_sai) {
+        this.so_lan_sai = so_lan_sai;
+    }
 
     public boolean isExpired() {
         return expiresAt != null && expiresAt.before(new Timestamp(System.currentTimeMillis()));
     }
-
-    
-
 
     public boolean isValid() {
         return !isExpired() && !isUsed();
@@ -104,7 +102,7 @@ public class PasswordResetToken implements Serializable {
                 "id=" + id +
                 ", userId=" + userId +
                 ", email='" + email + '\'' +
-                ", otpCode='" + otpCode + '\'' +
+                ", token='" + token + '\'' +
                 ", expiresAt=" + expiresAt +
                 ", used=" + used +
                 '}';

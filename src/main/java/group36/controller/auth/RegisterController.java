@@ -19,10 +19,10 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String name = request.getParameter("name");
-        String phone = request.getParameter("phone");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
+        String name = request.getParameter("name") != null ? request.getParameter("name").trim() : null;
+        String phone = request.getParameter("phone") != null ? request.getParameter("phone").trim() : null;
+        String email = request.getParameter("email") != null ? request.getParameter("email").trim() : null;
+        String password = request.getParameter("password"); 
         String confirmPassword = request.getParameter("confirmPassword");
 
         
