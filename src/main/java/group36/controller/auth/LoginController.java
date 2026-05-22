@@ -83,7 +83,7 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String username = request.getParameter("username");
+        String username = request.getParameter("username") != null ? request.getParameter("username").trim() : null;
         String pass = request.getParameter("password");
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
 
