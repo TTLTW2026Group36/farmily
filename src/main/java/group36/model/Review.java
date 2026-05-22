@@ -12,23 +12,26 @@ public class Review implements Serializable {
     private int id;
     private int userId;
     private int productId;
-    private Integer orderId; 
-    private Integer variantId; 
-    private int rating; 
+    private Integer orderId;
+    private Integer variantId;
+    private int rating;
     private String reviewText;
-    private String imageUrl; 
+    private String imageUrl;
     private Timestamp createdAt;
-    
-    private String status; // "pending", "approved", "rejected", "hidden"
-    private int reportCount;
 
-    
+    private String status;
+    private int reportCount;
+    private int helpfulCount;
+    private boolean helpfulByCurrentUser;
+    private int editCount;
+
+
     private User user;
     private Product product;
     private ProductVariant variant;
     private List<ReviewImage> images;
 
-    
+
     public Review() {
     }
 
@@ -52,7 +55,7 @@ public class Review implements Serializable {
         this.createdAt = createdAt;
     }
 
-    
+
     public int getId() {
         return id;
     }
@@ -135,6 +138,16 @@ public class Review implements Serializable {
     public int getReportCount() { return reportCount; }
     public void setReportCount(int reportCount) { this.reportCount = reportCount; }
 
+    public int getHelpfulCount() { return helpfulCount; }
+    public void setHelpfulCount(int helpfulCount) { this.helpfulCount = helpfulCount; }
+
+    public boolean isHelpfulByCurrentUser() { return helpfulByCurrentUser; }
+    public void setHelpfulByCurrentUser(boolean helpfulByCurrentUser) { this.helpfulByCurrentUser = helpfulByCurrentUser; }
+
+    public int getEditCount() { return editCount; }
+    public void setEditCount(int editCount) { this.editCount = editCount; }
+    public boolean isEditable() { return editCount == 0; }
+
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_APPROVED = "approved";
     public static final String STATUS_REJECTED = "rejected";
@@ -202,9 +215,9 @@ public class Review implements Serializable {
         this.images = images;
     }
 
-    
 
-    
+
+
 
 
 
@@ -216,17 +229,18 @@ public class Review implements Serializable {
         return "Ẩn danh";
     }
 
-    
+
 
 
 
 
     public String getUserInitial() {
         String name = getUserDisplayName();
+        if (name == null || name.isEmpty()) return "?";
         return name.substring(0, 1).toUpperCase();
     }
 
-    
+
 
 
 
@@ -238,7 +252,7 @@ public class Review implements Serializable {
         return "";
     }
 
-    
+
 
 
 
@@ -248,7 +262,7 @@ public class Review implements Serializable {
                 (imageUrl != null && !imageUrl.isEmpty());
     }
 
-    
+
 
 
 
@@ -257,7 +271,7 @@ public class Review implements Serializable {
         return orderId != null;
     }
 
-    
+
 
 
 

@@ -93,7 +93,7 @@
             if (!plusBtn || !qtyInput) return;
             const currentQty = Number(qtyInput.value);
             if (stockFetched && currentQty >= currentStock) {
-                plusBtn.disabled = false; // keep enabled to allow click event
+                plusBtn.disabled = false;
                 plusBtn.style.opacity = '0.5';
                 plusBtn.style.cursor = 'not-allowed';
             } else {
@@ -110,20 +110,20 @@
                 selectedVariant = document.querySelector('input[name="weight"]:checked');
             }
             if (!productId) return;
-            
+
             const variantId = selectedVariant ? selectedVariant.value : '';
-            
+
             const url = new URL((window.contextPath || '') + '/api/product/stock', window.location.origin);
             url.searchParams.append('productId', productId);
             if (variantId) url.searchParams.append('variantId', variantId);
-            
+
             fetch(url)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         currentStock = data.stock;
                         stockFetched = true;
-                        
+
                         if (qtyInput && Number(qtyInput.value) > currentStock) {
                             qtyInput.value = Math.max(1, currentStock);
                         }
@@ -373,11 +373,11 @@
             let icon = 'fa-check-circle';
             if (type === 'warning') icon = 'fa-exclamation-triangle';
             toast.innerHTML = '<i class="fas ' + icon + '"></i> ' + message;
-            
+
             let bgColor = '#3b82f6';
             if (type === 'success') bgColor = '#16a34a';
             else if (type === 'warning') bgColor = '#f59e0b';
-            
+
             toast.style.cssText = 'position:fixed;bottom:20px;right:20px;background:' +
                 bgColor +
                 ';color:#fff;padding:12px 24px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,.15);z-index:9999;display:flex;align-items:center;gap:8px;font-weight:500;animation:slideIn .3s ease;';
@@ -389,67 +389,257 @@
             }, 3000);
         }
 
-        document.querySelectorAll('.report-btn').forEach(btn => {
-            btn.addEventListener('click', async function() {
-                if (!window.isLoggedIn) {
-                    alert('Vui lòng đăng nhập để báo cáo');
-                    return;
-                }
-                if (!confirm('Bạn có chắc muốn báo cáo đánh giá này?')) return;
-                
-                const reviewId = this.dataset.reviewId;
-                try {
-                    const res = await fetch((window.contextPath || '') + '/api/review/report', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'reviewId=' + reviewId
-                    });
-                    
-                    if (res.ok) {
-                        this.disabled = true;
-                        this.innerHTML = '<i class="fas fa-flag"></i> Đã báo cáo';
-                        this.classList.add('reported');
-                        if (typeof showToast === 'function') {
-                            showToast('Đã báo cáo đánh giá!', 'success');
+        function bindReportButtons() {
+            document.querySelectorAll('.report-btn:not([data-bound])').forEach(btn => {
+                btn.dataset.bound = 'true';
+                btn.addEventListener('click', async function () {
+                    if (!window.isLoggedIn) {
+                        alert('Vui lòng đăng nhập để báo cáo');
+                        return;
+                    }
+                    if (!confirm('Bạn có chắc muốn báo cáo đánh giá này?')) return;
+
+                    const reviewId = this.dataset.reviewId;
+                    try {
+                        const res = await fetch((window.contextPath || '') + '/api/review/report', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'reviewId=' + reviewId
+                        });
+
+                        if (res.ok) {
+                            this.disabled = true;
+                            this.innerHTML = '<i class="fas fa-flag"></i> Đã báo cáo';
+                            this.classList.add('reported');
+                            if (typeof showToast === 'function') {
+                                showToast('Đã báo cáo đánh giá!', 'success');
+                            }
+                        } else {
+                            alert('Có lỗi xảy ra khi báo cáo.');
+                        }
+                    } catch (err) {
+                        console.error('Report error:', err);
+                        alert('Có lỗi xảy ra, vui lòng thử lại.');
+                    }
+                });
+            });
+        }
+        bindReportButtons();
+
+        function bindHelpfulButtons() {
+            document.querySelectorAll('.helpful-btn:not([data-bound])').forEach(btn => {
+                btn.dataset.bound = 'true';
+                btn.addEventListener('click', function () {
+                    if (!window.isLoggedIn) {
+                        alert('Vui lòng đăng nhập để đánh dấu hữu ích');
+                        return;
+                    }
+
+                    const reviewId = this.dataset.reviewId;
+                    const wasHelpful = this.dataset.helpfulByUser === 'true';
+                    const currentCount = parseInt(this.dataset.helpfulCount) || 0;
+                    const countEl = this.querySelector('.helpful-count');
+                    const icon = this.querySelector('i');
+                    const newCount = wasHelpful ? currentCount - 1 : currentCount + 1;
+
+                    // Optimistic update
+                    this.dataset.helpfulByUser = String(!wasHelpful);
+                    this.dataset.helpfulCount = String(newCount);
+                    this.classList.toggle('is-helpful');
+                    if (icon) icon.className = !wasHelpful ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+                    if (newCount > 0) {
+                        if (countEl) countEl.textContent = newCount;
+                        else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${newCount}</span>)`);
+                    } else if (countEl) {
+                        countEl.parentNode.removeChild(countEl);
+                    }
+
+                    fetch(`${window.contextPath || ''}/review-api/helpful?reviewId=${reviewId}`, { method: 'POST' })
+                        .then(r => r.json())
+                        .then(data => {
+                            this.dataset.helpfulByUser = String(data.helpful);
+                            this.dataset.helpfulCount = String(data.count);
+                            const syncEl = this.querySelector('.helpful-count');
+                            if (data.count > 0) {
+                                if (syncEl) syncEl.textContent = data.count;
+                                else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${data.count}</span>)`);
+                            } else if (syncEl) syncEl.parentNode.removeChild(syncEl);
+                        })
+                        .catch(() => {
+                            // Rollback
+                            this.dataset.helpfulByUser = String(wasHelpful);
+                            this.dataset.helpfulCount = String(currentCount);
+                            this.classList.toggle('is-helpful');
+                            if (icon) icon.className = wasHelpful ? 'fas fa-thumbs-up' : 'far fa-thumbs-up';
+                            const rollbackEl = this.querySelector('.helpful-count');
+                            if (currentCount > 0) {
+                                if (rollbackEl) rollbackEl.textContent = currentCount;
+                                else this.insertAdjacentHTML('beforeend', ` (<span class="helpful-count">${currentCount}</span>)`);
+                            } else if (rollbackEl) rollbackEl.parentNode.removeChild(rollbackEl);
+                        });
+                });
+            });
+        }
+        bindHelpfulButtons();
+
+
+        // Review filter + load-more (AJAX)
+        let activeFilter = 'all';
+        let activeVariantId = null;
+        let reviewCurrentPage = 1;
+        const productId = window.productData ? window.productData.id : 0;
+
+        function buildReviewHtml(review) {
+            const stars = Array.from({ length: 5 }, (_, i) =>
+                i < review.rating
+                    ? '<i class="fas fa-star"></i>'
+                    : '<i class="far fa-star"></i>'
+            ).join('');
+
+            const verified = review.verifiedPurchase
+                ? '<span class="verified"><i class="fas fa-check-circle"></i> Đã mua hàng</span>'
+                : '';
+
+            const variant = review.variantDisplayText
+                ? `<div class="review-variant">Phân loại: ${escapeHtml(review.variantDisplayText)}</div>`
+                : '';
+
+            let imagesHtml = '';
+            if (review.hasImages && review.images && review.images.length > 0) {
+                imagesHtml = '<div class="review-media-grid">' +
+                    review.images.map(m => {
+                        if (m.mediaType === 'video') {
+                            return `<video src="${escapeHtml(m.imageUrl)}" preload="metadata" class="review-media-thumb"></video>`;
+                        }
+                        return `<img src="${escapeHtml(m.imageUrl)}" alt="Ảnh đánh giá" class="review-media-thumb">`;
+                    }).join('') +
+                    '</div>';
+            }
+
+            return `<article class="review-item" data-rating="${review.rating}"
+                        data-verified="${review.verifiedPurchase}"
+                        data-has-images="${review.hasImages}">
+                        <div class="review-header">
+                            <div class="user-avatar">${escapeHtml(review.userInitial)}</div>
+                            <div class="user-info">
+                                <h4 class="user-name">${escapeHtml(review.userDisplayName)}</h4>
+                                <div class="review-meta">
+                                    <div class="stars">${stars}</div>
+                                    <span class="date">${escapeHtml(review.formattedDate)}</span>
+                                    ${verified}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="review-content">
+                            <p class="review-text">${escapeHtml(review.reviewText)}</p>
+                            ${variant}
+                            ${imagesHtml}
+                            <div class="review-actions">
+                                <button class="action-btn helpful-btn ${review.helpfulByCurrentUser ? 'is-helpful' : ''}"
+                                        data-review-id="${review.id}"
+                                        data-helpful-count="${review.helpfulCount || 0}"
+                                        data-helpful-by-user="${review.helpfulByCurrentUser || false}">
+                                    <i class="${review.helpfulByCurrentUser ? 'fas' : 'far'} fa-thumbs-up"></i>
+                                    Hữu ích${review.helpfulCount > 0 ? ` (<span class="helpful-count">${review.helpfulCount}</span>)` : ''}
+                                </button>
+                                <button class="action-btn report-btn"
+                                        data-review-id="${review.id}"
+                                        title="Báo cáo đánh giá không phù hợp">
+                                    <i class="far fa-flag"></i> Báo cáo
+                                </button>
+                            </div>
+                        </div>
+                    </article>`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function buildReviewApiUrl(filter, variantId, page) {
+            let url = `${window.contextPath}/review-api?productId=${productId}&page=${page}`;
+            if (filter === 'variant' && variantId) {
+                url += `&filter=variant&variantId=${variantId}`;
+            } else if (filter && filter !== 'all') {
+                url += `&filter=${encodeURIComponent(filter)}`;
+                if (filter.match(/^[1-5]$/)) url += `&rating=${filter}`;
+            } else {
+                url += '&filter=all';
+            }
+            return url;
+        }
+
+        function loadReviews(filter, variantId, page, append) {
+            const list = document.querySelector('.reviews-list');
+            const btnLoadMore = document.getElementById('btnLoadMore');
+            if (!list) return;
+
+            if (!append) {
+                list.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;">Đang tải...</div>';
+            }
+            if (btnLoadMore) { btnLoadMore.disabled = true; btnLoadMore.textContent = 'Đang tải...'; }
+
+            fetch(buildReviewApiUrl(filter, variantId, page))
+                .then(r => r.json())
+                .then(data => {
+                    if (!append) {
+                        if (data.reviews && data.reviews.length > 0) {
+                            list.innerHTML = data.reviews.map(buildReviewHtml).join('');
+                        } else {
+                            list.innerHTML = '<div class="no-reviews" style="text-align:center;padding:40px;color:#6b7280;">' +
+                                '<i class="far fa-comment-dots" style="font-size:48px;margin-bottom:16px;"></i>' +
+                                '<p>Không có đánh giá nào phù hợp.</p></div>';
                         }
                     } else {
-                        alert('Có lỗi xảy ra khi báo cáo.');
+                        if (data.reviews && data.reviews.length > 0) {
+                            list.insertAdjacentHTML('beforeend', data.reviews.map(buildReviewHtml).join(''));
+                        }
                     }
-                } catch (err) {
-                    console.error('Report error:', err);
-                    alert('Có lỗi xảy ra, vui lòng thử lại.');
-                }
-            });
-        });
 
+                    reviewCurrentPage = data.page;
+                    const container = document.getElementById('loadMoreContainer');
+                    if (btnLoadMore && container) {
+                        if (data.hasMore) {
+                            btnLoadMore.disabled = false;
+                            btnLoadMore.textContent = 'Xem thêm đánh giá';
+                            container.style.display = '';
+                        } else {
+                            container.style.display = 'none';
+                        }
+                    }
+
+                    bindReportButtons();
+                    bindHelpfulButtons();
+                })
+                .catch(() => {
+                    if (!append) list.innerHTML = '<div style="text-align:center;padding:20px;color:#e53e3e;">Có lỗi xảy ra khi tải đánh giá.</div>';
+                    if (btnLoadMore) { btnLoadMore.disabled = false; btnLoadMore.textContent = 'Xem thêm đánh giá'; }
+                });
+        }
 
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
-                const filter = btn.dataset.filter;
-                const reviewItems = document.querySelectorAll('.review-item');
-
-                reviewItems.forEach(item => {
-                    const rating = item.dataset.rating;
-                    const verified = item.dataset.verified === 'true';
-                    const hasImages = item.dataset.hasImages === 'true';
-                    let show = false;
-
-                    switch (filter) {
-                        case 'all': show = true; break;
-                        case '5': case '4': case '3': case '2': case '1':
-                            show = rating === filter; break;
-                        case 'with-images': show = hasImages; break;
-                        case 'verified': show = verified; break;
-                        default: show = true;
-                    }
-
-                    item.style.display = show ? 'block' : 'none';
-                });
+                activeFilter = btn.dataset.filter;
+                activeVariantId = btn.dataset.variantId || null;
+                reviewCurrentPage = 1;
+                loadReviews(activeFilter, activeVariantId, 1, false);
             });
         });
+
+        const btnLoadMore = document.getElementById('btnLoadMore');
+        if (btnLoadMore) {
+            btnLoadMore.addEventListener('click', () => {
+                loadReviews(activeFilter, activeVariantId, reviewCurrentPage + 1, true);
+            });
+        }
     };
 
 

@@ -27,17 +27,17 @@ body:
     validations:
       required: true
   - type: textarea
+    id: actual
+    attributes:
+      label: Tình trạng thực tế (Actual Behavior)
+      description: Điều gì đã thực sự xảy ra? (Có thể đính kèm thông báo lỗi hoặc log)
+    validations:
+      required: true
+  - type: textarea
     id: expected
     attributes:
       label: Kết quả mong muốn (Expected Behavior)
       description: Hệ thống đáng lẽ ra phải hoạt động như thế nào?
-    validations:
-      required: true
-  - type: textarea
-    id: actual
-    attributes:
-      label: Kết quả thực tế (Actual Behavior)
-      description: Điều gì đã thực sự xảy ra? (Có thể đính kèm thông báo lỗi hoặc log)
     validations:
       required: true
   - type: checkboxes

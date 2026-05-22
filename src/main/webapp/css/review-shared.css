@@ -1,0 +1,111 @@
+/* ============================================================
+   review-shared.css — CSS dùng chung cho 3 trang review
+   ChiTietSanPham, DonHangList, admin/reviews
+   ============================================================ */
+
+/* Grid thumbnail */
+.review-media-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 72px);
+    gap: 6px;
+    max-width: 100%;
+    margin: 8px 0 12px;
+}
+
+/* Compact variant cho admin table */
+.review-media-grid--compact {
+    grid-template-columns: repeat(auto-fill, 48px);
+    gap: 4px;
+    max-width: 160px;
+    margin: 4px 0;
+}
+
+/* Thumbnail chung */
+.review-media-thumb {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    transition: opacity 0.15s;
+    display: block;
+    background: #000;
+}
+
+.review-media-grid--compact .review-media-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 4px;
+}
+
+.review-media-thumb:hover {
+    opacity: 0.75;
+}
+
+/* ============================================================
+   Shared lightbox — #reviewSharedLightbox
+   ============================================================ */
+#reviewSharedLightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .85);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+}
+
+#reviewSharedLightbox.active {
+    display: flex;
+}
+
+#reviewSharedLightbox img,
+#reviewSharedLightbox video {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 8px;
+    object-fit: contain;
+    background: #000;
+}
+
+.rsl-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 32px;
+    color: #fff;
+    cursor: pointer;
+    background: none;
+    border: none;
+    line-height: 1;
+    z-index: 1;
+}
+
+.rsl-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, .15);
+    border: none;
+    color: #fff;
+    font-size: 48px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 14px;
+    border-radius: 6px;
+    transition: background 0.15s;
+    z-index: 1;
+}
+
+.rsl-nav:hover {
+    background: rgba(255, 255, 255, .3);
+}
+
+.rsl-nav.prev {
+    left: 16px;
+}
+
+.rsl-nav.next {
+    right: 16px;
+}

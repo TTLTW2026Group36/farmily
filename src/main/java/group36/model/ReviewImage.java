@@ -12,9 +12,11 @@ public class ReviewImage implements Serializable {
     private int id;
     private int reviewId;
     private String imageUrl;
+    private String mediaType;
+    private String cloudinaryPublicId;
     private Timestamp createdAt;
 
-    
+
     public ReviewImage() {
     }
 
@@ -30,7 +32,7 @@ public class ReviewImage implements Serializable {
         this.createdAt = createdAt;
     }
 
-    
+
     public int getId() {
         return id;
     }
@@ -55,6 +57,26 @@ public class ReviewImage implements Serializable {
         this.imageUrl = imageUrl;
     }
 
+    public String getMediaType() {
+        return mediaType;
+    }
+
+    public void setMediaType(String mediaType) {
+        this.mediaType = mediaType;
+    }
+
+    public boolean isVideo() {
+        return "video".equals(mediaType);
+    }
+
+    public String getCloudinaryPublicId() {
+        return cloudinaryPublicId;
+    }
+
+    public void setCloudinaryPublicId(String cloudinaryPublicId) {
+        this.cloudinaryPublicId = cloudinaryPublicId;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -69,6 +91,7 @@ public class ReviewImage implements Serializable {
                 "id=" + id +
                 ", reviewId=" + reviewId +
                 ", imageUrl='" + imageUrl + '\'' +
+                ", mediaType='" + mediaType + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

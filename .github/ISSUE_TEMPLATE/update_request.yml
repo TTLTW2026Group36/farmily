@@ -17,7 +17,7 @@ body:
   - type: textarea
     id: current_state
     attributes:
-      label: Hiện trạng hiện tại
+      label: Tình trạng thực tế
       description: Chức năng này hiện tại đang hoạt động như thế nào? Có hạn chế hay bất cập gì không?
       placeholder: Hiện tại hệ thống đang xử lý...
     validations:
