@@ -260,6 +260,14 @@ public class ProductDAO extends BaseDao {
 
 
 
+    public int incrementSoldCountWithHandle(org.jdbi.v3.core.Handle h, int productId, int quantity) {
+        String sql = "UPDATE products SET soild_count = soild_count + :quantity WHERE id = :id";
+        return h.createUpdate(sql)
+                .bind("id", productId)
+                .bind("quantity", quantity)
+                .execute();
+    }
+
     public int incrementSoldCount(int id, int increment) {
         String sql = "UPDATE products SET soild_count = soild_count + :increment WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)

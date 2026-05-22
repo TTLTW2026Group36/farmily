@@ -91,6 +91,13 @@ public class CartItemDAO extends BaseDao {
                 .execute());
     }
 
+    public int deleteByCartIdWithHandle(org.jdbi.v3.core.Handle h, int cartId) {
+        String sql = "DELETE FROM cart_items WHERE cart_id = :cartId";
+        return h.createUpdate(sql)
+                .bind("cartId", cartId)
+                .execute();
+    }
+
     public int deleteByCartId(int cartId) {
         String sql = "DELETE FROM cart_items WHERE cart_id = :cartId";
         return get().withHandle(handle -> handle.createUpdate(sql)

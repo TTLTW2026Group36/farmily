@@ -86,6 +86,17 @@ public class FlashSaleDAO extends BaseDao {
 
 
 
+        public Optional<FlashSale> findActiveByProductIdWithHandle(org.jdbi.v3.core.Handle h, int productId) {
+                String sql = "SELECT * FROM flash_sales " +
+                                "WHERE product_id = :productId " +
+                                "AND NOW() BETWEEN start_time AND end_time " +
+                                "AND sold_count < stock_limit";
+                return h.createQuery(sql)
+                                .bind("productId", productId)
+                                .map(new FlashSaleMapper())
+                                .findOne();
+        }
+
         public Optional<FlashSale> findActiveByProductId(int productId) {
                 String sql = "SELECT * FROM flash_sales " +
                                 "WHERE product_id = :productId " +
@@ -160,6 +171,14 @@ public class FlashSaleDAO extends BaseDao {
 
 
 
+
+        public int incrementSoldCountWithHandle(org.jdbi.v3.core.Handle h, int flashSaleId, int quantity) {
+                String sql = "UPDATE flash_sales SET sold_count = sold_count + :quantity WHERE id = :id AND sold_count + :quantity <= stock_limit";
+                return h.createUpdate(sql)
+                                .bind("id", flashSaleId)
+                                .bind("quantity", quantity)
+                                .execute();
+        }
 
         public int incrementSoldCount(int id, int increment) {
                 String sql = "UPDATE flash_sales SET sold_count = sold_count + :increment " +
