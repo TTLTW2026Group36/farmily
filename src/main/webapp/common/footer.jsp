@@ -30,7 +30,12 @@
                                 <i class="fa fa-mobile-alt" aria-hidden="true"></i>
                                 <div class="content">
                                     <div class="label">Số điện thoại:</div>
-                                    <a class="link" href="tel:0378827924" title="0378827924">0378827924</a>
+                                    <span class="footer-hotline-wrapper">
+                                        <a class="link" href="tel:0378827924" title="Gọi ngay">0378827924</a>
+                                        <button type="button" class="btn-copy-footer" onclick="copyToClipboard('0378827924')" title="Sao chép">
+                                            <i class="fa-regular fa-copy"></i>
+                                        </button>
+                                    </span>
                                 </div>
                             </div>
 

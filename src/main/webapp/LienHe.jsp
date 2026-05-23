@@ -45,7 +45,12 @@
               <h3>Phòng Kinh doanh, Mua bán, Kế toán</h3>
               <ul>
                 <li>Email: <a href="mailto:Farmily@gmail.com">Farmily@gmail.com</a></li>
-                <li>Điện thoại: <a href="tel:0332991664">0332991664</a></li>
+                <li>Điện thoại: 
+                  <span class="phone-item">
+                    <a href="tel:0332991664">0332991664</a>
+                    <i class="fa-regular fa-copy copy-icon" onclick="copyToClipboard('0332991664')" title="Sao chép"></i>
+                  </span>
+                </li>
                 <li>Địa chỉ: Trường Đại Học Nông Lâm Thành Phố Hồ Chí Minh</li>
               </ul>
             </div>
@@ -54,7 +59,12 @@
               <h3>Phòng Hành chính – Nhân sự</h3>
               <ul>
                 <li>Email: <a href="mailto:hcns@nongsanfarmily.site">hcns@nongsanfarmily.site</a></li>
-                <li>Điện thoại: <a href="tel:0378827924">0378827924</a></li>
+                <li>Điện thoại: 
+                  <span class="phone-item">
+                    <a href="tel:0378827924">0378827924</a>
+                    <i class="fa-regular fa-copy copy-icon" onclick="copyToClipboard('0378827924')" title="Sao chép"></i>
+                  </span>
+                </li>
                 <li>Địa chỉ: Trường Đại Học Nông Lâm Thành Phố Hồ Chí Minh</li>
               </ul>
             </div>
@@ -63,7 +73,12 @@
               <h3>Phòng Xử lý Thông tin chung</h3>
               <ul>
                 <li>Email: <a href="mailto:info@nongsanfarmily.site">info@nongsanfarmily.site</a></li>
-                <li>Điện thoại: <a href="tel:0332991664">0332991664</a></li>
+                <li>Điện thoại: 
+                  <span class="phone-item">
+                    <a href="tel:0332991664">0332991664</a>
+                    <i class="fa-regular fa-copy copy-icon" onclick="copyToClipboard('0332991664')" title="Sao chép"></i>
+                  </span>
+                </li>
                 <li>Địa chỉ: Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP. Hồ Chí Minh</li>
               </ul>
             </div>
@@ -71,8 +86,20 @@
             <div class="contact-hotline">
               <h3>HOTLINE TOÀN QUỐC</h3>
               <ul>
-                <li><strong>Kỹ thuật:</strong> <a href="tel:0332991664">0332991664</a></li>
-                <li><strong>CSKH:</strong> <a href="tel:0378827924">0378827924</a></li>
+                <li>
+                  <strong>Kỹ thuật:</strong> 
+                  <span class="phone-item">
+                    <a href="tel:0332991664">0332991664</a>
+                    <i class="fa-regular fa-copy copy-icon" onclick="copyToClipboard('0332991664')" title="Sao chép"></i>
+                  </span>
+                </li>
+                <li>
+                  <strong>CSKH:</strong> 
+                  <span class="phone-item">
+                    <a href="tel:0378827924">0378827924</a>
+                    <i class="fa-regular fa-copy copy-icon" onclick="copyToClipboard('0378827924')" title="Sao chép"></i>
+                  </span>
+                </li>
               </ul>
             </div>
           </aside>
