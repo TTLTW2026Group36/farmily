@@ -57,6 +57,8 @@ public class AdminCouponController extends HttpServlet {
                 updateCoupon(request, response);
             } else if (pathInfo.equals("/delete")) {
                 deleteCoupon(request, response);
+            } else if (pathInfo.equals("/toggle")) {
+                toggleCoupon(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -68,10 +70,36 @@ public class AdminCouponController extends HttpServlet {
         }
     }
 
+    private void toggleCoupon(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        int id = Integer.parseInt(request.getParameter("id"));
+        try {
+            couponService.toggleCouponStatus(id);
+            Coupon updated = couponService.getCouponById(id);
+            response.getWriter().print("{\"success\":true,\"isActive\":" + updated.isActive() 
+                + ",\"statusText\":\"" + updated.getStatusText() + "\""
+                + ",\"statusClass\":\"" + updated.getStatusBadgeClass() + "\"}");
+        } catch (Exception e) {
+            response.getWriter().print("{\"success\":false,\"message\":\"" + e.getMessage() + "\"}");
+        }
+    }
+
     private void listCoupons(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        List<Coupon> coupons = couponService.getAllCoupons();
+        String keyword = request.getParameter("keyword");
+        String status = request.getParameter("status");
+
+        List<Coupon> coupons;
+        if ((keyword != null && !keyword.isEmpty()) || (status != null && !status.isEmpty())) {
+            coupons = couponService.searchCoupons(keyword, status);
+        } else {
+            coupons = couponService.getAllCoupons();
+        }
+
         request.setAttribute("coupons", coupons);
+        request.setAttribute("currentKeyword", keyword);
+        request.setAttribute("currentStatus", status);
 
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {

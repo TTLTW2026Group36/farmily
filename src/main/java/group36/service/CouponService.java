@@ -82,4 +82,14 @@ public class CouponService {
             throw new IllegalArgumentException("Thời gian kết thúc phải sau thời gian bắt đầu");
         }
     }
+
+    public void toggleCouponStatus(int id) {
+        Coupon coupon = getCouponById(id);
+        couponDAO.updateActiveStatus(id, !coupon.isActive());
+    }
+
+    public List<Coupon> searchCoupons(String keyword, String status) {
+        return couponDAO.findByFilters(keyword, status);
+    }
 }
+

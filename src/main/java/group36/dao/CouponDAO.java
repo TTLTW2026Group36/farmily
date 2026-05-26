@@ -107,4 +107,44 @@ public class CouponDAO extends BaseDao {
                 .bind("id", id)
                 .execute());
     }
+
+    public int updateActiveStatus(int id, boolean isActive) {
+        String sql = "UPDATE coupons SET is_active = :isActive WHERE id = :id";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", id)
+                .bind("isActive", isActive)
+                .execute());
+    }
+
+    public List<Coupon> findByFilters(String keyword, String status) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM coupons WHERE 1=1");
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND code LIKE :keyword");
+        }
+        if (status != null && !status.isEmpty()) {
+            switch (status) {
+                case "active":
+                    sql.append(" AND is_active = 1 AND NOW() BETWEEN start_date AND end_date AND used_count < quantity");
+                    break;
+                case "upcoming":
+                    sql.append(" AND is_active = 1 AND start_date > NOW()");
+                    break;
+                case "expired":
+                    sql.append(" AND end_date < NOW()");
+                    break;
+                case "disabled":
+                    sql.append(" AND is_active = 0");
+                    break;
+            }
+        }
+        sql.append(" ORDER BY created_at DESC");
+        return get().withHandle(handle -> {
+            var query = handle.createQuery(sql.toString());
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                query.bind("keyword", "%" + keyword.trim() + "%");
+            }
+            return query.map(new CouponMapper()).list();
+        });
+    }
 }
+
