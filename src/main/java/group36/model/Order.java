@@ -32,6 +32,8 @@ public class Order implements Serializable {
     private List<OrderDetail> orderDetails;
     private Payment latestPayment;
     private String adminNote;
+    private Integer couponId;
+    private double discountAmount;
     private List<OrderStatusHistory> statusHistory;
 
     public static final String STATUS_PENDING = "pending";
@@ -367,7 +369,32 @@ public class Order implements Serializable {
     }
 
     public double getSubtotal() {
-        return totalPrice - shippingFee;
+        return totalPrice + discountAmount - shippingFee;
+    }
+
+    public Integer getCouponId() {
+        return couponId;
+    }
+
+    public void setCouponId(Integer couponId) {
+        this.couponId = couponId;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public String getFormattedDiscountAmount() {
+        if (discountAmount == 0) return "";
+        return "-" + String.format("%,.0f", discountAmount).replace(",", ".") + "đ";
+    }
+
+    public boolean hasCoupon() {
+        return couponId != null && couponId > 0;
     }
 
     public String getFormattedTotalPrice() {

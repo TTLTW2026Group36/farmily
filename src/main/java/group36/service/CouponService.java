@@ -2,6 +2,7 @@ package group36.service;
 
 import group36.dao.CouponDAO;
 import group36.model.Coupon;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class CouponService {
@@ -90,6 +91,62 @@ public class CouponService {
 
     public List<Coupon> searchCoupons(String keyword, String status) {
         return couponDAO.findByFilters(keyword, status);
+    }
+
+    public Coupon validateCouponForOrder(String code, Integer userId, double subtotal) {
+        if (code == null || code.trim().isEmpty()) {
+            throw new IllegalArgumentException("Vui lòng nhập mã giảm giá");
+        }
+
+        Coupon coupon = couponDAO.findByCode(code.toUpperCase().trim())
+            .orElseThrow(() -> new IllegalArgumentException("Mã giảm giá không tồn tại"));
+
+        if (!coupon.isActive()) {
+            throw new IllegalArgumentException("Mã giảm giá đã bị vô hiệu hóa");
+        }
+
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (now.before(coupon.getStartDate())) {
+            throw new IllegalArgumentException("Mã giảm giá chưa đến thời gian áp dụng");
+        }
+        if (now.after(coupon.getEndDate())) {
+            throw new IllegalArgumentException("Mã giảm giá đã hết hạn");
+        }
+
+        if (coupon.getUsedCount() >= coupon.getQuantity()) {
+            throw new IllegalArgumentException("Mã giảm giá đã hết lượt sử dụng");
+        }
+
+        if (subtotal < coupon.getMinOrderValue()) {
+            throw new IllegalArgumentException(
+                String.format("Đơn hàng tối thiểu %,.0fđ để sử dụng mã này", coupon.getMinOrderValue()));
+        }
+
+        if (userId != null) {
+            int userUsage = couponDAO.countUsageByUserAndCoupon(userId, coupon.getId());
+            if (userUsage >= coupon.getMaxUsagePerUser()) {
+                throw new IllegalArgumentException("Bạn đã sử dụng mã này đạt giới hạn cho phép");
+            }
+        }
+
+        return coupon;
+    }
+
+    public double calculateDiscount(Coupon coupon, double subtotal, double shippingFee) {
+        switch (coupon.getDiscountType()) {
+            case "percent":
+                double discount = subtotal * coupon.getDiscountValue() / 100;
+                if (coupon.getMaxDiscount() != null && discount > coupon.getMaxDiscount()) {
+                    discount = coupon.getMaxDiscount();
+                }
+                return discount;
+            case "fixed":
+                return Math.min(coupon.getDiscountValue(), subtotal);
+            case "freeship":
+                return shippingFee;
+            default:
+                return 0;
+        }
     }
 }
 

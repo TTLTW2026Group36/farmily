@@ -146,5 +146,33 @@ public class CouponDAO extends BaseDao {
             return query.map(new CouponMapper()).list();
         });
     }
+
+    public int countUsageByUserAndCoupon(int userId, int couponId) {
+        String sql = "SELECT COUNT(*) FROM coupon_usage WHERE user_id = :userId AND coupon_id = :couponId";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .bind("couponId", couponId)
+                .mapTo(Integer.class)
+                .one());
+    }
+
+    public int incrementUsedCount(int couponId) {
+        String sql = "UPDATE coupons SET used_count = used_count + 1 " +
+                     "WHERE id = :id AND used_count < quantity";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", couponId)
+                .execute());
+    }
+
+    public void insertUsage(int couponId, Integer userId, int orderId, double discountAmount) {
+        String sql = "INSERT INTO coupon_usage (coupon_id, user_id, order_id, discount_amount) " +
+                     "VALUES (:couponId, :userId, :orderId, :discountAmount)";
+        get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("couponId", couponId)
+                .bind("userId", userId)
+                .bind("orderId", orderId)
+                .bind("discountAmount", discountAmount)
+                .execute());
+    }
 }
 
