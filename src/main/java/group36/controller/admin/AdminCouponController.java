@@ -107,60 +107,154 @@ public class AdminCouponController extends HttpServlet {
 
     private void createCoupon(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        String code = request.getParameter("code").toUpperCase().trim();
-        String discountType = request.getParameter("discountType");
-        double discountValue = 0;
-        if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
-            discountValue = Double.parseDouble(request.getParameter("discountValue"));
-        }
-        Double maxDiscount = null;
-        if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
-            maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
-        }
-        double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
-        Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
-        Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
-        boolean isActive = request.getParameter("isActive") != null;
+        try {
+            String code = request.getParameter("code").toUpperCase().trim();
+            String discountType = request.getParameter("discountType");
+            double discountValue = 0;
+            if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+                discountValue = Double.parseDouble(request.getParameter("discountValue"));
+            }
+            Double maxDiscount = null;
+            if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+                maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
+            }
+            double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
+            Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
+            Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
+            boolean isActive = request.getParameter("isActive") != null;
 
-        Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
-        couponService.createCoupon(coupon);
+            Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
+            couponService.createCoupon(coupon);
 
-        HttpSession session = request.getSession();
-        session.setAttribute("success", "Thêm mã giảm giá thành công!");
-        response.sendRedirect(request.getContextPath() + "/admin/coupons");
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Thêm mã giảm giá thành công!");
+            response.sendRedirect(request.getContextPath() + "/admin/coupons");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
+
+            Coupon coupon = new Coupon();
+            coupon.setCode(request.getParameter("code"));
+            coupon.setDiscountType(request.getParameter("discountType"));
+            try {
+                if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+                    coupon.setDiscountValue(Double.parseDouble(request.getParameter("discountValue")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+                    coupon.setMaxDiscount(Double.parseDouble(request.getParameter("maxDiscount")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("minOrderValue") != null && !request.getParameter("minOrderValue").isEmpty()) {
+                    coupon.setMinOrderValue(Double.parseDouble(request.getParameter("minOrderValue")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("quantity") != null && !request.getParameter("quantity").isEmpty()) {
+                    coupon.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("maxUsagePerUser") != null && !request.getParameter("maxUsagePerUser").isEmpty()) {
+                    coupon.setMaxUsagePerUser(Integer.parseInt(request.getParameter("maxUsagePerUser")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                coupon.setStartDate(parseTimestamp(request.getParameter("startDate")));
+            } catch (Exception ignored) {}
+            try {
+                coupon.setEndDate(parseTimestamp(request.getParameter("endDate")));
+            } catch (Exception ignored) {}
+            coupon.setActive(request.getParameter("isActive") != null);
+
+            request.setAttribute("coupon", coupon);
+            request.getRequestDispatcher("/admin/coupon-add.jsp").forward(request, response);
+        }
     }
 
     private void updateCoupon(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        String code = request.getParameter("code").toUpperCase().trim();
-        String discountType = request.getParameter("discountType");
-        double discountValue = 0;
-        if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
-            discountValue = Double.parseDouble(request.getParameter("discountValue"));
-        }
-        Double maxDiscount = null;
-        if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
-            maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
-        }
-        double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
-        int quantity = Integer.parseInt(request.getParameter("quantity"));
-        int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
-        Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
-        Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
-        boolean isActive = request.getParameter("isActive") != null;
-        int usedCount = Integer.parseInt(request.getParameter("usedCount"));
+        try {
+            String code = request.getParameter("code").toUpperCase().trim();
+            String discountType = request.getParameter("discountType");
+            double discountValue = 0;
+            if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+                discountValue = Double.parseDouble(request.getParameter("discountValue"));
+            }
+            Double maxDiscount = null;
+            if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+                maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
+            }
+            double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
+            int quantity = Integer.parseInt(request.getParameter("quantity"));
+            int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
+            Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
+            Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
+            boolean isActive = request.getParameter("isActive") != null;
+            int usedCount = Integer.parseInt(request.getParameter("usedCount"));
 
-        Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
-        coupon.setId(id);
-        coupon.setUsedCount(usedCount);
-        couponService.updateCoupon(coupon);
+            Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
+            coupon.setId(id);
+            coupon.setUsedCount(usedCount);
+            couponService.updateCoupon(coupon);
 
-        HttpSession session = request.getSession();
-        session.setAttribute("success", "Cập nhật mã giảm giá thành công!");
-        response.sendRedirect(request.getContextPath() + "/admin/coupons");
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Cập nhật mã giảm giá thành công!");
+            response.sendRedirect(request.getContextPath() + "/admin/coupons");
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
+
+            Coupon coupon = new Coupon();
+            coupon.setId(id);
+            coupon.setCode(request.getParameter("code"));
+            coupon.setDiscountType(request.getParameter("discountType"));
+            try {
+                if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+                    coupon.setDiscountValue(Double.parseDouble(request.getParameter("discountValue")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+                    coupon.setMaxDiscount(Double.parseDouble(request.getParameter("maxDiscount")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("minOrderValue") != null && !request.getParameter("minOrderValue").isEmpty()) {
+                    coupon.setMinOrderValue(Double.parseDouble(request.getParameter("minOrderValue")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("quantity") != null && !request.getParameter("quantity").isEmpty()) {
+                    coupon.setQuantity(Integer.parseInt(request.getParameter("quantity")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("maxUsagePerUser") != null && !request.getParameter("maxUsagePerUser").isEmpty()) {
+                    coupon.setMaxUsagePerUser(Integer.parseInt(request.getParameter("maxUsagePerUser")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                if (request.getParameter("usedCount") != null && !request.getParameter("usedCount").isEmpty()) {
+                    coupon.setUsedCount(Integer.parseInt(request.getParameter("usedCount")));
+                }
+            } catch (Exception ignored) {}
+            try {
+                coupon.setStartDate(parseTimestamp(request.getParameter("startDate")));
+            } catch (Exception ignored) {}
+            try {
+                coupon.setEndDate(parseTimestamp(request.getParameter("endDate")));
+            } catch (Exception ignored) {}
+            coupon.setActive(request.getParameter("isActive") != null);
+
+            request.setAttribute("coupon", coupon);
+            request.getRequestDispatcher("/admin/coupon-edit.jsp").forward(request, response);
+        }
     }
 
     private void deleteCoupon(HttpServletRequest request, HttpServletResponse response)

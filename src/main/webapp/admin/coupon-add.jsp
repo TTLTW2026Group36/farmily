@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -48,64 +49,64 @@
 
                         <div class="form-group">
                             <label for="code">Mã giảm giá <span class="required">*</span></label>
-                            <input type="text" id="code" name="code" class="form-control" placeholder="VD: NHAP20, FSHIP" style="text-transform: uppercase;" required>
+                            <input type="text" id="code" name="code" class="form-control" value="${coupon.code}" placeholder="VD: NHAP20, FSHIP" style="text-transform: uppercase;" required>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="discountType">Loại giảm giá <span class="required">*</span></label>
                                 <select id="discountType" name="discountType" class="form-control" required>
-                                    <option value="percent">Giảm theo %</option>
-                                    <option value="fixed">Giảm số tiền cố định</option>
-                                    <option value="freeship">Miễn phí vận chuyển</option>
+                                    <option value="percent" ${coupon.discountType == 'percent' ? 'selected' : ''}>Giảm theo %</option>
+                                    <option value="fixed" ${coupon.discountType == 'fixed' ? 'selected' : ''}>Giảm số tiền cố định</option>
+                                    <option value="freeship" ${coupon.discountType == 'freeship' ? 'selected' : ''}>Miễn phí vận chuyển</option>
                                 </select>
                             </div>
 
                             <div class="form-group" id="discountValueGroup">
                                 <label for="discountValue">Giá trị giảm <span class="required">*</span></label>
-                                <input type="number" id="discountValue" name="discountValue" class="form-control" placeholder="VD: 20 hoặc 50000" min="0" required>
+                                <input type="number" id="discountValue" name="discountValue" class="form-control" value="${coupon.discountValue}" placeholder="VD: 20 hoặc 50000" min="0" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group" id="maxDiscountGroup">
                                 <label for="maxDiscount">Giảm tối đa (đ)</label>
-                                <input type="number" id="maxDiscount" name="maxDiscount" class="form-control" placeholder="Để trống nếu không giới hạn" min="0">
+                                <input type="number" id="maxDiscount" name="maxDiscount" class="form-control" value="${coupon.maxDiscount}" placeholder="Để trống nếu không giới hạn" min="0">
                             </div>
 
                             <div class="form-group">
                                 <label for="minOrderValue">Đơn hàng tối thiểu (đ) <span class="required">*</span></label>
-                                <input type="number" id="minOrderValue" name="minOrderValue" class="form-control" placeholder="VD: 150000" min="0" value="0" required>
+                                <input type="number" id="minOrderValue" name="minOrderValue" class="form-control" value="${coupon != null ? coupon.minOrderValue : '0'}" placeholder="VD: 150000" min="0" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="quantity">Số lượng mã phát hành <span class="required">*</span></label>
-                                <input type="number" id="quantity" name="quantity" class="form-control" placeholder="VD: 100" min="1" required>
+                                <input type="number" id="quantity" name="quantity" class="form-control" value="${coupon.quantity}" placeholder="VD: 100" min="1" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="maxUsagePerUser">Giới hạn sử dụng/khách hàng <span class="required">*</span></label>
-                                <input type="number" id="maxUsagePerUser" name="maxUsagePerUser" class="form-control" placeholder="VD: 1" min="1" value="1" required>
+                                <input type="number" id="maxUsagePerUser" name="maxUsagePerUser" class="form-control" value="${coupon != null ? coupon.maxUsagePerUser : '1'}" placeholder="VD: 1" min="1" required>
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="startDate">Thời gian bắt đầu <span class="required">*</span></label>
-                                <input type="datetime-local" id="startDate" name="startDate" class="form-control" required>
+                                <input type="datetime-local" id="startDate" name="startDate" class="form-control" value="<c:if test='${not empty coupon.startDate}'><fmt:formatDate value='${coupon.startDate}' pattern='yyyy-MM-dd' />T<fmt:formatDate value='${coupon.startDate}' pattern='HH:mm' /></c:if>" required>
                             </div>
 
                             <div class="form-group">
                                 <label for="endDate">Thời gian kết thúc <span class="required">*</span></label>
-                                <input type="datetime-local" id="endDate" name="endDate" class="form-control" required>
+                                <input type="datetime-local" id="endDate" name="endDate" class="form-control" value="<c:if test='${not empty coupon.endDate}'><fmt:formatDate value='${coupon.endDate}' pattern='yyyy-MM-dd' />T<fmt:formatDate value='${coupon.endDate}' pattern='HH:mm' /></c:if>" required>
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                                <input type="checkbox" id="isActive" name="isActive" checked style="width: auto;">
+                                <input type="checkbox" id="isActive" name="isActive" ${coupon == null || coupon.isActive() ? 'checked' : ''} style="width: auto;">
                                 Kích hoạt ngay lập tức
                             </label>
                         </div>
