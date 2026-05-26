@@ -1,0 +1,85 @@
+package group36.service;
+
+import group36.dao.CouponDAO;
+import group36.model.Coupon;
+import java.util.List;
+
+public class CouponService {
+    private final CouponDAO couponDAO;
+
+    public CouponService() {
+        this.couponDAO = new CouponDAO();
+    }
+
+    public List<Coupon> getAllCoupons() {
+        return couponDAO.findAll();
+    }
+
+    public Coupon getCouponById(int id) {
+        return couponDAO.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Mã giảm giá không tồn tại: " + id));
+    }
+
+    public Coupon createCoupon(Coupon coupon) {
+        validateCoupon(coupon);
+        couponDAO.findByCode(coupon.getCode()).ifPresent(existing -> {
+            throw new IllegalArgumentException("Mã giảm giá đã tồn tại: " + coupon.getCode());
+        });
+        int id = couponDAO.insert(coupon);
+        coupon.setId(id);
+        return coupon;
+    }
+
+    public Coupon updateCoupon(Coupon coupon) {
+        validateCoupon(coupon);
+        couponDAO.findById(coupon.getId())
+                .orElseThrow(() -> new IllegalArgumentException("Mã giảm giá không tồn tại: " + coupon.getId()));
+        couponDAO.findByCode(coupon.getCode()).ifPresent(existing -> {
+            if (existing.getId() != coupon.getId()) {
+                throw new IllegalArgumentException("Mã giảm giá đã tồn tại: " + coupon.getCode());
+            }
+        });
+        couponDAO.update(coupon);
+        return coupon;
+    }
+
+    public void deleteCoupon(int id) {
+        int affected = couponDAO.delete(id);
+        if (affected == 0) {
+            throw new IllegalArgumentException("Mã giảm giá không tồn tại: " + id);
+        }
+    }
+
+    private void validateCoupon(Coupon coupon) {
+        if (coupon.getCode() == null || coupon.getCode().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mã giảm giá không được để trống");
+        }
+        if (!coupon.getCode().matches("^[A-Z0-9_-]+$")) {
+            throw new IllegalArgumentException("Mã chỉ chứa chữ IN HOA, số, _ và -");
+        }
+        if (coupon.getDiscountType() == null) {
+            throw new IllegalArgumentException("Loại giảm giá là bắt buộc");
+        }
+        if ("percent".equals(coupon.getDiscountType())) {
+            if (coupon.getDiscountValue() <= 0 || coupon.getDiscountValue() > 100) {
+                throw new IllegalArgumentException("Phần trăm giảm phải từ 1 đến 100");
+            }
+        } else if ("fixed".equals(coupon.getDiscountType())) {
+            if (coupon.getDiscountValue() <= 0) {
+                throw new IllegalArgumentException("Số tiền giảm phải lớn hơn 0");
+            }
+        }
+        if (coupon.getQuantity() <= 0) {
+            throw new IllegalArgumentException("Số lượng mã phải lớn hơn 0");
+        }
+        if (coupon.getMaxUsagePerUser() <= 0) {
+            throw new IllegalArgumentException("Giới hạn sử dụng trên mỗi người dùng phải lớn hơn 0");
+        }
+        if (coupon.getStartDate() == null || coupon.getEndDate() == null) {
+            throw new IllegalArgumentException("Thời gian bắt đầu và kết thúc là bắt buộc");
+        }
+        if (coupon.getEndDate().before(coupon.getStartDate())) {
+            throw new IllegalArgumentException("Thời gian kết thúc phải sau thời gian bắt đầu");
+        }
+    }
+}

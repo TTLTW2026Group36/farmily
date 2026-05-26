@@ -1,0 +1,183 @@
+package group36.controller.admin;
+
+import jakarta.servlet.*;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
+import group36.model.Coupon;
+import group36.service.CouponService;
+
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+
+@WebServlet(name = "AdminCouponController", urlPatterns = { "/admin/coupons", "/admin/coupons/*" })
+public class AdminCouponController extends HttpServlet {
+    private final CouponService couponService;
+
+    public AdminCouponController() {
+        this.couponService = new CouponService();
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String pathInfo = request.getPathInfo();
+
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                listCoupons(request, response);
+            } else if (pathInfo.equals("/add")) {
+                showAddForm(request, response);
+            } else if (pathInfo.equals("/edit")) {
+                showEditForm(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            request.setAttribute("error", "Lỗi: " + e.getMessage());
+            listCoupons(request, response);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        String pathInfo = request.getPathInfo();
+
+        try {
+            if (pathInfo == null || pathInfo.equals("/")) {
+                response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            } else if (pathInfo.equals("/add")) {
+                createCoupon(request, response);
+            } else if (pathInfo.equals("/edit")) {
+                updateCoupon(request, response);
+            } else if (pathInfo.equals("/delete")) {
+                deleteCoupon(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "Lỗi: " + e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/coupons");
+        }
+    }
+
+    private void listCoupons(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Coupon> coupons = couponService.getAllCoupons();
+        request.setAttribute("coupons", coupons);
+
+        HttpSession session = request.getSession();
+        if (session.getAttribute("success") != null) {
+            request.setAttribute("success", session.getAttribute("success"));
+            session.removeAttribute("success");
+        }
+        if (session.getAttribute("error") != null) {
+            request.setAttribute("error", session.getAttribute("error"));
+            session.removeAttribute("error");
+        }
+
+        request.getRequestDispatcher("/admin/coupons.jsp").forward(request, response);
+    }
+
+    private void showAddForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        request.getRequestDispatcher("/admin/coupon-add.jsp").forward(request, response);
+    }
+
+    private void showEditForm(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/coupons");
+            return;
+        }
+
+        int id = Integer.parseInt(idParam);
+        Coupon coupon = couponService.getCouponById(id);
+        request.setAttribute("coupon", coupon);
+        request.getRequestDispatcher("/admin/coupon-edit.jsp").forward(request, response);
+    }
+
+    private void createCoupon(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String code = request.getParameter("code").toUpperCase().trim();
+        String discountType = request.getParameter("discountType");
+        double discountValue = 0;
+        if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+            discountValue = Double.parseDouble(request.getParameter("discountValue"));
+        }
+        Double maxDiscount = null;
+        if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+            maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
+        }
+        double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
+        Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
+        Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
+        boolean isActive = request.getParameter("isActive") != null;
+
+        Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
+        couponService.createCoupon(coupon);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("success", "Thêm mã giảm giá thành công!");
+        response.sendRedirect(request.getContextPath() + "/admin/coupons");
+    }
+
+    private void updateCoupon(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        String code = request.getParameter("code").toUpperCase().trim();
+        String discountType = request.getParameter("discountType");
+        double discountValue = 0;
+        if (request.getParameter("discountValue") != null && !request.getParameter("discountValue").isEmpty()) {
+            discountValue = Double.parseDouble(request.getParameter("discountValue"));
+        }
+        Double maxDiscount = null;
+        if (request.getParameter("maxDiscount") != null && !request.getParameter("maxDiscount").isEmpty()) {
+            maxDiscount = Double.parseDouble(request.getParameter("maxDiscount"));
+        }
+        double minOrderValue = Double.parseDouble(request.getParameter("minOrderValue"));
+        int quantity = Integer.parseInt(request.getParameter("quantity"));
+        int maxUsagePerUser = Integer.parseInt(request.getParameter("maxUsagePerUser"));
+        Timestamp startDate = parseTimestamp(request.getParameter("startDate"));
+        Timestamp endDate = parseTimestamp(request.getParameter("endDate"));
+        boolean isActive = request.getParameter("isActive") != null;
+        int usedCount = Integer.parseInt(request.getParameter("usedCount"));
+
+        Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
+        coupon.setId(id);
+        coupon.setUsedCount(usedCount);
+        couponService.updateCoupon(coupon);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("success", "Cập nhật mã giảm giá thành công!");
+        response.sendRedirect(request.getContextPath() + "/admin/coupons");
+    }
+
+    private void deleteCoupon(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        couponService.deleteCoupon(id);
+
+        HttpSession session = request.getSession();
+        session.setAttribute("success", "Xóa mã giảm giá thành công!");
+        response.sendRedirect(request.getContextPath() + "/admin/coupons");
+    }
+
+    private Timestamp parseTimestamp(String datetimeStr) {
+        if (datetimeStr == null || datetimeStr.isEmpty()) {
+            return null;
+        }
+        LocalDateTime ldt = LocalDateTime.parse(datetimeStr, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        return Timestamp.valueOf(ldt);
+    }
+}
