@@ -748,9 +748,22 @@ a {
     color: #16a34a;
 }
 
-.report-btn { color: #9ca3af; }
-.report-btn:hover { color: #ef4444; border-color: #ef4444; background: #fef2f2; }
-.report-btn.reported { color: #ef4444; border-color: #ef4444; background: #fef2f2; cursor: default; }
+.report-btn {
+    color: #9ca3af;
+}
+
+.report-btn:hover {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: #fef2f2;
+}
+
+.report-btn.reported {
+    color: #ef4444;
+    border-color: #ef4444;
+    background: #fef2f2;
+    cursor: default;
+}
 
 
 .shop-response {
@@ -1157,12 +1170,16 @@ a {
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.85);
+    background: rgba(0, 0, 0, .85);
     z-index: 9999;
     align-items: center;
     justify-content: center;
 }
-.review-lightbox.active { display: flex; }
+
+.review-lightbox.active {
+    display: flex;
+}
+
 .review-lightbox img,
 .review-lightbox video {
     max-width: 90vw;
@@ -1170,9 +1187,11 @@ a {
     border-radius: 8px;
     object-fit: contain;
 }
+
 .review-lightbox-close {
     position: absolute;
-    top: 16px; right: 20px;
+    top: 16px;
+    right: 20px;
     font-size: 32px;
     color: #fff;
     cursor: pointer;
@@ -1185,7 +1204,7 @@ a {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: rgba(255,255,255,.15);
+    background: rgba(255, 255, 255, .15);
     border: none;
     color: #fff;
     font-size: 48px;
@@ -1196,7 +1215,54 @@ a {
     transition: background 0.15s;
     z-index: 1;
 }
-.review-lightbox-nav:hover { background: rgba(255,255,255,.3); }
-.review-lightbox-nav.prev { left: 16px; }
-.review-lightbox-nav.next { right: 16px; }
-.review-lightbox-nav[style*="display:none"] { display: none !important; }
+
+.review-lightbox-nav:hover {
+    background: rgba(255, 255, 255, .3);
+}
+
+.review-lightbox-nav.prev {
+    left: 16px;
+}
+
+.review-lightbox-nav.next {
+    right: 16px;
+}
+
+.review-lightbox-nav[style*="display:none"] {
+    display: none !important;
+}
+
+.phone-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.hotline-link-inline {
+    color: var(--primary) !important;
+    text-decoration: none !important;
+    font-weight: 600;
+}
+
+.hotline-link-inline:hover {
+    text-decoration: underline !important;
+}
+
+.btn-copy-inline {
+    background: transparent;
+    border: none;
+    color: var(--c-muted);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color 0.2s, background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-copy-inline:hover {
+    color: var(--primary);
+    background-color: rgba(0, 0, 0, 0.05);
+}

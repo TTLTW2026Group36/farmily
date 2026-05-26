@@ -67,13 +67,13 @@
                 <main>
                     <div class="forgot-container">
                         <h1><i class="fas fa-lock"></i> QUÊN MẬT KHẨU</h1>
-                        <p>Nhập địa chỉ email đã đăng ký để nhận mã OTP đặt lại mật khẩu.</p>
+                        <p>Nhập địa chỉ email đã đăng ký để nhận liên kết đặt lại mật khẩu.</p>
 
 
                         <c:if test="${not empty error}">
                             <div class="error-message">
                                 <i class="fas fa-exclamation-circle"></i>
-                                ${error}
+                                <span id="error-text">${error}</span>
                             </div>
                         </c:if>
 
@@ -83,7 +83,7 @@
                                 autofocus>
 
                             <button class="submit" type="submit">
-                                <i class="fas fa-paper-plane"></i> Gửi mã OTP
+                                <i class="fas fa-paper-plane"></i> Gửi liên kết
                             </button>
 
                             <a class="back" href="${pageContext.request.contextPath}/dang-nhap">
@@ -100,7 +100,44 @@
                 </main>
 
                 
-                    <jsp:include page="common/footer.jsp" />
+                <jsp:include page="common/footer.jsp" />
+
+                <script>
+                    // 1. Chống click nhiều lần
+                    const forgotForm = document.querySelector('form[action*="forgot-password"]');
+                    const btnSubmit = document.querySelector('button.submit');
+                    
+                    if (forgotForm && btnSubmit) {
+                        forgotForm.onsubmit = function() {
+                            btnSubmit.disabled = true;
+                            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+                            btnSubmit.style.opacity = '0.7';
+                        };
+                    }
+
+                    // 2. đếm ngược real time
+                    const errorMsg = document.getElementById('error-text');
+                    if (errorMsg) {
+                        let match = errorMsg.innerText.match(/\d+/);
+                        if (match) {
+                            let seconds = parseInt(match[0]);
+                            const timer = setInterval(() => {
+                                seconds--;
+                                if (seconds <= 0) {
+                                    clearInterval(timer);
+                                    const parent = errorMsg.closest('.error-message');
+                                    if(parent) {
+                                        parent.style.transition = 'opacity 0.5s';
+                                        parent.style.opacity = '0';
+                                        setTimeout(() => parent.style.display = 'none', 500);
+                                    }
+                                } else {
+                                    errorMsg.innerText = errorMsg.innerText.replace(/\d+/, seconds);
+                                }
+                            }, 1000);
+                        }
+                    }
+                </script>
         </body>
 
         </html>
