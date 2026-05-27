@@ -102,9 +102,6 @@ public class Order implements Serializable {
         ALLOWED_TRANSITIONS.put(STATUS_REFUNDED, new HashSet<>());
     }
 
-    public static final double FREE_SHIPPING_THRESHOLD = 100000;
-    public static final double STANDARD_SHIPPING_FEE = 30000;
-
     public Order() {
         this.orderDetails = new ArrayList<>();
         this.status = STATUS_PENDING;
@@ -364,10 +361,6 @@ public class Order implements Serializable {
         }
     }
 
-    public static double calculateShippingFee(double subtotal) {
-        return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
-    }
-
     public double getSubtotal() {
         return totalPrice + discountAmount - shippingFee;
     }
@@ -402,9 +395,6 @@ public class Order implements Serializable {
     }
 
     public String getFormattedShippingFee() {
-        if (shippingFee == 0) {
-            return "Miễn phí";
-        }
         return String.format("%,.0f", shippingFee).replace(",", ".") + "đ";
     }
 

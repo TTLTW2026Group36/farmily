@@ -29,9 +29,6 @@ public class OrderService {
     private final CouponDAO couponDAO;
     private final CouponService couponService;
 
-    public static final double FREE_SHIPPING_THRESHOLD = 100000;
-    public static final double STANDARD_SHIPPING_FEE = 30000;
-
     public OrderService() {
         this.orderDAO = new OrderDAO();
         this.orderDetailDAO = new OrderDetailDAO();
@@ -51,11 +48,7 @@ public class OrderService {
         this.couponService = new CouponService();
     }
 
-    public double calculateShippingFee(double subtotal) {
-        return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
-    }
-
-    public Order createOrder(int userId, int addressId, int paymentMethodId, String note)
+    public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
             throws IllegalArgumentException {
         return createOrder(userId, addressId, paymentMethodId, note, null, null);
     }
@@ -142,7 +135,7 @@ public class OrderService {
         return order;
     }
 
-    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems)
+    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
         return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, null, null);
     }
@@ -221,7 +214,7 @@ public class OrderService {
     }
 
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
-            int paymentMethodId, String note, List<CartItem> cartItems)
+            int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
         return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, null, null);
     }

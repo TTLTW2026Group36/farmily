@@ -26,6 +26,7 @@ public class PlaceOrderController extends HttpServlet {
     private CartService cartService;
     private PaymentService paymentService;
     private PaymentMethodService paymentMethodService;
+    private GhnService ghnService;
     private final Gson gson = new Gson();
 
     @Override
@@ -35,6 +36,7 @@ public class PlaceOrderController extends HttpServlet {
         cartService = new CartService();
         paymentService = new PaymentService();
         paymentMethodService = new PaymentMethodService();
+        ghnService = new GhnService();
     }
 
     @Override
@@ -60,6 +62,8 @@ public class PlaceOrderController extends HttpServlet {
             String note = request.getParameter("note");
             String paymentMethodStr = request.getParameter("payment");
             String addressIdStr = request.getParameter("addressId");
+            String ghnDistrictIdStr = request.getParameter("ghnDistrictId");
+            String ghnWardCode = request.getParameter("ghnWardCode");
 
             if (isEmpty(email) || isEmpty(fullname) || isEmpty(phone) || isEmpty(street)) {
                 sendError(out, "Vui lòng điền đầy đủ thông tin bắt buộc");
@@ -131,6 +135,24 @@ public class PlaceOrderController extends HttpServlet {
 
             Order order;
 
+            double shippingFee;
+            int ghnDistrictId = 0;
+
+            if (ghnDistrictIdStr != null && !ghnDistrictIdStr.isEmpty()
+                    && ghnWardCode != null && !ghnWardCode.isEmpty()) {
+                try {
+                    ghnDistrictId = Integer.parseInt(ghnDistrictIdStr);
+                    shippingFee = ghnService.calculateFee(ghnDistrictId, ghnWardCode, 0);
+                } catch (Exception e) {
+                    System.err.println("[PlaceOrder] GHN fee calculation failed: " + e.getMessage());
+                    sendError(out, "Không thể tính phí vận chuyển. Vui lòng thử lại.");
+                    return;
+                }
+            } else {
+                sendError(out, "Thiếu thông tin địa chỉ giao hàng");
+                return;
+            }
+
             if (user != null) {
                 int addressId;
 
@@ -143,6 +165,8 @@ public class PlaceOrderController extends HttpServlet {
                     newAddress.setAddressDetail(buildAddressDetail(street, ward));
                     newAddress.setDistrict(district);
                     newAddress.setCity(city);
+                    newAddress.setGhnDistrictId(ghnDistrictId);
+                    newAddress.setGhnWardCode(ghnWardCode);
 
                     Address created = addressService.createAddress(newAddress);
                     addressId = created.getId();
@@ -179,12 +203,13 @@ public class PlaceOrderController extends HttpServlet {
                 shippingAddress.setAddressDetail(buildAddressDetail(street, ward));
                 shippingAddress.setDistrict(district);
                 shippingAddress.setCity(city);
+                shippingAddress.setGhnDistrictId(ghnDistrictId);
+                shippingAddress.setGhnWardCode(ghnWardCode);
 
                 List<CartItem> cartItems = targetCart.getItems();
 
                 order = orderService.createGuestOrder(guestInfo, shippingAddress,
-                        paymentMethodId, note, cartItems, couponCode, appliedDiscountAmount);
-
+                        paymentMethodId, note, cartItems, shippingFee, couponCode, appliedDiscountAmount);
                 if (isBuyNow) {
                     session.removeAttribute("buyNowCart");
                 } else {
