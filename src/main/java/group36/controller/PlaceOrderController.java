@@ -179,11 +179,11 @@ public class PlaceOrderController extends HttpServlet {
                         return;
                     }
                     order = orderService.createOrderFromItems(user.getId(), addressId, paymentMethodId, note,
-                            buyNowCart.getItems(), couponCode, appliedDiscountAmount);
+                            buyNowCart.getItems(), shippingFee, couponCode, appliedDiscountAmount);
                     session.removeAttribute("buyNowCart");
                 } else {
                     order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note,
-                            couponCode, appliedDiscountAmount);
+                            shippingFee, couponCode, appliedDiscountAmount);
                     session.setAttribute("cartCount", 0);
                 }
 

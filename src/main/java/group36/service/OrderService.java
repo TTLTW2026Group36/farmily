@@ -50,11 +50,11 @@ public class OrderService {
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
             throws IllegalArgumentException {
-        return createOrder(userId, addressId, paymentMethodId, note, null, null);
+        return createOrder(userId, addressId, paymentMethodId, note, shippingFee, null, null);
     }
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note,
-                             String couponCode, Double appliedDiscountAmount)
+                             double shippingFee, String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -83,8 +83,6 @@ public class OrderService {
             loadCartItemDetails(item);
             subtotal += item.getSubtotal();
         }
-
-        double shippingFee = calculateShippingFee(subtotal);
 
         Integer couponId = null;
         double discountAmount = 0;
@@ -137,11 +135,11 @@ public class OrderService {
 
     public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
-        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, null, null);
+        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, shippingFee, null, null);
     }
 
     public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems,
-                                      String couponCode, Double appliedDiscountAmount)
+                                      double shippingFee, String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -163,8 +161,6 @@ public class OrderService {
             loadCartItemDetails(item);
             subtotal += item.getSubtotal();
         }
-
-        double shippingFee = calculateShippingFee(subtotal);
 
         Integer couponId = null;
         double discountAmount = 0;
@@ -216,12 +212,12 @@ public class OrderService {
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
-        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, null, null);
+        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, shippingFee, null, null);
     }
 
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems,
-            String couponCode, Double appliedDiscountAmount)
+            double shippingFee, String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         if (guestInfo == null || !guestInfo.isValid()) {
@@ -246,8 +242,6 @@ public class OrderService {
             loadCartItemDetails(item);
             subtotal += item.getSubtotal();
         }
-
-        double shippingFee = calculateShippingFee(subtotal);
 
         Integer couponId = null;
         double discountAmount = 0;
