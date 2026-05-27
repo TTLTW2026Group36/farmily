@@ -1322,3 +1322,144 @@ header .mini-nav .wrap {
 .wishlist-btn.active:active {
     transform: scale(1) !important;
 }
+
+.hotline-link {
+    color: #ffffff !important;
+    text-decoration: none !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+}
+
+.hotline-link:hover {
+    text-decoration: none !important;
+    color: #ffffff !important;
+}
+
+.btn-copy-hotline {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-copy-hotline:hover {
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.15);
+}
+
+.footer-hotline-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-copy-footer {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: color 0.2s, background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-copy-footer:hover {
+    color: var(--primary);
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Toast notification */
+.copy-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #ffffff;
+    color: #1f2937;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--primary);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 14px;
+    pointer-events: none;
+    transform: translateY(20px);
+    opacity: 0;
+    animation: toast-in-out 3s ease forwards;
+}
+
+.copy-toast i {
+    color: var(--primary);
+    font-size: 16px;
+}
+
+@keyframes toast-in-out {
+    0% {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    10% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-10px);
+        opacity: 0;
+    }
+}
+
+/* Mobile responsive for Toast */
+@media (max-width: 768px) {
+    .copy-toast {
+        right: auto;
+        left: 50%;
+        transform: translate(-50%, 20px);
+        bottom: 20px;
+        animation: toast-in-out-mobile 3s ease forwards;
+        width: max-content;
+        max-width: 90%;
+    }
+}
+
+@keyframes toast-in-out-mobile {
+    0% {
+        transform: translate(-50%, 20px);
+        opacity: 0;
+    }
+
+    10% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translate(-50%, 0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translate(-50%, -10px);
+        opacity: 0;
+    }
+}

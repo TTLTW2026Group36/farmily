@@ -273,7 +273,14 @@
                                 mùa vụ hoặc thời
                                 tiết nhưng vẫn đảm bảo chất lượng.</li>
                             <li>Nếu có yêu cầu đặc biệt về rửa/lựa size, vui lòng ghi chú khi đặt hàng.</li>
-                            <li>Hotline/Zalo: 0378827924</li>
+                            <li>Hotline/Zalo: 
+                                <span class="phone-item">
+                                    <a href="tel:0378827924" class="hotline-link-inline">0378827924</a>
+                                    <button type="button" class="btn-copy-inline" onclick="copyToClipboard('0378827924')" title="Sao chép số hotline">
+                                        <i class="fa-regular fa-copy"></i>
+                                    </button>
+                                </span>
+                            </li>
                         </ul>
                     </section>
 
