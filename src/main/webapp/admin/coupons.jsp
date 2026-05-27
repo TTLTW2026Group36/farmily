@@ -228,6 +228,9 @@
                                                     </td>
                                                     <td>
                                                         <div class="action-buttons">
+                                                            <a href="${pageContext.request.contextPath}/admin/coupons/detail?id=${c.id}" class="btn btn-sm btn-outline" style="border-color: #22c55e; color: #22c55e;" title="Chi tiết">
+                                                                <i class="fas fa-eye"></i>
+                                                            </a>
                                                             <a href="${pageContext.request.contextPath}/admin/coupons/edit?id=${c.id}" class="btn btn-sm btn-outline" title="Sửa">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>

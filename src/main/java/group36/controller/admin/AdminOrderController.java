@@ -165,6 +165,16 @@ public class AdminOrderController extends HttpServlet {
             Order order = orderOpt.get();
             orderService.loadOrderDetailsForAdmin(order);
             
+            if (order.getCouponId() != null) {
+                try {
+                    group36.service.CouponService couponService = new group36.service.CouponService();
+                    group36.model.Coupon coupon = couponService.getCouponById(order.getCouponId());
+                    request.setAttribute("coupon", coupon);
+                } catch (Exception e) {
+                    System.err.println("Could not load coupon details for admin order view: " + e.getMessage());
+                }
+            }
+            
             request.setAttribute("order", order);
             request.setAttribute("allowedStatuses", Order.getAllowedNextStatuses(order.getStatus()));
             request.getRequestDispatcher("/admin/order-detail.jsp").forward(request, response);

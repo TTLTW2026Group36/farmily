@@ -32,6 +32,8 @@ public class AdminCouponController extends HttpServlet {
                 showAddForm(request, response);
             } else if (pathInfo.equals("/edit")) {
                 showEditForm(request, response);
+            } else if (pathInfo.equals("/detail")) {
+                showCouponDetail(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -293,6 +295,19 @@ public class AdminCouponController extends HttpServlet {
         HttpSession session = request.getSession();
         session.setAttribute("success", "Xóa mã giảm giá thành công!");
         response.sendRedirect(request.getContextPath() + "/admin/coupons");
+    }
+
+    private void showCouponDetail(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        int id = Integer.parseInt(request.getParameter("id"));
+        Coupon coupon = couponService.getCouponById(id);
+        List<group36.model.CouponUsage> usageHistory = couponService.getCouponUsageHistory(id);
+        double totalDiscount = couponService.getTotalDiscountAmount(id);
+        
+        request.setAttribute("coupon", coupon);
+        request.setAttribute("usageHistory", usageHistory);
+        request.setAttribute("totalDiscount", totalDiscount);
+        request.getRequestDispatcher("/admin/coupon-detail.jsp").forward(request, response);
     }
 
     private Timestamp parseTimestamp(String datetimeStr) {

@@ -1,15 +1,19 @@
 package group36.service;
 
 import group36.dao.CouponDAO;
+import group36.dao.CouponUsageDAO;
 import group36.model.Coupon;
+import group36.model.CouponUsage;
 import java.sql.Timestamp;
 import java.util.List;
 
 public class CouponService {
     private final CouponDAO couponDAO;
+    private final CouponUsageDAO couponUsageDAO;
 
     public CouponService() {
         this.couponDAO = new CouponDAO();
+        this.couponUsageDAO = new CouponUsageDAO();
     }
 
     public List<Coupon> getAllCoupons() {
@@ -147,6 +151,14 @@ public class CouponService {
             default:
                 return 0;
         }
+    }
+
+    public List<CouponUsage> getCouponUsageHistory(int couponId) {
+        return couponUsageDAO.findByCouponId(couponId);
+    }
+
+    public double getTotalDiscountAmount(int couponId) {
+        return couponUsageDAO.getTotalDiscountByCouponId(couponId);
     }
 }
 
