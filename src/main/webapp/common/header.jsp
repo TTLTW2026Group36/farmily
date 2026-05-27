@@ -30,7 +30,7 @@
                             <i class="fa-solid fa-phone"></i>
                             <div class="support-text">
                                 <span>Hỗ trợ khách hàng</span>
-                                <strong>0378827924</strong>
+                                <a href="tel:0378827924" class="hotline-link" onclick="copyToClipboard('0378827924')">0378827924</a>
                             </div>
                         </div>
 
@@ -272,4 +272,5 @@
             window.contextPath = '${pageContext.request.contextPath}';
             window.isLoggedIn = ${not empty sessionScope.auth ? 'true' : 'false' };
         </script>
+        <script src="${pageContext.request.contextPath}/js/hotline-utils.js"></script>
         <script src="${pageContext.request.contextPath}/js/cart.js"></script>

@@ -406,3 +406,36 @@ textarea.input-error:focus {
     opacity: 0.7;
     cursor: not-allowed;
 }
+
+.phone-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.copy-icon {
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 13px;
+    transition: color 0.2s, transform 0.1s;
+    padding: 2px 4px;
+}
+
+.copy-icon:hover {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.contact-hotline .phone-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.contact-hotline .copy-icon {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.contact-hotline .copy-icon:hover {
+    color: #ffffff;
+}

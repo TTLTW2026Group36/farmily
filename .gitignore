@@ -27,3 +27,4 @@ Thumbs.db
 src/main/resources/config.properties
 src/main/resources/payment.properties
 src/main/resources/db.properties
+src/main/resources/cloudinary.properties
