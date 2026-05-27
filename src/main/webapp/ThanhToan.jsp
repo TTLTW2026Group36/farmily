@@ -218,6 +218,8 @@
                 <input type="hidden" id="ghnDistrictId" name="ghnDistrictId" value="">
                 <input type="hidden" id="ghnWardCode" name="ghnWardCode" value="">
                 <input type="hidden" name="isBuyNow" value="${isBuyNow}">
+                <input type="hidden" id="appliedCouponId" name="couponId" value="">
+                <input type="hidden" id="appliedDiscountAmount" name="discountAmount" value="0">
 
                 <c:if test="${!isLoggedIn}">
                   <h2 class="section-heading"><i class="fas fa-user"></i> Thông tin người nhận</h2>
@@ -308,6 +310,36 @@
             <aside class="checkout-summary" aria-label="Tóm tắt đơn hàng">
               <h2 class="sum-title">Tóm tắt đơn hàng</h2>
 
+              <div class="coupon-section" id="couponSection">
+                <div class="coupon-input-group" id="couponInputGroup">
+                  <input type="text" id="couponCode" placeholder="Nhập mã giảm giá"
+                         style="text-transform: uppercase;" maxlength="50">
+                  <button type="button" id="btnApplyCoupon" class="btn-apply-coupon">
+                    Áp dụng
+                  </button>
+                </div>
+                <div class="coupon-result" id="couponResult" style="display: none;">
+                  <div class="coupon-applied">
+                    <i class="fas fa-check-circle" style="color: #22c55e;"></i>
+                    <span id="couponAppliedText"></span>
+                    <button type="button" id="btnRemoveCoupon" class="btn-remove-coupon" title="Hủy mã">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="coupon-error" id="couponError" style="display: none; color: #dc2626; font-size: 13px;"></div>
+              </div>
+
+              <c:if test="${subtotal < freeShippingThreshold}">
+                <div class="free-ship-notice">
+                  <i class="fas fa-truck"></i>
+                  Mua thêm <strong>
+                    <fmt:formatNumber value="${freeShippingThreshold - subtotal}" type="number" groupingUsed="true" />đ
+                  </strong>
+                  để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>
+                </div>
+              </c:if>
+
               <div class="totals">
                 <p>
                   Tạm tính
@@ -320,6 +352,10 @@
                   <span id="shippingFeeText">
                     <span style="color: #999;">Chọn địa chỉ để tính phí</span>
                   </span>
+                </p>
+                <p id="discountRow" style="display: none; color: #22c55e;">
+                  Giảm giá
+                  <span id="discountText">-0đ</span>
                 </p>
                 <p class="grand">
                   Tổng cộng

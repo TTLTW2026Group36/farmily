@@ -17,8 +17,6 @@ public class AdminUserController extends HttpServlet {
     private final UserService userService;
     private final AddressDAO addressDAO;
 
-    private static final int PAGE_SIZE = 10;
-
     public AdminUserController() {
         this.userService = new UserService();
         this.addressDAO = new AddressDAO();
@@ -64,8 +62,6 @@ public class AdminUserController extends HttpServlet {
                 deleteUser(request, response);
             } else if (pathInfo.equals("/reset-password")) {
                 resetPassword(request, response);
-            } else if (pathInfo.equals("/restore")) {
-                restoreUser(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -85,74 +81,35 @@ public class AdminUserController extends HttpServlet {
         if (pageParam != null && !pageParam.isEmpty()) {
             try {
                 page = Integer.parseInt(pageParam);
-                if (page < 1)
-                    page = 1;
+                if (page < 1) page = 1;
             } catch (NumberFormatException e) {
                 page = 1;
             }
         }
 
+        int size = 10;
+        String sizeParam = request.getParameter("size");
+        if (sizeParam != null && !sizeParam.isEmpty()) {
+            try {
+                size = Integer.parseInt(sizeParam);
+                if (size != -1) {
+                    if (size < 1) size = 10;
+                    if (size > 100) size = 100;
+                }
+            } catch (NumberFormatException e) {
+                size = 10;
+            }
+        }
+
         String keyword = request.getParameter("search");
-
-        String statusFilter = request.getParameter("status");
-        boolean showDeleted = "deleted".equals(statusFilter);
-
         String role = request.getParameter("role");
         if (role == null || role.isEmpty()) {
             role = "all";
         }
 
-        List<User> users;
-        int totalUsers;
-
-        if (showDeleted) {
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                users = userService.searchDeletedUsers(keyword);
-                totalUsers = users.size();
-                int start = (page - 1) * PAGE_SIZE;
-                int end = Math.min(start + PAGE_SIZE, users.size());
-                if (start < users.size()) {
-                    users = users.subList(start, end);
-                } else {
-                    users = List.of();
-                }
-            } else {
-                users = userService.getDeletedUsersPaginated(page, PAGE_SIZE);
-                totalUsers = userService.getTotalDeletedUsers();
-            }
-        } else {
-            if (keyword != null && !keyword.trim().isEmpty()) {
-
-                users = userService.searchUsers(keyword);
-
-                if (!"all".equals(role)) {
-                    String finalRole = role;
-                    users = users.stream()
-                            .filter(u -> finalRole.equals(u.getRole()))
-                            .toList();
-                }
-                totalUsers = users.size();
-
-                int start = (page - 1) * PAGE_SIZE;
-                int end = Math.min(start + PAGE_SIZE, users.size());
-                if (start < users.size()) {
-                    users = users.subList(start, end);
-                } else {
-                    users = List.of();
-                }
-            } else {
-
-                if ("all".equals(role)) {
-                    users = userService.getUsersPaginated(page, PAGE_SIZE);
-                    totalUsers = userService.getTotalUsers();
-                } else {
-                    users = userService.getCustomersPaginated(page, PAGE_SIZE);
-                    totalUsers = userService.getTotalCustomers();
-                }
-            }
-        }
-
-        int totalPages = (int) Math.ceil((double) totalUsers / PAGE_SIZE);
+        List<User> users = userService.findUsers(keyword, role, page, size);
+        int totalUsers = userService.countUsers(keyword, role);
+        int totalPages = size > 0 ? (int) Math.ceil((double) totalUsers / size) : 1;
 
         Map<Integer, Integer> addressCountMap = new HashMap<>();
         for (User u : users) {
@@ -166,8 +123,7 @@ public class AdminUserController extends HttpServlet {
         request.setAttribute("totalUsers", totalUsers);
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedRole", role);
-        request.setAttribute("pageSize", PAGE_SIZE);
-        request.setAttribute("statusFilter", showDeleted ? "deleted" : "active");
+        request.setAttribute("pageSize", size);
 
         HttpSession session = request.getSession();
         if (session.getAttribute("success") != null) {
@@ -262,33 +218,32 @@ public class AdminUserController extends HttpServlet {
     private void deleteUser(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         String idParam = request.getParameter("id");
+
         if (idParam == null || idParam.trim().isEmpty()) {
             response.sendRedirect(request.getContextPath() + "/admin/users");
             return;
         }
+
         try {
             int id = Integer.parseInt(idParam);
-            HttpSession session = request.getSession();
-            User currentUser = (User) session.getAttribute("adminUser");
-            if (currentUser == null) {
-                currentUser = (User) session.getAttribute("auth");
-            }
-            if (currentUser == null) {
-                throw new IllegalStateException("Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn");
-            }
-            int currentUserId = currentUser.getId();
-
             User user = userService.getUserById(id);
             String userName = user.getName();
 
-            userService.deleteUser(id, currentUserId);
+            userService.deleteUser(id);
 
-            session.setAttribute("success", "Đã xóa khách hàng '" + userName + "' thành công!");
-        } catch (IllegalArgumentException | IllegalStateException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Xóa khách hàng '" + userName + "' thành công!");
+
+            response.sendRedirect(request.getContextPath() + "/admin/users");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "ID người dùng không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/admin/users");
+        } catch (IllegalArgumentException e) {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/users");
         }
-        response.sendRedirect(request.getContextPath() + "/admin/users");
     }
 
     private void resetPassword(HttpServletRequest request, HttpServletResponse response)
@@ -319,31 +274,5 @@ public class AdminUserController extends HttpServlet {
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/users/edit?id=" + idParam);
         }
-    }
-
-    private void restoreUser(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String idParam = request.getParameter("id");
-        if (idParam == null || idParam.trim().isEmpty()) {
-            response.sendRedirect(request.getContextPath() + "/admin/users?status=deleted");
-            return;
-        }
-        try {
-            int id = Integer.parseInt(idParam);
-            User user = userService.getUserById(id);
-            String userName = user.getName();
-
-            userService.restoreUser(id);
-
-            HttpSession session = request.getSession();
-            session.setAttribute("success", "Đã khôi phục khách hàng '" + userName + "' thành công!");
-        } catch (NumberFormatException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("error", "ID người dùng không hợp lệ");
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            HttpSession session = request.getSession();
-            session.setAttribute("error", e.getMessage());
-        }
-        response.sendRedirect(request.getContextPath() + "/admin/users?status=deleted");
     }
 }

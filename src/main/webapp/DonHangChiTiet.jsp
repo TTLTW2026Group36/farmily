@@ -272,10 +272,18 @@
                                 <div class="summary-row">
                                     <span class="summary-label">Tạm tính:</span>
                                     <span class="summary-value">
-                                        <fmt:formatNumber value="${order.totalPrice - order.shippingFee}"
+                                        <fmt:formatNumber value="${order.subtotal}"
                                             pattern="#,###" />đ
                                     </span>
                                 </div>
+                                <c:if test="${order.hasCoupon()}">
+                                    <div class="summary-row">
+                                        <span class="summary-label">Khuyến mãi (${coupon != null ? coupon.code : 'Mã giảm giá'}):</span>
+                                        <span class="summary-value" style="color: #22c55e; font-weight: bold;">
+                                            ${order.formattedDiscountAmount}
+                                        </span>
+                                    </div>
+                                </c:if>
                                 <div class="summary-row">
                                     <span class="summary-label">Phí vận chuyển:</span>
                                     <span class="summary-value">

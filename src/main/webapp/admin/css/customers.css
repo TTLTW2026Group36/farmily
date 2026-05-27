@@ -67,3 +67,19 @@
   color: var(--gray-400);
   border: 1px solid var(--gray-200);
 }
+
+.size-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-700);
+}
+
+.size-filter-group select {
+  padding: 6px 12px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}

@@ -26,6 +26,8 @@ public class OrderService {
     private final UserDAO userDAO;
     private final FlashSaleDAO flashSaleDAO;
     private final OrderStatusHistoryDAO orderStatusHistoryDAO;
+    private final CouponDAO couponDAO;
+    private final CouponService couponService;
 
     public OrderService() {
         this.orderDAO = new OrderDAO();
@@ -42,9 +44,17 @@ public class OrderService {
         this.userDAO = new UserDAO();
         this.flashSaleDAO = new FlashSaleDAO();
         this.orderStatusHistoryDAO = new OrderStatusHistoryDAO();
+        this.couponDAO = new CouponDAO();
+        this.couponService = new CouponService();
     }
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
+            throws IllegalArgumentException {
+        return createOrder(userId, addressId, paymentMethodId, note, null, null);
+    }
+
+    public Order createOrder(int userId, int addressId, int paymentMethodId, String note,
+                             String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -74,7 +84,24 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double totalPrice = subtotal + shippingFee;
+        double shippingFee = calculateShippingFee(subtotal);
+
+        Integer couponId = null;
+        double discountAmount = 0;
+        if (couponCode != null && !couponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon coupon = couponService.validateCouponForOrder(couponCode, userId, subtotal);
+                discountAmount = couponService.calculateDiscount(coupon, subtotal, shippingFee);
+                couponId = coupon.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount + shippingFee;
+        final Integer finalCouponId = couponId;
+        final double finalDiscountAmount = discountAmount;
+        final double finalSubtotal = subtotal;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             Order o = new Order();
@@ -84,9 +111,16 @@ public class OrderService {
             o.setNote(note);
             o.setShippingFee(shippingFee);
             o.setTotalPrice(totalPrice);
+            o.setCouponId(finalCouponId);
+            o.setDiscountAmount(finalDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             return executeOrderTransaction(handle, o, cartItems, cart.getId());
         });
+
+        if (couponId != null && discountAmount > 0) {
+            couponDAO.incrementUsedCount(couponId);
+            couponDAO.insertUsage(couponId, userId, order.getId(), discountAmount);
+        }
 
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
@@ -102,6 +136,12 @@ public class OrderService {
     }
 
     public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
+            throws IllegalArgumentException {
+        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, null, null);
+    }
+
+    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems,
+                                      String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -124,7 +164,23 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double totalPrice = subtotal + shippingFee;
+        double shippingFee = calculateShippingFee(subtotal);
+
+        Integer couponId = null;
+        double discountAmount = 0;
+        if (couponCode != null && !couponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon coupon = couponService.validateCouponForOrder(couponCode, userId, subtotal);
+                discountAmount = couponService.calculateDiscount(coupon, subtotal, shippingFee);
+                couponId = coupon.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount + shippingFee;
+        final Integer finalCouponId = couponId;
+        final double finalDiscountAmount = discountAmount;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             Order o = new Order();
@@ -134,9 +190,16 @@ public class OrderService {
             o.setNote(note);
             o.setShippingFee(shippingFee);
             o.setTotalPrice(totalPrice);
+            o.setCouponId(finalCouponId);
+            o.setDiscountAmount(finalDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             return executeOrderTransaction(handle, o, cartItems, null);
         });
+
+        if (couponId != null && discountAmount > 0) {
+            couponDAO.incrementUsedCount(couponId);
+            couponDAO.insertUsage(couponId, userId, order.getId(), discountAmount);
+        }
 
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
@@ -152,6 +215,13 @@ public class OrderService {
 
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
+            throws IllegalArgumentException {
+        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, null, null);
+    }
+
+    public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
+            int paymentMethodId, String note, List<CartItem> cartItems,
+            String couponCode, Double appliedDiscountAmount)
             throws IllegalArgumentException {
 
         if (guestInfo == null || !guestInfo.isValid()) {
@@ -177,7 +247,23 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double totalPrice = subtotal + shippingFee;
+        double shippingFee = calculateShippingFee(subtotal);
+
+        Integer couponId = null;
+        double discountAmount = 0;
+        if (couponCode != null && !couponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon coupon = couponService.validateCouponForOrder(couponCode, null, subtotal);
+                discountAmount = couponService.calculateDiscount(coupon, subtotal, shippingFee);
+                couponId = coupon.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount + shippingFee;
+        final Integer finalCouponId = couponId;
+        final double finalDiscountAmount = discountAmount;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             shippingAddress.setUserId(0);
@@ -191,6 +277,8 @@ public class OrderService {
             o.setNote(note);
             o.setShippingFee(shippingFee);
             o.setTotalPrice(totalPrice);
+            o.setCouponId(finalCouponId);
+            o.setDiscountAmount(finalDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             o.setGuestEmail(guestInfo.getEmail());
             o.setGuestName(guestInfo.getFullName());
@@ -220,6 +308,11 @@ public class OrderService {
 
             return o;
         });
+
+        if (couponId != null && discountAmount > 0) {
+            couponDAO.incrementUsedCount(couponId);
+            couponDAO.insertUsage(couponId, null, order.getId(), discountAmount);
+        }
 
         order.setAddress(shippingAddress);
         order.setPaymentMethod(paymentOpt.get());

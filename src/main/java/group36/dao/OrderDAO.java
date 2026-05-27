@@ -46,6 +46,13 @@ public class OrderDAO extends BaseDao {
                         } catch (SQLException e) {
                         }
 
+                        try {
+                                int couponId = rs.getInt("coupon_id");
+                                order.setCouponId(rs.wasNull() ? null : couponId);
+                                order.setDiscountAmount(rs.getDouble("discount_amount"));
+                        } catch (SQLException e) {
+                        }
+
                         return order;
                 }
         }
@@ -107,8 +114,8 @@ public class OrderDAO extends BaseDao {
         }
 
         public int insertWithHandle(org.jdbi.v3.core.Handle h, Order order) {
-                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price) "
-                                + "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice)";
+                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price, coupon_id, discount_amount) "
+                                + "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, :couponId, :discountAmount)";
                 return h.createUpdate(sql)
                                 .bind("userId", order.getUserId())
                                 .bind("addressId", order.getAddressId())
@@ -118,6 +125,8 @@ public class OrderDAO extends BaseDao {
                                 .bind("adminNote", order.getAdminNote())
                                 .bind("shippingFee", order.getShippingFee())
                                 .bind("totalPrice", order.getTotalPrice())
+                                .bind("couponId", order.getCouponId())
+                                .bind("discountAmount", order.getDiscountAmount())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
                                 .one();
@@ -129,9 +138,9 @@ public class OrderDAO extends BaseDao {
 
         public int insertGuestOrderWithHandle(org.jdbi.v3.core.Handle h, Order order) {
                 String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, " +
-                                "shipping_fee, total_price, guest_email, guest_name, guest_phone) " +
+                                "shipping_fee, total_price, guest_email, guest_name, guest_phone, coupon_id, discount_amount) " +
                                 "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, " +
-                                ":guestEmail, :guestName, :guestPhone)";
+                                ":guestEmail, :guestName, :guestPhone, :couponId, :discountAmount)";
                 return h.createUpdate(sql)
                                 .bind("addressId", order.getAddressId())
                                 .bind("paymentMethodId", order.getPaymentMethodId())
@@ -143,6 +152,8 @@ public class OrderDAO extends BaseDao {
                                 .bind("guestEmail", order.getGuestEmail())
                                 .bind("guestName", order.getGuestName())
                                 .bind("guestPhone", order.getGuestPhone())
+                                .bind("couponId", order.getCouponId())
+                                .bind("discountAmount", order.getDiscountAmount())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
                                 .one();

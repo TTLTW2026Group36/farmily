@@ -23,16 +23,14 @@ public class UserDAO extends BaseDao {
             user.setRole(rs.getString("role"));
             user.setCreated_at(rs.getTimestamp("created_at"));
             user.setUpdated_at(rs.getTimestamp("updated_at"));
-            user.setStatus(rs.getString("status"));
             user.setLoginAttempts(rs.getInt("login_attempts"));
             user.setLockoutUntil(rs.getTimestamp("lockout_until"));
-            user.setDeletedAt(rs.getTimestamp("deleted_at"));
             return user;
         }
     }
 
     public List<User> findAll() {
-        String sql = "SELECT * FROM users WHERE status = 'active' ORDER BY id DESC";
+        String sql = "SELECT * FROM users ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .map(new UserMapper())
                 .list());
@@ -40,7 +38,7 @@ public class UserDAO extends BaseDao {
 
     public List<User> findAllPaginated(int page, int size) {
         int offset = (page - 1) * size;
-        String sql = "SELECT * FROM users WHERE status = 'active' ORDER BY id DESC LIMIT :size OFFSET :offset";
+        String sql = "SELECT * FROM users ORDER BY id DESC LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("size", size)
                 .bind("offset", offset)
@@ -57,7 +55,7 @@ public class UserDAO extends BaseDao {
     }
 
     public Optional<User> findByEmail(String email) {
-        String sql = "SELECT * FROM users WHERE email = :email AND status = 'active'";
+        String sql = "SELECT * FROM users WHERE email = :email";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("email", email)
                 .map(new UserMapper())
@@ -65,7 +63,7 @@ public class UserDAO extends BaseDao {
     }
 
     public List<User> findByRole(String role) {
-        String sql = "SELECT * FROM users WHERE role = :role AND status = 'active' ORDER BY id DESC";
+        String sql = "SELECT * FROM users WHERE role = :role ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("role", role)
                 .map(new UserMapper())
@@ -74,7 +72,7 @@ public class UserDAO extends BaseDao {
 
     public List<User> findByRolePaginated(String role, int page, int size) {
         int offset = (page - 1) * size;
-        String sql = "SELECT * FROM users WHERE role = :role AND status = 'active' ORDER BY id DESC LIMIT :size OFFSET :offset";
+        String sql = "SELECT * FROM users WHERE role = :role ORDER BY id DESC LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("role", role)
                 .bind("size", size)
@@ -84,7 +82,7 @@ public class UserDAO extends BaseDao {
     }
 
     public List<User> searchByNameOrEmail(String keyword) {
-        String sql = "SELECT * FROM users WHERE (name LIKE :keyword OR email LIKE :keyword) AND status = 'active' ORDER BY id DESC";
+        String sql = "SELECT * FROM users WHERE name LIKE :keyword OR email LIKE :keyword ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("keyword", "%" + keyword + "%")
                 .map(new UserMapper())
@@ -131,45 +129,15 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
-    public int softDelete(int id) {
-        String sql = "UPDATE users SET status = 'deleted', deleted_at = NOW() "
-                   + "WHERE id = :id AND status = 'active'";
-        return get().withHandle(handle -> handle.createUpdate(sql)
-                .bind("id", id)
-                .execute());
-    }
-
-    public List<User> findDeletedPaginated(int page, int size) {
-        int offset = (page - 1) * size;
-        String sql = "SELECT * FROM users WHERE status = 'deleted' " + "ORDER BY deleted_at DESC LIMIT :size OFFSET :offset";
-        return get().withHandle(handle -> handle.createQuery(sql).bind("size", size).bind("offset", offset).map(new UserMapper()).list());
-    }
-
-    public int countDeleted() {
-        String sql = "SELECT COUNT(*) FROM users WHERE status = 'deleted'";
-        return get().withHandle(handle -> handle.createQuery(sql).mapTo(Integer.class).one());
-    }
-
-    public List<User> searchDeletedByNameOrEmail(String keyword) {
-        String sql = "SELECT * FROM users WHERE status = 'deleted' "
-                   + "AND (name LIKE :keyword OR email LIKE :keyword) " + "ORDER BY deleted_at DESC";
-        return get().withHandle(handle -> handle.createQuery(sql).bind("keyword", "%" + keyword + "%").map(new UserMapper()).list());
-    }
-
-    public int restore(int id) {
-        String sql = "UPDATE users SET status = 'active', deleted_at = NULL " + "WHERE id = :id AND status = 'deleted'";
-        return get().withHandle(handle -> handle.createUpdate(sql).bind("id", id).execute());
-    }
-
     public int count() {
-        String sql = "SELECT COUNT(*) FROM users WHERE status = 'active'";
+        String sql = "SELECT COUNT(*) FROM users";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .mapTo(Integer.class)
                 .one());
     }
 
     public int countByRole(String role) {
-        String sql = "SELECT COUNT(*) FROM users WHERE role = :role AND status = 'active'";
+        String sql = "SELECT COUNT(*) FROM users WHERE role = :role";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("role", role)
                 .mapTo(Integer.class)
@@ -190,6 +158,60 @@ public class UserDAO extends BaseDao {
         String sql = "UPDATE users SET lockout_until = :until WHERE id = :id";
         java.sql.Timestamp until = new java.sql.Timestamp(System.currentTimeMillis() + (long) minutes * 60 * 1000);
         get().useHandle(handle -> handle.createUpdate(sql).bind("id", userId).bind("until", until).execute());
+    }
+
+    public List<User> findUsers(String keyword, String role, int page, int size) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
+
+        if (role != null && !role.isEmpty() && !"all".equals(role)) {
+            sql.append(" AND role = :role");
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword)");
+        }
+        sql.append(" ORDER BY id DESC");
+
+        boolean isPaginated = size > 0;
+        if (isPaginated) {
+            sql.append(" LIMIT :size OFFSET :offset");
+        }
+
+        return get().withHandle(handle -> {
+            var q = handle.createQuery(sql.toString());
+            if (isPaginated) {
+                int offset = (page - 1) * size;
+                q.bind("size", size).bind("offset", offset);
+            }
+            if (role != null && !role.isEmpty() && !"all".equals(role)) {
+                q.bind("role", role);
+            }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                q.bind("keyword", "%" + keyword.trim() + "%");
+            }
+            return q.map(new UserMapper()).list();
+        });
+    }
+
+    public int countUsers(String keyword, String role) {
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
+
+        if (role != null && !role.isEmpty() && !"all".equals(role)) {
+            sql.append(" AND role = :role");
+        }
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword)");
+        }
+
+        return get().withHandle(handle -> {
+            var q = handle.createQuery(sql.toString());
+            if (role != null && !role.isEmpty() && !"all".equals(role)) {
+                q.bind("role", role);
+            }
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                q.bind("keyword", "%" + keyword.trim() + "%");
+            }
+            return q.mapTo(Integer.class).one();
+        });
     }
 }
 
