@@ -387,6 +387,11 @@
                                                 <div class="order-header">
                                                     <div class="order-id">
                                                         <strong>Mã đơn hàng:</strong> #${order.id}
+                                                        <c:if test="${order.hasCoupon()}">
+                                                            <span class="coupon-badge" style="background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 10px; font-weight: normal; display: inline-flex; align-items: center; gap: 4px;">
+                                                                <i class="fas fa-ticket-alt"></i> Có mã giảm giá
+                                                            </span>
+                                                        </c:if>
                                                     </div>
                                                     <div class="order-date">
                                                         <fmt:formatDate value="${order.orderDate}"

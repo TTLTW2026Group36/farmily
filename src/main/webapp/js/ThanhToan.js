@@ -703,6 +703,146 @@
   }
 
 
+  let currentDiscountAmount = 0;
+
+  function getCurrentShippingFee() {
+    let currentSub = getEffectiveSubtotal();
+    return currentSub >= window.freeShippingThreshold ? 0 : window.standardShippingFee;
+  }
+
+  function getEffectiveSubtotal() {
+    let sub = window.subtotal;
+    const extraCb = document.getElementById('extraProductCb');
+    if (extraCb && extraCb.checked) {
+      const extraVariantSelect = document.getElementById('extraVariantId');
+      const extraQtyInput = document.getElementById('extraQuantity');
+      let unitPrice = parseFloat(extraCb.getAttribute('data-base-price')) || 0;
+      if (extraVariantSelect && extraVariantSelect.tagName.toLowerCase() === 'select') {
+        const selectedOpt = extraVariantSelect.options[extraVariantSelect.selectedIndex];
+        if (selectedOpt && selectedOpt.getAttribute('data-price')) {
+          unitPrice = parseFloat(selectedOpt.getAttribute('data-price')) || 0;
+        }
+      }
+      let qty = extraQtyInput ? (parseInt(extraQtyInput.value, 10) || 1) : 1;
+      sub += unitPrice * qty;
+    }
+    return sub;
+  }
+
+  function formatCurrency(num) {
+    return new Intl.NumberFormat('vi-VN').format(Math.round(num));
+  }
+
+  function recalcGrandTotal() {
+    let currentSub = getEffectiveSubtotal();
+    let shippingFee = currentSub >= window.freeShippingThreshold ? 0 : window.standardShippingFee;
+    let grandTotal = currentSub - currentDiscountAmount + shippingFee;
+
+    const subtotalText = document.getElementById('subtotalText');
+    if (subtotalText) subtotalText.innerHTML = formatCurrency(currentSub) + 'đ';
+
+    const shippingText = document.getElementById('shippingFeeText');
+    if (shippingText) {
+      shippingText.innerHTML = shippingFee === 0 ? '<span class="free-shipping">Miễn phí</span>' : formatCurrency(shippingFee) + 'đ';
+    }
+
+    const grandTotalEl = document.getElementById('grandTotalText');
+    if (grandTotalEl) grandTotalEl.innerHTML = formatCurrency(grandTotal) + 'đ';
+
+    const notice = document.querySelector('.free-ship-notice');
+    if (shippingFee === 0) {
+      if (notice) notice.style.display = 'none';
+    } else {
+      if (notice) {
+        notice.style.display = 'block';
+        notice.innerHTML = '<i class="fas fa-truck"></i> Mua thêm <strong>' + formatCurrency(window.freeShippingThreshold - currentSub) + 'đ</strong> để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>';
+      }
+    }
+  }
+
+  function setupCoupon() {
+    const btnApply = document.getElementById('btnApplyCoupon');
+    const btnRemove = document.getElementById('btnRemoveCoupon');
+    const couponInput = document.getElementById('couponCode');
+
+    if (btnApply) {
+      btnApply.addEventListener('click', function() {
+        const code = couponInput ? couponInput.value.trim() : '';
+        if (!code) return;
+
+        const btn = this;
+        btn.disabled = true;
+        btn.textContent = 'Đang kiểm tra...';
+
+        let shippingFee = getCurrentShippingFee();
+        let effectiveSub = getEffectiveSubtotal();
+
+        fetch(window.contextPath + '/api/coupon/apply', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: 'code=' + encodeURIComponent(code) + '&subtotal=' + effectiveSub + '&shippingFee=' + shippingFee
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.success) {
+            document.getElementById('couponInputGroup').style.display = 'none';
+            document.getElementById('couponResult').style.display = '';
+            document.getElementById('couponAppliedText').textContent =
+              'Mã ' + data.code + ': -' + formatCurrency(data.discountAmount) + 'đ';
+            document.getElementById('couponError').style.display = 'none';
+
+            document.getElementById('discountRow').style.display = '';
+            document.getElementById('discountText').textContent =
+              '-' + formatCurrency(data.discountAmount) + 'đ';
+
+            document.getElementById('appliedCouponId').value = data.couponId;
+            document.getElementById('appliedDiscountAmount').value = data.discountAmount;
+
+            currentDiscountAmount = data.discountAmount;
+            recalcGrandTotal();
+          } else {
+            document.getElementById('couponError').textContent = data.message;
+            document.getElementById('couponError').style.display = '';
+          }
+        })
+        .catch(function() {
+          document.getElementById('couponError').textContent = 'Có lỗi xảy ra, vui lòng thử lại';
+          document.getElementById('couponError').style.display = '';
+        })
+        .finally(function() {
+          btn.disabled = false;
+          btn.textContent = 'Áp dụng';
+        });
+      });
+    }
+
+    if (couponInput) {
+      couponInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (btnApply) btnApply.click();
+        }
+      });
+    }
+
+    if (btnRemove) {
+      btnRemove.addEventListener('click', function() {
+        fetch(window.contextPath + '/api/coupon/remove', {
+          method: 'POST'
+        }).then(function() {
+          document.getElementById('couponInputGroup').style.display = '';
+          document.getElementById('couponResult').style.display = 'none';
+          document.getElementById('discountRow').style.display = 'none';
+          document.getElementById('appliedCouponId').value = '';
+          document.getElementById('appliedDiscountAmount').value = '0';
+          document.getElementById('couponCode').value = '';
+          currentDiscountAmount = 0;
+          recalcGrandTotal();
+        });
+      });
+    }
+  }
+
   function setupEventListeners() {
     const provinceSelect = document.getElementById('province');
     if (provinceSelect) {
@@ -754,45 +894,21 @@
       
       let addPrice = unitPrice * qty;
       if (recPriceDisplay) {
-        recPriceDisplay.innerHTML = '+' + new Intl.NumberFormat('vi-VN').format(addPrice) + 'đ';
+        recPriceDisplay.innerHTML = '+' + formatCurrency(addPrice) + 'đ';
       }
-      
-      let currentSub = window.subtotal;
-      if (extraCb.checked) {
-        currentSub += addPrice;
+
+      if (currentDiscountAmount > 0) {
+        document.getElementById('couponInputGroup').style.display = '';
+        document.getElementById('couponResult').style.display = 'none';
+        document.getElementById('discountRow').style.display = 'none';
+        document.getElementById('appliedCouponId').value = '';
+        document.getElementById('appliedDiscountAmount').value = '0';
+        document.getElementById('couponCode').value = '';
+        currentDiscountAmount = 0;
+        fetch(window.contextPath + '/api/coupon/remove', { method: 'POST' });
       }
-      
-      const subtotalText = document.getElementById('subtotalText');
-      if (subtotalText) {
-          subtotalText.innerHTML = new Intl.NumberFormat('vi-VN').format(currentSub) + 'đ';
-      }
-      
-      let shippingFee = window.standardShippingFee;
-      if (currentSub >= window.freeShippingThreshold) {
-        shippingFee = 0;
-      }
-      
-      let currentTotal = currentSub + shippingFee;
-      
-      const shippingText = document.getElementById('shippingFeeText');
-      if (shippingText) {
-        shippingText.innerHTML = shippingFee === 0 ? '<span class="free-shipping">Miễn phí</span>' : new Intl.NumberFormat('vi-VN').format(shippingFee) + 'đ';
-      }
-      
-      const grandTotal = document.getElementById('grandTotalText');
-      if (grandTotal) {
-        grandTotal.innerHTML = new Intl.NumberFormat('vi-VN').format(currentTotal) + 'đ';
-      }
-      
-      const notice = document.querySelector('.free-ship-notice');
-      if (shippingFee === 0) {
-        if (notice) notice.style.display = 'none';
-      } else {
-        if (notice) {
-          notice.style.display = 'block';
-          notice.innerHTML = '<i class="fas fa-truck"></i> Mua thêm <strong>' + new Intl.NumberFormat('vi-VN').format(window.freeShippingThreshold - currentSub) + 'đ</strong> để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>';
-        }
-      }
+
+      recalcGrandTotal();
     }
 
     if (extraCb) {
@@ -831,6 +947,7 @@
     setupEventListeners();
     setupAddressBook();
     setupModal();
+    setupCoupon();
   });
 
 })();

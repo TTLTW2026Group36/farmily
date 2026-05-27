@@ -176,6 +176,16 @@ public class UserOrderController extends HttpServlet {
                 reviewMap.put(r.getProductId(), r);
             }
 
+            if (order.getCouponId() != null) {
+                try {
+                    group36.service.CouponService couponService = new group36.service.CouponService();
+                    group36.model.Coupon coupon = couponService.getCouponById(order.getCouponId());
+                    request.setAttribute("coupon", coupon);
+                } catch (Exception e) {
+                    System.err.println("Could not load coupon details for user order view: " + e.getMessage());
+                }
+            }
+
             request.setAttribute("order", order);
             request.setAttribute("reviewMap", reviewMap);
             request.setAttribute("pageTitle", "Chi tiết đơn hàng #" + orderId);

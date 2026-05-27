@@ -32,6 +32,11 @@
                         <span>Flash Sale</span>
                     </a></li>
 
+                <li><a href="${pageContext.request.contextPath}/admin/coupons" data-page="coupons">
+                        <i class="fas fa-ticket-alt"></i>
+                        <span>Mã giảm giá</span>
+                    </a></li>
+
                 <li><a href="${pageContext.request.contextPath}/admin/categories" data-page="categories">
                         <i class="fas fa-list"></i>
                         <span>Danh mục</span>

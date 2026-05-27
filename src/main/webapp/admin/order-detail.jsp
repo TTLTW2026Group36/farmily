@@ -346,6 +346,12 @@
                                                 <span>Tạm tính</span>
                                                 <span>${order.formattedSubtotal}</span>
                                             </div>
+                                            <c:if test="${order.hasCoupon()}">
+                                                <div class="total-row">
+                                                    <span>Khuyến mãi <c:if test="${coupon != null}">(Mã: <a href="${pageContext.request.contextPath}/admin/coupons/detail?id=${coupon.id}" style="color: var(--primary); font-weight: 600; text-decoration: underline;">${coupon.code}</a>)</c:if></span>
+                                                    <span style="color: #22c55e; font-weight: 600;">${order.formattedDiscountAmount}</span>
+                                                </div>
+                                            </c:if>
                                             <div class="total-row">
                                                 <span>Phí vận chuyển</span>
                                                 <span>${order.formattedShippingFee}</span>

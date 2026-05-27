@@ -88,6 +88,9 @@ public class PlaceOrderController extends HttpServlet {
 
             boolean isBuyNow = "true".equals(request.getParameter("isBuyNow"));
 
+            String couponCode = (String) session.getAttribute("appliedCouponCode");
+            Double appliedDiscountAmount = (Double) session.getAttribute("appliedDiscountAmount");
+
             String extraProductIdStr = request.getParameter("extraProductId");
             if (extraProductIdStr != null && !extraProductIdStr.isEmpty()) {
                 try {
@@ -152,10 +155,11 @@ public class PlaceOrderController extends HttpServlet {
                         return;
                     }
                     order = orderService.createOrderFromItems(user.getId(), addressId, paymentMethodId, note,
-                            buyNowCart.getItems());
+                            buyNowCart.getItems(), couponCode, appliedDiscountAmount);
                     session.removeAttribute("buyNowCart");
                 } else {
-                    order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note);
+                    order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note,
+                            couponCode, appliedDiscountAmount);
                     session.setAttribute("cartCount", 0);
                 }
 
@@ -179,7 +183,7 @@ public class PlaceOrderController extends HttpServlet {
                 List<CartItem> cartItems = targetCart.getItems();
 
                 order = orderService.createGuestOrder(guestInfo, shippingAddress,
-                        paymentMethodId, note, cartItems);
+                        paymentMethodId, note, cartItems, couponCode, appliedDiscountAmount);
 
                 if (isBuyNow) {
                     session.removeAttribute("buyNowCart");
@@ -187,6 +191,10 @@ public class PlaceOrderController extends HttpServlet {
                     session.removeAttribute("guestCart");
                 }
             }
+
+            session.removeAttribute("appliedCouponId");
+            session.removeAttribute("appliedCouponCode");
+            session.removeAttribute("appliedDiscountAmount");
 
             session.setAttribute("lastOrderId", order.getId());
 
