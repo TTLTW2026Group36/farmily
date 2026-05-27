@@ -60,7 +60,9 @@
                           <div class="address-option-item ${addr['default'] ? 'selected' : ''}"
                             data-address-id="${addr.id}" data-receiver="${addr.receiver}" data-phone="${addr.phone}"
                             data-detail="${addr.addressDetail}" data-district="${addr.district}"
-                            data-city="${addr.city}" data-full="${addr.fullAddress}">
+                            data-city="${addr.city}" data-full="${addr.fullAddress}"
+                            data-ghn-district-id="${addr.ghnDistrictId}"
+                            data-ghn-ward-code="${addr.ghnWardCode}">
                             <div class="option-check">
                               <i class="fas fa-check"></i>
                             </div>
@@ -213,6 +215,8 @@
 
               <form class="checkout-form" id="checkoutForm" novalidate>
                 <input type="hidden" id="selectedAddressId" name="addressId" value="">
+                <input type="hidden" id="ghnDistrictId" name="ghnDistrictId" value="">
+                <input type="hidden" id="ghnWardCode" name="ghnWardCode" value="">
                 <input type="hidden" name="isBuyNow" value="${isBuyNow}">
 
                 <c:if test="${!isLoggedIn}">
@@ -304,16 +308,6 @@
             <aside class="checkout-summary" aria-label="Tóm tắt đơn hàng">
               <h2 class="sum-title">Tóm tắt đơn hàng</h2>
 
-              <c:if test="${subtotal < freeShippingThreshold}">
-                <div class="free-ship-notice">
-                  <i class="fas fa-truck"></i>
-                  Mua thêm <strong>
-                    <fmt:formatNumber value="${freeShippingThreshold - subtotal}" type="number" groupingUsed="true" />đ
-                  </strong>
-                  để được <strong>MIỄN PHÍ VẬN CHUYỂN</strong>
-                </div>
-              </c:if>
-
               <div class="totals">
                 <p>
                   Tạm tính
@@ -324,14 +318,7 @@
                 <p>
                   Phí vận chuyển
                   <span id="shippingFeeText">
-                    <c:choose>
-                      <c:when test="${shippingFee == 0}">
-                        <span class="free-shipping">Miễn phí</span>
-                      </c:when>
-                      <c:otherwise>
-                        <fmt:formatNumber value="${shippingFee}" type="number" groupingUsed="true" />đ
-                      </c:otherwise>
-                    </c:choose>
+                    <span style="color: #999;">Chọn địa chỉ để tính phí</span>
                   </span>
                 </p>
                 <p class="grand">
@@ -414,8 +401,7 @@
           window.contextPath = '${pageContext.request.contextPath}';
           window.isLoggedIn = <c:out value="${isLoggedIn != null ? isLoggedIn : false}" />;
           window.subtotal = <c:out value="${subtotal != null ? subtotal : 0}" />;
-          window.freeShippingThreshold = <c:out value="${freeShippingThreshold != null ? freeShippingThreshold : 100000}" />;
-          window.standardShippingFee = 30000;
+          window.ghnApiBase = '${pageContext.request.contextPath}/api/ghn';
           window.userEmail = '${userEmail}';
           window.userName = '${userName}';
           window.userPhone = '${userPhone}';

@@ -104,8 +104,8 @@ public class CheckoutController extends HttpServlet {
 
             
             double subtotal = cart.getTotalAmount();
-            double shippingFee = orderService.calculateShippingFee(subtotal);
-            double total = subtotal + shippingFee;
+            double shippingFee = 0;
+            double total = subtotal;
 
             
             request.setAttribute("cart", cart);
@@ -116,7 +116,6 @@ public class CheckoutController extends HttpServlet {
             request.setAttribute("subtotal", subtotal);
             request.setAttribute("shippingFee", shippingFee);
             request.setAttribute("total", total);
-            request.setAttribute("freeShippingThreshold", OrderService.FREE_SHIPPING_THRESHOLD);
             request.setAttribute("pageTitle", "Thanh toán");
 
             

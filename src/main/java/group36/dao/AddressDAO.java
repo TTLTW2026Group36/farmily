@@ -22,6 +22,8 @@ public class AddressDAO extends BaseDao {
             address.setAddressDetail(rs.getString("address_detail"));
             address.setDistrict(rs.getString("district"));
             address.setCity(rs.getString("city"));
+            address.setGhnDistrictId(rs.getObject("ghn_district_id") != null ? rs.getInt("ghn_district_id") : null);
+            address.setGhnWardCode(rs.getString("ghn_ward_code"));
             address.setDefault(rs.getBoolean("is_default"));
             address.setCreatedAt(rs.getTimestamp("created_at"));
             address.setUpdatedAt(rs.getTimestamp("updated_at"));
@@ -58,8 +60,8 @@ public class AddressDAO extends BaseDao {
     }
 
     public int insertWithHandle(org.jdbi.v3.core.Handle h, Address address) {
-        String sql = "INSERT INTO address (user_id, receiver, phone, address_detail, district, city, is_default) " +
-                "VALUES (:userId, :receiver, :phone, :addressDetail, :district, :city, :isDefault)";
+        String sql = "INSERT INTO address (user_id, receiver, phone, address_detail, district, city, is_default, ghn_district_id, ghn_ward_code) " +
+                "VALUES (:userId, :receiver, :phone, :addressDetail, :district, :city, :isDefault, :ghnDistrictId, :ghnWardCode)";
         return h.createUpdate(sql)
                 .bind("userId", address.getUserId())
                 .bind("receiver", address.getReceiver())
@@ -68,6 +70,8 @@ public class AddressDAO extends BaseDao {
                 .bind("district", address.getDistrict())
                 .bind("city", address.getCity())
                 .bind("isDefault", address.isDefault())
+                .bind("ghnDistrictId", address.getGhnDistrictId())
+                .bind("ghnWardCode", address.getGhnWardCode())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one();
@@ -75,7 +79,9 @@ public class AddressDAO extends BaseDao {
 
     public int update(Address address) {
         String sql = "UPDATE address SET receiver = :receiver, phone = :phone, address_detail = :addressDetail, " +
-                "district = :district, city = :city, is_default = :isDefault, updated_at = NOW() WHERE id = :id";
+                "district = :district, city = :city, is_default = :isDefault, " +
+                "ghn_district_id = :ghnDistrictId, ghn_ward_code = :ghnWardCode, " +
+                "updated_at = NOW() WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", address.getId())
                 .bind("receiver", address.getReceiver())
@@ -84,6 +90,8 @@ public class AddressDAO extends BaseDao {
                 .bind("district", address.getDistrict())
                 .bind("city", address.getCity())
                 .bind("isDefault", address.isDefault())
+                .bind("ghnDistrictId", address.getGhnDistrictId())
+                .bind("ghnWardCode", address.getGhnWardCode())
                 .execute());
     }
 

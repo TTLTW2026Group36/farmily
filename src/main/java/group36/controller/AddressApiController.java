@@ -135,6 +135,14 @@ public class AddressApiController extends HttpServlet {
             address.setCity(city);
             address.setDefault(isDefault);
 
+            String ghnDistrictIdStr = request.getParameter("ghnDistrictId");
+            String ghnWardCodeStr = request.getParameter("ghnWardCode");
+            address.setGhnDistrictId(
+                ghnDistrictIdStr != null && !ghnDistrictIdStr.isEmpty()
+                    ? Integer.parseInt(ghnDistrictIdStr) : null
+            );
+            address.setGhnWardCode(ghnWardCodeStr);
+
             Address created = addressService.createAddress(address);
             out.print("{\"success\":true,\"address\":" + toJson(created) + "}");
 
@@ -225,6 +233,14 @@ public class AddressApiController extends HttpServlet {
             address.setCity(city);
             address.setDefault("true".equals(isDefaultStr));
 
+            String ghnDistrictIdStr = request.getParameter("ghnDistrictId");
+            String ghnWardCodeStr = request.getParameter("ghnWardCode");
+            address.setGhnDistrictId(
+                ghnDistrictIdStr != null && !ghnDistrictIdStr.isEmpty()
+                    ? Integer.parseInt(ghnDistrictIdStr) : null
+            );
+            address.setGhnWardCode(ghnWardCodeStr);
+
             boolean updated = addressService.updateAddress(address);
             if (updated) {
                 out.print("{\"success\":true,\"address\":" + toJson(address) + "}");
@@ -301,7 +317,8 @@ public class AddressApiController extends HttpServlet {
     private String toJson(Address address) {
         return String.format(
                 "{\"id\":%d,\"userId\":%d,\"receiver\":\"%s\",\"phone\":\"%s\",\"addressDetail\":\"%s\"," +
-                        "\"district\":\"%s\",\"city\":\"%s\",\"isDefault\":%b,\"fullAddress\":\"%s\"}",
+                        "\"district\":\"%s\",\"city\":\"%s\",\"isDefault\":%b,\"fullAddress\":\"%s\"," +
+                        "\"ghnDistrictId\":%s,\"ghnWardCode\":\"%s\"}",
                 address.getId(),
                 address.getUserId(),
                 escapeJson(address.getReceiver()),
@@ -310,7 +327,9 @@ public class AddressApiController extends HttpServlet {
                 escapeJson(address.getDistrict()),
                 escapeJson(address.getCity()),
                 address.isDefault(),
-                escapeJson(address.getFullAddress()));
+                escapeJson(address.getFullAddress()),
+                address.getGhnDistrictId() != null ? String.valueOf(address.getGhnDistrictId()) : "null",
+                escapeJson(address.getGhnWardCode()));
     }
 
     private String toJsonArray(List<Address> addresses) {

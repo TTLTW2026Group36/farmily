@@ -15,6 +15,8 @@ public class Address implements Serializable {
     private String addressDetail;
     private String district;
     private String city;
+    private Integer ghnDistrictId;
+    private String ghnWardCode;
     private boolean isDefault;
     private Timestamp createdAt;
     private Timestamp updatedAt;
@@ -102,6 +104,22 @@ public class Address implements Serializable {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public Integer getGhnDistrictId() {
+        return ghnDistrictId;
+    }
+
+    public void setGhnDistrictId(Integer ghnDistrictId) {
+        this.ghnDistrictId = ghnDistrictId;
+    }
+
+    public String getGhnWardCode() {
+        return ghnWardCode;
+    }
+
+    public void setGhnWardCode(String ghnWardCode) {
+        this.ghnWardCode = ghnWardCode;
     }
 
     public boolean isDefault() {

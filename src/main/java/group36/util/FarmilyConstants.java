@@ -26,6 +26,11 @@ public class FarmilyConstants {
     public static String MAIL_USER;
     public static String MAIL_PASSWORD;
 
+    public static String GHN_API_TOKEN;
+    public static int GHN_SHOP_ID;
+    public static int GHN_FROM_DISTRICT_ID;
+    public static String GHN_FROM_WARD_CODE;
+
     static {
         Properties pro = new Properties();
         try (InputStream input = FarmilyConstants.class.getClassLoader().getResourceAsStream("config.properties")) {
@@ -37,6 +42,12 @@ public class FarmilyConstants {
                 FACEBOOK_CLIENT_SECRET = pro.getProperty("facebook.client.secret");
                 RECAPTCHA_SITE_KEY = pro.getProperty("recaptcha.site.key");
                 RECAPTCHA_SECRET_KEY = pro.getProperty("recaptcha.secret.key");
+
+                GHN_API_TOKEN = pro.getProperty("ghn.api.token", "");
+                GHN_SHOP_ID = Integer.parseInt(pro.getProperty("ghn.shop.id", "0"));
+                GHN_FROM_DISTRICT_ID = Integer.parseInt(pro.getProperty("ghn.from.district.id", "0"));
+                GHN_FROM_WARD_CODE = pro.getProperty("ghn.from.ward.code", "0");
+
                 MAIL_HOST = pro.getProperty("mail.smtp.host");
                 MAIL_PORT = pro.getProperty("mail.smtp.port");
                 MAIL_AUTH = pro.getProperty("mail.smtp.auth");

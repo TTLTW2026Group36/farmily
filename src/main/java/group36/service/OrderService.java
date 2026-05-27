@@ -27,9 +27,6 @@ public class OrderService {
     private final FlashSaleDAO flashSaleDAO;
     private final OrderStatusHistoryDAO orderStatusHistoryDAO;
 
-    public static final double FREE_SHIPPING_THRESHOLD = 100000;
-    public static final double STANDARD_SHIPPING_FEE = 30000;
-
     public OrderService() {
         this.orderDAO = new OrderDAO();
         this.orderDetailDAO = new OrderDetailDAO();
@@ -47,11 +44,7 @@ public class OrderService {
         this.orderStatusHistoryDAO = new OrderStatusHistoryDAO();
     }
 
-    public double calculateShippingFee(double subtotal) {
-        return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING_FEE;
-    }
-
-    public Order createOrder(int userId, int addressId, int paymentMethodId, String note)
+    public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -81,7 +74,6 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
@@ -109,7 +101,7 @@ public class OrderService {
         return order;
     }
 
-    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems)
+    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -132,7 +124,6 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
@@ -160,7 +151,7 @@ public class OrderService {
     }
 
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
-            int paymentMethodId, String note, List<CartItem> cartItems)
+            int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
 
         if (guestInfo == null || !guestInfo.isValid()) {
@@ -186,7 +177,6 @@ public class OrderService {
             subtotal += item.getSubtotal();
         }
 
-        double shippingFee = calculateShippingFee(subtotal);
         double totalPrice = subtotal + shippingFee;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {

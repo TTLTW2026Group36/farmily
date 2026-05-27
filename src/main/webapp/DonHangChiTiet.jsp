@@ -279,14 +279,7 @@
                                 <div class="summary-row">
                                     <span class="summary-label">Phí vận chuyển:</span>
                                     <span class="summary-value">
-                                        <c:choose>
-                                            <c:when test="${order.shippingFee == 0}">
-                                                <span class="free-ship">Miễn phí</span>
-                                            </c:when>
-                                            <c:otherwise>
-                                                <fmt:formatNumber value="${order.shippingFee}" pattern="#,###" />đ
-                                            </c:otherwise>
-                                        </c:choose>
+                                        <fmt:formatNumber value="${order.shippingFee}" pattern="#,###" />đ
                                     </span>
                                 </div>
                                 <div class="summary-row summary-total">
