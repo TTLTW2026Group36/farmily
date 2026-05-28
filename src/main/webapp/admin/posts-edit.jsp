@@ -73,6 +73,226 @@
                         color: #166534;
                         font-size: 14px;
                     }
+
+                    /* Toast Notification Center */
+                    .toast-container {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        z-index: 9999;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 12px;
+                        pointer-events: none;
+                    }
+
+                    .custom-toast {
+                        pointer-events: auto;
+                        background: rgba(255, 255, 255, 0.98);
+                        border-left: 5px solid #3b82f6;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                        padding: 16px 28px;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        font-weight: 500;
+                        color: #1e293b;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        min-width: 320px;
+                        max-width: 480px;
+                        animation: toastFadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), toastFadeOut 0.35s ease forwards 2.65s;
+                        backdrop-filter: blur(8px);
+                        border: 1px solid rgba(226, 232, 240, 0.8);
+                    }
+
+                    .custom-toast.toast-success {
+                        border-left-color: #22c55e;
+                    }
+
+                    .custom-toast.toast-error {
+                        border-left-color: #ef4444;
+                    }
+
+                    .custom-toast.toast-warning {
+                        border-left-color: #f59e0b;
+                    }
+
+                    .custom-toast i {
+                        font-size: 18px;
+                    }
+
+                    .custom-toast.toast-success i {
+                        color: #22c55e;
+                    }
+
+                    .custom-toast.toast-error i {
+                        color: #ef4444;
+                    }
+
+                    .custom-toast.toast-warning i {
+                        color: #f59e0b;
+                    }
+
+                    /* Custom Confirm Dialog */
+                    .confirm-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(15, 23, 42, 0.45);
+                        backdrop-filter: blur(4px);
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: fadeInBg 0.2s ease;
+                    }
+
+                    .confirm-box {
+                        background: #ffffff;
+                        border-radius: 12px;
+                        padding: 24px;
+                        width: 90%;
+                        max-width: 400px;
+                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+                        text-align: center;
+                        animation: scaleInConfirm 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        border: 1px solid rgba(226, 232, 240, 0.8);
+                    }
+
+                    .confirm-box i {
+                        font-size: 42px;
+                        color: #eab308;
+                        margin-bottom: 16px;
+                    }
+
+                    .confirm-box h3 {
+                        margin: 0 0 8px 0;
+                        font-size: 18px;
+                        color: #0f172a;
+                        font-weight: 600;
+                    }
+
+                    .confirm-box p {
+                        margin: 0 0 24px 0;
+                        font-size: 14px;
+                        color: #64748b;
+                        line-height: 1.5;
+                    }
+
+                    .confirm-buttons {
+                        display: flex;
+                        gap: 12px;
+                        justify-content: center;
+                    }
+
+                    .confirm-btn {
+                        padding: 10px 22px;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border: 1px solid transparent;
+                    }
+
+                    .confirm-btn-cancel {
+                        background: #f8fafc;
+                        color: #475569;
+                        border-color: #cbd5e1;
+                    }
+
+                    .confirm-btn-cancel:hover {
+                        background: #f1f5f9;
+                        border-color: #94a3b8;
+                    }
+
+                    .confirm-btn-ok {
+                        background: #0f172a;
+                        color: #ffffff;
+                    }
+
+                    .confirm-btn-ok:hover {
+                        background: #1e293b;
+                    }
+
+                    @keyframes toastFadeIn {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.9);
+                        }
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+
+                    @keyframes toastFadeOut {
+                        from {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                        to {
+                            opacity: 0;
+                            transform: scale(0.9);
+                        }
+                    }
+
+                    @keyframes fadeInBg {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+
+                    @keyframes scaleInConfirm {
+                        from { transform: scale(0.9); opacity: 0; }
+                        to { transform: scale(1); opacity: 1; }
+                    }
+
+                    /* Form Controls styling overrides for Premium look */
+                    .form-control {
+                        width: 100%;
+                        padding: 10px 16px;
+                        border: 1px solid #cbd5e1;
+                        border-radius: 8px;
+                        font-size: 14px;
+                        color: #1e293b;
+                        background-color: #ffffff;
+                        transition: all 0.2s ease-in-out;
+                        box-sizing: border-box;
+                    }
+
+                    .form-control:focus {
+                        border-color: #22c55e;
+                        outline: none;
+                        box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.15);
+                    }
+
+                    .form-control:disabled {
+                        background-color: #f8fafc;
+                        color: #94a3b8;
+                        cursor: not-allowed;
+                        border-color: #e2e8f0;
+                    }
+
+                    textarea.form-control {
+                        resize: vertical;
+                        min-height: 100px;
+                        line-height: 1.5;
+                    }
+
+                    select.form-control {
+                        appearance: none;
+                        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+                        background-repeat: no-repeat;
+                        background-position: right 16px center;
+                        background-size: 16px;
+                        padding-right: 40px;
+                        cursor: pointer;
+                    }
                 </style>
             </head>
 
@@ -137,6 +357,7 @@
                                                 <div class="form-group" style="margin-top: 12px;">
                                                     <label for="imageUrl">URL ảnh mới</label>
                                                     <input type="text" id="imageUrl" name="imageUrl"
+                                                        class="form-control"
                                                         value="${post.imageUrl}"
                                                         placeholder="https://example.com/image.jpg">
                                                 </div>
@@ -150,19 +371,19 @@
                                             <div class="card-body">
                                                 <div class="form-group">
                                                     <label for="postId">ID bài viết</label>
-                                                    <input type="text" id="postId" value="${post.id}" disabled>
+                                                    <input type="text" id="postId" class="form-control" value="${post.id}" disabled>
                                                 </div>
 
                                                 <div class="form-group">
                                                     <label for="title">Tiêu đề bài viết <span
                                                             class="required">*</span></label>
-                                                    <input type="text" id="title" name="title" value="${post.title}"
+                                                    <input type="text" id="title" name="title" class="form-control" value="${post.title}"
                                                         required>
                                                 </div>
 
                                                 <div class="form-group">
                                                     <label for="excerpt">Mô tả ngắn (Excerpt)</label>
-                                                    <textarea id="excerpt" name="excerpt"
+                                                    <textarea id="excerpt" name="excerpt" class="form-control"
                                                         rows="3">${post.excerpt}</textarea>
                                                 </div>
 
@@ -195,7 +416,7 @@
                                             <div class="card-body">
                                                 <div class="form-group">
                                                     <label for="status">Trạng thái</label>
-                                                    <select id="status" name="status">
+                                                    <select id="status" name="status" class="form-control">
                                                         <option value="draft" ${post.status=='draft' ? 'selected' : ''
                                                             }>Nháp</option>
                                                         <option value="published" ${post.status=='published'
@@ -239,7 +460,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <div class="form-group">
-                                                    <select id="categoryId" name="categoryId">
+                                                    <select id="categoryId" name="categoryId" class="form-control">
                                                         <option value="">-- Chọn danh mục --</option>
                                                         <c:forEach var="category" items="${categories}">
                                                             <option value="${category.id}"
@@ -344,33 +565,84 @@
                         }
                     });
 
-                    // Delete button
-                    document.getElementById('btnDelete').addEventListener('click', function () {
-                        if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-                            return;
+                    // Helper functions for Custom Alerts and Confirms
+                    function showAlert(type, message) {
+                        let container = document.querySelector('.toast-container');
+                        if (!container) {
+                            container = document.createElement('div');
+                            container.className = 'toast-container';
+                            document.body.appendChild(container);
                         }
 
-                        const postId = '${post.id}';
+                        const toast = document.createElement('div');
+                        toast.className = 'custom-toast toast-' + type;
 
-                        fetch('${pageContext.request.contextPath}/admin/posts/delete', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            body: 'id=' + postId
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                if (data.success) {
-                                    window.location.href = '${pageContext.request.contextPath}/admin/posts';
-                                } else {
-                                    alert(data.message);
-                                }
+                        let icon = 'info-circle';
+                        if (type === 'success') icon = 'check-circle';
+                        else if (type === 'error') icon = 'exclamation-circle';
+                        else if (type === 'warning') icon = 'exclamation-triangle';
+
+                        toast.innerHTML = '<i class="fas fa-' + icon + '"></i> <span>' + message + '</span>';
+                        container.appendChild(toast);
+
+                        setTimeout(() => {
+                            toast.remove();
+                            if (container.childElementCount === 0) {
+                                container.remove();
+                            }
+                        }, 3000);
+                    }
+
+                    function showConfirm(title, message, onConfirm) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'confirm-overlay';
+                        overlay.innerHTML = 
+                            '<div class="confirm-box">' +
+                                '<i class="fas fa-exclamation-triangle"></i>' +
+                                '<h3>' + title + '</h3>' +
+                                '<p>' + message + '</p>' +
+                                '<div class="confirm-buttons">' +
+                                    '<button class="confirm-btn confirm-btn-cancel">Hủy</button>' +
+                                    '<button class="confirm-btn confirm-btn-ok">Xác nhận</button>' +
+                                '</div>' +
+                            '</div>';
+                        document.body.appendChild(overlay);
+
+                        overlay.querySelector('.confirm-btn-cancel').addEventListener('click', () => overlay.remove());
+                        overlay.querySelector('.confirm-btn-ok').addEventListener('click', () => {
+                            overlay.remove();
+                            onConfirm();
+                        });
+                    }
+
+                    // Delete button
+                    document.getElementById('btnDelete').addEventListener('click', function () {
+                        showConfirm('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa vĩnh viễn bài viết này không?', () => {
+                            const postId = '${post.id}';
+
+                            fetch('${pageContext.request.contextPath}/admin/posts/delete', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/x-www-form-urlencoded'
+                                },
+                                body: 'id=' + postId
                             })
-                            .catch(err => {
-                                console.error(err);
-                                alert('Đã xảy ra lỗi khi xóa bài viết');
-                            });
+                                .then(res => res.json())
+                                .then(data => {
+                                    if (data.success) {
+                                        showAlert('success', 'Xóa bài viết thành công. Đang chuyển hướng...');
+                                        setTimeout(() => {
+                                            window.location.href = '${pageContext.request.contextPath}/admin/posts';
+                                        }, 1500);
+                                    } else {
+                                        showAlert('error', data.message);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error(err);
+                                    showAlert('error', 'Đã xảy ra lỗi khi xóa bài viết');
+                                });
+                        });
                     });
                 </script>
             </body>

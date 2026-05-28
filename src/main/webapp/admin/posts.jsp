@@ -72,6 +72,37 @@
                         margin-bottom: 16px;
                         color: #cbd5e1;
                     }
+
+                    .btn-toggle {
+                        border: 1px solid #94a3b8;
+                        color: #64748b;
+                        background: transparent;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+
+                    .btn-toggle:hover {
+                        background: #f1f5f9;
+                        border-color: #64748b;
+                    }
+
+                    .btn-toggle.btn-published {
+                        border-color: #22c55e;
+                        color: #22c55e;
+                    }
+
+                    .btn-toggle.btn-published:hover {
+                        background: #f0fdf4;
+                    }
+
+                    .btn-toggle.btn-hidden {
+                        border-color: #94a3b8;
+                        color: #94a3b8;
+                    }
+
+                    .btn-toggle.btn-hidden:hover {
+                        background: #f8fafc;
+                    }
                 </style>
             </head>
 
@@ -204,6 +235,14 @@
                                                             </td>
                                                             <td>
                                                                 <div class="action-buttons">
+                                                                    <button
+                                                                        class="btn btn-sm btn-toggle ${post.status == 'published' ? 'btn-published' : 'btn-hidden'}"
+                                                                        data-id="${post.id}"
+                                                                        data-status="${post.status}"
+                                                                        title="${post.status == 'published' ? 'Ẩn bài viết' : 'Hiện bài viết'}">
+                                                                        <i
+                                                                            class="fas ${post.status == 'published' ? 'fa-eye' : 'fa-eye-slash'}"></i>
+                                                                    </button>
                                                                     <a href="${pageContext.request.contextPath}/admin/posts/edit?id=${post.id}"
                                                                         class="btn btn-sm btn-outline" title="Sửa">
                                                                         <i class="fas fa-edit"></i>
@@ -260,55 +299,132 @@
                 </div>
 
                 <script>
-                    // Delete post with AJAX
+                    function showConfirm(title, message, onConfirm) {
+                        const overlay = document.createElement('div');
+                        overlay.className = 'confirm-overlay';
+                        overlay.innerHTML = `
+                            <div class="confirm-box">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <h3>\${title}</h3>
+                                <p>\${message}</p>
+                                <div class="confirm-buttons">
+                                    <button class="confirm-btn confirm-btn-cancel">Hủy</button>
+                                    <button class="confirm-btn confirm-btn-ok">Xác nhận</button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(overlay);
+
+                        overlay.querySelector('.confirm-btn-cancel').addEventListener('click', () => overlay.remove());
+                        overlay.querySelector('.confirm-btn-ok').addEventListener('click', () => {
+                            overlay.remove();
+                            onConfirm();
+                        });
+                    }
+
                     document.querySelectorAll('.btn-delete').forEach(btn => {
                         btn.addEventListener('click', function (e) {
                             e.preventDefault();
                             const postId = this.dataset.id;
 
-                            if (!confirm('Bạn có chắc chắn muốn xóa bài viết này?')) {
-                                return;
-                            }
-
-                            fetch('${pageContext.request.contextPath}/admin/posts/delete', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/x-www-form-urlencoded'
-                                },
-                                body: 'id=' + postId
-                            })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.success) {
-                                        // Remove row from table
-                                        const row = document.querySelector(`tr[data-id="${postId}"]`);
-                                        if (row) {
-                                            row.style.animation = 'fadeOut 0.3s ease';
-                                            setTimeout(() => row.remove(), 300);
-                                        }
-                                        // Show success message
-                                        showAlert('success', data.message);
-                                    } else {
-                                        showAlert('error', data.message);
-                                    }
+                            showConfirm('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa vĩnh viễn bài viết này không?', () => {
+                                fetch('${pageContext.request.contextPath}/admin/posts/delete', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: 'id=' + postId
                                 })
-                                .catch(err => {
-                                    console.error(err);
-                                    showAlert('error', 'Đã xảy ra lỗi khi xóa bài viết');
-                                });
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            const row = document.querySelector(`tr[data-id="${postId}"]`);
+                                            if (row) {
+                                                row.style.animation = 'fadeOut 0.3s ease';
+                                                setTimeout(() => row.remove(), 300);
+                                            }
+                                            showAlert('success', data.message);
+                                        } else {
+                                            showAlert('error', data.message);
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        showAlert('error', 'Đã xảy ra lỗi khi xóa bài viết');
+                                    });
+                            });
                         });
                     });
 
+                    document.querySelectorAll('.btn-toggle').forEach(btn => {
+                        btn.addEventListener('click', function (e) {
+                            e.preventDefault();
+                            const postId = this.dataset.id;
+                            const currentStatus = this.dataset.status;
+                            const action = currentStatus === 'published' ? 'ẩn' : 'hiện';
+
+                            showConfirm('Thay đổi trạng thái', 'Bạn có chắc chắn muốn ' + action + ' bài viết này không?', () => {
+                                fetch('${pageContext.request.contextPath}/admin/posts/toggle', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                    body: 'id=' + postId
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            this.dataset.status = data.status;
+                                            this.title = data.isPublished ? 'Ẩn bài viết' : 'Hiện bài viết';
+                                            this.className = 'btn btn-sm btn-toggle ' +
+                                                (data.isPublished ? 'btn-published' : 'btn-hidden');
+                                            this.querySelector('i').className = 'fas ' +
+                                                (data.isPublished ? 'fa-eye' : 'fa-eye-slash');
+
+                                            const row = document.querySelector('tr[data-id="' + postId + '"]');
+                                            if (row) {
+                                                const badge = row.querySelector('.badge');
+                                                if (badge) {
+                                                    badge.className = 'badge ' + data.badgeClass;
+                                                    badge.textContent = data.statusText;
+                                                }
+                                            }
+
+                                            showAlert('success', 'Đã ' + action + ' bài viết thành công');
+                                        } else {
+                                            showAlert('error', data.message || 'Đã xảy ra lỗi');
+                                        }
+                                    })
+                                    .catch(err => {
+                                        console.error(err);
+                                        showAlert('error', 'Đã xảy ra lỗi khi thay đổi trạng thái');
+                                    });
+                            });
+                        });
+                    });
                     function showAlert(type, message) {
-                        const alertDiv = document.createElement('div');
-                        alertDiv.className = 'alert alert-' + type;
-                        alertDiv.innerHTML = '<i class="fas fa-' + (type === 'success' ? 'check' : 'exclamation') + '-circle"></i> ' + message;
+                        let container = document.querySelector('.toast-container');
+                        if (!container) {
+                            container = document.createElement('div');
+                            container.className = 'toast-container';
+                            document.body.appendChild(container);
+                        }
 
-                        const content = document.querySelector('.admin-content');
-                        const header = content.querySelector('.content-header');
-                        header.insertAdjacentElement('afterend', alertDiv);
+                        const toast = document.createElement('div');
+                        toast.className = 'custom-toast toast-' + type;
 
-                        setTimeout(() => alertDiv.remove(), 3000);
+                        let icon = 'info-circle';
+                        if (type === 'success') icon = 'check-circle';
+                        else if (type === 'error') icon = 'exclamation-circle';
+                        else if (type === 'warning') icon = 'exclamation-triangle';
+
+                        toast.innerHTML = '<i class="fas fa-' + icon + '"></i> <span>' + message + '</span>';
+                        container.appendChild(toast);
+
+                        setTimeout(() => {
+                            toast.remove();
+                            if (container.childElementCount === 0) {
+                                container.remove();
+                            }
+                        }, 3000);
                     }
                 </script>
 
@@ -322,6 +438,197 @@
                         to {
                             opacity: 0;
                             transform: translateX(-20px);
+                        }
+                    }
+
+                    /* Toast Notification Center */
+                    .toast-container {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        z-index: 9999;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 12px;
+                        pointer-events: none;
+                    }
+
+                    .custom-toast {
+                        pointer-events: auto;
+                        background: rgba(255, 255, 255, 0.98);
+                        border-left: 5px solid #3b82f6;
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+                        padding: 16px 28px;
+                        border-radius: 8px;
+                        font-size: 15px;
+                        font-weight: 500;
+                        color: #1e293b;
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        min-width: 320px;
+                        max-width: 480px;
+                        animation: toastFadeIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), toastFadeOut 0.35s ease forwards 2.65s;
+                        backdrop-filter: blur(8px);
+                        border: 1px solid rgba(226, 232, 240, 0.8);
+                    }
+
+                    .custom-toast.toast-success {
+                        border-left-color: #22c55e;
+                    }
+
+                    .custom-toast.toast-error {
+                        border-left-color: #ef4444;
+                    }
+
+                    .custom-toast.toast-warning {
+                        border-left-color: #f59e0b;
+                    }
+
+                    .custom-toast i {
+                        font-size: 18px;
+                    }
+
+                    .custom-toast.toast-success i {
+                        color: #22c55e;
+                    }
+
+                    .custom-toast.toast-error i {
+                        color: #ef4444;
+                    }
+
+                    .custom-toast.toast-warning i {
+                        color: #f59e0b;
+                    }
+
+                    @keyframes toastFadeIn {
+                        from {
+                            opacity: 0;
+                            transform: scale(0.9);
+                        }
+
+                        to {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+                    }
+
+                    @keyframes toastFadeOut {
+                        from {
+                            opacity: 1;
+                            transform: scale(1);
+                        }
+
+                        to {
+                            opacity: 0;
+                            transform: scale(0.9);
+                        }
+                    }
+
+                    .confirm-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(15, 23, 42, 0.45);
+                        backdrop-filter: blur(4px);
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        animation: fadeInBg 0.2s ease;
+                    }
+
+                    .confirm-box {
+                        background: #ffffff;
+                        border-radius: 12px;
+                        padding: 24px;
+                        width: 90%;
+                        max-width: 400px;
+                        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+                        text-align: center;
+                        animation: scaleInConfirm 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+                        border: 1px solid rgba(226, 232, 240, 0.8);
+                    }
+
+                    .confirm-box i {
+                        font-size: 42px;
+                        color: #eab308;
+                        margin-bottom: 16px;
+                    }
+
+                    .confirm-box h3 {
+                        margin: 0 0 8px 0;
+                        font-size: 18px;
+                        color: #0f172a;
+                        font-weight: 600;
+                    }
+
+                    .confirm-box p {
+                        margin: 0 0 24px 0;
+                        font-size: 14px;
+                        color: #64748b;
+                        line-height: 1.5;
+                    }
+
+                    .confirm-buttons {
+                        display: flex;
+                        gap: 12px;
+                        justify-content: center;
+                    }
+
+                    .confirm-btn {
+                        padding: 10px 22px;
+                        border-radius: 6px;
+                        font-size: 14px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        border: 1px solid transparent;
+                    }
+
+                    .confirm-btn-cancel {
+                        background: #f8fafc;
+                        color: #475569;
+                        border-color: #cbd5e1;
+                    }
+
+                    .confirm-btn-cancel:hover {
+                        background: #f1f5f9;
+                        border-color: #94a3b8;
+                    }
+
+                    .confirm-btn-ok {
+                        background: #0f172a;
+                        color: #ffffff;
+                    }
+
+                    .confirm-btn-ok:hover {
+                        background: #1e293b;
+                    }
+
+                    @keyframes fadeInBg {
+                        from {
+                            opacity: 0;
+                        }
+
+                        to {
+                            opacity: 1;
+                        }
+                    }
+
+                    @keyframes scaleInConfirm {
+                        from {
+                            transform: scale(0.9);
+                            opacity: 0;
+                        }
+
+                        to {
+                            transform: scale(1);
+                            opacity: 1;
                         }
                     }
                 </style>

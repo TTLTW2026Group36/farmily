@@ -65,6 +65,8 @@ public class AdminPostController extends HttpServlet {
                 updatePost(request, response);
             } else if (pathInfo != null && pathInfo.equals("/delete")) {
                 deletePost(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/toggle")) {
+                togglePost(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -321,6 +323,45 @@ public class AdminPostController extends HttpServlet {
             out.print("{\"success\": false, \"message\": \"ID bài viết không hợp lệ\"}");
         } catch (IllegalArgumentException e) {
             out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+        }
+    }
+
+    private void togglePost(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            out.print("{\"success\": false, \"message\": \"Thiếu ID bài viết\"}");
+            return;
+        }
+
+        try {
+            int postId = Integer.parseInt(idParam);
+            String newStatus = newsService.togglePostStatus(postId);
+
+            String statusText;
+            String badgeClass;
+            if ("published".equals(newStatus)) {
+                statusText = "Đã đăng";
+                badgeClass = "success";
+            } else {
+                statusText = "Nháp";
+                badgeClass = "warning";
+            }
+            boolean isPublished = "published".equals(newStatus);
+
+            out.print("{\"success\": true, \"status\": \"" + newStatus
+                    + "\", \"statusText\": \"" + statusText
+                    + "\", \"badgeClass\": \"" + badgeClass
+                    + "\", \"isPublished\": " + isPublished + "}");
+        } catch (NumberFormatException e) {
+            out.print("{\"success\": false, \"message\": \"ID bài viết không hợp lệ\"}");
+        } catch (IllegalArgumentException e) {
+            out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
+        } catch (Exception e) {
+            out.print("{\"success\": false, \"message\": \"Đã xảy ra lỗi khi thay đổi trạng thái\"}");
         }
     }
 }

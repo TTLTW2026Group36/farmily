@@ -174,6 +174,24 @@ public class NewsService {
         return imageDAO.delete(imageId);
     }
 
+    public String togglePostStatus(int id) {
+        News news = getNewsById(id);
+        String currentStatus = news.getStatus();
+        String newStatus;
+
+        if ("published".equals(currentStatus)) {
+            newStatus = "draft";
+        } else {
+            newStatus = "published";
+        }
+
+        int rows = newsDAO.updateStatus(id, newStatus);
+        if (rows == 0) {
+            throw new IllegalStateException("Không thể cập nhật trạng thái bài viết");
+        }
+        return newStatus;
+    }
+
     private void loadNewsDetails(News news) {
         if (news == null)
             return;

@@ -262,6 +262,14 @@ public class NewsDAO extends BaseDao {
                                 .bind("id", id)
                                 .execute());
         }
+        
+        public int updateStatus(int id, String status) {
+                String sql = "UPDATE news SET status = :status, updated_at = NOW() WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", id)
+                                .bind("status", status)
+                                .execute());
+        }
 
         
 
