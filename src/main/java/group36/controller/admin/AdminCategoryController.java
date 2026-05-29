@@ -7,6 +7,7 @@ import group36.model.Category;
 import group36.service.CategoryService;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,6 +67,8 @@ public class AdminCategoryController extends HttpServlet {
                 updateCategory(request, response);
             } else if (pathInfo.equals("/delete")) {
                 deleteCategory(request, response);
+            } else if (pathInfo.equals("/toggle")) {
+                toggleCategory(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -205,6 +208,31 @@ public class AdminCategoryController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/categories");
+        }
+    }
+
+    private void toggleCategory(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        PrintWriter out = response.getWriter();
+        String idParam = request.getParameter("id");
+        if (idParam == null || idParam.trim().isEmpty()) {
+            out.print("{\"success\": false, \"message\": \"Thiếu ID danh mục\"}");
+            return;
+        }
+        try {
+            int id = Integer.parseInt(idParam);
+            String newStatus = categoryService.toggleCategoryStatus(id);
+            boolean isActive = "active".equals(newStatus);
+            String statusText = isActive ? "Hoạt động" : "Tạm ẩn";
+            String badgeClass = isActive ? "success" : "warning";
+
+            out.print("{\"success\": true, \"status\": \"" + newStatus 
+                    + "\", \"statusText\": \"" + statusText 
+                    + "\", \"badgeClass\": \"" + badgeClass 
+                    + "\", \"isActive\": " + isActive + "}");
+        } catch (Exception e) {
+            out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
         }
     }
 }

@@ -27,6 +27,20 @@ public class CategoryService {
         return categoryDAO.findAll();
     }
 
+    public List<Category> getAllActiveCategories() {
+        return categoryDAO.findAllActive();
+    }
+
+    public String toggleCategoryStatus(int id) {
+        Category category = getCategoryById(id);
+        String newStatus = "active".equals(category.getStatus()) ? "inactive" : "active";
+        int rowsAffected = categoryDAO.updateStatus(id, newStatus);
+        if (rowsAffected == 0) {
+            throw new IllegalStateException("Failed to update status for category ID: " + id);
+        }
+        return newStatus;
+    }
+
     
 
 

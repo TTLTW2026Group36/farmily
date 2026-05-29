@@ -52,7 +52,7 @@ public class HomeController extends HttpServlet {
             return;
         }
 
-        List<Category> categories = categoryService.getAllCategories();
+        List<Category> categories = categoryService.getAllActiveCategories();
         request.setAttribute("categories", categories);
 
         List<FlashSale> flashSales = flashSaleService.getActiveFlashSales(10);
