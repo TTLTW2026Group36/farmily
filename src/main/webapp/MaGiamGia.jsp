@@ -52,11 +52,9 @@
                 <div class="coupon-grid">
                     <c:forEach var="coupon" items="${coupons}">
                         <div class="coupon-card ${coupon.discountType}">
-                            <div class="coupon-left">
-                                <span class="coupon-type-badge">${coupon.formattedDiscountValue}</span>
-                                <c:if test="${coupon.discountType == 'percent' && coupon.maxDiscount != null}">
-                                    <span class="coupon-max">Tối đa <fmt:formatNumber value="${coupon.maxDiscount}" pattern="#,##0"/>đ</span>
-                                </c:if>
+                            <div class="coupon-left ${coupon.discountType}">
+                                <i class="${coupon.discountType == 'freeship' ? 'fas fa-truck' : 'fas fa-tag'}"></i>
+                                <div class="discount-val">${coupon.formattedDiscountValue}</div>
                             </div>
                             <div class="coupon-right">
                                 <div class="coupon-code-row">
@@ -65,12 +63,28 @@
                                         <i class="fas fa-copy"></i> Sao chép
                                     </button>
                                 </div>
-                                <p class="coupon-condition">${coupon.formattedMinOrderValue}</p>
+                                <div class="voucher-desc">
+                                    <c:choose>
+                                        <c:when test="${coupon.discountType == 'percent'}">
+                                            Giảm ${coupon.discountValue}%
+                                            <c:if test="${coupon.maxDiscount != null && coupon.maxDiscount > 0}">
+                                                tối đa <fmt:formatNumber value="${coupon.maxDiscount}" pattern="#,##0"/>đ
+                                            </c:if>
+                                        </c:when>
+                                        <c:when test="${coupon.discountType == 'freeship'}">
+                                            Miễn phí vận chuyển
+                                        </c:when>
+                                        <c:otherwise>
+                                            Giảm <fmt:formatNumber value="${coupon.discountValue}" pattern="#,##0"/>đ
+                                        </c:otherwise>
+                                    </c:choose>
+                                    <c:if test="${coupon.expiringSoon}">
+                                        <span class="voucher-tag-expiring">Sắp hết hạn</span>
+                                    </c:if>
+                                </div>
+                                <div class="voucher-condition">${coupon.formattedMinOrderValue}</div>
                                 <p class="coupon-expiry">
                                     HSD: <fmt:formatDate value="${coupon.endDate}" pattern="dd/MM/yyyy"/>
-                                    <c:if test="${coupon.expiringSoon}">
-                                        <span class="expiring-badge">⚡ Sắp hết hạn</span>
-                                    </c:if>
                                 </p>
                                 <div class="coupon-action">
                                     <c:choose>

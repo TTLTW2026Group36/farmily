@@ -94,6 +94,8 @@ public class PlaceOrderController extends HttpServlet {
 
             String couponCode = (String) session.getAttribute("appliedCouponCode");
             Double appliedDiscountAmount = (Double) session.getAttribute("appliedDiscountAmount");
+            String freeshipCouponCode = (String) session.getAttribute("appliedFreeshipCouponCode");
+            Double appliedFreeshipDiscountAmount = (Double) session.getAttribute("appliedFreeshipDiscountAmount");
 
             String extraProductIdStr = request.getParameter("extraProductId");
             if (extraProductIdStr != null && !extraProductIdStr.isEmpty()) {
@@ -179,11 +181,11 @@ public class PlaceOrderController extends HttpServlet {
                         return;
                     }
                     order = orderService.createOrderFromItems(user.getId(), addressId, paymentMethodId, note,
-                            buyNowCart.getItems(), shippingFee, couponCode, appliedDiscountAmount);
+                            buyNowCart.getItems(), shippingFee, couponCode, appliedDiscountAmount, freeshipCouponCode, appliedFreeshipDiscountAmount);
                     session.removeAttribute("buyNowCart");
                 } else {
                     order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note,
-                            shippingFee, couponCode, appliedDiscountAmount);
+                            shippingFee, couponCode, appliedDiscountAmount, freeshipCouponCode, appliedFreeshipDiscountAmount);
                     session.setAttribute("cartCount", 0);
                 }
 
@@ -209,7 +211,7 @@ public class PlaceOrderController extends HttpServlet {
                 List<CartItem> cartItems = targetCart.getItems();
 
                 order = orderService.createGuestOrder(guestInfo, shippingAddress,
-                        paymentMethodId, note, cartItems, shippingFee, couponCode, appliedDiscountAmount);
+                        paymentMethodId, note, cartItems, shippingFee, couponCode, appliedDiscountAmount, freeshipCouponCode, appliedFreeshipDiscountAmount);
                 if (isBuyNow) {
                     session.removeAttribute("buyNowCart");
                 } else {
@@ -220,6 +222,9 @@ public class PlaceOrderController extends HttpServlet {
             session.removeAttribute("appliedCouponId");
             session.removeAttribute("appliedCouponCode");
             session.removeAttribute("appliedDiscountAmount");
+            session.removeAttribute("appliedFreeshipCouponId");
+            session.removeAttribute("appliedFreeshipCouponCode");
+            session.removeAttribute("appliedFreeshipDiscountAmount");
 
             session.setAttribute("lastOrderId", order.getId());
 

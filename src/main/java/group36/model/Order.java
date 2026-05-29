@@ -34,6 +34,8 @@ public class Order implements Serializable {
     private String adminNote;
     private Integer couponId;
     private double discountAmount;
+    private Integer freeshipCouponId;
+    private double freeshipDiscountAmount;
     private List<OrderStatusHistory> statusHistory;
 
     public static final String STATUS_PENDING = "pending";
@@ -362,7 +364,7 @@ public class Order implements Serializable {
     }
 
     public double getSubtotal() {
-        return totalPrice + discountAmount - shippingFee;
+        return totalPrice + discountAmount + freeshipDiscountAmount - shippingFee;
     }
 
     public Integer getCouponId() {
@@ -386,8 +388,37 @@ public class Order implements Serializable {
         return "-" + String.format("%,.0f", discountAmount).replace(",", ".") + "đ";
     }
 
+    public String getFormattedFreeshipDiscountAmount() {
+        if (freeshipDiscountAmount == 0) return "";
+        return "-" + String.format("%,.0f", freeshipDiscountAmount).replace(",", ".") + "đ";
+    }
+
     public boolean hasCoupon() {
         return couponId != null && couponId > 0;
+    }
+
+    public Integer getFreeshipCouponId() {
+        return freeshipCouponId;
+    }
+
+    public void setFreeshipCouponId(Integer freeshipCouponId) {
+        this.freeshipCouponId = freeshipCouponId;
+    }
+
+    public double getFreeshipDiscountAmount() {
+        return freeshipDiscountAmount;
+    }
+
+    public void setFreeshipDiscountAmount(double freeshipDiscountAmount) {
+        this.freeshipDiscountAmount = freeshipDiscountAmount;
+    }
+
+    public boolean hasFreeshipCoupon() {
+        return freeshipCouponId != null && freeshipCouponId > 0;
+    }
+
+    public double getTotalDiscount() {
+        return discountAmount + freeshipDiscountAmount;
     }
 
     public String getFormattedTotalPrice() {

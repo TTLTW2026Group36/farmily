@@ -284,6 +284,14 @@
                                         </span>
                                     </div>
                                 </c:if>
+                                <c:if test="${order.hasFreeshipCoupon()}">
+                                    <div class="summary-row">
+                                        <span class="summary-label">Giảm phí vận chuyển:</span>
+                                        <span class="summary-value" style="color: #22c55e; font-weight: bold;">
+                                            ${order.formattedFreeshipDiscountAmount}
+                                        </span>
+                                    </div>
+                                </c:if>
                                 <div class="summary-row">
                                     <span class="summary-label">Phí vận chuyển:</span>
                                     <span class="summary-value">

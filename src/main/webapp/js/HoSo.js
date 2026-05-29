@@ -1044,7 +1044,7 @@ function loadCouponWallet() {
     .then(function (data) {
         if (data.success && data.coupons && data.coupons.length > 0) {
             renderWalletCoupons(data.coupons, data.userStatuses || {});
-            container.style.display = 'flex';
+            container.style.display = 'grid';
             if (emptyState) emptyState.style.display = 'none';
         } else {
             container.innerHTML = '';
@@ -1062,6 +1062,8 @@ function renderWalletCoupons(coupons, statuses) {
     const container = document.getElementById('coupon-wallet-container');
     if (!container) return;
 
+    function formatNum(n) { return new Intl.NumberFormat('vi-VN').format(Math.round(n)); }
+
     let html = '';
     coupons.forEach(function (coupon) {
         const discountVal = coupon.formattedDiscountValue;
@@ -1075,7 +1077,22 @@ function renderWalletCoupons(coupons, statuses) {
         const isUsed = statuses[coupon.id] === 'used';
         const typeClass = coupon.discountType || '';
         const cardClass = 'wallet-card ' + typeClass + (isUsed ? ' disabled' : '');
-        
+        const isFreeship = coupon.discountType === 'freeship';
+        const iconClass = isFreeship ? 'fas fa-truck' : 'fas fa-tag';
+        const leftClass = 'wallet-card-left ' + typeClass;
+
+        let descText = '';
+        if (coupon.discountType === 'percent') {
+            descText = 'Giảm ' + coupon.discountValue + '%';
+            if (coupon.maxDiscount > 0) descText += ' tối đa ' + formatNum(coupon.maxDiscount) + 'đ';
+        } else if (isFreeship) {
+            descText = 'Miễn phí vận chuyển';
+        } else {
+            descText = 'Giảm ' + formatNum(coupon.discountValue) + 'đ';
+        }
+
+        let expiringTag = coupon.expiringSoon ? '<span class="voucher-tag-expiring">Sắp hết hạn</span>' : '';
+
         let statusHtml = '';
         if (isUsed) {
             statusHtml = '<span class="wallet-status used">Đã dùng</span>';
@@ -1089,12 +1106,14 @@ function renderWalletCoupons(coupons, statuses) {
         }
 
         html += '<div class="' + cardClass + '" data-id="' + coupon.id + '">' +
-                '  <div class="wallet-card-left">' +
-                '    <span class="wallet-discount">' + discountVal + '</span>' +
+                '  <div class="' + leftClass + '">' +
+                '    <i class="' + iconClass + '"></i>' +
+                '    <div class="discount-val">' + discountVal + '</div>' +
                 '  </div>' +
                 '  <div class="wallet-card-right">' +
                 '    <span class="wallet-code">' + coupon.code + '</span>' +
-                '    <p class="wallet-condition">' + condition + '</p>' +
+                '    <div class="voucher-desc">' + descText + ' ' + expiringTag + '</div>' +
+                '    <div class="voucher-condition">' + condition + '</div>' +
                 '    <p class="wallet-condition">HSD: ' + expiryStr + '</p>' +
                 '    ' + statusHtml +
                 '    ' + actionHtml +

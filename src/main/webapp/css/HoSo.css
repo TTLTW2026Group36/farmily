@@ -1057,40 +1057,30 @@ input.field-invalid,
 
 .coupon-wallet-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .coupon-wallet-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .wallet-card {
   display: flex;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  transition: opacity 0.3s;
+  transition: all 0.2s ease;
   position: relative;
 }
 
-.wallet-card::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-}
-
-.wallet-card.percent::before {
-  background: #f97316;
-}
-
-.wallet-card.fixed::before {
-  background: #ef4444;
-}
-
-.wallet-card.freeship::before {
-  background: #0284c7;
+.wallet-card:hover {
+  border-color: #16a34a;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.12);
 }
 
 .wallet-card.disabled {
@@ -1098,59 +1088,64 @@ input.field-invalid,
 }
 
 .wallet-card-left {
-  color: #1e293b;
-  padding: 16px 12px;
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
+  width: 120px;
+  min-width: 120px;
+  max-width: 120px;
+  background: #16a34a;
+  color: #fff;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
+  padding: 12px 8px;
+  font-size: 11px;
   text-align: center;
+  gap: 4px;
+  position: relative;
 }
 
-.wallet-card.percent .wallet-card-left {
-  background: #fff7ed;
-  color: #f97316;
-}
-
-.wallet-card.fixed .wallet-card-left {
-  background: #fef2f2;
-  color: #ef4444;
+.wallet-card-left::after {
+  content: '';
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  background: radial-gradient(circle, #fff 50%, transparent 50%);
+  z-index: 2;
 }
 
 .wallet-card.freeship .wallet-card-left {
-  background: #f0f9ff;
-  color: #0284c7;
+  background: #0ea5e9;
 }
 
-.wallet-card.disabled .wallet-card-left {
-  background: #f1f5f9 !important;
-  color: #94a3b8 !important;
+.wallet-card-left i {
+  font-size: 22px;
+  margin-bottom: 4px;
 }
 
-.wallet-discount {
+.wallet-card-left .discount-val {
+  font-weight: 800;
   font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
+  line-height: 1.1;
+  word-break: break-all;
 }
 
 .wallet-card-right {
   flex: 1;
-  padding: 14px 16px;
+  padding: 12px 14px 12px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .wallet-code {
   font-family: 'Courier New', monospace;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   color: #1e293b;
   background: #f1f5f9;
   padding: 4px 10px;
@@ -1160,9 +1155,37 @@ input.field-invalid,
   align-self: flex-start;
 }
 
-.wallet-condition {
+.voucher-desc {
   font-size: 13px;
   color: #64748b;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.voucher-condition {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.voucher-tag-expiring {
+  background-color: #fffbeb;
+  color: #d97706;
+  border: 1px solid #fde68a;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 4px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.wallet-condition {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 2px 0 0;
 }
 
 .wallet-status {
@@ -1172,17 +1195,19 @@ input.field-invalid,
   padding: 2px 8px;
   border-radius: 4px;
   align-self: flex-start;
+  margin-top: 4px;
 }
 
 .wallet-status.used {
-  background: #fee2e2;
-  color: #ef4444;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #94a3b8;
 }
 
 .wallet-actions {
   display: flex;
   gap: 12px;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
 .btn-use-now {
@@ -1197,11 +1222,13 @@ input.field-invalid,
   transition: background 0.2s;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
 }
 
 .btn-use-now:hover {
   background: #15803d;
 }
+
 
 .empty-wallet {
   display: flex;

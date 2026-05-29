@@ -50,11 +50,18 @@ public class OrderService {
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
             throws IllegalArgumentException {
-        return createOrder(userId, addressId, paymentMethodId, note, shippingFee, null, null);
+        return createOrder(userId, addressId, paymentMethodId, note, shippingFee, null, null, null, null);
     }
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note,
                              double shippingFee, String couponCode, Double appliedDiscountAmount)
+            throws IllegalArgumentException {
+        return createOrder(userId, addressId, paymentMethodId, note, shippingFee, couponCode, appliedDiscountAmount, null, null);
+    }
+
+    public Order createOrder(int userId, int addressId, int paymentMethodId, String note,
+                             double shippingFee, String couponCode, Double appliedDiscountAmount,
+                             String freeshipCouponCode, Double appliedFreeshipDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -96,10 +103,23 @@ public class OrderService {
             }
         }
 
-        double totalPrice = subtotal - discountAmount + shippingFee;
+        Integer freeshipCouponId = null;
+        double freeshipDiscountAmount = 0;
+        if (freeshipCouponCode != null && !freeshipCouponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon fc = couponService.validateCouponForOrder(freeshipCouponCode, userId, subtotal);
+                freeshipDiscountAmount = couponService.calculateDiscount(fc, subtotal, shippingFee);
+                freeshipCouponId = fc.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Freeship coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount - freeshipDiscountAmount + shippingFee;
         final Integer finalCouponId = couponId;
         final double finalDiscountAmount = discountAmount;
-        final double finalSubtotal = subtotal;
+        final Integer finalFreeshipCouponId = freeshipCouponId;
+        final double finalFreeshipDiscountAmount = freeshipDiscountAmount;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             Order o = new Order();
@@ -111,6 +131,8 @@ public class OrderService {
             o.setTotalPrice(totalPrice);
             o.setCouponId(finalCouponId);
             o.setDiscountAmount(finalDiscountAmount);
+            o.setFreeshipCouponId(finalFreeshipCouponId);
+            o.setFreeshipDiscountAmount(finalFreeshipDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             return executeOrderTransaction(handle, o, cartItems, cart.getId());
         });
@@ -119,6 +141,10 @@ public class OrderService {
             couponDAO.incrementUsedCount(couponId);
             couponDAO.insertUsage(couponId, userId, order.getId(), discountAmount);
         }
+        if (freeshipCouponId != null && freeshipDiscountAmount > 0) {
+            couponDAO.incrementUsedCount(freeshipCouponId);
+            couponDAO.insertUsage(freeshipCouponId, userId, order.getId(), freeshipDiscountAmount);
+        }
 
         order.setAddress(addressOpt.get());
         order.setPaymentMethod(paymentOpt.get());
@@ -126,20 +152,27 @@ public class OrderService {
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         return order;
     }
 
+
     public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
-        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, shippingFee, null, null);
+        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, shippingFee, null, null, null, null);
     }
 
     public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems,
                                       double shippingFee, String couponCode, Double appliedDiscountAmount)
+            throws IllegalArgumentException {
+        return createOrderFromItems(userId, addressId, paymentMethodId, note, cartItems, shippingFee, couponCode, appliedDiscountAmount, null, null);
+    }
+
+    public Order createOrderFromItems(int userId, int addressId, int paymentMethodId, String note, List<CartItem> cartItems,
+                                      double shippingFee, String couponCode, Double appliedDiscountAmount,
+                                      String freeshipCouponCode, Double appliedFreeshipDiscountAmount)
             throws IllegalArgumentException {
 
         Optional<Address> addressOpt = addressDAO.findById(addressId);
@@ -174,9 +207,23 @@ public class OrderService {
             }
         }
 
-        double totalPrice = subtotal - discountAmount + shippingFee;
+        Integer freeshipCouponId = null;
+        double freeshipDiscountAmount = 0;
+        if (freeshipCouponCode != null && !freeshipCouponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon fc = couponService.validateCouponForOrder(freeshipCouponCode, userId, subtotal);
+                freeshipDiscountAmount = couponService.calculateDiscount(fc, subtotal, shippingFee);
+                freeshipCouponId = fc.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Freeship coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount - freeshipDiscountAmount + shippingFee;
         final Integer finalCouponId = couponId;
         final double finalDiscountAmount = discountAmount;
+        final Integer finalFreeshipCouponId = freeshipCouponId;
+        final double finalFreeshipDiscountAmount = freeshipDiscountAmount;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             Order o = new Order();
@@ -188,6 +235,8 @@ public class OrderService {
             o.setTotalPrice(totalPrice);
             o.setCouponId(finalCouponId);
             o.setDiscountAmount(finalDiscountAmount);
+            o.setFreeshipCouponId(finalFreeshipCouponId);
+            o.setFreeshipDiscountAmount(finalFreeshipDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             return executeOrderTransaction(handle, o, cartItems, null);
         });
@@ -195,6 +244,10 @@ public class OrderService {
         if (couponId != null && discountAmount > 0) {
             couponDAO.incrementUsedCount(couponId);
             couponDAO.insertUsage(couponId, userId, order.getId(), discountAmount);
+        }
+        if (freeshipCouponId != null && freeshipDiscountAmount > 0) {
+            couponDAO.incrementUsedCount(freeshipCouponId);
+            couponDAO.insertUsage(freeshipCouponId, userId, order.getId(), freeshipDiscountAmount);
         }
 
         order.setAddress(addressOpt.get());
@@ -212,12 +265,20 @@ public class OrderService {
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems, double shippingFee)
             throws IllegalArgumentException {
-        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, shippingFee, null, null);
+        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, shippingFee, null, null, null, null);
     }
 
     public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
             int paymentMethodId, String note, List<CartItem> cartItems,
             double shippingFee, String couponCode, Double appliedDiscountAmount)
+            throws IllegalArgumentException {
+        return createGuestOrder(guestInfo, shippingAddress, paymentMethodId, note, cartItems, shippingFee, couponCode, appliedDiscountAmount, null, null);
+    }
+
+    public Order createGuestOrder(GuestInfo guestInfo, Address shippingAddress,
+            int paymentMethodId, String note, List<CartItem> cartItems,
+            double shippingFee, String couponCode, Double appliedDiscountAmount,
+            String freeshipCouponCode, Double appliedFreeshipDiscountAmount)
             throws IllegalArgumentException {
 
         if (guestInfo == null || !guestInfo.isValid()) {
@@ -255,9 +316,23 @@ public class OrderService {
             }
         }
 
-        double totalPrice = subtotal - discountAmount + shippingFee;
+        Integer freeshipCouponId = null;
+        double freeshipDiscountAmount = 0;
+        if (freeshipCouponCode != null && !freeshipCouponCode.trim().isEmpty()) {
+            try {
+                group36.model.Coupon fc = couponService.validateCouponForOrder(freeshipCouponCode, null, subtotal);
+                freeshipDiscountAmount = couponService.calculateDiscount(fc, subtotal, shippingFee);
+                freeshipCouponId = fc.getId();
+            } catch (IllegalArgumentException e) {
+                System.err.println("[OrderService] Freeship coupon validation failed: " + e.getMessage());
+            }
+        }
+
+        double totalPrice = subtotal - discountAmount - freeshipDiscountAmount + shippingFee;
         final Integer finalCouponId = couponId;
         final double finalDiscountAmount = discountAmount;
+        final Integer finalFreeshipCouponId = freeshipCouponId;
+        final double finalFreeshipDiscountAmount = freeshipDiscountAmount;
 
         Order order = JdbiProvider.getInstance().inTransaction(handle -> {
             shippingAddress.setUserId(0);
@@ -273,6 +348,8 @@ public class OrderService {
             o.setTotalPrice(totalPrice);
             o.setCouponId(finalCouponId);
             o.setDiscountAmount(finalDiscountAmount);
+            o.setFreeshipCouponId(finalFreeshipCouponId);
+            o.setFreeshipDiscountAmount(finalFreeshipDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
             o.setGuestEmail(guestInfo.getEmail());
             o.setGuestName(guestInfo.getFullName());
@@ -307,6 +384,10 @@ public class OrderService {
             couponDAO.incrementUsedCount(couponId);
             couponDAO.insertUsage(couponId, null, order.getId(), discountAmount);
         }
+        if (freeshipCouponId != null && freeshipDiscountAmount > 0) {
+            couponDAO.incrementUsedCount(freeshipCouponId);
+            couponDAO.insertUsage(freeshipCouponId, null, order.getId(), freeshipDiscountAmount);
+        }
 
         order.setAddress(shippingAddress);
         order.setPaymentMethod(paymentOpt.get());
@@ -319,6 +400,7 @@ public class OrderService {
 
         return order;
     }
+
 
     private Order executeOrderTransaction(Handle handle, Order order, List<CartItem> cartItems, Integer cartIdToDelete) {
         int orderId = orderDAO.insertWithHandle(handle, order);
@@ -653,6 +735,9 @@ public class OrderService {
 
     public void loadOrderDetailsForAdmin(Order order) {
         List<OrderDetail> details = orderDetailDAO.findByOrderId(order.getId());
+        for (OrderDetail detail : details) {
+            loadOrderDetailProducts(detail);
+        }
         order.setOrderDetails(details);
 
         if (!order.isGuestOrder() && order.getUserId() != null) {

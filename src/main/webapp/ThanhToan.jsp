@@ -220,6 +220,8 @@
                 <input type="hidden" name="isBuyNow" value="${isBuyNow}">
                 <input type="hidden" id="appliedCouponId" name="couponId" value="">
                 <input type="hidden" id="appliedDiscountAmount" name="discountAmount" value="0">
+                <input type="hidden" id="appliedFreeshipCouponId" value="">
+                <input type="hidden" id="appliedFreeshipDiscountAmount" value="0">
 
                 <c:if test="${!isLoggedIn}">
                   <h2 class="section-heading"><i class="fas fa-user"></i> Thông tin người nhận</h2>
@@ -311,6 +313,10 @@
               <h2 class="sum-title">Tóm tắt đơn hàng</h2>
 
               <div class="coupon-section" id="couponSection">
+                <button type="button" id="btnOpenVoucherPicker" class="btn-voucher-picker">
+                  <i class="fas fa-ticket-alt"></i> Chọn Farmily Voucher
+                </button>
+                <div id="appliedVouchersDisplay" style="display:none;" class="applied-vouchers-display"></div>
                 <div class="coupon-input-group" id="couponInputGroup">
                   <input type="text" id="couponCode" placeholder="Nhập mã giảm giá"
                          style="text-transform: uppercase;" maxlength="50">
@@ -356,6 +362,10 @@
                 <p id="discountRow" style="display: none; color: #22c55e;">
                   Giảm giá
                   <span id="discountText">-0đ</span>
+                </p>
+                <p id="freeshipDiscountRow" style="display: none; color: #22c55e;">
+                  Freeship
+                  <span id="freeshipDiscountText">-0đ</span>
                 </p>
                 <p class="grand">
                   Tổng cộng
@@ -430,6 +440,37 @@
           </div>
         </div>
     <div id="sepay-form-container" style="display:none;"></div>
+
+    <div class="voucher-modal-overlay" id="voucherModalOverlay" style="display:none;">
+      <div class="voucher-modal">
+        <div class="voucher-modal-header">
+          <h3><i class="fas fa-ticket-alt"></i> Chọn Farmily Voucher</h3>
+          <button class="voucher-modal-close" id="btnCloseVoucherModal">&times;</button>
+        </div>
+        <div class="voucher-modal-body">
+          <div class="voucher-section">
+            <h4><i class="fas fa-tag"></i> Mã Giảm Giá Đơn Hàng</h4>
+            <div id="discountVoucherList" class="voucher-list">
+              <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+          </div>
+          <div class="voucher-section">
+            <h4><i class="fas fa-truck"></i> Mã Miễn Phí Vận Chuyển</h4>
+            <div id="freeshipVoucherList" class="voucher-list">
+              <div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i></div>
+            </div>
+          </div>
+          <div class="voucher-manual-input">
+            <input type="text" id="voucherManualCode" placeholder="Nhập mã voucher khác..." style="text-transform:uppercase;">
+            <button type="button" id="btnApplyManualVoucher">Áp dụng</button>
+          </div>
+        </div>
+        <div class="voucher-modal-footer">
+          <span id="voucherSavingText">Tiết kiệm: 0đ</span>
+          <button type="button" id="btnConfirmVoucher" class="btn-confirm-voucher">Xác nhận</button>
+        </div>
+      </div>
+    </div>
 
         <jsp:include page="common/footer.jsp" />
 

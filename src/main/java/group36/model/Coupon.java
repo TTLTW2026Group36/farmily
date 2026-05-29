@@ -244,7 +244,6 @@ public class Coupon implements Serializable {
         }
         return "";
     }
-
     public String getFormattedMinOrderValue() {
         if (minOrderValue <= 0) return "Không giới hạn";
         java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0");

@@ -315,6 +315,18 @@
                                     <span>Tạm tính</span>
                                     <span>${order.formattedSubtotal}</span>
                                 </div>
+                                <c:if test="${order.discountAmount > 0}">
+                                    <div class="order-total-row">
+                                        <span>Giảm giá (Voucher)</span>
+                                        <span style="color: #dc2626;">${order.formattedDiscountAmount}</span>
+                                    </div>
+                                </c:if>
+                                <c:if test="${order.freeshipDiscountAmount > 0}">
+                                    <div class="order-total-row">
+                                        <span>Giảm phí vận chuyển</span>
+                                        <span style="color: #dc2626;">${order.formattedFreeshipDiscountAmount}</span>
+                                    </div>
+                                </c:if>
                                 <div class="order-total-row">
                                     <span>Phí vận chuyển</span>
                                     <span>${order.formattedShippingFee}</span>

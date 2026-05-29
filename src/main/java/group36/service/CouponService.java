@@ -6,9 +6,13 @@ import group36.dao.SavedCouponDAO;
 import group36.model.Coupon;
 import group36.model.CouponUsage;
 import java.sql.Timestamp;
-import java.util.List;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class CouponService {
     private final CouponDAO couponDAO;
@@ -192,6 +196,66 @@ public class CouponService {
             return "saved";
         }
         return "none";
+    }
+
+    public Map<String, Object> getAvailableVouchersForCheckout(Integer userId, double subtotal) {
+        Map<String, Object> result = new HashMap<>();
+        List<Coupon> allActive = couponDAO.findActiveCoupons();
+        List<Map<String, Object>> discountList = new ArrayList<>();
+        List<Map<String, Object>> freeshipList = new ArrayList<>();
+
+        Set<Integer> savedIds = userId != null ? savedCouponDAO.getSavedCouponIds(userId) : new HashSet<>();
+
+        for (Coupon c : allActive) {
+            if (userId != null) {
+                int usageCount = couponDAO.countUsageByUserAndCoupon(userId, c.getId());
+                if (usageCount >= c.getMaxUsagePerUser()) {
+                    continue;
+                }
+            }
+            Map<String, Object> item = couponToMap(c);
+            boolean eligible = subtotal >= c.getMinOrderValue();
+            item.put("eligible", eligible);
+            item.put("saved", savedIds.contains(c.getId()));
+            if (!eligible) {
+                item.put("shortAmount", c.getMinOrderValue() - subtotal);
+            }
+            item.put("calculatedDiscount", calculateDiscount(c, subtotal, 0));
+
+            if ("freeship".equals(c.getDiscountType())) {
+                freeshipList.add(item);
+            } else {
+                discountList.add(item);
+            }
+        }
+
+        Comparator<Map<String, Object>> comp = (a, b) -> {
+            boolean aE = (boolean) a.get("eligible");
+            boolean bE = (boolean) b.get("eligible");
+            if (aE != bE) return bE ? 1 : -1;
+            return Double.compare((double) b.get("calculatedDiscount"), (double) a.get("calculatedDiscount"));
+        };
+        discountList.sort(comp);
+        freeshipList.sort(comp);
+
+        result.put("discountCoupons", discountList);
+        result.put("freeshipCoupons", freeshipList);
+        return result;
+    }
+
+    private Map<String, Object> couponToMap(Coupon c) {
+        Map<String, Object> m = new HashMap<>();
+        m.put("id", c.getId());
+        m.put("code", c.getCode());
+        m.put("discountType", c.getDiscountType());
+        m.put("discountValue", c.getDiscountValue());
+        m.put("maxDiscount", c.getMaxDiscount());
+        m.put("minOrderValue", c.getMinOrderValue());
+        m.put("endDate", c.getEndDate());
+        m.put("expiringSoon", c.isExpiringSoon());
+        m.put("formattedDiscountValue", c.getFormattedDiscountValue());
+        m.put("formattedMinOrderValue", c.getFormattedMinOrderValue());
+        return m;
     }
 }
 
