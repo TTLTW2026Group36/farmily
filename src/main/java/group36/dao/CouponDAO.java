@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class CouponDAO extends BaseDao {
 
-    private static class CouponMapper implements RowMapper<Coupon> {
+    public static class CouponMapper implements RowMapper<Coupon> {
         @Override
         public Coupon map(ResultSet rs, StatementContext ctx) throws SQLException {
             Coupon c = new Coupon();

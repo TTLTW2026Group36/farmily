@@ -68,6 +68,11 @@
                                 <i class="fas fa-heart"></i> Sản phẩm yêu thích
                             </a>
                         </li>
+                        <li class="${param.tab == 'coupons' ? 'active' : ''}">
+                            <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
+                                <i class="fas fa-ticket-alt"></i> Ví voucher
+                            </a>
+                        </li>
                     </ul>
                 </div>
 
@@ -193,6 +198,25 @@
                                 </p>
                                 <a href="${pageContext.request.contextPath}/san-pham" class="btn-explore">Khám phá sản
                                     phẩm</a>
+                            </div>
+                        </div>
+                    </c:if>
+
+                    <c:if test="${param.tab == 'coupons'}">
+                        <div class="coupon-wallet-section">
+                            <h2>VÍ VOUCHER</h2>
+                            <div id="coupon-wallet-container" class="coupon-wallet-grid">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                </div>
+                            </div>
+                            <div id="coupon-wallet-empty" class="empty-wallet" style="display: none;">
+                                <i class="fas fa-ticket-alt"></i>
+                                <h3>Chưa lưu mã giảm giá nào</h3>
+                                <p>Khám phá và lưu mã giảm giá cho đơn hàng tiếp theo!</p>
+                                <a href="${pageContext.request.contextPath}/ma-giam-gia" class="btn-explore">
+                                    Xem mã giảm giá
+                                </a>
                             </div>
                         </div>
                     </c:if>

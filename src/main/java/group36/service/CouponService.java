@@ -2,18 +2,23 @@ package group36.service;
 
 import group36.dao.CouponDAO;
 import group36.dao.CouponUsageDAO;
+import group36.dao.SavedCouponDAO;
 import group36.model.Coupon;
 import group36.model.CouponUsage;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 public class CouponService {
     private final CouponDAO couponDAO;
     private final CouponUsageDAO couponUsageDAO;
+    private final SavedCouponDAO savedCouponDAO;
 
     public CouponService() {
         this.couponDAO = new CouponDAO();
         this.couponUsageDAO = new CouponUsageDAO();
+        this.savedCouponDAO = new SavedCouponDAO();
     }
 
     public List<Coupon> getAllCoupons() {
@@ -163,6 +168,30 @@ public class CouponService {
 
     public double getTotalDiscountAmount(int couponId) {
         return couponUsageDAO.getTotalDiscountByCouponId(couponId);
+    }
+
+    public void saveCoupon(int userId, int couponId) {
+        getCouponById(couponId);
+        savedCouponDAO.save(userId, couponId);
+    }
+
+    public List<Coupon> getSavedCoupons(int userId) {
+        return savedCouponDAO.getSavedCoupons(userId);
+    }
+
+    public Set<Integer> getSavedCouponIds(int userId) {
+        return savedCouponDAO.getSavedCouponIds(userId);
+    }
+
+    public String getUserCouponStatus(int userId, Coupon coupon) {
+        int usageCount = couponDAO.countUsageByUserAndCoupon(userId, coupon.getId());
+        if (usageCount >= coupon.getMaxUsagePerUser()) {
+            return "used";
+        }
+        if (savedCouponDAO.isSaved(userId, coupon.getId())) {
+            return "saved";
+        }
+        return "none";
     }
 }
 

@@ -234,7 +234,11 @@ public class Coupon implements Serializable {
         if ("percent".equals(discountType)) {
             return "Giảm " + (int) discountValue + "%";
         } else if ("fixed".equals(discountType)) {
-            return "Giảm " + String.format("%,.0f", discountValue) + "đ";
+            java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0");
+            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+            symbols.setGroupingSeparator('.');
+            df.setDecimalFormatSymbols(symbols);
+            return "Giảm " + df.format(discountValue) + "đ";
         } else if ("freeship".equals(discountType)) {
             return "Miễn phí vận chuyển";
         }
@@ -243,6 +247,10 @@ public class Coupon implements Serializable {
 
     public String getFormattedMinOrderValue() {
         if (minOrderValue <= 0) return "Không giới hạn";
-        return "Đơn tối thiểu " + String.format("%,.0f", minOrderValue) + "đ";
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0");
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        df.setDecimalFormatSymbols(symbols);
+        return "Đơn tối thiểu " + df.format(minOrderValue) + "đ";
     }
 }

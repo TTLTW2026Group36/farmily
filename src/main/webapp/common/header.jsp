@@ -55,6 +55,11 @@
                                             </a>
                                         </li>
                                         <li>
+                                            <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
+                                                <i class="fa-solid fa-ticket-alt"></i> Ví voucher
+                                            </a>
+                                        </li>
+                                        <li>
                                             <a href="${pageContext.request.contextPath}/logout">
                                                 <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                                             </a>

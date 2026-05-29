@@ -72,6 +72,25 @@
                                         <span class="expiring-badge">⚡ Sắp hết hạn</span>
                                     </c:if>
                                 </p>
+                                <div class="coupon-action">
+                                    <c:choose>
+                                        <c:when test="${userCouponStatuses[coupon.id] == 'used'}">
+                                            <button class="btn-coupon-status used" disabled>
+                                                <i class="fas fa-check-double"></i> Đã dùng
+                                            </button>
+                                        </c:when>
+                                        <c:when test="${userCouponStatuses[coupon.id] == 'saved'}">
+                                            <button class="btn-coupon-status saved" disabled>
+                                                <i class="fas fa-bookmark"></i> Đã lưu
+                                            </button>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <button class="btn-coupon-status save" onclick="toggleSaveCoupon(${coupon.id}, this)">
+                                                <i class="far fa-bookmark"></i> Lưu mã
+                                            </button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </div>
                             </div>
                         </div>
                     </c:forEach>
@@ -85,6 +104,9 @@
     <jsp:include page="common/footer.jsp" />
 
     <script>
+        var contextPath = '${pageContext.request.contextPath}';
+        var isLoggedIn = ${not empty sessionScope.auth};
+
         function copyCouponCode(code, btn) {
             navigator.clipboard.writeText(code).then(function() {
                 onCopySuccess(code, btn);
@@ -116,6 +138,36 @@
             toast.textContent = message;
             toast.classList.add('show');
             setTimeout(function() { toast.classList.remove('show'); }, 2000);
+        }
+
+        function toggleSaveCoupon(couponId, btn) {
+            if (!isLoggedIn) {
+                window.location.href = contextPath + '/dang-nhap';
+                return;
+            }
+            
+            btn.disabled = true;
+            var url = contextPath + '/api/coupon/save';
+            
+            fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'couponId=' + couponId
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (!data.success) {
+                    btn.disabled = false;
+                    showToast(data.message || 'Có lỗi xảy ra');
+                } else {
+                    btn.className = 'btn-coupon-status saved';
+                    btn.innerHTML = '<i class="fas fa-bookmark"></i> Đã lưu';
+                    showToast('Đã lưu mã thành công');
+                }
+            })
+            .catch(function() {
+                btn.disabled = false;
+            });
         }
     </script>
 
