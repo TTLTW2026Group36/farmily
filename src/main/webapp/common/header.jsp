@@ -55,6 +55,11 @@
                                             </a>
                                         </li>
                                         <li>
+                                            <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
+                                                <i class="fa-solid fa-ticket-alt"></i> Ví voucher
+                                            </a>
+                                        </li>
+                                        <li>
                                             <a href="${pageContext.request.contextPath}/logout">
                                                 <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
                                             </a>
@@ -146,6 +151,7 @@
                         <a href="${pageContext.request.contextPath}/GioiThieu.jsp">Giới Thiệu</a>
                         <a href="${pageContext.request.contextPath}/san-pham">Sản Phẩm</a>
                         <a href="${pageContext.request.contextPath}/gia-tot">Giá Tốt</a>
+                        <a href="${pageContext.request.contextPath}/ma-giam-gia">Mã Giảm Giá</a>
                         <a href="${pageContext.request.contextPath}/tin-tuc">Tin Tức</a>
                         <a href="${pageContext.request.contextPath}/lien-he">Liên Hệ</a>
                     </div>

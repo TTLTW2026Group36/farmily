@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public class CouponDAO extends BaseDao {
 
-    private static class CouponMapper implements RowMapper<Coupon> {
+    public static class CouponMapper implements RowMapper<Coupon> {
         @Override
         public Coupon map(ResultSet rs, StatementContext ctx) throws SQLException {
             Coupon c = new Coupon();
@@ -173,6 +173,25 @@ public class CouponDAO extends BaseDao {
                 .bind("orderId", orderId)
                 .bind("discountAmount", discountAmount)
                 .execute());
+    }
+
+    public List<Coupon> findActiveCoupons() {
+        String sql = "SELECT * FROM coupons WHERE is_active = 1 " +
+                     "AND NOW() BETWEEN start_date AND end_date " +
+                     "AND used_count < quantity " +
+                     "ORDER BY created_at DESC";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new CouponMapper())
+                .list());
+    }
+
+    public List<Coupon> findActiveCouponsByType(String discountType) {
+        String sql = "SELECT * FROM coupons WHERE is_active = 1 " +
+                     "AND discount_type = :type " +
+                     "AND NOW() BETWEEN start_date AND end_date " +
+                     "AND used_count < quantity ORDER BY discount_value DESC";
+        return get().withHandle(h -> h.createQuery(sql)
+                .bind("type", discountType).map(new CouponMapper()).list());
     }
 }
 

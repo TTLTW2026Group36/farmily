@@ -352,6 +352,12 @@
                                                     <span style="color: #22c55e; font-weight: 600;">${order.formattedDiscountAmount}</span>
                                                 </div>
                                             </c:if>
+                                            <c:if test="${order.hasFreeshipCoupon()}">
+                                                <div class="total-row">
+                                                    <span>Giảm phí vận chuyển</span>
+                                                    <span style="color: #22c55e; font-weight: 600;">${order.formattedFreeshipDiscountAmount}</span>
+                                                </div>
+                                            </c:if>
                                             <div class="total-row">
                                                 <span>Phí vận chuyển</span>
                                                 <span>${order.formattedShippingFee}</span>

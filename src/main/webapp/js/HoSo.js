@@ -1023,3 +1023,103 @@ function deleteSelectedWishlistItems() {
             showToast('Không thể xóa sản phẩm', 'error');
         });
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tab') === 'coupons') {
+        loadCouponWallet();
+    }
+});
+
+function loadCouponWallet() {
+    const container = document.getElementById('coupon-wallet-container');
+    const emptyState = document.getElementById('coupon-wallet-empty');
+    if (!container) return;
+
+    fetch((window.contextPath || '') + '/api/coupon/saved', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+        if (data.success && data.coupons && data.coupons.length > 0) {
+            renderWalletCoupons(data.coupons, data.userStatuses || {});
+            container.style.display = 'grid';
+            if (emptyState) emptyState.style.display = 'none';
+        } else {
+            container.innerHTML = '';
+            container.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'flex';
+        }
+    })
+    .catch(function (error) {
+        console.error('Error loading coupon wallet:', error);
+        container.innerHTML = '<p class="error-msg">Có lỗi xảy ra khi tải ví voucher</p>';
+    });
+}
+
+function renderWalletCoupons(coupons, statuses) {
+    const container = document.getElementById('coupon-wallet-container');
+    if (!container) return;
+
+    function formatNum(n) { return new Intl.NumberFormat('vi-VN').format(Math.round(n)); }
+
+    let html = '';
+    coupons.forEach(function (coupon) {
+        const discountVal = coupon.formattedDiscountValue;
+        const condition = coupon.formattedMinOrderValue;
+        const expiryDate = new Date(coupon.endDate);
+        const day = ('0' + expiryDate.getDate()).slice(-2);
+        const month = ('0' + (expiryDate.getMonth() + 1)).slice(-2);
+        const year = expiryDate.getFullYear();
+        const expiryStr = day + '/' + month + '/' + year;
+
+        const isUsed = statuses[coupon.id] === 'used';
+        const typeClass = coupon.discountType || '';
+        const cardClass = 'wallet-card ' + typeClass + (isUsed ? ' disabled' : '');
+        const isFreeship = coupon.discountType === 'freeship';
+        const iconClass = isFreeship ? 'fas fa-truck' : 'fas fa-tag';
+        const leftClass = 'wallet-card-left ' + typeClass;
+
+        let descText = '';
+        if (coupon.discountType === 'percent') {
+            descText = 'Giảm ' + coupon.discountValue + '%';
+            if (coupon.maxDiscount > 0) descText += ' tối đa ' + formatNum(coupon.maxDiscount) + 'đ';
+        } else if (isFreeship) {
+            descText = 'Miễn phí vận chuyển';
+        } else {
+            descText = 'Giảm ' + formatNum(coupon.discountValue) + 'đ';
+        }
+
+        let expiringTag = coupon.expiringSoon ? '<span class="voucher-tag-expiring">Sắp hết hạn</span>' : '';
+
+        let statusHtml = '';
+        if (isUsed) {
+            statusHtml = '<span class="wallet-status used">Đã dùng</span>';
+        }
+
+        let actionHtml = '';
+        if (!isUsed) {
+            actionHtml = '<div class="wallet-actions">' +
+                         '  <a href="' + (window.contextPath || '') + '/san-pham" class="btn-use-now">Dùng ngay</a>' +
+                         '</div>';
+        }
+
+        html += '<div class="' + cardClass + '" data-id="' + coupon.id + '">' +
+                '  <div class="' + leftClass + '">' +
+                '    <i class="' + iconClass + '"></i>' +
+                '    <div class="discount-val">' + discountVal + '</div>' +
+                '  </div>' +
+                '  <div class="wallet-card-right">' +
+                '    <span class="wallet-code">' + coupon.code + '</span>' +
+                '    <div class="voucher-desc">' + descText + ' ' + expiringTag + '</div>' +
+                '    <div class="voucher-condition">' + condition + '</div>' +
+                '    <p class="wallet-condition">HSD: ' + expiryStr + '</p>' +
+                '    ' + statusHtml +
+                '    ' + actionHtml +
+                '  </div>' +
+                '</div>';
+    });
+
+    container.innerHTML = html;
+}

@@ -223,4 +223,33 @@ public class Coupon implements Serializable {
     public int getRemainingCount() {
         return Math.max(0, quantity - usedCount);
     }
+
+    public boolean isExpiringSoon() {
+        if (endDate == null) return false;
+        long hoursLeft = (endDate.getTime() - System.currentTimeMillis()) / (1000 * 60 * 60);
+        return hoursLeft > 0 && hoursLeft <= 48;
+    }
+
+    public String getFormattedDiscountValue() {
+        if ("percent".equals(discountType)) {
+            return "Giảm " + (int) discountValue + "%";
+        } else if ("fixed".equals(discountType)) {
+            java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0");
+            java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+            symbols.setGroupingSeparator('.');
+            df.setDecimalFormatSymbols(symbols);
+            return "Giảm " + df.format(discountValue) + "đ";
+        } else if ("freeship".equals(discountType)) {
+            return "Miễn phí vận chuyển";
+        }
+        return "";
+    }
+    public String getFormattedMinOrderValue() {
+        if (minOrderValue <= 0) return "Không giới hạn";
+        java.text.DecimalFormat df = new java.text.DecimalFormat("#,##0");
+        java.text.DecimalFormatSymbols symbols = new java.text.DecimalFormatSymbols();
+        symbols.setGroupingSeparator('.');
+        df.setDecimalFormatSymbols(symbols);
+        return "Đơn tối thiểu " + df.format(minOrderValue) + "đ";
+    }
 }

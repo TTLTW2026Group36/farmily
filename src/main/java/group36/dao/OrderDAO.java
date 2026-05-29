@@ -53,6 +53,13 @@ public class OrderDAO extends BaseDao {
                         } catch (SQLException e) {
                         }
 
+                        try {
+                                int freeshipCouponId = rs.getInt("freeship_coupon_id");
+                                order.setFreeshipCouponId(rs.wasNull() ? null : freeshipCouponId);
+                                order.setFreeshipDiscountAmount(rs.getDouble("freeship_discount_amount"));
+                        } catch (SQLException e) {
+                        }
+
                         return order;
                 }
         }
@@ -114,8 +121,8 @@ public class OrderDAO extends BaseDao {
         }
 
         public int insertWithHandle(org.jdbi.v3.core.Handle h, Order order) {
-                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price, coupon_id, discount_amount) "
-                                + "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, :couponId, :discountAmount)";
+                String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, shipping_fee, total_price, coupon_id, discount_amount, freeship_coupon_id, freeship_discount_amount) "
+                                + "VALUES (:userId, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, :couponId, :discountAmount, :freeshipCouponId, :freeshipDiscountAmount)";
                 return h.createUpdate(sql)
                                 .bind("userId", order.getUserId())
                                 .bind("addressId", order.getAddressId())
@@ -127,6 +134,8 @@ public class OrderDAO extends BaseDao {
                                 .bind("totalPrice", order.getTotalPrice())
                                 .bind("couponId", order.getCouponId())
                                 .bind("discountAmount", order.getDiscountAmount())
+                                .bind("freeshipCouponId", order.getFreeshipCouponId())
+                                .bind("freeshipDiscountAmount", order.getFreeshipDiscountAmount())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
                                 .one();
@@ -138,9 +147,9 @@ public class OrderDAO extends BaseDao {
 
         public int insertGuestOrderWithHandle(org.jdbi.v3.core.Handle h, Order order) {
                 String sql = "INSERT INTO orders (user_id, address_id, payment_method_id, status, note, admin_note, " +
-                                "shipping_fee, total_price, guest_email, guest_name, guest_phone, coupon_id, discount_amount) " +
+                                "shipping_fee, total_price, guest_email, guest_name, guest_phone, coupon_id, discount_amount, freeship_coupon_id, freeship_discount_amount) " +
                                 "VALUES (NULL, :addressId, :paymentMethodId, :status, :note, :adminNote, :shippingFee, :totalPrice, " +
-                                ":guestEmail, :guestName, :guestPhone, :couponId, :discountAmount)";
+                                ":guestEmail, :guestName, :guestPhone, :couponId, :discountAmount, :freeshipCouponId, :freeshipDiscountAmount)";
                 return h.createUpdate(sql)
                                 .bind("addressId", order.getAddressId())
                                 .bind("paymentMethodId", order.getPaymentMethodId())
@@ -154,6 +163,8 @@ public class OrderDAO extends BaseDao {
                                 .bind("guestPhone", order.getGuestPhone())
                                 .bind("couponId", order.getCouponId())
                                 .bind("discountAmount", order.getDiscountAmount())
+                                .bind("freeshipCouponId", order.getFreeshipCouponId())
+                                .bind("freeshipDiscountAmount", order.getFreeshipDiscountAmount())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
                                 .one();
