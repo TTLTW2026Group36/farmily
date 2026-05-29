@@ -174,5 +174,15 @@ public class CouponDAO extends BaseDao {
                 .bind("discountAmount", discountAmount)
                 .execute());
     }
+
+    public List<Coupon> findActiveCoupons() {
+        String sql = "SELECT * FROM coupons WHERE is_active = 1 " +
+                     "AND NOW() BETWEEN start_date AND end_date " +
+                     "AND used_count < quantity " +
+                     "ORDER BY created_at DESC";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new CouponMapper())
+                .list());
+    }
 }
 

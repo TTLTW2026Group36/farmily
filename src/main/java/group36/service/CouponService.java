@@ -97,6 +97,10 @@ public class CouponService {
         return couponDAO.findByFilters(keyword, status);
     }
 
+    public List<Coupon> getPublicCoupons() {
+        return couponDAO.findActiveCoupons();
+    }
+
     public Coupon validateCouponForOrder(String code, Integer userId, double subtotal) {
         if (code == null || code.trim().isEmpty()) {
             throw new IllegalArgumentException("Vui lòng nhập mã giảm giá");

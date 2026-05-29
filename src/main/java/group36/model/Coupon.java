@@ -223,4 +223,26 @@ public class Coupon implements Serializable {
     public int getRemainingCount() {
         return Math.max(0, quantity - usedCount);
     }
+
+    public boolean isExpiringSoon() {
+        if (endDate == null) return false;
+        long hoursLeft = (endDate.getTime() - System.currentTimeMillis()) / (1000 * 60 * 60);
+        return hoursLeft > 0 && hoursLeft <= 48;
+    }
+
+    public String getFormattedDiscountValue() {
+        if ("percent".equals(discountType)) {
+            return "Giảm " + (int) discountValue + "%";
+        } else if ("fixed".equals(discountType)) {
+            return "Giảm " + String.format("%,.0f", discountValue) + "đ";
+        } else if ("freeship".equals(discountType)) {
+            return "Miễn phí vận chuyển";
+        }
+        return "";
+    }
+
+    public String getFormattedMinOrderValue() {
+        if (minOrderValue <= 0) return "Không giới hạn";
+        return "Đơn tối thiểu " + String.format("%,.0f", minOrderValue) + "đ";
+    }
 }
