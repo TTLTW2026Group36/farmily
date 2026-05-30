@@ -26,13 +26,28 @@
                     <ol class="breadcrumb-list">
                         <li class="breadcrumb-item">
                             <a href="${pageContext.request.contextPath}/">
-                                <i class="fas fa-home"></i>
-                                Trang chủ
+                                <i class="fas fa-home"></i> Trang chủ
                             </a>
                         </li>
-                        <li class="breadcrumb-item active" aria-current="page">
-                            Hồ sơ cá nhân
-                        </li>
+                        <c:choose>
+                            <c:when test="${param.tab == null || param.tab == 'info'}">
+                                <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+                            </c:when>
+                            <c:otherwise>
+                                <li class="breadcrumb-item">
+                                    <a href="${pageContext.request.contextPath}/ho-so">Hồ sơ cá nhân</a>
+                                </li>
+                                <li class="breadcrumb-item active" aria-current="page">
+                                    <c:choose>
+                                        <c:when test="${param.tab == 'address'}">Sổ địa chỉ</c:when>
+                                        <c:when test="${param.tab == 'password'}">Đổi mật khẩu</c:when>
+                                        <c:when test="${param.tab == 'wishlist'}">Sản phẩm yêu thích</c:when>
+                                        <c:when test="${param.tab == 'coupons'}">Ví voucher</c:when>
+                                        <c:otherwise>Chi tiết</c:otherwise>
+                                    </c:choose>
+                                </li>
+                            </c:otherwise>
+                        </c:choose>
                     </ol>
                 </div>
             </nav>

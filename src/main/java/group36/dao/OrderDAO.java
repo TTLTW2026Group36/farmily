@@ -331,6 +331,38 @@ public class OrderDAO extends BaseDao {
                 });
         }
 
+        public int countByUserIdAndStatus(int userId, String status) {
+                String sql = "SELECT COUNT(*) FROM orders WHERE user_id = :userId AND status = :status";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .bind("userId", userId)
+                                .bind("status", status)
+                                .mapTo(Integer.class)
+                                .one());
+        }
+
+        public List<Order> findByUserIdPaginated(int userId, int page, int size) {
+                int offset = (page - 1) * size;
+                String sql = "SELECT * FROM orders WHERE user_id = :userId ORDER BY order_date DESC LIMIT :size OFFSET :offset";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .bind("userId", userId)
+                                .bind("size", size)
+                                .bind("offset", offset)
+                                .map(new OrderMapper())
+                                .list());
+        }
+
+        public List<Order> findByUserIdAndStatusPaginated(int userId, String status, int page, int size) {
+                int offset = (page - 1) * size;
+                String sql = "SELECT * FROM orders WHERE user_id = :userId AND status = :status ORDER BY order_date DESC LIMIT :size OFFSET :offset";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .bind("userId", userId)
+                                .bind("status", status)
+                                .bind("size", size)
+                                .bind("offset", offset)
+                                .map(new OrderMapper())
+                                .list());
+        }
+
         public int countFiltered(String status, String keyword, String fromDate, String toDate) {
                 StringBuilder sql = new StringBuilder(
                                 "SELECT COUNT(*) FROM orders o " +

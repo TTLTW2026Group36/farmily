@@ -1428,3 +1428,93 @@ a.review-product-name:hover {
 .btn-cancel-edit:hover {
     background: #e5e7eb;
 }
+
+.pagination-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 28px;
+    padding-top: 20px;
+    border-top: 1px solid #e8e8e8;
+}
+
+.pagination-pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pagination-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #555;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination-page:hover {
+    background: #f0fdf4;
+    border-color: #2d6a2d;
+    color: #2d6a2d;
+}
+
+.pagination-page.active {
+    background: #2d6a2d;
+    border-color: #2d6a2d;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(45, 106, 45, 0.25);
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.pagination-btn:hover {
+    background: #f0fdf4;
+    border-color: #2d6a2d;
+    color: #2d6a2d;
+}
+
+.pagination-btn i {
+    font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .pagination-bar {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .pagination-page {
+        min-width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+
+    .pagination-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}

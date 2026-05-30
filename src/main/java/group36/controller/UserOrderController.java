@@ -90,17 +90,27 @@ public class UserOrderController extends HttpServlet {
             throws ServletException, IOException {
 
         String statusFilter = request.getParameter("status");
+        int page = parseIntOrDefault(request.getParameter("page"), 1);
+        int pageSize = 5;
+        int userId = user.getId();
 
-        List<Order> orders = orderService.getOrdersByUserId(user.getId());
+        int countAll = orderService.countOrdersByUserId(userId);
+        int countPending = orderService.countOrdersByUserIdAndStatus(userId, "pending");
+        int countProcessing = orderService.countOrdersByUserIdAndStatus(userId, "processing");
+        int countShipping = orderService.countOrdersByUserIdAndStatus(userId, "shipping");
+        int countCompleted = orderService.countOrdersByUserIdAndStatus(userId, "completed");
+        int countCancelled = orderService.countOrdersByUserIdAndStatus(userId, "cancelled");
+
+        List<Order> orders;
+        int totalOrders;
 
         if ("review".equals(statusFilter)) {
-            orders = orders.stream()
-                    .filter(o -> "completed".equals(o.getStatus()))
-                    .toList();
+            orders = orderService.getOrdersByUserIdAndStatusPaginated(userId, "completed", page, pageSize);
+            totalOrders = countCompleted;
 
             Map<Integer, Map<Integer, Review>> orderReviewMaps = new HashMap<>();
             for (Order order : orders) {
-                List<Review> reviews = reviewDAO.findByOrderIdAndUserId(order.getId(), user.getId());
+                List<Review> reviews = reviewDAO.findByOrderIdAndUserId(order.getId(), userId);
                 for (Review r : reviews) {
                     r.setImages(reviewImageDAO.findByReviewId(r.getId()));
                 }
@@ -112,18 +122,14 @@ public class UserOrderController extends HttpServlet {
             }
             request.setAttribute("orderReviewMaps", orderReviewMaps);
         } else if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
-            orders = orders.stream()
-                    .filter(o -> statusFilter.equals(o.getStatus()))
-                    .toList();
+            orders = orderService.getOrdersByUserIdAndStatusPaginated(userId, statusFilter, page, pageSize);
+            totalOrders = orderService.countOrdersByUserIdAndStatus(userId, statusFilter);
+        } else {
+            orders = orderService.getOrdersByUserIdPaginated(userId, page, pageSize);
+            totalOrders = countAll;
         }
 
-        List<Order> allOrders = orderService.getOrdersByUserId(user.getId());
-        int countAll = allOrders.size();
-        int countPending = (int) allOrders.stream().filter(o -> "pending".equals(o.getStatus())).count();
-        int countProcessing = (int) allOrders.stream().filter(o -> "processing".equals(o.getStatus())).count();
-        int countShipping = (int) allOrders.stream().filter(o -> "shipping".equals(o.getStatus())).count();
-        int countCompleted = (int) allOrders.stream().filter(o -> "completed".equals(o.getStatus())).count();
-        int countCancelled = (int) allOrders.stream().filter(o -> "cancelled".equals(o.getStatus())).count();
+        int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
 
         request.setAttribute("orders", orders);
         request.setAttribute("currentStatus", statusFilter != null ? statusFilter : "all");
@@ -133,10 +139,23 @@ public class UserOrderController extends HttpServlet {
         request.setAttribute("countShipping", countShipping);
         request.setAttribute("countCompleted", countCompleted);
         request.setAttribute("countCancelled", countCancelled);
+        request.setAttribute("currentPage", page);
+        request.setAttribute("totalPages", totalPages);
+        request.setAttribute("pageSize", pageSize);
         request.setAttribute("pageTitle", "Đơn hàng của bạn");
         request.setAttribute("activeTab", "orders");
 
         request.getRequestDispatcher("/DonHangList.jsp").forward(request, response);
+    }
+
+    private int parseIntOrDefault(String value, int defaultValue) {
+        if (value == null || value.isEmpty()) return defaultValue;
+        try {
+            int parsed = Integer.parseInt(value);
+            return parsed > 0 ? parsed : defaultValue;
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
     }
 
     private void handleOrderDetail(HttpServletRequest request, HttpServletResponse response, User user)

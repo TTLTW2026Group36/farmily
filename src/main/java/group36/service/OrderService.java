@@ -449,6 +449,30 @@ public class OrderService {
         return orders;
     }
 
+    public List<Order> getOrdersByUserIdPaginated(int userId, int page, int pageSize) {
+        List<Order> orders = orderDAO.findByUserIdPaginated(userId, page, pageSize);
+        for (Order order : orders) {
+            loadOrderDetails(order);
+        }
+        return orders;
+    }
+
+    public List<Order> getOrdersByUserIdAndStatusPaginated(int userId, String status, int page, int pageSize) {
+        List<Order> orders = orderDAO.findByUserIdAndStatusPaginated(userId, status, page, pageSize);
+        for (Order order : orders) {
+            loadOrderDetails(order);
+        }
+        return orders;
+    }
+
+    public int countOrdersByUserId(int userId) {
+        return orderDAO.countByUserId(userId);
+    }
+
+    public int countOrdersByUserIdAndStatus(int userId, String status) {
+        return orderDAO.countByUserIdAndStatus(userId, status);
+    }
+
     public List<Product> getPreviouslyPurchasedRecommendations(int userId, List<Integer> excludedProductIds, int limit) {
         if (limit <= 0) {
             return new ArrayList<>();
@@ -661,16 +685,12 @@ public class OrderService {
     }
 
     private void loadOrderDetailProducts(OrderDetail detail) {
-        System.out.println("DEBUG: Loading product for productId=" + detail.getProductId());
         Optional<Product> productOpt = productDAO.findById(detail.getProductId());
         if (productOpt.isPresent()) {
             Product product = productOpt.get();
-            System.out.println("DEBUG: Product found - ID=" + product.getId() + ", Name=" + product.getName());
             List<ProductImage> images = productImageDAO.findByProductId(product.getId());
             product.setImages(images);
             detail.setProduct(product);
-        } else {
-            System.out.println("DEBUG: Product NOT FOUND for productId=" + detail.getProductId());
         }
         if (detail.getVariantId() != null) {
             productVariantDAO.findById(detail.getVariantId()).ifPresent(detail::setVariant);

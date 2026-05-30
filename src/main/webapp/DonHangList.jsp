@@ -27,12 +27,11 @@
                             <ol class="breadcrumb-list">
                                 <li class="breadcrumb-item">
                                     <a href="${pageContext.request.contextPath}/">
-                                        <i class="fas fa-home"></i>
-                                        Trang chủ
+                                        <i class="fas fa-home"></i> Trang chủ
                                     </a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="${pageContext.request.contextPath}/ho-so">Hồ sơ</a>
+                                    <a href="${pageContext.request.contextPath}/ho-so">Hồ sơ cá nhân</a>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">
                                     Đơn hàng của bạn
@@ -70,6 +69,11 @@
                                 <li>
                                     <a href="${pageContext.request.contextPath}/ho-so?tab=wishlist">
                                         <i class="fas fa-heart"></i> Sản phẩm yêu thích
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
+                                        <i class="fas fa-ticket-alt"></i> Ví voucher
                                     </a>
                                 </li>
                             </ul>
@@ -536,6 +540,30 @@
                                     </div>
                                 </c:otherwise>
                             </c:choose>
+                            <c:if test="${totalPages > 1}">
+                                <div class="pagination-bar">
+                                    <c:if test="${currentPage > 1}">
+                                        <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=${currentStatus}&page=${currentPage - 1}"
+                                            class="pagination-btn pagination-prev">
+                                            <i class="fas fa-chevron-left"></i> Trước
+                                        </a>
+                                    </c:if>
+
+                                    <div class="pagination-pages">
+                                        <c:forEach begin="1" end="${totalPages}" var="i">
+                                            <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=${currentStatus}&page=${i}"
+                                                class="pagination-page ${i == currentPage ? 'active' : ''}">${i}</a>
+                                        </c:forEach>
+                                    </div>
+
+                                    <c:if test="${currentPage < totalPages}">
+                                        <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=${currentStatus}&page=${currentPage + 1}"
+                                            class="pagination-btn pagination-next">
+                                            Sau <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </c:if>
+                                </div>
+                            </c:if>
                         </div>
                     </div>
 
