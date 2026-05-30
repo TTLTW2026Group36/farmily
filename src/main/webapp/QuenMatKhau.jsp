@@ -1,143 +1,134 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-        <!DOCTYPE html>
-        <html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Quên mật khẩu | Farmily</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/QuenMatKhau.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <style>
-                .error-message {
-                    background: #ffebee;
-                    color: #c62828;
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    margin: 15px 0;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quên mật khẩu | Farmily</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DangNhap.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
 
-                .info-box {
-                    background: #e3f2fd;
-                    color: #1565c0;
-                    padding: 15px 20px;
-                    border-radius: 8px;
-                    margin: 20px 0;
-                    font-size: 14px;
-                    line-height: 1.6;
-                }
+<body>
 
-                .info-box i {
-                    margin-right: 8px;
-                }
 
-                .forgot-container h1 i {
-                    color: #4CAF50;
-                    margin-right: 10px;
-                }
-            </style>
-        </head>
+    <header class="login-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="${pageContext.request.contextPath}/" class="logo-link">
+                    <img src="https://i.postimg.cc/zBz59B8m/logo-backpng.png" alt="Farmily Logo" class="brand-logo">
+                </a>
+                <span class="header-title">Quên mật khẩu</span>
+            </div>
+            <a href="${pageContext.request.contextPath}/lien-he" class="help-link">Bạn cần trợ giúp?</a>
+        </div>
+    </header>
 
-        <body>
-            
-                <jsp:include page="common/header.jsp" />
+    <main class="login-main">
+        <div class="login-container">
 
-                <nav class="site-breadcrumb" aria-label="Breadcrumb">
-                    <div class="breadcrumb-container">
-                        <ol class="breadcrumb-list">
-                            <li class="breadcrumb-item">
-                                <a href="${pageContext.request.contextPath}/">
-                                    <i class="fas fa-home"></i>
-                                    Trang chủ
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">
-                                Quên mật khẩu
-                            </li>
-                        </ol>
+            <div class="login-brand-banner">
+                <div class="brand-logo-large">
+                    <i class="fas fa-seedling"></i> Farmily
+                </div>
+                <h2>Nông Sản Sạch từ Nông Trại</h2>
+                <p>Mang bữa ăn tươi ngon, an toàn & trọn vẹn dinh dưỡng trực tiếp từ vườn hữu cơ đến bàn ăn nhà bạn.</p>
+                <ul class="brand-features-list">
+                    <li><i class="fas fa-check-circle"></i> 100% Thực phẩm sạch chất lượng cao</li>
+                    <li><i class="fas fa-check-circle"></i> Giao nhận nhanh chóng trong ngày</li>
+                    <li><i class="fas fa-check-circle"></i> Hỗ trợ thanh toán tiện lợi qua ví & thẻ</li>
+                </ul>
+            </div>
+
+
+            <div class="login-card">
+                <div class="card-header">
+                    <h1>Yêu cầu đặt lại mật khẩu</h1>
+                    <p style="color: #666; font-size: 14px; margin-top: 8px; line-height: 1.4;">Nhập địa chỉ email đã đăng ký để nhận liên kết/mã OTP đặt lại mật khẩu.</p>
+                </div>
+
+
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger" style="margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span id="error-text">${error}</span>
                     </div>
-                </nav>
+                </c:if>
 
-                <main>
-                    <div class="forgot-container">
-                        <h1><i class="fas fa-lock"></i> QUÊN MẬT KHẨU</h1>
-                        <p>Nhập địa chỉ email đã đăng ký để nhận liên kết đặt lại mật khẩu.</p>
-
-
-                        <c:if test="${not empty error}">
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                <span id="error-text">${error}</span>
-                            </div>
-                        </c:if>
-
-                        <form action="${pageContext.request.contextPath}/forgot-password" method="post">
-                            <label>Email <span>*</span></label>
-                            <input type="email" name="email" placeholder="Nhập địa chỉ email" value="${email}" required
-                                autofocus>
-
-                            <button class="submit" type="submit">
-                                <i class="fas fa-paper-plane"></i> Gửi liên kết
-                            </button>
-
-                            <a class="back" href="${pageContext.request.contextPath}/dang-nhap">
-                                <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
-                            </a>
-                        </form>
-
-                        <p class="hoac">Hoặc đăng nhập bằng</p>
-                        <div class="social-login">
-                            <button class="fb"><i class="fa-brands fa-facebook"></i> Facebook</button>
-                            <button class="gg"><i class="fa-brands fa-google"></i> Google</button>
+                <form action="${pageContext.request.contextPath}/forgot-password" method="post" class="modern-form">
+                    <div class="input-group">
+                        <div class="input-wrapper">
+                            <input type="email" name="email" placeholder="Địa chỉ email đã đăng ký" value="${email}" required autofocus>
                         </div>
                     </div>
-                </main>
 
-                
-                <jsp:include page="common/footer.jsp" />
+                    <button class="submit-btn submit" type="submit">GỬI LIÊN KẾT / MÃ OTP</button>
 
-                <script>
-                    // 1. Chống click nhiều lần
-                    const forgotForm = document.querySelector('form[action*="forgot-password"]');
-                    const btnSubmit = document.querySelector('button.submit');
-                    
-                    if (forgotForm && btnSubmit) {
-                        forgotForm.onsubmit = function() {
-                            btnSubmit.disabled = true;
-                            btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
-                            btnSubmit.style.opacity = '0.7';
-                        };
-                    }
+                    <a class="back-to-login" href="${pageContext.request.contextPath}/dang-nhap">
+                        <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
+                    </a>
+                </form>
 
-                    // 2. đếm ngược real time
-                    const errorMsg = document.getElementById('error-text');
-                    if (errorMsg) {
-                        let match = errorMsg.innerText.match(/\d+/);
-                        if (match) {
-                            let seconds = parseInt(match[0]);
-                            const timer = setInterval(() => {
-                                seconds--;
-                                if (seconds <= 0) {
-                                    clearInterval(timer);
-                                    const parent = errorMsg.closest('.error-message');
-                                    if(parent) {
-                                        parent.style.transition = 'opacity 0.5s';
-                                        parent.style.opacity = '0';
-                                        setTimeout(() => parent.style.display = 'none', 500);
-                                    }
-                                } else {
-                                    errorMsg.innerText = errorMsg.innerText.replace(/\d+/, seconds);
-                                }
-                            }, 1000);
+                <div class="divider">
+                    <span>HOẶC ĐĂNG NHẬP VỚI</span>
+                </div>
+
+                <div class="social-login">
+                    <a href="${googleOAuthUrl}" class="social-btn gg-btn">
+                        <i class="fa-brands fa-google google-icon"></i>
+                        <span>Google</span>
+                    </a>
+                    <a href="${facebookOAuthUrl}" class="social-btn fb-btn">
+                        <i class="fa-brands fa-facebook"></i>
+                        <span>Facebook</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <jsp:include page="common/footer.jsp" />
+
+    <script>
+
+        const forgotForm = document.querySelector('form');
+        const btnSubmit = document.querySelector('button.submit');
+        
+        if (forgotForm && btnSubmit) {
+            forgotForm.onsubmit = function() {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+                btnSubmit.style.opacity = '0.7';
+            };
+        }
+
+
+        const errorMsg = document.getElementById('error-text');
+        if (errorMsg) {
+            let match = errorMsg.innerText.match(/\d+/);
+            if (match) {
+                let seconds = parseInt(match[0]);
+                const timer = setInterval(() => {
+                    seconds--;
+                    if (seconds <= 0) {
+                        clearInterval(timer);
+                        const parent = errorMsg.closest('.alert-danger');
+                        if(parent) {
+                            parent.style.transition = 'opacity 0.5s';
+                            parent.style.opacity = '0';
+                            setTimeout(() => parent.style.display = 'none', 500);
                         }
+                    } else {
+                        errorMsg.innerText = errorMsg.innerText.replace(/\d+/, seconds);
                     }
-                </script>
-        </body>
+                }, 1000);
+            }
+        }
+    </script>
+</body>
 
-        </html>
+</html>

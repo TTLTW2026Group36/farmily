@@ -1,31 +1,27 @@
 var diemMatKhau = 0;
 document.querySelector("form").addEventListener("submit", function (e) {
-    e.preventDefault();
-
     const tenInput = document.querySelector('input[name="name"]');
     const sdtInput = document.querySelector('input[name="phone"]');
     const emailInput = document.querySelector('input[name="email"]');
     const pwdInput = document.querySelector('input[name="password"]');
 
     const ho = tenInput ? tenInput.value.trim() : "";
-    const ten = ho; 
     const sdt = sdtInput ? sdtInput.value.trim() : "";
     const email = emailInput ? emailInput.value.trim() : "";
     const password = pwdInput ? pwdInput.value.trim() : "";
 
-    if (!ho || !ten || !sdt || !email || !password) {
+    if (!ho || !sdt || !email || !password) {
+        e.preventDefault();
         alert("Vui lòng nhập đầy đủ thông tin!");
         return;
     }
 
     if (diemMatKhau < 3) {
+        e.preventDefault();
         alert("Mật khẩu quá yếu! Vui lòng nhập mật khẩu từ mức trung bình trở lên");
         if(pwdInput) pwdInput.focus();
         return;
     }
-
-    alert("Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.");
-    window.location.href = "DangNhap.jsp";
 });
 
 document.addEventListener("DOMContentLoaded", function () {

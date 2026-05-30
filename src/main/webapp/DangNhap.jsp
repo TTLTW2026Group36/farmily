@@ -16,79 +16,108 @@
 
         <body>
 
-            <jsp:include page="common/header.jsp" />
-            <nav class="site-breadcrumb" aria-label="Breadcrumb">
-                <div class="breadcrumb-container">
-                    <ol class="breadcrumb-list">
-                        <li class="breadcrumb-item">
-                            <a href="${pageContext.request.contextPath}/">
-                                <i class="fas fa-home"></i>
-                                Trang chủ
-                            </a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page">
-                            Đăng nhập
-                        </li>
-                    </ol>
-                </div>
-            </nav>
-
-            <main>
-                <div class="login-container">
-                    <h1>ĐĂNG NHẬP TÀI KHOẢN</h1>
-
-                    <c:if test="${not empty sessionScope.passwordResetSuccess}">
-                        <div
-                            style="background: #e8f5e9; color: #2e7d32; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-                            <i class="fas fa-check-circle"></i>
-                            ${sessionScope.passwordResetSuccess}
-                        </div>
-                        <c:remove var="passwordResetSuccess" scope="session" />
-                    </c:if>
-
-                    <p>Bạn chưa có tài khoản ?
-                        <a href="${pageContext.request.contextPath}/register">Đăng ký tại đây.</a>
-                    </p>
-
-                    <form action="${pageContext.request.contextPath}/login" method="post">
-
-                        <label>Email <span>*</span> </label>
-                        <input type="text" name="username" placeholder="Email" style="margin-top: 8px;" value="${username}" required>
-
-                        <label>Mật khẩu <span>*</span></label>
-                        <div class="password-field" style="margin-top: 8px;">
-                            <input type="password" name="password" id="password" placeholder="Mật khẩu" value="${password}" required>
-                            <i class="fas fa-eye-slash" id="togglePassword"></i>
-                        </div>
-
-                        <div style="display: flex; align-items: center; margin-top: 10px; gap: 8px;">
-                            <input type="checkbox" id="rememberMe" name="rememberMe" value="true" style="width: auto; margin: 0;">
-                            <label for="rememberMe" style="margin: 0; font-weight: normal; cursor: pointer;">Ghi nhớ đăng nhập</label>
-                        </div>
-
-                        <div class="quenmk">
-                            <small>Quên mật khẩu? Nhấn vào
-                                <a href="${pageContext.request.contextPath}/forgot-password">đây</a></small>
-                        </div>
-
-                        <c:if test="${showCaptcha}">
-                            <div class="g-recaptcha" data-sitekey="<%= group36.util.FarmilyConstants.RECAPTCHA_SITE_KEY %>" style="margin-bottom: 15px;"></div>
-                        </c:if>
-
-                        <c:if test="${not empty error}">
-                            <p style="color: red; text-align: center;">${error}</p>
-                        </c:if>
-
-                        <button class="submit" type="submit">Đăng nhập</button>
-                    </form>
-
-                    <p class="hoac">Hoặc đăng nhập bằng</p>
-                    <div class="social-login">
-                        <a href="${facebookOAuthUrl}" class="fb">
-                            <i class="fa-brands fa-facebook"></i> Facebook
+            <!-- Shopee-style Minimal Header -->
+            <header class="login-header">
+                <div class="header-container">
+                    <div class="header-left">
+                        <a href="${pageContext.request.contextPath}/" class="logo-link">
+                            <img src="https://i.postimg.cc/zBz59B8m/logo-backpng.png" alt="Farmily Logo" class="brand-logo">
                         </a>
-                        <a href="${googleOAuthUrl}" class="gg">
-                            <i class="fa-brands fa-google"></i> Google</a>
+                        <span class="header-title">Đăng nhập</span>
+                    </div>
+                    <a href="${pageContext.request.contextPath}/lien-he" class="help-link">Bạn cần trợ giúp?</a>
+                </div>
+            </header>
+
+            <main class="login-main">
+                <div class="login-container">
+                    <!-- Banner thương hiệu bên trái (giống Shopee, ẩn trên mobile) -->
+                    <div class="login-brand-banner">
+                        <div class="brand-logo-large">
+                            <i class="fas fa-seedling"></i> Farmily
+                        </div>
+                        <h2>Nông Sản Sạch từ Nông Trại</h2>
+                        <p>Mang bữa ăn tươi ngon, an toàn & trọn vẹn dinh dưỡng trực tiếp từ vườn hữu cơ đến bàn ăn nhà bạn.</p>
+                        <ul class="brand-features-list">
+                            <li><i class="fas fa-check-circle"></i> 100% Thực phẩm sạch chất lượng cao</li>
+                            <li><i class="fas fa-check-circle"></i> Giao nhận nhanh chóng trong ngày</li>
+                            <li><i class="fas fa-check-circle"></i> Hỗ trợ thanh toán tiện lợi qua ví & thẻ</li>
+                        </ul>
+                    </div>
+
+                    <!-- Card đăng nhập lớn bên phải -->
+                    <div class="login-card">
+                        <div class="card-header">
+                            <h1>Đăng nhập</h1>
+                        </div>
+
+                        <!-- Thông báo thành công -->
+                        <c:if test="${not empty sessionScope.passwordResetSuccess}">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i>
+                                <span>${sessionScope.passwordResetSuccess}</span>
+                            </div>
+                            <c:remove var="passwordResetSuccess" scope="session" />
+                        </c:if>
+
+                        <!-- Thông báo lỗi -->
+                        <c:if test="${not empty error}">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>${error}</span>
+                            </div>
+                        </c:if>
+
+                        <form action="${pageContext.request.contextPath}/login" method="post" class="modern-form">
+                            <div class="input-group">
+                                <div class="input-wrapper">
+                                    <input type="text" id="username" name="username" placeholder="Email / Tên đăng nhập" value="${username}" required>
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <div class="input-wrapper">
+                                    <input type="password" name="password" id="password" placeholder="Mật khẩu" required>
+                                    <i class="fas fa-eye-slash toggle-eye" id="togglePassword"></i>
+                                </div>
+                            </div>
+
+                            <div class="form-options">
+                                <label class="remember-me">
+                                    <input type="checkbox" id="rememberMe" name="rememberMe" value="true">
+                                    <span class="checkmark"></span>
+                                    Ghi nhớ đăng nhập
+                                </label>
+                                <a href="${pageContext.request.contextPath}/forgot-password" class="forgot-link">Quên mật khẩu?</a>
+                            </div>
+
+                            <c:if test="${showCaptcha}">
+                                <div class="captcha-container">
+                                    <div class="g-recaptcha" data-sitekey="<%= group36.util.FarmilyConstants.RECAPTCHA_SITE_KEY %>"></div>
+                                </div>
+                            </c:if>
+
+                            <button class="submit-btn" type="submit">ĐĂNG NHẬP</button>
+                        </form>
+
+                        <div class="divider">
+                            <span>HOẶC</span>
+                        </div>
+
+                        <div class="social-login">
+                            <a href="${googleOAuthUrl}" class="social-btn gg-btn">
+                                <i class="fa-brands fa-google google-icon"></i>
+                                <span>Google</span>
+                            </a>
+                            <a href="${facebookOAuthUrl}" class="social-btn fb-btn">
+                                <i class="fa-brands fa-facebook"></i>
+                                <span>Facebook</span>
+                            </a>
+                        </div>
+
+                        <p class="register-prompt">
+                            Bạn mới biết đến Farmily? <a href="${pageContext.request.contextPath}/register">Đăng ký</a>
+                        </p>
                     </div>
                 </div>
             </main>
