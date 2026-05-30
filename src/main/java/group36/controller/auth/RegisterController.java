@@ -13,6 +13,19 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        String fbUrl = "https://www.facebook.com/v19.0/dialog/oauth"
+                + "?client_id=" + group36.util.FarmilyConstants.FACEBOOK_CLIENT_ID
+                + "&redirect_uri=" + java.net.URLEncoder.encode(group36.util.FarmilyConstants.FACEBOOK_REDIRECT_URI, "UTF-8");
+
+        String ggUrl = "https://accounts.google.com/o/oauth2/auth"
+                + "?scope=email%20profile%20openid"
+                + "&redirect_uri=" + java.net.URLEncoder.encode(group36.util.FarmilyConstants.GOOGLE_REDIRECT_URI, "UTF-8")
+                + "&response_type=code"
+                + "&client_id=" + group36.util.FarmilyConstants.GOOGLE_CLIENT_ID
+                + "&approval_prompt=force";
+
+        request.setAttribute("facebookOAuthUrl", fbUrl);
+        request.setAttribute("googleOAuthUrl", ggUrl);
         request.getRequestDispatcher("/DangKy.jsp").forward(request, response);
     }
 

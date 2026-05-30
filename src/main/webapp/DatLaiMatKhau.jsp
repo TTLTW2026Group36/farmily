@@ -1,352 +1,234 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-    <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 
-        <!DOCTYPE html>
-        <html lang="vi">
+<!DOCTYPE html>
+<html lang="vi">
 
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Đặt lại mật khẩu | Farmily</title>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/QuenMatKhau.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <style>
-                .password-wrapper {
-                    position: relative;
-                    margin-bottom: 15px;
-                }
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đặt lại mật khẩu | Farmily</title>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DangNhap.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=<%= System.currentTimeMillis() %>">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
 
-                .password-wrapper input {
-                    padding-right: 45px;
-                }
+<body>
 
-                .toggle-password {
-                    position: absolute;
-                    right: 12px;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: none;
-                    border: none;
-                    cursor: pointer;
-                    color: #666;
-                    font-size: 18px;
-                    padding: 5px;
-                }
 
-                .toggle-password:hover {
-                    color: #4CAF50;
-                }
+    <header class="login-header">
+        <div class="header-container">
+            <div class="header-left">
+                <a href="${pageContext.request.contextPath}/" class="logo-link">
+                    <img src="https://i.postimg.cc/zBz59B8m/logo-backpng.png" alt="Farmily Logo" class="brand-logo">
+                </a>
+                <span class="header-title">Đặt lại mật khẩu</span>
+            </div>
+            <a href="${pageContext.request.contextPath}/lien-he" class="help-link">Bạn cần trợ giúp?</a>
+        </div>
+    </header>
 
-                .password-strength {
-                    height: 4px;
-                    background: #eee;
-                    border-radius: 2px;
-                    margin-top: 8px;
-                    overflow: hidden;
-                }
+    <main class="login-main">
+        <div class="login-container">
 
-                .password-strength-bar {
-                    height: 100%;
-                    width: 0;
-                    transition: all 0.3s ease;
-                    border-radius: 2px;
-                }
+            <div class="login-brand-banner">
+                <div class="brand-logo-large">
+                    <i class="fas fa-seedling"></i> Farmily
+                </div>
+                <h2>Nông Sản Sạch từ Nông Trại</h2>
+                <p>Mang bữa ăn tươi ngon, an toàn & trọn vẹn dinh dưỡng trực tiếp từ vườn hữu cơ đến bàn ăn nhà bạn.</p>
+                <ul class="brand-features-list">
+                    <li><i class="fas fa-check-circle"></i> 100% Thực phẩm sạch chất lượng cao</li>
+                    <li><i class="fas fa-check-circle"></i> Giao nhận nhanh chóng trong ngày</li>
+                    <li><i class="fas fa-check-circle"></i> Hỗ trợ thanh toán tiện lợi qua ví & thẻ</li>
+                </ul>
+            </div>
 
-                .strength-weak {
-                    background: #f44336;
-                    width: 33%;
-                }
 
-                .strength-medium {
-                    background: #ff9800;
-                    width: 66%;
-                }
+            <div class="login-card">
+                <div class="card-header">
+                    <h1>Đặt lại mật khẩu</h1>
+                    <p style="color: #666; font-size: 14px; margin-top: 8px; line-height: 1.4;">Tạo mật khẩu mới cho tài khoản của bạn.</p>
+                </div>
 
-                .strength-strong {
-                    background: #4CAF50;
-                    width: 100%;
-                }
 
-                .password-hint {
-                    font-size: 12px;
-                    color: #666;
-                    margin-top: 8px;
-                }
-
-                .password-hint.error {
-                    color: #f44336;
-                }
-
-                .password-hint.success {
-                    color: #4CAF50;
-                }
-
-                .password-match {
-                    font-size: 12px;
-                    margin-top: 5px;
-                }
-
-                .password-match.match {
-                    color: #4CAF50;
-                }
-
-                .password-match.no-match {
-                    color: #f44336;
-                }
-
-                .success-icon {
-                    font-size: 60px;
-                    color: #4CAF50;
-                    margin-bottom: 20px;
-                }
-
-                .error-message {
-                    background: #ffebee;
-                    color: #c62828;
-                    padding: 12px 16px;
-                    border-radius: 8px;
-                    margin: 15px 0;
-                    display: flex;
-                    align-items: center;
-                    gap: 10px;
-                }
-
-                .requirements-list {
-                    list-style: none;
-                    padding: 0;
-                    margin: 15px 0;
-                    font-size: 13px;
-                }
-
-                .requirements-list li {
-                    padding: 5px 0;
-                    color: #666;
-                }
-
-                .requirements-list li i {
-                    margin-right: 8px;
-                    width: 16px;
-                }
-
-                .requirements-list li.valid {
-                    color: #4CAF50;
-                }
-
-                .requirements-list li.invalid {
-                    color: #999;
-                }
-            </style>
-        </head>
-
-        <body>
-            
-                <jsp:include page="common/header.jsp" />
-
-                <nav class="site-breadcrumb" aria-label="Breadcrumb">
-                    <div class="breadcrumb-container">
-                        <ol class="breadcrumb-list">
-                            <li class="breadcrumb-item">
-                                <a href="${pageContext.request.contextPath}/">
-                                    <i class="fas fa-home"></i>
-                                    Trang chủ
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item">
-                                <a href="${pageContext.request.contextPath}/forgot-password">
-                                    Quên mật khẩu
-                                </a>
-                            </li>
-                            <li class="breadcrumb-item active" aria-current="page">
-                                Đặt lại mật khẩu
-                            </li>
-                        </ol>
+                <c:if test="${not empty error}">
+                    <div class="alert alert-danger" style="margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <span>${error}</span>
                     </div>
-                </nav>
+                </c:if>
 
-                <main>
-                    <div class="forgot-container">
-                        <h1><i class="fas fa-key"></i> ĐẶT LẠI MẬT KHẨU</h1>
-                        <p>Tạo mật khẩu mới cho tài khoản của bạn.</p>
-
-                        <c:if test="${not empty error}">
-                            <div class="error-message">
-                                <i class="fas fa-exclamation-circle"></i>
-                                ${error}
-                            </div>
-                        </c:if>
-
-                        <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm">
-                            <input type="hidden" name="token" value="${token}">
-                            <label>Mật khẩu mới <span>*</span></label>
-                            <div class="password-wrapper">
-                                <input type="password" name="newPassword" id="newPassword"
-                                    placeholder="Nhập mật khẩu mới" required minlength="8">
-                                <button type="button" class="toggle-password"
-                                    onclick="togglePassword('newPassword', this)">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="password-strength">
-                                <div class="password-strength-bar" id="strengthBar"></div>
-                            </div>
-
-                            <ul class="requirements-list" id="requirements">
-                                <li id="req-length" class="invalid">
-                                    <i class="fas fa-circle"></i> Ít nhất 8 ký tự
-                                </li>
-                                <li id="req-upper" class="invalid">
-                                    <i class="fas fa-circle"></i> Phải có chữ viết hoa
-                                </li>
-                                <li id="req-lower" class="invalid">
-                                    <i class="fas fa-circle"></i> Phải có chữ viết thường
-                                </li>
-                                <li id="req-number" class="invalid">
-                                    <i class="fas fa-circle"></i> Phải có chữ số
-                                </li>
-                                <li id="req-special" class="invalid">
-                                    <i class="fas fa-circle"></i> Phải có ký tự đặc biệt
-                                </li>
-                            </ul>
-
-                            <label>Xác nhận mật khẩu <span>*</span></label>
-                            <div class="password-wrapper">
-                                <input type="password" name="confirmPassword" id="confirmPassword"
-                                    placeholder="Nhập lại mật khẩu mới" required>
-                                <button type="button" class="toggle-password"
-                                    onclick="togglePassword('confirmPassword', this)">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <div class="password-match" id="matchStatus"></div>
-
-                            <button class="submit" type="submit" id="submitBtn">
-                                <i class="fas fa-save"></i> Đặt lại mật khẩu
+                <form action="${pageContext.request.contextPath}/reset-password" method="post" id="resetForm" class="modern-form">
+                    <input type="hidden" name="token" value="${token}">
+                    
+                    <div class="input-group">
+                        <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block; color: #555;">Mật khẩu mới <span style="color: red;">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" name="newPassword" id="newPassword" placeholder="Nhập mật khẩu mới" required minlength="8">
+                            <button type="button" class="toggle-password" onclick="togglePassword('newPassword', this)">
+                                <i class="fas fa-eye"></i>
                             </button>
+                        </div>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="strengthBar"></div>
+                        </div>
 
-                            <a class="back" href="${pageContext.request.contextPath}/DangNhap.jsp">
-                                <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
-                            </a>
-                        </form>
+                        <ul class="requirements-list" id="requirements">
+                            <li id="req-length" class="invalid">
+                                <i class="fas fa-circle"></i> Ít nhất 8 ký tự
+                            </li>
+                            <li id="req-upper" class="invalid">
+                                <i class="fas fa-circle"></i> Phải có chữ viết hoa
+                            </li>
+                            <li id="req-lower" class="invalid">
+                                <i class="fas fa-circle"></i> Phải có chữ viết thường
+                            </li>
+                            <li id="req-number" class="invalid">
+                                <i class="fas fa-circle"></i> Phải có chữ số
+                            </li>
+                            <li id="req-special" class="invalid">
+                                <i class="fas fa-circle"></i> Phải có ký tự đặc biệt
+                            </li>
+                        </ul>
                     </div>
-                </main>
 
-                
-                    <jsp:include page="common/footer.jsp" />
+                    <div class="input-group">
+                        <label style="font-weight: 600; font-size: 14px; margin-bottom: 8px; display: block; color: #555;">Xác nhận mật khẩu <span style="color: red;">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" name="confirmPassword" id="confirmPassword" placeholder="Nhập lại mật khẩu mới" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword('confirmPassword', this)">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-match" id="matchStatus"></div>
+                    </div>
 
-                    <script>
-                        // Toggle password visibility
-                        function togglePassword(inputId, btn) {
-                            const input = document.getElementById(inputId);
-                            const icon = btn.querySelector('i');
+                    <button class="submit-btn submit" type="submit" id="submitBtn">ĐẶT LẠI MẬT KHẨU</button>
 
-                            if (input.type === 'password') {
-                                input.type = 'text';
-                                icon.classList.remove('fa-eye');
-                                icon.classList.add('fa-eye-slash');
-                            } else {
-                                input.type = 'password';
-                                icon.classList.remove('fa-eye-slash');
-                                icon.classList.add('fa-eye');
-                            }
-                        }
+                    <a class="back-to-login" href="${pageContext.request.contextPath}/dang-nhap">
+                        <i class="fas fa-arrow-left"></i> Quay lại đăng nhập
+                    </a>
+                </form>
+            </div>
+        </div>
+    </main>
 
-                        // Password strength checker
-                        const newPassword = document.getElementById('newPassword');
-                        const confirmPassword = document.getElementById('confirmPassword');
-                        const strengthBar = document.getElementById('strengthBar');
-                        const matchStatus = document.getElementById('matchStatus');
+    <jsp:include page="common/footer.jsp" />
 
-                        newPassword.addEventListener('input', function () {
-                            const value = this.value;
-                            let strength = 0;
+    <script>
 
-                            const hasLength = value.length >= 8;
-                            const hasUpper = /[A-Z]/.test(value);
-                            const hasLower = /[a-z]/.test(value);
-                            const hasNumber = /[0-9]/.test(value);
-                            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
 
-                            updateRequirement('req-length', hasLength);
-                            updateRequirement('req-upper', hasUpper);
-                            updateRequirement('req-lower', hasLower);
-                            updateRequirement('req-number', hasNumber);
-                            updateRequirement('req-special', hasSpecial);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
 
-                            if (hasLength) strength++;
-                            if (hasUpper) strength++;
-                            if (hasLower) strength++;
-                            if (hasNumber) strength++;
-                            if (hasSpecial) strength++;
 
-                            strengthBar.className = 'password-strength-bar';
-                            if (strength <= 2) {
-                                strengthBar.classList.add('strength-weak');
-                            } else if (strength <= 4) {
-                                strengthBar.classList.add('strength-medium');
-                            } else if (strength === 5) {
-                                strengthBar.classList.add('strength-strong');
-                            }
+        const newPassword = document.getElementById('newPassword');
+        const confirmPassword = document.getElementById('confirmPassword');
+        const strengthBar = document.getElementById('strengthBar');
+        const matchStatus = document.getElementById('matchStatus');
 
-                            checkMatch();
-                        });
+        newPassword.addEventListener('input', function () {
+            const value = this.value;
+            let strength = 0;
 
-                        confirmPassword.addEventListener('input', checkMatch);
+            const hasLength = value.length >= 8;
+            const hasUpper = /[A-Z]/.test(value);
+            const hasLower = /[a-z]/.test(value);
+            const hasNumber = /[0-9]/.test(value);
+            const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(value);
 
-                        function updateRequirement(id, isValid) {
-                            const el = document.getElementById(id);
-                            const icon = el.querySelector('i');
+            updateRequirement('req-length', hasLength);
+            updateRequirement('req-upper', hasUpper);
+            updateRequirement('req-lower', hasLower);
+            updateRequirement('req-number', hasNumber);
+            updateRequirement('req-special', hasSpecial);
 
-                            if (isValid) {
-                                el.classList.remove('invalid');
-                                el.classList.add('valid');
-                                icon.classList.remove('fa-circle');
-                                icon.classList.add('fa-check-circle');
-                            } else {
-                                el.classList.remove('valid');
-                                el.classList.add('invalid');
-                                icon.classList.remove('fa-check-circle');
-                                icon.classList.add('fa-circle');
-                            }
-                        }
+            if (hasLength) strength++;
+            if (hasUpper) strength++;
+            if (hasLower) strength++;
+            if (hasNumber) strength++;
+            if (hasSpecial) strength++;
 
-                        function checkMatch() {
-                            const pass = newPassword.value;
-                            const confirm = confirmPassword.value;
+            strengthBar.className = 'password-strength-bar';
+            if (strength <= 2) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('strength-medium');
+            } else if (strength === 5) {
+                strengthBar.classList.add('strength-strong');
+            }
 
-                            if (confirm.length === 0) {
-                                matchStatus.textContent = '';
-                                matchStatus.className = 'password-match';
-                                return;
-                            }
+            checkMatch();
+        });
 
-                            if (pass === confirm) {
-                                matchStatus.textContent = '✓ Mật khẩu khớp';
-                                matchStatus.className = 'password-match match';
-                            } else {
-                                matchStatus.textContent = '✗ Mật khẩu không khớp';
-                                matchStatus.className = 'password-match no-match';
-                            }
-                        }
+        confirmPassword.addEventListener('input', checkMatch);
 
-                        // Form validation
-                        document.getElementById('resetForm').addEventListener('submit', function (e) {
-                            const pass = newPassword.value;
-                            const confirm = confirmPassword.value;
+        function updateRequirement(id, isValid) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('i');
 
-                            if (pass.length < 8) {
-                                e.preventDefault();
-                                alert('Mật khẩu phải có ít nhất 8 ký tự');
-                                return;
-                            }
+            if (isValid) {
+                el.classList.remove('invalid');
+                el.classList.add('valid');
+                icon.classList.remove('fa-circle');
+                icon.classList.add('fa-check-circle');
+            } else {
+                el.classList.remove('valid');
+                el.classList.add('invalid');
+                icon.classList.remove('fa-check-circle');
+                icon.classList.add('fa-circle');
+            }
+        }
 
-                            if (pass !== confirm) {
-                                e.preventDefault();
-                                alert('Mật khẩu xác nhận không khớp');
-                                return;
-                            }
-                        });
-                    </script>
-        </body>
+        function checkMatch() {
+            const pass = newPassword.value;
+            const confirm = confirmPassword.value;
 
-        </html>
+            if (confirm.length === 0) {
+                matchStatus.textContent = '';
+                matchStatus.className = 'password-match';
+                return;
+            }
+
+            if (pass === confirm) {
+                matchStatus.textContent = '✓ Mật khẩu khớp';
+                matchStatus.className = 'password-match match';
+            } else {
+                matchStatus.textContent = '✗ Mật khẩu không khớp';
+                matchStatus.className = 'password-match no-match';
+            }
+        }
+
+
+        document.getElementById('resetForm').addEventListener('submit', function (e) {
+            const pass = newPassword.value;
+            const confirm = confirmPassword.value;
+
+            if (pass.length < 8) {
+                e.preventDefault();
+                alert('Mật khẩu phải có ít nhất 8 ký tự');
+                return;
+            }
+
+            if (pass !== confirm) {
+                e.preventDefault();
+                alert('Mật khẩu xác nhận không khớp');
+                return;
+            }
+        });
+    </script>
+</body>
+
+</html>

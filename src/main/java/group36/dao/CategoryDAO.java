@@ -25,6 +25,7 @@ public class CategoryDAO extends BaseDao {
             Category category = new Category();
             category.setId(rs.getInt("id"));
             category.setName(rs.getString("name"));
+            category.setStatus(rs.getString("status"));
             category.setCreatedAt(rs.getTimestamp("created_at"));
             return category;
         }
@@ -77,9 +78,10 @@ public class CategoryDAO extends BaseDao {
 
 
     public int insert(Category category) {
-        String sql = "INSERT INTO category (name) VALUES (:name)";
+        String sql = "INSERT INTO category (name, status) VALUES (:name, :status)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("name", category.getName())
+                .bind("status", category.getStatus())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -92,10 +94,11 @@ public class CategoryDAO extends BaseDao {
 
 
     public int update(Category category) {
-        String sql = "UPDATE category SET name = :name WHERE id = :id";
+        String sql = "UPDATE category SET name = :name, status = :status WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", category.getId())
                 .bind("name", category.getName())
+                .bind("status", category.getStatus())
                 .execute());
     }
 
@@ -132,6 +135,21 @@ public class CategoryDAO extends BaseDao {
 
 
 
+
+    public List<Category> findAllActive() {
+        String sql = "SELECT * FROM category WHERE status = 'active' ORDER BY id ASC";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new CategoryMapper())
+                .list());
+    }
+
+    public int updateStatus(int id, String status) {
+        String sql = "UPDATE category SET status = :status WHERE id = :id";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", id)
+                .bind("status", status)
+                .execute());
+    }
 
     public int count() {
         String sql = "SELECT COUNT(*) FROM category";

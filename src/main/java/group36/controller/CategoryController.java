@@ -35,7 +35,7 @@ public class CategoryController extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         try {
-            List<Category> categories = categoryService.getAllCategories();
+            List<Category> categories = categoryService.getAllActiveCategories();
             String json = gson.toJson(categories);
 
             PrintWriter out = response.getWriter();

@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 public class Category implements Serializable {
     private int id;
     private String name;
+    private String status = "active";
     private Timestamp createdAt;
 
     public Category() {
@@ -37,6 +38,14 @@ public class Category implements Serializable {
         this.name = name;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public Timestamp getCreatedAt() {
         return createdAt;
     }
@@ -50,6 +59,7 @@ public class Category implements Serializable {
         return "Category{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", status='" + status + '\'' +
                 ", createdAt=" + createdAt +
                 '}';
     }

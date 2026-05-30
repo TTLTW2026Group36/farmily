@@ -52,7 +52,7 @@ public class ProductController extends HttpServlet {
         if (size < 1 || size > 48)
             size = DEFAULT_PAGE_SIZE;
 
-        List<Category> categories = categoryService.getAllCategories();
+        List<Category> categories = categoryService.getAllActiveCategories();
         request.setAttribute("categories", categories);
 
         List<Product> products;
