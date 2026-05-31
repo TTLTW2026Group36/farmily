@@ -3,6 +3,9 @@ package group36.dao;
 import com.mysql.cj.jdbc.MysqlDataSource;
 import org.jdbi.v3.core.Jdbi;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class JdbiProvider {
@@ -20,6 +23,15 @@ public class JdbiProvider {
     }
 
     private static Jdbi createJdbi() {
+        try {
+            Context ctx = new InitialContext();
+            DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/farmily");
+            System.out.println("[JdbiProvider] Using JNDI DataSource (Tomcat Connection Pool)");
+            return Jdbi.create(ds);
+        } catch (Exception e) {
+            System.out.println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
+        }
+
         MysqlDataSource ds = new MysqlDataSource();
         ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname);
         ds.setUser(DBProperties.username);
@@ -27,8 +39,8 @@ public class JdbiProvider {
         try {
             ds.setUseCompression(true);
             ds.setAutoReconnect(true);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        } catch (SQLException ex) {
+            throw new RuntimeException(ex);
         }
         return Jdbi.create(ds);
     }

@@ -30,10 +30,10 @@
                                     </a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="${pageContext.request.contextPath}/ho-so">Hồ sơ</a>
+                                    <a href="${pageContext.request.contextPath}/ho-so">Hồ sơ cá nhân</a>
                                 </li>
                                 <li class="breadcrumb-item">
-                                    <a href="${pageContext.request.contextPath}/ho-so/don-hang">Đơn hàng</a>
+                                    <a href="${pageContext.request.contextPath}/ho-so/don-hang">Đơn hàng của bạn</a>
                                 </li>
                                 <li class="breadcrumb-item active" aria-current="page">
                                     Chi tiết #${order.id}
@@ -71,6 +71,11 @@
                                 <li>
                                     <a href="${pageContext.request.contextPath}/ho-so?tab=wishlist">
                                         <i class="fas fa-heart"></i> Sản phẩm yêu thích
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
+                                        <i class="fas fa-ticket-alt"></i> Ví voucher
                                     </a>
                                 </li>
                             </ul>

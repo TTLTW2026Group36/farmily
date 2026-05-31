@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context>
+    <Resource name="jdbc/farmily"
+              auth="Container"
+              type="javax.sql.DataSource"
+              factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+              driverClassName="com.mysql.cj.jdbc.Driver"
+              url="jdbc:mysql://localhost:3306/farmily?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowPublicKeyRetrieval=true&amp;useSSL=false"
+              username="root"
+              password="123"
+              maxActive="20"
+              maxIdle="10"
+              minIdle="5"
+              initialSize="5"
+              maxWait="10000"
+              validationQuery="SELECT 1"
+              testOnBorrow="true"
+              removeAbandoned="true"
+              removeAbandonedTimeout="60"
+              logAbandoned="true" />
+</Context>
