@@ -4,6 +4,7 @@ import group36.dao.AuthDao;
 import group36.dao.RefreshTokenDao;
 import group36.model.RefreshToken;
 import group36.model.User;
+import group36.model.UserRole;
 import group36.service.CartService;
 import group36.service.WishlistService;
 import jakarta.servlet.*;
@@ -76,7 +77,7 @@ public class RememberMeFilter implements Filter {
                             HttpSession newSession = req.getSession(true);
                             newSession.setAttribute("auth", u);
 
-                            if (u.getRole() != null && (u.getRole().equalsIgnoreCase("admin") || u.getRole().equalsIgnoreCase("manager"))) {
+                            if (u.getRole() != null && UserRole.fromString(u.getRole()).canAccessAdmin()) {
                                 newSession.setAttribute("adminUser", u);
                             }
 

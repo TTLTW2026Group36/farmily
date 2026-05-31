@@ -153,15 +153,15 @@
                                                                 </span>
                                                             </td>
                                                             <td>
-                                                                <c:choose>
-                                                                    <c:when test="${user.role == 'admin'}">
-                                                                        <span class="role-badge role-admin">Admin</span>
-                                                                    </c:when>
-                                                                    <c:otherwise>
-                                                                        <span class="role-badge role-user">Người
-                                                                            dùng</span>
-                                                                    </c:otherwise>
-                                                                </c:choose>
+                                                                <span>
+                                                                    <c:choose>
+                                                                        <c:when test="${user.role == 'ADMIN'}">Quản trị viên</c:when>
+                                                                        <c:when test="${user.role == 'MANAGER'}">Quản lý</c:when>
+                                                                        <c:when test="${user.role == 'STAFF_ORDER'}">NV Đơn hàng</c:when>
+                                                                        <c:when test="${user.role == 'STAFF_CONTENT'}">NV Nội dung</c:when>
+                                                                        <c:otherwise>Khách hàng</c:otherwise>
+                                                                    </c:choose>
+                                                                </span>
                                                             </td>
                                                             <td>
                                                                 <fmt:formatDate value="${user.created_at}"
@@ -281,7 +281,14 @@
                             const name = escCsv(row.dataset.name || '');
                             const email = escCsv(row.dataset.email || '');
                             const phone = escCsv(row.dataset.phone || '');
-                            const role = row.dataset.role === 'admin' ? 'Admin' : 'Khách hàng';
+                            const roleMap = {
+                                'ADMIN': 'Quản trị viên',
+                                'MANAGER': 'Quản lý',
+                                'STAFF_ORDER': 'NV Đơn hàng',
+                                'STAFF_CONTENT': 'NV Nội dung',
+                                'USER': 'Khách hàng'
+                            };
+                            const role = roleMap[row.dataset.role] || row.dataset.role;
                             const date = row.dataset.date || '';
                             lines.push([id, name, email, phone, role, date].join(','));
                         });

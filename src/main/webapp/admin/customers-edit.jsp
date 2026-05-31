@@ -78,10 +78,21 @@
                                                 <div class="form-group">
                                                     <label for="role">Vai trò</label>
                                                     <select id="role" name="role">
-                                                        <option value="user" ${user.role=='user' ? 'selected' : '' }>
-                                                            Người dùng</option>
-                                                        <option value="admin" ${user.role=='admin' ? 'selected' : '' }>
-                                                            Admin</option>
+                                                        <option value="USER" ${user.role == 'USER' ? 'selected' : ''}>
+                                                            Khách hàng (USER)
+                                                        </option>
+                                                        <option value="STAFF_ORDER" ${user.role == 'STAFF_ORDER' ? 'selected' : ''}>
+                                                            NV Đơn hàng (STAFF_ORDER)
+                                                        </option>
+                                                        <option value="STAFF_CONTENT" ${user.role == 'STAFF_CONTENT' ? 'selected' : ''}>
+                                                            NV Nội dung (STAFF_CONTENT)
+                                                        </option>
+                                                        <option value="MANAGER" ${user.role == 'MANAGER' ? 'selected' : ''}>
+                                                            Quản lý (MANAGER)
+                                                        </option>
+                                                        <option value="ADMIN" ${user.role == 'ADMIN' ? 'selected' : ''}>
+                                                            Quản trị viên (ADMIN)
+                                                        </option>
                                                     </select>
                                                 </div>
                                             </div>

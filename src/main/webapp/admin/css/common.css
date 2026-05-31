@@ -266,9 +266,11 @@ ul {
 .card-body.p-0 {
   padding: 0;
 }
+
 .card-body.p-sm {
   padding: 16px;
 }
+
 .card-body.p-lg {
   padding: 32px;
 }
@@ -285,27 +287,33 @@ ul {
   box-shadow: var(--shadow-sm);
   border: 1px solid transparent;
 }
+
 .alert i {
   font-size: 20px;
 }
+
 .alert-success {
   background: var(--success-light);
   color: var(--success);
   border-color: #bbf7d0;
 }
+
 .alert-danger {
   background: var(--danger-light);
   color: var(--danger);
   border-color: #fecaca;
 }
+
 .alert-warning {
   background: var(--warning-light);
   color: #b45309;
   border-color: #fde68a;
 }
+
 .alert-warning i {
   color: var(--warning);
 }
+
 .alert-info {
   background: var(--info-light);
   color: var(--info);
@@ -322,6 +330,7 @@ ul {
   font-weight: 600;
   border: 1px solid transparent;
 }
+
 .status-badge::before {
   content: "";
   display: block;
@@ -329,11 +338,13 @@ ul {
   height: 6px;
   border-radius: 50%;
 }
+
 .status-pending {
   background: var(--warning-light);
   color: #b45309;
   border-color: #fde68a;
 }
+
 .status-pending::before {
   background: var(--warning);
 }
@@ -343,6 +354,7 @@ ul {
   color: #1e40af;
   border-color: #bfdbfe;
 }
+
 .status-processing::before {
   background: var(--info);
 }
@@ -352,6 +364,7 @@ ul {
   color: #5b21b6;
   border-color: #ddd6fe;
 }
+
 .status-shipping::before {
   background: #8b5cf6;
 }
@@ -362,6 +375,7 @@ ul {
   color: var(--success);
   border-color: #bbf7d0;
 }
+
 .status-completed::before,
 .status-active::before {
   background: var(--success);
@@ -373,6 +387,7 @@ ul {
   color: var(--gray-600);
   border-color: var(--gray-300);
 }
+
 .status-cancelled::before,
 .status-inactive::before {
   background: var(--gray-400);
@@ -382,9 +397,7 @@ ul {
   padding: 8px 32px 8px 16px;
   border: 1px solid var(--gray-300);
   border-radius: var(--border-radius-full);
-  background: var(--gray-50)
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")
-    no-repeat right 12px center;
+  background: var(--gray-50) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E") no-repeat right 12px center;
   background-size: 16px;
   appearance: none;
   font-size: 14px;
@@ -394,10 +407,12 @@ ul {
   transition: all 0.2s ease;
   min-width: 140px;
 }
+
 .role-select:hover {
   border-color: var(--gray-400);
   background-color: white;
 }
+
 .role-select:focus {
   outline: none;
   border-color: var(--primary);
@@ -674,6 +689,7 @@ ul {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1019,14 +1035,17 @@ ul {
   background: var(--warning-light);
   color: var(--warning);
 }
+
 .notification-icon.success {
   background: var(--success-light);
   color: var(--success);
 }
+
 .notification-icon.info {
   background: var(--info-light);
   color: var(--info);
 }
+
 .notification-icon.danger {
   background: var(--danger-light);
   color: var(--danger);
@@ -1075,6 +1094,7 @@ ul {
 .form-group {
   margin-bottom: 24px;
 }
+
 .form-group label {
   display: block;
   margin-bottom: 8px;
@@ -1082,6 +1102,7 @@ ul {
   color: var(--gray-800);
   font-size: 14px;
 }
+
 .form-group .form-text {
   font-size: 13px;
   color: var(--gray-500);
@@ -1105,18 +1126,22 @@ ul {
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: var(--shadow);
 }
+
 .btn-next-step:hover {
   background: var(--primary-dark);
 
   box-shadow: var(--shadow-md);
 }
+
 .btn-next-step:active {
   transform: translateY(0);
   box-shadow: var(--shadow-sm);
 }
+
 .btn-next-step.btn-complete {
   background: var(--success);
 }
+
 .btn-next-step.btn-complete:hover {
   background: #047857;
 }
@@ -1129,6 +1154,7 @@ ul {
   color: var(--gray-500);
   margin-top: 4px;
 }
+
 .content-breadcrumb a {
   color: var(--primary);
   font-weight: 500;
@@ -1137,10 +1163,12 @@ ul {
   gap: 6px;
   transition: color 0.2s ease;
 }
+
 .content-breadcrumb a:hover {
   color: var(--primary-dark);
   text-decoration: none;
 }
+
 .content-breadcrumb span {
   color: var(--gray-400);
 }
