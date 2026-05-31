@@ -2,8 +2,10 @@ package group36.service;
 
 import group36.dao.OrderDAO;
 import group36.dao.PaymentDAO;
+import group36.dao.OrderStatusHistoryDAO;
 import group36.model.Order;
 import group36.model.Payment;
+import group36.model.OrderStatusHistory;
 import group36.service.payment.*;
 
 import java.math.BigDecimal;
@@ -102,6 +104,28 @@ public class PaymentService {
                 payment.setStatus(Payment.STATUS_EXPIRED);
                 orderDAO.updatePaymentStatus(orderId, Payment.STATUS_EXPIRED);
                 System.out.println("[PaymentService] Auto-expired payment #" + payment.getId());
+
+                Optional<Order> orderOpt = orderDAO.findById(orderId);
+                if (orderOpt.isPresent()) {
+                    Order order = orderOpt.get();
+                    if (Order.STATUS_PENDING.equals(order.getStatus())) {
+                        orderDAO.updateStatus(orderId, Order.STATUS_PAYMENT_EXPIRED);
+                        System.out.println("[PaymentService] Order #" + orderId + " marked as payment_expired");
+
+                        try {
+                            OrderStatusHistory history = new OrderStatusHistory();
+                            history.setOrderId(orderId);
+                            history.setOldStatus(Order.STATUS_PENDING);
+                            history.setNewStatus(Order.STATUS_PAYMENT_EXPIRED);
+                            history.setChangedBy("system");
+                            history.setChangedById(null);
+                            history.setNote("Đơn hàng tự động chuyển sang hết hạn thanh toán do quá thời gian chờ.");
+                            new OrderStatusHistoryDAO().insert(history);
+                        } catch (Exception e) {
+                            System.err.println("[PaymentService] Failed to insert status history: " + e.getMessage());
+                        }
+                    }
+                }
             }
         }
 
@@ -123,6 +147,19 @@ public class PaymentService {
                     orderDAO.updateStatus(orderId, Order.STATUS_CONFIRMED);
                     System.out.println("[PaymentService] Order #" + orderId
                             + " confirmed after payment");
+
+                    try {
+                        OrderStatusHistory history = new OrderStatusHistory();
+                        history.setOrderId(orderId);
+                        history.setOldStatus(Order.STATUS_PENDING);
+                        history.setNewStatus(Order.STATUS_CONFIRMED);
+                        history.setChangedBy("system");
+                        history.setChangedById(null);
+                        history.setNote("Đơn hàng được xác nhận tự động sau khi thanh toán thành công qua chuyển khoản ngân hàng.");
+                        new OrderStatusHistoryDAO().insert(history);
+                    } catch (Exception e) {
+                        System.err.println("[PaymentService] Failed to insert status history: " + e.getMessage());
+                    }
                 } else {
                     System.out.println("[PaymentService] Order #" + orderId
                             + " status=" + order.getStatus()

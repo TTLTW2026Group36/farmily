@@ -164,6 +164,7 @@ public class PlaceOrderController extends HttpServlet {
                     Address newAddress = new Address();
                     newAddress.setUserId(user.getId());
                     newAddress.setReceiver(fullname);
+                    newAddress.setPhone(phone);
                     newAddress.setAddressDetail(buildAddressDetail(street, ward));
                     newAddress.setDistrict(district);
                     newAddress.setCity(city);
@@ -202,6 +203,7 @@ public class PlaceOrderController extends HttpServlet {
 
                 Address shippingAddress = new Address();
                 shippingAddress.setReceiver(fullname);
+                shippingAddress.setPhone(phone);
                 shippingAddress.setAddressDetail(buildAddressDetail(street, ward));
                 shippingAddress.setDistrict(district);
                 shippingAddress.setCity(city);

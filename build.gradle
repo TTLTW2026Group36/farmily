@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'war'
+    id 'org.hidetake.ssh' version '2.11.2'
 }
 
 group = 'Group36'
@@ -56,3 +57,61 @@ tasks.test {
 tasks.war {
     archiveFileName = 'ROOT.war'
 }
+
+remotes {
+    host {
+        host = '165.232.168.235'
+        user = 'root'
+        password = 'ChuTanTai123@a'
+    }
+}
+
+ssh.settings {
+    knownHosts = allowAnyHosts
+}
+
+task docker_app_start {
+    doLast {
+        println 'begin docker_app_start'
+        ssh.run {
+            session(remotes.host) {
+                execute 'docker stop tomcat9', ignoreError: true
+                execute 'docker rm tomcat9', ignoreError: true
+                execute 'docker run -d --name tomcat9 --add-host localhost:172.17.0.1 -v /usr/deploy:/usr/local/tomcat/webapps -p 80:8080 tomcat:10.1'
+            }
+        }
+    }
+}
+
+task docker_upload_file_to_server {
+    doLast {
+        println 'begin docker_upload_file_to_server'
+        ssh.run {
+            session(remotes.host) {
+                execute 'rm -rf /usr/deploy/ROOT.war /usr/deploy/ROOT'
+                put from: "${project.projectDir}/build/libs/ROOT.war",
+                        into: "/usr/deploy/ROOT.war"
+            }
+        }
+    }
+}
+
+task docker_deploy {
+    docker_deploy.dependsOn docker_app_start
+    docker_deploy.dependsOn docker_upload_file_to_server
+    docker_deploy.dependsOn build
+    tasks.getByName('docker_app_start').mustRunAfter docker_upload_file_to_server
+}
+
+task checkDb {
+    doLast {
+        ssh.run {
+            session(remotes.host) {
+                def result = execute 'docker exec -i mysql mysql -uroot -p123 farmily -e "SELECT * FROM orders;"'
+                println result
+            }
+        }
+    }
+}
+
+

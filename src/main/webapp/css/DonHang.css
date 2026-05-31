@@ -111,6 +111,7 @@
   color: #856404;
 }
 
+.status-confirmed,
 .status-processing {
   background: #cfe2ff;
   color: #084298;
@@ -126,9 +127,22 @@
   color: #155724;
 }
 
-.status-cancelled {
+.status-cancelled,
+.status-cancelled_by_admin,
+.status-payment_expired {
   background: #f8d7da;
   color: #721c24;
+}
+
+.status-delivery_failed {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-returned,
+.status-refunded {
+  background: #e2e3e5;
+  color: #41464b;
 }
 
 .order-body {

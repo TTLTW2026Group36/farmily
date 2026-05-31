@@ -91,12 +91,12 @@
                             </div>
 
 
-                            <c:if test="${order.status != 'cancelled'}">
+                            <c:if test="${order.status != 'cancelled' && order.status != 'cancelled_by_admin' && order.status != 'payment_expired'}">
                                 <div class="order-progress-tracker">
                                     <div class="progress-steps">
 
                                         <div
-                                            class="progress-step ${order.status == 'pending' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active completed' : ''}">
+                                            class="progress-step ${order.status == 'pending' || order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active completed' : ''}">
                                             <div class="step-icon">
                                                 <i class="fas fa-clipboard-check"></i>
                                             </div>
@@ -110,12 +110,12 @@
 
 
                                         <div
-                                            class="progress-connector ${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''}">
+                                            class="progress-connector ${order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''}">
                                         </div>
 
 
                                         <div
-                                            class="progress-step ${order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''} ${order.status == 'shipping' || order.status == 'completed' ? 'completed' : ''}">
+                                            class="progress-step ${order.status == 'confirmed' || order.status == 'processing' || order.status == 'shipping' || order.status == 'completed' ? 'active' : ''} ${order.status == 'shipping' || order.status == 'completed' ? 'completed' : ''}">
                                             <div class="step-icon">
                                                 <i class="fas fa-boxes-stacking"></i>
                                             </div>
@@ -162,12 +162,22 @@
                             </c:if>
 
 
-                            <c:if test="${order.status == 'cancelled'}">
+                            <c:if test="${order.status == 'cancelled' || order.status == 'cancelled_by_admin'}">
                                 <div class="order-cancelled-banner">
                                     <i class="fas fa-circle-xmark"></i>
                                     <div class="cancelled-info">
                                         <span class="cancelled-title">Đơn hàng đã bị hủy</span>
                                         <span class="cancelled-desc">Đơn hàng này không còn hiệu lực</span>
+                                    </div>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${order.status == 'payment_expired'}">
+                                <div class="order-cancelled-banner" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">
+                                    <i class="fas fa-clock" style="color: #dc2626;"></i>
+                                    <div class="cancelled-info">
+                                        <span class="cancelled-title" style="color: #991b1b;">Thanh toán hết hạn</span>
+                                        <span class="cancelled-desc" style="color: #b91c1c;">Giao dịch thanh toán trực tuyến đã quá hạn. Đơn hàng tự động hủy.</span>
                                     </div>
                                 </div>
                             </c:if>
@@ -185,17 +195,7 @@
                                         <p class="info-label">Trạng thái:</p>
                                         <p class="info-value">
                                             <span class="status-badge status-${order.status}">
-                                                <c:choose>
-                                                    <c:when test="${order.status == 'pending'}">Chờ xác nhận
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'processing'}">Đang xử lý
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'shipping'}">Đang giao</c:when>
-                                                    <c:when test="${order.status == 'completed'}">Hoàn thành
-                                                    </c:when>
-                                                    <c:when test="${order.status == 'cancelled'}">Đã hủy</c:when>
-                                                    <c:otherwise>${order.status}</c:otherwise>
-                                                </c:choose>
+                                                ${order.statusText}
                                             </span>
                                         </p>
                                     </div>
@@ -326,14 +326,19 @@
                             </c:if>
 
                             <c:if test="${order.status == 'pending'}">
-                                <div class="order-actions">
+                                <div class="order-actions" style="display: flex; gap: 12px; margin-top: 20px;">
+                                    <c:if test="${order.onlinePayment && order.paymentStatus != 'paid'}">
+                                        <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}" class="btn-confirm-received" style="background-color: #22c55e; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                            <i class="fas fa-credit-card"></i> Thanh toán ngay
+                                        </a>
+                                    </c:if>
                                     <form action="${pageContext.request.contextPath}/ho-so/don-hang" method="post"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');">
-                                        <input type="hidden" name="action" value="cancel">
-                                        <input type="hidden" name="orderId" value="${order.id}">
-                                        <button type="submit" class="btn-cancel-order">
-                                            <i class="fas fa-times"></i> Hủy đơn hàng
-                                        </button>
+                                         onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');" style="margin: 0;">
+                                         <input type="hidden" name="action" value="cancel">
+                                         <input type="hidden" name="orderId" value="${order.id}">
+                                         <button type="submit" class="btn-cancel-order">
+                                             <i class="fas fa-times"></i> Hủy đơn hàng
+                                         </button>
                                     </form>
                                 </div>
                             </c:if>

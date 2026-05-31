@@ -25,24 +25,24 @@ public class CloudinaryConfig {
     private static Cloudinary build() {
         Properties props = new Properties();
         try (InputStream in = CloudinaryConfig.class.getClassLoader()
-                .getResourceAsStream("cloudinary.properties")) {
+                .getResourceAsStream("config.properties")) {
             if (in == null) {
                 throw new IllegalStateException(
-                        "cloudinary.properties not found in classpath. "
-                                + "Copy cloudinary.properties.example and fill in credentials.");
+                        "config.properties not found in classpath. "
+                                + "Please ensure config.properties exists and contains Cloudinary credentials.");
             }
             props.load(in);
         } catch (IOException e) {
-            throw new IllegalStateException("Failed to load cloudinary.properties", e);
+            throw new IllegalStateException("Failed to load config.properties", e);
         }
 
-        String cloudName = props.getProperty("cloud_name");
-        String apiKey = props.getProperty("api_key");
-        String apiSecret = props.getProperty("api_secret");
+        String cloudName = props.getProperty("cloudinary.cloud_name");
+        String apiKey = props.getProperty("cloudinary.api_key");
+        String apiSecret = props.getProperty("cloudinary.api_secret");
 
         if (isBlank(cloudName) || isBlank(apiKey) || isBlank(apiSecret)) {
             throw new IllegalStateException(
-                    "Cloudinary credentials missing. Required keys: cloud_name, api_key, api_secret");
+                    "Cloudinary credentials missing. Required keys: cloudinary.cloud_name, cloudinary.api_key, cloudinary.api_secret");
         }
 
         return new Cloudinary(ObjectUtils.asMap(

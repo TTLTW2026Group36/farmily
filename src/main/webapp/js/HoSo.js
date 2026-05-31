@@ -1,5 +1,5 @@
 
-const PROVINCE_API = 'https://provinces.open-api.vn/api/';
+const GHN_API = window.contextPath + '/api/ghn';
 let addrApiAvailable = true;
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -21,15 +21,16 @@ async function loadAddrProvinces() {
     const sel = document.getElementById('addr-province');
     if (!sel) return;
     try {
-        const res = await fetch(PROVINCE_API + '?depth=1');
+        const res = await fetch(GHN_API + '/provinces');
         if (!res.ok) throw new Error('API error');
-        const provinces = await res.json();
+        const result = await res.json();
+        const provinces = result.data || [];
         sel.innerHTML = '<option value="">Chọn Tỉnh/Thành</option>';
         provinces.forEach(p => {
             const opt = document.createElement('option');
-            opt.value = p.name;
-            opt.dataset.code = p.code;
-            opt.textContent = p.name;
+            opt.value = p.ProvinceName;
+            opt.dataset.code = p.ProvinceID;
+            opt.textContent = p.ProvinceName;
             sel.appendChild(opt);
         });
         addrApiAvailable = true;
@@ -48,15 +49,16 @@ async function loadAddrDistricts(provinceCode) {
     distSel.innerHTML = '<option value="">Đang tải...</option>';
     if (wardSel) { wardSel.innerHTML = '<option value="">Chọn Phường/Xã</option>'; wardSel.disabled = true; }
     try {
-        const res = await fetch(PROVINCE_API + 'p/' + provinceCode + '?depth=2');
+        const res = await fetch(GHN_API + '/districts?provinceId=' + provinceCode);
         if (!res.ok) throw new Error('API error');
-        const data = await res.json();
+        const result = await res.json();
+        const districts = result.data || [];
         distSel.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
-        data.districts.forEach(d => {
+        districts.forEach(d => {
             const opt = document.createElement('option');
-            opt.value = d.name;
-            opt.dataset.code = d.code;
-            opt.textContent = d.name;
+            opt.value = d.DistrictName;
+            opt.dataset.code = d.DistrictID;
+            opt.textContent = d.DistrictName;
             distSel.appendChild(opt);
         });
         distSel.disabled = false;
@@ -71,14 +73,16 @@ async function loadAddrWards(districtCode) {
     wardSel.disabled = true;
     wardSel.innerHTML = '<option value="">Đang tải...</option>';
     try {
-        const res = await fetch(PROVINCE_API + 'd/' + districtCode + '?depth=2');
+        const res = await fetch(GHN_API + '/wards?districtId=' + districtCode);
         if (!res.ok) throw new Error('API error');
-        const data = await res.json();
+        const result = await res.json();
+        const wards = result.data || [];
         wardSel.innerHTML = '<option value="">Chọn Phường/Xã</option>';
-        data.wards.forEach(w => {
+        wards.forEach(w => {
             const opt = document.createElement('option');
-            opt.value = w.name;
-            opt.textContent = w.name;
+            opt.value = w.WardName;
+            opt.dataset.code = w.WardCode;
+            opt.textContent = w.WardName;
             wardSel.appendChild(opt);
         });
         wardSel.disabled = false;
@@ -121,10 +125,11 @@ function resetAddrDropdowns() {
     if (distHidden) distHidden.value = '';
 }
 
-async function populateProvinceForEdit(cityName, districtName, wardName) {
+async function populateProvinceForEdit(cityName, districtName, ghnDistrictId, ghnWardCode) {
     if (!addrApiAvailable || !cityName) return;
     const provSel = document.getElementById('addr-province');
     const distSel = document.getElementById('addr-district');
+    const wardSel = document.getElementById('addr-ward');
     if (!provSel) return;
 
     const provOpts = Array.from(provSel.options);
@@ -136,8 +141,6 @@ async function populateProvinceForEdit(cityName, districtName, wardName) {
             switchAddrToFallback();
             const distFb = document.getElementById('addr-district-fallback');
             if (distFb) distFb.value = districtName || '';
-            const wardFb = document.getElementById('addr-ward-fallback');
-            if (wardFb) wardFb.value = wardName || '';
         }
         return;
     }
@@ -145,13 +148,30 @@ async function populateProvinceForEdit(cityName, districtName, wardName) {
 
     if (provOpt.dataset.code) {
         await loadAddrDistricts(provOpt.dataset.code);
-        if (districtName && distSel) {
-            distSel.value = districtName;
-            const distOpt = distSel.options[distSel.selectedIndex];
-            if (distOpt && distOpt.dataset.code && wardName) {
-                await loadAddrWards(distOpt.dataset.code);
-                const wardSel = document.getElementById('addr-ward');
-                if (wardSel) wardSel.value = wardName;
+        if (distSel) {
+            const distOpts = Array.from(distSel.options);
+            let distOpt = null;
+            if (ghnDistrictId) {
+                distOpt = distOpts.find(o => o.dataset.code == ghnDistrictId);
+            }
+            if (!distOpt && districtName) {
+                distOpt = distOpts.find(o => o.value === districtName);
+            }
+            if (distOpt) {
+                distSel.value = distOpt.value;
+                if (distOpt.dataset.code) {
+                    await loadAddrWards(distOpt.dataset.code);
+                    if (wardSel) {
+                        const wardOpts = Array.from(wardSel.options);
+                        let wardOpt = null;
+                        if (ghnWardCode) {
+                            wardOpt = wardOpts.find(o => o.dataset.code == ghnWardCode);
+                        }
+                        if (wardOpt) {
+                            wardSel.value = wardOpt.value;
+                        }
+                    }
+                }
             }
         }
     }
@@ -427,7 +447,12 @@ function editAddress(addressId) {
             if (distHidden) distHidden.value = address.district || '';
 
             if (addrApiAvailable) {
-                populateProvinceForEdit(address.city || '', address.district || '');
+                populateProvinceForEdit(
+                    address.city || '',
+                    address.district || '',
+                    address.ghnDistrictId,
+                    address.ghnWardCode
+                );
             } else {
                 const provFb = document.getElementById('addr-province-fallback');
                 const distFb = document.getElementById('addr-district-fallback');
@@ -458,6 +483,8 @@ function saveAddress() {
     let city = '';
     let district = '';
     let ward = '';
+    let ghnDistrictId = '';
+    let ghnWardCode = '';
     if (addrApiAvailable) {
         const provSel = document.getElementById('addr-province');
         const distSel = document.getElementById('addr-district');
@@ -465,6 +492,14 @@ function saveAddress() {
         city = provSel ? provSel.value.trim() : '';
         district = distSel ? distSel.value.trim() : '';
         ward = wardSel ? wardSel.value.trim() : '';
+
+        if (distSel && distSel.selectedIndex >= 0) {
+            ghnDistrictId = distSel.options[distSel.selectedIndex].dataset.code || '';
+        }
+        if (wardSel && wardSel.selectedIndex >= 0) {
+            ghnWardCode = wardSel.options[wardSel.selectedIndex].dataset.code || '';
+        }
+
         const cityH = document.getElementById('city');
         const distH = document.getElementById('district');
         if (cityH) cityH.value = city;
@@ -477,10 +512,14 @@ function saveAddress() {
         district = distFb ? distFb.value.trim() : '';
         ward = wardFb ? wardFb.value.trim() : '';
     }
-
-    // Build full addressDetail: "Số nhà..." + ", Phường X" if ward chosen
     let fullAddressDetail = addressDetail;
-    if (ward) fullAddressDetail += ', ' + ward;
+    if (ward) {
+        const cleanWard = ward.trim().toLowerCase();
+        const cleanDetail = addressDetail.trim().toLowerCase();
+        if (!cleanDetail.endsWith(cleanWard)) {
+            fullAddressDetail = addressDetail.trim() + ', ' + ward.trim();
+        }
+    }
 
     let hasError = false;
     clearAddressFormErrors();
@@ -525,6 +564,8 @@ function saveAddress() {
     formData.append('district', district);
     formData.append('city', city);
     formData.append('isDefault', isDefault ? 'true' : 'false');
+    formData.append('ghnDistrictId', ghnDistrictId);
+    formData.append('ghnWardCode', ghnWardCode);
 
     const isUpdate = addressId !== '';
     const url = isUpdate ?
@@ -571,6 +612,8 @@ function setDefaultAddress(addressId) {
             formData.append('district', address.district || '');
             formData.append('city', address.city || '');
             formData.append('isDefault', 'true');
+            formData.append('ghnDistrictId', address.ghnDistrictId || '');
+            formData.append('ghnWardCode', address.ghnWardCode || '');
 
             return fetch(`${window.contextPath}/api/address/${addressId}`, {
                 method: 'POST',
@@ -1040,22 +1083,22 @@ function loadCouponWallet() {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
     })
-    .then(function (res) { return res.json(); })
-    .then(function (data) {
-        if (data.success && data.coupons && data.coupons.length > 0) {
-            renderWalletCoupons(data.coupons, data.userStatuses || {});
-            container.style.display = 'grid';
-            if (emptyState) emptyState.style.display = 'none';
-        } else {
-            container.innerHTML = '';
-            container.style.display = 'none';
-            if (emptyState) emptyState.style.display = 'flex';
-        }
-    })
-    .catch(function (error) {
-        console.error('Error loading coupon wallet:', error);
-        container.innerHTML = '<p class="error-msg">Có lỗi xảy ra khi tải ví voucher</p>';
-    });
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success && data.coupons && data.coupons.length > 0) {
+                renderWalletCoupons(data.coupons, data.userStatuses || {});
+                container.style.display = 'grid';
+                if (emptyState) emptyState.style.display = 'none';
+            } else {
+                container.innerHTML = '';
+                container.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'flex';
+            }
+        })
+        .catch(function (error) {
+            console.error('Error loading coupon wallet:', error);
+            container.innerHTML = '<p class="error-msg">Có lỗi xảy ra khi tải ví voucher</p>';
+        });
 }
 
 function renderWalletCoupons(coupons, statuses) {
@@ -1101,24 +1144,24 @@ function renderWalletCoupons(coupons, statuses) {
         let actionHtml = '';
         if (!isUsed) {
             actionHtml = '<div class="wallet-actions">' +
-                         '  <a href="' + (window.contextPath || '') + '/san-pham" class="btn-use-now">Dùng ngay</a>' +
-                         '</div>';
+                '  <a href="' + (window.contextPath || '') + '/san-pham" class="btn-use-now">Dùng ngay</a>' +
+                '</div>';
         }
 
         html += '<div class="' + cardClass + '" data-id="' + coupon.id + '">' +
-                '  <div class="' + leftClass + '">' +
-                '    <i class="' + iconClass + '"></i>' +
-                '    <div class="discount-val">' + discountVal + '</div>' +
-                '  </div>' +
-                '  <div class="wallet-card-right">' +
-                '    <span class="wallet-code">' + coupon.code + '</span>' +
-                '    <div class="voucher-desc">' + descText + ' ' + expiringTag + '</div>' +
-                '    <div class="voucher-condition">' + condition + '</div>' +
-                '    <p class="wallet-condition">HSD: ' + expiryStr + '</p>' +
-                '    ' + statusHtml +
-                '    ' + actionHtml +
-                '  </div>' +
-                '</div>';
+            '  <div class="' + leftClass + '">' +
+            '    <i class="' + iconClass + '"></i>' +
+            '    <div class="discount-val">' + discountVal + '</div>' +
+            '  </div>' +
+            '  <div class="wallet-card-right">' +
+            '    <span class="wallet-code">' + coupon.code + '</span>' +
+            '    <div class="voucher-desc">' + descText + ' ' + expiringTag + '</div>' +
+            '    <div class="voucher-condition">' + condition + '</div>' +
+            '    <p class="wallet-condition">HSD: ' + expiryStr + '</p>' +
+            '    ' + statusHtml +
+            '    ' + actionHtml +
+            '  </div>' +
+            '</div>';
     });
 
     container.innerHTML = html;

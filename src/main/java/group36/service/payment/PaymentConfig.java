@@ -17,14 +17,14 @@ public class PaymentConfig {
 
     private PaymentConfig() {
         Properties props = new Properties();
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream("payment.properties")) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream("config.properties")) {
             if (is != null) {
                 props.load(is);
             } else {
-                System.err.println("[PaymentConfig] payment.properties not found, using defaults");
+                System.err.println("[PaymentConfig] config.properties not found, using defaults");
             }
         } catch (IOException e) {
-            System.err.println("[PaymentConfig] Error loading payment.properties: " + e.getMessage());
+            System.err.println("[PaymentConfig] Error loading config.properties: " + e.getMessage());
         }
 
         this.merchantId = props.getProperty("sepay.merchant_id", "DEMO_MERCHANT");

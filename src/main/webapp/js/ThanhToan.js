@@ -143,16 +143,20 @@
     const shippingText = document.getElementById('shippingFeeText');
 
     if (fee === null) {
+      window.shippingError = null;
       if (shippingText) shippingText.innerHTML = '<span style="color:#999">Chọn địa chỉ để tính phí</span>';
       window.currentShippingFee = 0;
       recalcGrandTotal();
     } else if (fee === 'loading') {
+      window.shippingError = null;
       if (shippingText) shippingText.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tính...';
     } else if (fee === 'error') {
-      if (shippingText) shippingText.innerHTML = '<span style="color:#d32f2f">' + (errorMsg || 'Lỗi') + '</span>';
+      window.shippingError = errorMsg || 'Lỗi';
+      if (shippingText) shippingText.innerHTML = '<span style="color:#d32f2f">' + window.shippingError + '</span>';
       window.currentShippingFee = 0;
       recalcGrandTotal();
     } else {
+      window.shippingError = null;
       window.currentShippingFee = fee;
       recalcGrandTotal();
     }
@@ -589,6 +593,11 @@
   }
 
   function validateForm() {
+    if (window.shippingError) {
+      showError(window.shippingError);
+      return false;
+    }
+
     const addressId = document.getElementById('selectedAddressId');
     if (window.isLoggedIn && addressId && addressId.value && addressId.value !== '') {
       return true;
@@ -880,7 +889,9 @@
 
     const shippingText = document.getElementById('shippingFeeText');
     if (shippingText) {
-      if (shippingFee === 0) {
+      if (window.shippingError) {
+        shippingText.innerHTML = '<span style="color:#d32f2f">' + window.shippingError + '</span>';
+      } else if (shippingFee === 0) {
         const selectedAddress = document.getElementById('selectedAddressId');
         const districtSelect = document.getElementById('district');
         const wardSelect = document.getElementById('ward');

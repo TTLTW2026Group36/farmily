@@ -403,19 +403,7 @@
                                                     </div>
                                                     <div class="order-status">
                                                         <span class="status-badge status-${order.status}">
-                                                            <c:choose>
-                                                                <c:when test="${order.status == 'pending'}">Chờ xác
-                                                                    nhận</c:when>
-                                                                <c:when test="${order.status == 'processing'}">Đang
-                                                                    xử lý</c:when>
-                                                                <c:when test="${order.status == 'shipping'}">Đang
-                                                                    giao</c:when>
-                                                                <c:when test="${order.status == 'completed'}">Hoàn
-                                                                    thành</c:when>
-                                                                <c:when test="${order.status == 'cancelled'}">Đã hủy
-                                                                </c:when>
-                                                                <c:otherwise>${order.status}</c:otherwise>
-                                                            </c:choose>
+                                                            ${order.statusText}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -529,7 +517,13 @@
                                                     </div>
                                                 </div>
 
-                                                <div class="order-footer">
+                                                <div class="order-footer" style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
+                                                    <c:if test="${order.status == 'pending' && order.onlinePayment && order.paymentStatus != 'paid'}">
+                                                        <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}"
+                                                            class="btn-view-detail" style="background-color: #22c55e; border-color: #22c55e; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                                            <i class="fas fa-credit-card"></i> Thanh toán ngay
+                                                        </a>
+                                                    </c:if>
                                                     <a href="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet?id=${order.id}"
                                                         class="btn-view-detail">
                                                         Chi tiết đơn hàng

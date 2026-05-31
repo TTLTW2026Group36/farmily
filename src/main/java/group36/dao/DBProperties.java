@@ -9,11 +9,11 @@ public class DBProperties {
     private static Properties prop = new Properties();
     static {
         try {
-            File f = new File("/db.properties");
+            File f = new File("/config.properties");
             if (f.exists()) {
                 prop.load(new FileInputStream(f));
             } else {
-                prop.load(DBProperties.class.getClassLoader().getResourceAsStream("db.properties"));
+                prop.load(DBProperties.class.getClassLoader().getResourceAsStream("config.properties"));
             }
         } catch (IOException e) {
             throw new RuntimeException(e);

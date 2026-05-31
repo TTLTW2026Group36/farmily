@@ -280,7 +280,7 @@
                                 <div class="order-detail-item">
                                     <span class="order-detail-label">Điện thoại</span>
                                     <span class="order-detail-value">
-                                        ${order.guestOrder ? order.guestPhone : order.user.phone}
+                                        ${not empty order.address.phone ? order.address.phone : (order.guestOrder ? order.guestPhone : order.user.phone)}
                                     </span>
                                 </div>
                                 <div class="order-detail-item">
@@ -339,6 +339,12 @@
                         </div>
 
                         <div class="action-buttons">
+                            <c:if test="${order.status == 'pending' && order.onlinePayment && order.paymentStatus != 'paid'}">
+                                <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}" class="ty-btn" style="background-color: #22c55e; color: #fff; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;" id="repayButton">
+                                    <i class="fas fa-credit-card"></i>
+                                    Thanh toán lại
+                                </a>
+                            </c:if>
                             <a href="${pageContext.request.contextPath}/" class="ty-btn btn-primary">
                                 <i class="fas fa-home"></i>
                                 Về trang chủ
@@ -365,8 +371,8 @@
                     function poll() {
                         pollCount++;
                         if (pollCount > maxPolls) {
-                            updateUI('fa-check', '#22c55e', 'Đặt hàng thành công!',
-                                'Hệ thống sẽ tự động cập nhật khi nhận được xác nhận từ ngân hàng.');
+                            updateUI('fa-check', '#f59e0b', 'Chưa nhận được xác nhận thanh toán',
+                                'Hệ thống chưa nhận được phản hồi từ ngân hàng. Bạn có thể kiểm tra lại sau hoặc thử thanh toán lại.', true);
                             return;
                         }
                         fetch(contextPath + '/api/payment/status?orderId=' + orderId)
@@ -374,13 +380,13 @@
                             .then(function(data) {
                                 if (data.paid) {
                                     updateUI('fa-check', '#22c55e', 'Thanh toán thành công!',
-                                        'Cảm ơn bạn đã mua hàng tại Nông Sản Farmily.');
+                                        'Cảm ơn bạn đã mua hàng tại Nông Sản Farmily.', false);
                                 } else if (data.expired) {
                                     updateUI('fa-clock', '#ef4444', 'Thanh toán đã hết hạn',
-                                        'Phiên thanh toán đã quá hạn. Bạn có thể đặt hàng lại.');
+                                        'Phiên thanh toán đã quá hạn. Bạn có thể thanh toán lại.', true);
                                 } else if (data.status === 'failed') {
                                     updateUI('fa-times', '#ef4444', 'Thanh toán thất bại',
-                                        'Giao dịch không thành công. Đơn hàng vẫn được giữ.');
+                                        'Giao dịch không thành công. Bạn có thể thanh toán lại.', true);
                                 } else {
                                     setTimeout(poll, 3000);
                                 }
@@ -388,13 +394,18 @@
                             .catch(function() { setTimeout(poll, 3000); });
                     }
 
-                    function updateUI(icon, color, title, subtitle) {
+                    function updateUI(icon, color, title, subtitle, showRepay) {
                         var el = document.getElementById('statusIcon');
                         if (el) { el.style.background = color; el.innerHTML = '<i class="fas ' + icon + '"></i>'; }
                         var t = document.getElementById('statusTitle');
                         if (t) t.textContent = title;
                         var s = document.getElementById('statusSubtitle');
                         if (s) s.textContent = subtitle;
+
+                        var repayBtn = document.getElementById('repayButton');
+                        if (repayBtn) {
+                            repayBtn.style.display = showRepay ? 'inline-flex' : 'none';
+                        }
                     }
 
                     setTimeout(poll, 1500);

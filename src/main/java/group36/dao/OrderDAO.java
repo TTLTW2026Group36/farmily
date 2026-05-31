@@ -332,12 +332,22 @@ public class OrderDAO extends BaseDao {
         }
 
         public int countByUserIdAndStatus(int userId, String status) {
-                String sql = "SELECT COUNT(*) FROM orders WHERE user_id = :userId AND status = :status";
-                return get().withHandle(handle -> handle.createQuery(sql)
-                                .bind("userId", userId)
-                                .bind("status", status)
-                                .mapTo(Integer.class)
-                                .one());
+                String sql;
+                if ("processing".equals(status)) {
+                        sql = "SELECT COUNT(*) FROM orders WHERE user_id = :userId AND status IN ('confirmed', 'processing')";
+                } else if ("cancelled".equals(status)) {
+                        sql = "SELECT COUNT(*) FROM orders WHERE user_id = :userId AND status IN ('cancelled', 'cancelled_by_admin', 'payment_expired')";
+                } else {
+                        sql = "SELECT COUNT(*) FROM orders WHERE user_id = :userId AND status = :status";
+                }
+                return get().withHandle(handle -> {
+                        org.jdbi.v3.core.statement.Query q = handle.createQuery(sql)
+                                        .bind("userId", userId);
+                        if (!"processing".equals(status) && !"cancelled".equals(status)) {
+                                q.bind("status", status);
+                        }
+                        return q.mapTo(Integer.class).one();
+                });
         }
 
         public List<Order> findByUserIdPaginated(int userId, int page, int size) {
@@ -353,14 +363,24 @@ public class OrderDAO extends BaseDao {
 
         public List<Order> findByUserIdAndStatusPaginated(int userId, String status, int page, int size) {
                 int offset = (page - 1) * size;
-                String sql = "SELECT * FROM orders WHERE user_id = :userId AND status = :status ORDER BY order_date DESC LIMIT :size OFFSET :offset";
-                return get().withHandle(handle -> handle.createQuery(sql)
-                                .bind("userId", userId)
-                                .bind("status", status)
-                                .bind("size", size)
-                                .bind("offset", offset)
-                                .map(new OrderMapper())
-                                .list());
+                String sql;
+                if ("processing".equals(status)) {
+                        sql = "SELECT * FROM orders WHERE user_id = :userId AND status IN ('confirmed', 'processing') ORDER BY order_date DESC LIMIT :size OFFSET :offset";
+                } else if ("cancelled".equals(status)) {
+                        sql = "SELECT * FROM orders WHERE user_id = :userId AND status IN ('cancelled', 'cancelled_by_admin', 'payment_expired') ORDER BY order_date DESC LIMIT :size OFFSET :offset";
+                } else {
+                        sql = "SELECT * FROM orders WHERE user_id = :userId AND status = :status ORDER BY order_date DESC LIMIT :size OFFSET :offset";
+                }
+                return get().withHandle(handle -> {
+                        org.jdbi.v3.core.statement.Query q = handle.createQuery(sql)
+                                        .bind("userId", userId)
+                                        .bind("size", size)
+                                        .bind("offset", offset);
+                        if (!"processing".equals(status) && !"cancelled".equals(status)) {
+                                q.bind("status", status);
+                        }
+                        return q.map(new OrderMapper()).list();
+                });
         }
 
         public int countFiltered(String status, String keyword, String fromDate, String toDate) {
