@@ -4,6 +4,7 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.User;
+import group36.model.UserRole;
 import group36.service.AuthService;
 
 import group36.util.RecaptchaUtil;
@@ -11,9 +12,6 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
-
-import java.util.Arrays;
-import java.util.List;
 
 
 
@@ -23,7 +21,6 @@ import java.util.List;
 @WebServlet(name = "AdminLoginController", value = "/admin/login")
 public class AdminLoginController extends HttpServlet {
 
-    private static final List<String> ALLOWED_ROLES = Arrays.asList("admin", "manager");
     private final AuthService authService = new AuthService();
 
     @Override
@@ -146,7 +143,7 @@ public class AdminLoginController extends HttpServlet {
         if (user == null || user.getRole() == null) {
             return false;
         }
-        return ALLOWED_ROLES.contains(user.getRole().toLowerCase());
+        return UserRole.fromString(user.getRole()).canAccessAdmin();
     }
 
     

@@ -3,6 +3,7 @@ package group36.dao;
 import org.jdbi.v3.core.mapper.RowMapper;
 import org.jdbi.v3.core.statement.StatementContext;
 import group36.model.User;
+import group36.model.UserRole;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,7 +21,8 @@ public class UserDAO extends BaseDao {
             user.setEmail(rs.getString("email"));
             user.setPassword(rs.getString("password"));
             user.setPhone(rs.getString("phone"));
-            user.setRole(rs.getString("role"));
+
+            user.setRole(UserRole.fromString(rs.getString("role")).name());
             user.setCreated_at(rs.getTimestamp("created_at"));
             user.setUpdated_at(rs.getTimestamp("updated_at"));
             user.setLoginAttempts(rs.getInt("login_attempts"));
@@ -97,7 +99,7 @@ public class UserDAO extends BaseDao {
                 .bind("email", user.getEmail())
                 .bind("password", user.getPassword())
                 .bind("phone", user.getPhone())
-                .bind("role", user.getRole() != null ? user.getRole() : "user")
+                .bind("role", UserRole.fromString(user.getRole()).name())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());

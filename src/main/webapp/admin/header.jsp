@@ -43,17 +43,16 @@
                         <div class="name">${not empty adminUser.name ? adminUser.name : 'Admin User'}</div>
                         <div class="role">
                             <c:choose>
-                                <c:when test="${adminUser.role == 'admin'}">Quản trị viên</c:when>
-                                <c:when test="${adminUser.role == 'manager'}">Người quản lý</c:when>
-                                <c:otherwise>Quản trị viên</c:otherwise>
+                                <c:when test="${adminUser.role == 'ADMIN'}">Quản trị viên</c:when>
+                                <c:when test="${adminUser.role == 'MANAGER'}">Quản lý vận hành</c:when>
+                                <c:when test="${adminUser.role == 'STAFF_ORDER'}">NV Đơn hàng</c:when>
+                                <c:when test="${adminUser.role == 'STAFF_CONTENT'}">NV Nội dung</c:when>
+                                <c:otherwise>Nhân viên</c:otherwise>
                             </c:choose>
                         </div>
                     </div>
                     <div class="user-dropdown">
-                        <!-- <a href="${pageContext.request.contextPath}/admin/settings" data-page="settings">
-                            <i class="fas fa-cog"></i>
-                            <span>Cài đặt</span>
-                        </a> -->
+
                         <a href="${pageContext.request.contextPath}/admin/logout">
                             <i class="fas fa-sign-out-alt"></i>
                             <span>Đăng xuất</span>

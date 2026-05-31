@@ -5,6 +5,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.dao.AddressDAO;
 import group36.model.User;
+import group36.model.UserRole;
 import group36.service.UserService;
 
 import java.io.IOException;
@@ -198,10 +199,25 @@ public class AdminUserController extends HttpServlet {
 
         try {
             int id = Integer.parseInt(idParam);
-            userService.updateUserBasic(id, name, phone, role);
+
+            UserRole parsedRole = UserRole.fromString(role);
 
             HttpSession session = request.getSession();
-            session.setAttribute("success", "Cập nhật thông tin khách hàng thành công!");
+            User currentAdmin = (User) session.getAttribute("adminUser");
+            if (currentAdmin != null
+                    && currentAdmin.getId() == id
+                    && UserRole.fromString(currentAdmin.getRole()) == UserRole.ADMIN
+                    && parsedRole != UserRole.ADMIN) {
+                session.setAttribute("error", "Không thể thay đổi vai trò của chính mình khi đang là ADMIN!");
+                response.sendRedirect(request.getContextPath() + "/admin/users/edit?id=" + idParam);
+                return;
+            }
+
+            userService.updateUserBasic(id, name, phone, parsedRole.name());
+
+            session.setAttribute("success",
+                    "Cập nhật thông tin & vai trò (" + parsedRole.name() + ") thành công! "
+                    + "Người dùng cần đăng nhập lại để áp dụng vai trò mới.");
 
             response.sendRedirect(request.getContextPath() + "/admin/users");
         } catch (NumberFormatException e) {
