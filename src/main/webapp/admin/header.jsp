@@ -260,6 +260,11 @@
                             placeholder: 'Tìm tên sản phẩm Flash Sale...',
                             tableId: 'flashSalesTable',
                             columns: [0]
+                        },
+                        contacts: {
+                            placeholder: 'Tìm họ tên, email, SĐT hoặc tiêu đề...',
+                            tableId: 'contactsTable',
+                            columns: [1, 2, 3, 4]
                         }
                     };
 

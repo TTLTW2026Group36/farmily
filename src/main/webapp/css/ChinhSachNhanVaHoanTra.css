@@ -62,3 +62,51 @@
 .py-3 {
     padding: 1.5rem 0;
 }
+
+@media (max-width: 768px) {
+    .ChinhSachNhanVaHoanTra_container {
+        padding: 1.5rem 1rem;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .title_page a {
+        font-size: 1.5rem;
+    }
+
+    .heading-bar {
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .ChinhSachNhanVaHoanTra_container {
+        padding: 1rem 0.75rem;
+    }
+
+    .title_page a {
+        font-size: 1.3rem;
+    }
+
+    .content-page p {
+        font-size: 12pt;
+    }
+
+    .page.section {
+        padding: 1rem 0;
+    }
+}
+
+@media (max-width: 375px) {
+    .ChinhSachNhanVaHoanTra_container {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .title_page a {
+        font-size: 1.2rem;
+    }
+
+    .content-page p {
+        font-size: 11pt;
+    }
+}

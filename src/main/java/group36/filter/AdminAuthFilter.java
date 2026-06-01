@@ -23,6 +23,7 @@ public class AdminAuthFilter implements Filter {
 
         map.put("/admin/users",       EnumSet.of(UserRole.ADMIN));
         map.put("/admin/api/address", EnumSet.of(UserRole.ADMIN));
+        map.put("/admin/contacts",    EnumSet.of(UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF_ORDER));
 
         Set<UserRole> managerLevel = EnumSet.of(UserRole.ADMIN, UserRole.MANAGER);
         map.put("/admin/products",   managerLevel);

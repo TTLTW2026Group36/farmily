@@ -327,6 +327,32 @@
         font-size: 2rem;
     }
 
+    .about-hero {
+        height: 45vh;
+        min-height: 300px;
+    }
+
+    .about-hero p {
+        font-size: 1rem;
+    }
+
+    .about-intro h2 {
+        font-size: 1.8rem;
+    }
+
+    .about-intro p {
+        font-size: 1rem;
+    }
+
+    .about-intro,
+    .about-values,
+    .about-journey,
+    .about-video,
+    .about-process,
+    .about-testimonials {
+        padding: 2.5rem 0;
+    }
+
     .journey-item {
         flex-direction: column;
     }
@@ -349,5 +375,109 @@
 
     .process-steps {
         flex-direction: column;
+    }
+
+    .testimonial-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .about-cta h2 {
+        font-size: 1.8rem;
+    }
+
+    .about-cta {
+        padding: 3rem 0;
+    }
+
+    .values-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .about-hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .about-hero {
+        height: 40vh;
+        min-height: 250px;
+    }
+
+    .about-hero p {
+        font-size: 0.9rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .about-btn {
+        padding: 10px 24px;
+        font-size: 14px;
+    }
+
+    .about-intro h2 {
+        font-size: 1.5rem;
+    }
+
+    .about-intro,
+    .about-values,
+    .about-journey,
+    .about-video,
+    .about-process,
+    .about-testimonials {
+        padding: 2rem 0;
+    }
+
+    .about-page-wrapper .about-container {
+        padding: 0 0.75rem;
+    }
+
+    .values-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .value-card {
+        padding: 1.5rem;
+    }
+
+    .process-icon {
+        width: 64px;
+        height: 64px;
+        font-size: 1.5rem;
+    }
+
+    .testimonial-card {
+        padding: 1.5rem;
+    }
+
+    .about-cta h2 {
+        font-size: 1.5rem;
+    }
+
+    .about-cta p {
+        font-size: 0.95rem;
+    }
+
+    .journey-year {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 375px) {
+    .about-hero h1 {
+        font-size: 1.4rem;
+    }
+
+    .about-hero-content {
+        padding: 1rem;
+    }
+
+    .about-intro h2,
+    .about-cta h2 {
+        font-size: 1.3rem;
+    }
+
+    .about-page-wrapper .about-container {
+        padding: 0 0.5rem;
     }
 }

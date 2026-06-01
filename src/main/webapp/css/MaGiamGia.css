@@ -292,3 +292,80 @@
     cursor: not-allowed;
 }
 
+@media (max-width: 480px) {
+    .coupon-page {
+        padding: 0 12px;
+        margin: 12px auto 24px;
+    }
+
+    .coupon-page-header {
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 16px;
+    }
+
+    .coupon-page-header h1 {
+        font-size: 20px;
+        gap: 8px;
+    }
+
+    .coupon-page-header h1 i {
+        font-size: 24px;
+    }
+
+    .coupon-left {
+        width: 90px;
+        min-width: 90px;
+        max-width: 90px;
+        padding: 10px 6px;
+    }
+
+    .coupon-left i {
+        font-size: 18px;
+    }
+
+    .coupon-left .discount-val {
+        font-size: 12px;
+    }
+
+    .coupon-right {
+        padding: 10px 10px 10px 16px;
+    }
+
+    .coupon-code {
+        font-size: 12px;
+        padding: 3px 8px;
+    }
+
+    .coupon-code-row {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 375px) {
+    .coupon-page {
+        padding: 0 8px;
+    }
+
+    .coupon-page-header h1 {
+        font-size: 18px;
+    }
+
+    .coupon-left {
+        width: 80px;
+        min-width: 80px;
+        max-width: 80px;
+    }
+
+    .coupon-right {
+        padding: 8px 8px 8px 14px;
+    }
+
+    .voucher-desc {
+        font-size: 12px;
+    }
+
+    .coupon-card {
+        border-radius: 6px;
+    }
+}

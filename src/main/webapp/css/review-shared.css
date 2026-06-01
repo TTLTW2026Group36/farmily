@@ -109,3 +109,58 @@
 .rsl-nav.next {
     right: 16px;
 }
+
+@media (max-width: 768px) {
+    .review-media-grid {
+        grid-template-columns: repeat(auto-fill, 60px);
+        gap: 5px;
+    }
+
+    .review-media-thumb {
+        width: 60px;
+        height: 60px;
+    }
+
+    .rsl-nav {
+        font-size: 36px;
+        padding: 4px 10px;
+    }
+
+    .rsl-close {
+        font-size: 28px;
+        top: 12px;
+        right: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .review-media-grid {
+        grid-template-columns: repeat(auto-fill, 52px);
+        gap: 4px;
+    }
+
+    .review-media-thumb {
+        width: 52px;
+        height: 52px;
+        border-radius: 4px;
+    }
+
+    .rsl-nav {
+        font-size: 28px;
+        padding: 2px 8px;
+    }
+
+    .rsl-nav.prev {
+        left: 8px;
+    }
+
+    .rsl-nav.next {
+        right: 8px;
+    }
+
+    #reviewSharedLightbox img,
+    #reviewSharedLightbox video {
+        max-width: 95vw;
+        max-height: 80vh;
+    }
+}

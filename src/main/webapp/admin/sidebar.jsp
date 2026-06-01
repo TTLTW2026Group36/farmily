@@ -78,6 +78,12 @@
                 <span>Đánh giá</span>
             </a>
         </li>
+        <li>
+            <a href="${cp}/admin/contacts" data-page="contacts">
+                <i class="fas fa-envelope"></i>
+                <span>Liên hệ</span>
+            </a>
+        </li>
         </c:if>
 
 

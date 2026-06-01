@@ -18,6 +18,7 @@ public class Address implements Serializable {
     private Integer ghnDistrictId;
     private String ghnWardCode;
     private boolean isDefault;
+    private boolean isDeleted;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -128,6 +129,14 @@ public class Address implements Serializable {
 
     public void setDefault(boolean isDefault) {
         this.isDefault = isDefault;
+    }
+
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean isDeleted) {
+        this.isDeleted = isDeleted;
     }
 
     public Timestamp getCreatedAt() {
