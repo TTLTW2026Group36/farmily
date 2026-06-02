@@ -79,14 +79,16 @@
                                                         <span>•</span>
                                                         <span>
                                                             <i class="fas fa-tag"></i>
-                                                            <c:choose>
-                                                                <c:when test="${n.type == 'new_order'}">Đơn hàng
-                                                                </c:when>
-                                                                <c:when test="${n.type == 'order_cancelled'}">Hủy đơn
-                                                                </c:when>
+                                                             <c:choose>
+                                                                <c:when test="${n.type == 'new_order'}">Đơn hàng</c:when>
+                                                                <c:when test="${n.type == 'order_cancelled'}">Hủy đơn</c:when>
                                                                 <c:when test="${n.type == 'low_stock'}">Tồn kho</c:when>
+                                                                <c:when test="${n.type == 'new_contact'}">Liên hệ</c:when>
+                                                                <c:when test="${n.type == 'new_review'}">Đánh giá</c:when>
+                                                                <c:when test="${n.type == 'review_reported'}">Báo cáo</c:when>
+                                                                <c:when test="${n.type == 'flash_sale_low_stock'}">Flash Sale</c:when>
                                                                 <c:otherwise>Hệ thống</c:otherwise>
-                                                            </c:choose>
+                                                             </c:choose>
                                                         </span>
                                                     </div>
                                                 </div>

@@ -71,6 +71,8 @@
                 var notificationCountText = document.getElementById('notificationCountText');
                 var notificationList = document.getElementById('notificationList');
                 var markAllReadBtn = document.getElementById('markAllReadBtn');
+                var cachedNotifications = null;
+                var currentUnreadCount = 0;
 
                 notificationBtn.addEventListener('click', function (e) {
                     e.stopPropagation();
@@ -79,6 +81,13 @@
                         loadNotifications();
                     }
                 });
+
+                var notificationWrapper = document.querySelector('.notification-wrapper');
+                if (notificationWrapper) {
+                    notificationWrapper.addEventListener('mouseenter', function () {
+                        loadNotifications();
+                    });
+                }
 
                 document.addEventListener('click', function (e) {
                     if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
@@ -95,6 +104,7 @@
                         .then(function (response) { return response.json(); })
                         .then(function (data) {
                             if (data.success) {
+                                cachedNotifications = null;
                                 updateBadge(0);
                                 var items = notificationList.querySelectorAll('.notification-item.unread');
                                 items.forEach(function (item) {
@@ -108,15 +118,24 @@
                 });
 
                 function loadNotifications() {
+                    if (cachedNotifications) {
+                        renderNotifications(cachedNotifications);
+                    } else {
+                        notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+                    }
+
                     fetch(contextPath + '/admin/api/notifications?limit=5')
                         .then(function (response) { return response.json(); })
                         .then(function (data) {
+                            cachedNotifications = data.notifications;
                             updateBadge(data.unreadCount);
                             renderNotifications(data.notifications);
                         })
                         .catch(function (error) {
                             console.error('Error loading notifications:', error);
-                            notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Lỗi tải thông báo</div>';
+                            if (!cachedNotifications) {
+                                notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Lỗi tải thông báo</div>';
+                            }
                         });
                 }
 
@@ -159,12 +178,19 @@
                             return contextPath + '/admin/orders/detail?id=' + notification.referenceId;
                         case 'product':
                             return contextPath + '/admin/products/edit?id=' + notification.referenceId;
+                        case 'contact':
+                            return contextPath + '/admin/contacts';
+                        case 'review':
+                            return contextPath + '/admin/reviews';
+                        case 'flash_sale':
+                            return contextPath + '/admin/flash-sales';
                         default:
                             return contextPath + '/admin/notifications';
                     }
                 }
 
                 function updateBadge(count) {
+                    currentUnreadCount = count;
                     if (count > 0) {
                         notificationBadge.textContent = count > 99 ? '99+' : count;
                         notificationBadge.style.display = 'flex';
@@ -176,6 +202,7 @@
                 }
 
                 function markAsRead(id) {
+                    cachedNotifications = null;
                     fetch(contextPath + '/admin/api/notifications/read', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -203,6 +230,9 @@
                     fetch(contextPath + '/admin/api/notifications/count')
                         .then(function (response) { return response.json(); })
                         .then(function (data) {
+                            if (data.unreadCount !== currentUnreadCount) {
+                                cachedNotifications = null; // Clear cache to reload fresh notifications next click
+                            }
                             updateBadge(data.unreadCount);
                         })
                         .catch(function (error) {
@@ -211,6 +241,18 @@
                 }
 
                 fetchUnreadCount();
+
+                setTimeout(function () {
+                    fetch(contextPath + '/admin/api/notifications?limit=5')
+                        .then(function (response) { return response.json(); })
+                        .then(function (data) {
+                            cachedNotifications = data.notifications;
+                            updateBadge(data.unreadCount);
+                        })
+                        .catch(function (error) {
+                            console.error('Error pre-fetching notifications:', error);
+                        });
+                }, 1000);
 
                 setInterval(fetchUnreadCount, 30000);
                 (function () {

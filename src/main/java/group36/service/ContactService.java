@@ -2,6 +2,8 @@ package group36.service;
 
 import group36.dao.ContactDAO;
 import group36.model.Contact;
+import group36.model.AdminNotification;
+import group36.service.AdminNotificationService;
 
 import java.util.List;
 import java.util.Optional;
@@ -56,7 +58,20 @@ public class ContactService {
             contact.setOrganization(contact.getOrganization().trim());
         }
 
-        return contactDAO.insert(contact);
+        int contactId = contactDAO.insert(contact);
+        try {
+            AdminNotificationService notificationService = new AdminNotificationService();
+            notificationService.createNotification(
+                AdminNotification.TYPE_NEW_CONTACT,
+                "Liên hệ mới từ " + contact.getFullname(),
+                "Tiêu đề: " + contact.getSubject(),
+                contactId,
+                "contact"
+            );
+        } catch (Exception e) {
+            System.err.println("[ContactService] Failed to create contact notification: " + e.getMessage());
+        }
+        return contactId;
     }
 
     

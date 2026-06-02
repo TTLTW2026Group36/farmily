@@ -14,6 +14,7 @@ import group36.model.Order;
 import group36.model.Review;
 import group36.model.ReviewImage;
 import group36.model.User;
+import group36.model.AdminNotification;
 import group36.service.AdminNotificationService;
 import group36.service.CloudinaryService;
 import group36.service.OrderService;
@@ -408,6 +409,19 @@ public class UserOrderController extends HttpServlet {
                 }
                 reviewDAO.delete(reviewId);
                 throw uploadEx;
+            }
+
+            try {
+                AdminNotificationService notificationService = new AdminNotificationService();
+                notificationService.createNotification(
+                    AdminNotification.TYPE_NEW_REVIEW,
+                    "Đánh giá mới cho sản phẩm",
+                    "Khách hàng " + user.getName() + " đánh giá " + rating + " sao: " + (reviewText.trim().length() > 50 ? reviewText.trim().substring(0, 47) + "..." : reviewText.trim()),
+                    reviewId,
+                    "review"
+                );
+            } catch (Exception notiEx) {
+                System.err.println("[UserOrderController] Failed to create review notification: " + notiEx.getMessage());
             }
 
             String returnTo = request.getParameter("returnTo");

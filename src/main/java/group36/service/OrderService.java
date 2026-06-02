@@ -155,6 +155,8 @@ public class OrderService {
             e.printStackTrace();
         }
 
+        checkAndTriggerFlashSaleNotifications(cartItems);
+
         return order;
     }
 
@@ -258,6 +260,8 @@ public class OrderService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        checkAndTriggerFlashSaleNotifications(cartItems);
 
         return order;
     }
@@ -397,6 +401,8 @@ public class OrderService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        checkAndTriggerFlashSaleNotifications(cartItems);
 
         return order;
     }
@@ -808,5 +814,36 @@ public class OrderService {
             loadOrderDetailsForAdmin(order);
         }
         return orders;
+    }
+
+    private void checkAndTriggerFlashSaleNotifications(List<CartItem> cartItems) {
+        try {
+            for (CartItem item : cartItems) {
+                if (item.hasFlashSalePrice()) {
+                    flashSaleDAO.findActiveByProductId(item.getProductId()).ifPresent(fs -> {
+                        int remaining = fs.getStockLimit() - fs.getSoldCount();
+                        if (remaining <= 0) {
+                            adminNotificationService.createNotification(
+                                AdminNotification.TYPE_FLASH_SALE_LOW_STOCK,
+                                "Flash Sale hết hàng!",
+                                "Sản phẩm Flash Sale \"" + (item.getProduct() != null ? item.getProduct().getName() : "Sản phẩm #" + item.getProductId()) + "\" đã bán hết giới hạn tồn kho (" + fs.getStockLimit() + ").",
+                                fs.getId(),
+                                "flash_sale"
+                            );
+                        } else if (remaining <= 5) {
+                            adminNotificationService.createNotification(
+                                AdminNotification.TYPE_FLASH_SALE_LOW_STOCK,
+                                "Flash Sale sắp hết hàng",
+                                "Sản phẩm Flash Sale \"" + (item.getProduct() != null ? item.getProduct().getName() : "Sản phẩm #" + item.getProductId()) + "\" chỉ còn lại " + remaining + " sản phẩm.",
+                                fs.getId(),
+                                "flash_sale"
+                            );
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

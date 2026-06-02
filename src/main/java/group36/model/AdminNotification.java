@@ -23,8 +23,11 @@ public class AdminNotification implements Serializable {
     public static final String TYPE_NEW_ORDER = "new_order";
     public static final String TYPE_ORDER_CANCELLED = "order_cancelled";
     public static final String TYPE_LOW_STOCK = "low_stock";
-    public static final String TYPE_NEW_USER = "new_user";
     public static final String TYPE_SYSTEM = "system";
+    public static final String TYPE_NEW_CONTACT = "new_contact";
+    public static final String TYPE_NEW_REVIEW = "new_review";
+    public static final String TYPE_REVIEW_REPORTED = "review_reported";
+    public static final String TYPE_FLASH_SALE_LOW_STOCK = "flash_sale_low_stock";
 
     
     public AdminNotification() {
@@ -148,8 +151,14 @@ public class AdminNotification implements Serializable {
                 return "fa-times-circle";
             case TYPE_LOW_STOCK:
                 return "fa-exclamation-triangle";
-            case TYPE_NEW_USER:
-                return "fa-user-plus";
+            case TYPE_NEW_CONTACT:
+                return "fa-envelope";
+            case TYPE_NEW_REVIEW:
+                return "fa-star";
+            case TYPE_REVIEW_REPORTED:
+                return "fa-flag";
+            case TYPE_FLASH_SALE_LOW_STOCK:
+                return "fa-bolt";
             default:
                 return "fa-bell";
         }
@@ -166,8 +175,14 @@ public class AdminNotification implements Serializable {
                 return "danger";
             case TYPE_LOW_STOCK:
                 return "warning";
-            case TYPE_NEW_USER:
+            case TYPE_NEW_CONTACT:
+                return "info";
+            case TYPE_NEW_REVIEW:
                 return "success";
+            case TYPE_REVIEW_REPORTED:
+                return "danger";
+            case TYPE_FLASH_SALE_LOW_STOCK:
+                return "warning";
             default:
                 return "info";
         }
@@ -186,8 +201,12 @@ public class AdminNotification implements Serializable {
                 return contextPath + "/admin/orders/detail?id=" + referenceId;
             case "product":
                 return contextPath + "/admin/products/edit?id=" + referenceId;
-            case "user":
-                return contextPath + "/admin/users/detail?id=" + referenceId;
+            case "contact":
+                return contextPath + "/admin/contacts";
+            case "review":
+                return contextPath + "/admin/reviews";
+            case "flash_sale":
+                return contextPath + "/admin/flash-sales";
             default:
                 return contextPath + "/admin/notifications";
         }

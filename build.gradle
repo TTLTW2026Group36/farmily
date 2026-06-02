@@ -58,11 +58,17 @@ tasks.war {
     archiveFileName = 'ROOT.war'
 }
 
+def configProps = new Properties()
+def configFile = file("src/main/resources/config.properties")
+if (configFile.exists()) {
+    configProps.load(new FileInputStream(configFile))
+}
+
 remotes {
     host {
-        host = '165.232.168.235'
-        user = 'root'
-        password = 'ChuTanTai123@a'
+        host = configProps.getProperty('deploy.host') ?: ''
+        user = configProps.getProperty('deploy.user') ?: ''
+        password = configProps.getProperty('deploy.password') ?: ''
     }
 }
 
