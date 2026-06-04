@@ -13,6 +13,12 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("auth") != null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
         String fbUrl = "https://www.facebook.com/v19.0/dialog/oauth"
                 + "?client_id=" + group36.util.FarmilyConstants.FACEBOOK_CLIENT_ID
                 + "&redirect_uri=" + java.net.URLEncoder.encode(group36.util.FarmilyConstants.FACEBOOK_REDIRECT_URI, "UTF-8");
@@ -32,6 +38,12 @@ public class RegisterController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("auth") != null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
         String name = request.getParameter("name") != null ? request.getParameter("name").trim() : null;
         String phone = request.getParameter("phone") != null ? request.getParameter("phone").trim() : null;
         String email = request.getParameter("email") != null ? request.getParameter("email").trim() : null;
