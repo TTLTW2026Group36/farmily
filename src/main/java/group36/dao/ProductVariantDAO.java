@@ -27,6 +27,8 @@ public class ProductVariantDAO extends BaseDao {
             variant.setOptionsValue(rs.getString("options_value"));
             variant.setStock(rs.getInt("stock"));
             variant.setPrice(rs.getDouble("price"));
+            variant.setImportPrice(rs.getDouble("import_price"));
+            variant.setExpiryDate(rs.getTimestamp("expiry_date"));
             variant.setCreatedAt(rs.getTimestamp("created_at"));
             return variant;
         }
@@ -67,13 +69,15 @@ public class ProductVariantDAO extends BaseDao {
 
 
     public int insert(ProductVariant variant) {
-        String sql = "INSERT INTO product_variants (product_id, options_value, stock, price) " +
-                "VALUES (:productId, :optionsValue, :stock, :price)";
+        String sql = "INSERT INTO product_variants (product_id, options_value, stock, price, import_price, expiry_date) " +
+                "VALUES (:productId, :optionsValue, :stock, :price, :importPrice, :expiryDate)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("productId", variant.getProductId())
                 .bind("optionsValue", variant.getOptionsValue())
                 .bind("stock", variant.getStock())
                 .bind("price", variant.getPrice())
+                .bind("importPrice", variant.getImportPrice())
+                .bind("expiryDate", variant.getExpiryDate())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -87,12 +91,14 @@ public class ProductVariantDAO extends BaseDao {
 
     public int update(ProductVariant variant) {
         String sql = "UPDATE product_variants SET options_value = :optionsValue, " +
-                "stock = :stock, price = :price WHERE id = :id";
+                "stock = :stock, price = :price, import_price = :importPrice, expiry_date = :expiryDate WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("id", variant.getId())
                 .bind("optionsValue", variant.getOptionsValue())
                 .bind("stock", variant.getStock())
                 .bind("price", variant.getPrice())
+                .bind("importPrice", variant.getImportPrice())
+                .bind("expiryDate", variant.getExpiryDate())
                 .execute());
     }
 
@@ -190,6 +196,27 @@ public class ProductVariantDAO extends BaseDao {
 
 
 
+
+    public int countExpiringVariants() {
+        String sql = "SELECT COUNT(*) FROM product_variants WHERE expiry_date IS NOT NULL AND stock > 0 AND expiry_date > NOW() AND expiry_date <= DATE_ADD(NOW(), INTERVAL 3 DAY)";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .mapTo(Integer.class)
+                .one());
+    }
+
+    public List<ProductVariant> findExpiringVariants() {
+        String sql = "SELECT * FROM product_variants WHERE expiry_date IS NOT NULL AND stock > 0 AND expiry_date > NOW() AND expiry_date <= DATE_ADD(NOW(), INTERVAL 3 DAY)";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new ProductVariantMapper())
+                .list());
+    }
+
+    public List<ProductVariant> findExpiredVariants() {
+        String sql = "SELECT * FROM product_variants WHERE expiry_date IS NOT NULL AND stock > 0 AND expiry_date <= NOW()";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new ProductVariantMapper())
+                .list());
+    }
 
     public double getMinPrice(int productId) {
         String sql = "SELECT COALESCE(MIN(price), 0) FROM product_variants WHERE product_id = :productId";

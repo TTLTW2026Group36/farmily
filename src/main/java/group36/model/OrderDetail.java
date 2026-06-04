@@ -14,6 +14,7 @@ public class OrderDetail implements Serializable {
     private int quantity;
     private double unitPrice;
     private double subtotal;
+    private double importPrice;
 
     
     private Product product;
@@ -102,6 +103,14 @@ public class OrderDetail implements Serializable {
 
     public void setSubtotal(double subtotal) {
         this.subtotal = subtotal;
+    }
+
+    public double getImportPrice() {
+        return importPrice;
+    }
+
+    public void setImportPrice(double importPrice) {
+        this.importPrice = importPrice;
     }
 
     public Product getProduct() {
@@ -215,6 +224,11 @@ public class OrderDetail implements Serializable {
         detail.setSubtotal(cartItem.getSubtotal());
         detail.setProduct(cartItem.getProduct());
         detail.setVariant(cartItem.getVariant());
+        if (cartItem.getVariant() != null) {
+            detail.setImportPrice(cartItem.getVariant().getImportPrice());
+        } else {
+            detail.setImportPrice(0.0);
+        }
         return detail;
     }
 
@@ -228,6 +242,7 @@ public class OrderDetail implements Serializable {
                 ", quantity=" + quantity +
                 ", unitPrice=" + unitPrice +
                 ", subtotal=" + subtotal +
+                ", importPrice=" + importPrice +
                 '}';
     }
 }

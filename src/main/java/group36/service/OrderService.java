@@ -795,6 +795,23 @@ public class OrderService {
         return ((thisMonth - lastMonth) / lastMonth) * 100;
     }
 
+    public double getTotalProfit() {
+        return orderDAO.getTotalProfit();
+    }
+
+    public double getProfitThisMonth() {
+        return orderDAO.getProfitThisMonth();
+    }
+
+    public double getProfitChangePercent() {
+        double thisMonth = orderDAO.getProfitThisMonth();
+        double lastMonth = orderDAO.getProfitPreviousMonth();
+        if (lastMonth == 0) {
+            return thisMonth > 0 ? 100 : 0;
+        }
+        return ((thisMonth - lastMonth) / lastMonth) * 100;
+    }
+
     public int getOrdersThisMonth() {
         return orderDAO.countOrdersThisMonth();
     }

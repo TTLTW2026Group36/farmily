@@ -193,6 +193,8 @@ public class AdminProductController extends HttpServlet {
         String[] variantNames = request.getParameterValues("variantName");
         String[] variantPrices = request.getParameterValues("variantPrice");
         String[] variantStocks = request.getParameterValues("variantStock");
+        String[] variantImportPrices = request.getParameterValues("variantImportPrice");
+        String[] variantExpiryDates = request.getParameterValues("variantExpiryDate");
         String[] imageUrls = request.getParameterValues("imageUrl");
 
         try {
@@ -213,6 +215,17 @@ public class AdminProductController extends HttpServlet {
                 variant.setOptionsValue(vName.trim());
                 variant.setPrice(Double.parseDouble(variantPrices[i]));
                 variant.setStock(Integer.parseInt(variantStocks[i]));
+                
+                if (variantImportPrices != null && i < variantImportPrices.length && variantImportPrices[i] != null && !variantImportPrices[i].trim().isEmpty()) {
+                    variant.setImportPrice(Double.parseDouble(variantImportPrices[i].trim()));
+                } else {
+                    variant.setImportPrice(0.0);
+                }
+                
+                if (variantExpiryDates != null && i < variantExpiryDates.length && variantExpiryDates[i] != null && !variantExpiryDates[i].trim().isEmpty()) {
+                    variant.setExpiryDate(parseExpiryDate(variantExpiryDates[i]));
+                }
+                
                 variants.add(variant);
             }
 
@@ -298,6 +311,8 @@ public class AdminProductController extends HttpServlet {
         String[] variantOptions = request.getParameterValues("variantOptions");
         String[] variantStocks = request.getParameterValues("variantStock");
         String[] variantPrices = request.getParameterValues("variantPrice");
+        String[] variantImportPrices = request.getParameterValues("variantImportPrice");
+        String[] variantExpiryDates = request.getParameterValues("variantExpiryDate");
 
         if (variantIds == null || variantOptions == null || variantStocks == null || variantPrices == null) {
             return;
@@ -317,9 +332,20 @@ public class AdminProductController extends HttpServlet {
                 variant.setStock(stock);
                 variant.setPrice(price);
 
+                if (variantImportPrices != null && i < variantImportPrices.length && variantImportPrices[i] != null && !variantImportPrices[i].trim().isEmpty()) {
+                    variant.setImportPrice(Double.parseDouble(variantImportPrices[i].trim()));
+                } else {
+                    variant.setImportPrice(0.0);
+                }
+
+                if (variantExpiryDates != null && i < variantExpiryDates.length && variantExpiryDates[i] != null && !variantExpiryDates[i].trim().isEmpty()) {
+                    variant.setExpiryDate(parseExpiryDate(variantExpiryDates[i]));
+                } else {
+                    variant.setExpiryDate(null);
+                }
+
                 productService.updateVariant(variant);
             } catch (Exception e) {
-                
                 e.printStackTrace();
             }
         }
@@ -329,6 +355,8 @@ public class AdminProductController extends HttpServlet {
         String[] names = request.getParameterValues("newVariantName");
         String[] prices = request.getParameterValues("newVariantPrice");
         String[] stocks = request.getParameterValues("newVariantStock");
+        String[] importPrices = request.getParameterValues("newVariantImportPrice");
+        String[] expiryDates = request.getParameterValues("newVariantExpiryDate");
 
         if (names == null || prices == null || stocks == null) {
             return;
@@ -345,10 +373,39 @@ public class AdminProductController extends HttpServlet {
                 variant.setPrice(Double.parseDouble(prices[i]));
                 variant.setStock(Integer.parseInt(stocks[i]));
 
+                if (importPrices != null && i < importPrices.length && importPrices[i] != null && !importPrices[i].trim().isEmpty()) {
+                    variant.setImportPrice(Double.parseDouble(importPrices[i].trim()));
+                } else {
+                    variant.setImportPrice(0.0);
+                }
+
+                if (expiryDates != null && i < expiryDates.length && expiryDates[i] != null && !expiryDates[i].trim().isEmpty()) {
+                    variant.setExpiryDate(parseExpiryDate(expiryDates[i]));
+                }
+
                 productService.addVariant(variant);
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private java.sql.Timestamp parseExpiryDate(String dateStr) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            dateStr = dateStr.trim();
+            if (dateStr.contains("T")) {
+                dateStr = dateStr.replace("T", " ");
+            }
+            if (dateStr.length() == 10) {
+                dateStr += " 00:00:00";
+            }
+            return java.sql.Timestamp.valueOf(dateStr);
+        } catch (Exception e) {
+            System.err.println("Error parsing expiry date: " + dateStr);
+            return null;
         }
     }
 

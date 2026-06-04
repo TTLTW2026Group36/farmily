@@ -11,12 +11,9 @@ import group36.service.OrderService;
 import group36.service.ProductService;
 import group36.service.UserService;
 
+import group36.service.AdminNotificationService;
 import java.io.IOException;
 import java.util.List;
-
-
-
-
 
 @WebServlet(urlPatterns = { "/admin/dashboard", "/admin/", "/admin" })
 public class AdminDashboardController extends HttpServlet {
@@ -35,7 +32,9 @@ public class AdminDashboardController extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        
+        AdminNotificationService notificationService = new AdminNotificationService();
+        notificationService.checkAndTriggerExpiryNotifications();
+
         double totalRevenue = orderService.getTotalRevenue();
         double revenueThisMonth = orderService.getRevenueThisMonth();
         double revenueChangePercent = orderService.getRevenueChangePercent();
@@ -44,7 +43,14 @@ public class AdminDashboardController extends HttpServlet {
         request.setAttribute("revenueThisMonth", revenueThisMonth);
         request.setAttribute("revenueChangePercent", revenueChangePercent);
 
-        
+        double totalProfit = orderService.getTotalProfit();
+        double profitThisMonth = orderService.getProfitThisMonth();
+        double profitChangePercent = orderService.getProfitChangePercent();
+
+        request.setAttribute("totalProfit", totalProfit);
+        request.setAttribute("profitThisMonth", profitThisMonth);
+        request.setAttribute("profitChangePercent", profitChangePercent);
+
         int totalOrders = orderService.countOrders();
         int ordersThisMonth = orderService.getOrdersThisMonth();
         double ordersChangePercent = orderService.getOrdersChangePercent();
@@ -53,28 +59,26 @@ public class AdminDashboardController extends HttpServlet {
         request.setAttribute("ordersThisMonth", ordersThisMonth);
         request.setAttribute("ordersChangePercent", ordersChangePercent);
 
-        
         int totalProducts = productService.getTotalProducts();
-        
+
         List<Product> newestProducts = productService.getNewestProducts(15);
         int newProductsCount = newestProducts.size();
 
         request.setAttribute("totalProducts", totalProducts);
         request.setAttribute("newProductsCount", newProductsCount);
 
-        
+        int expiringProductsCount = productService.getExpiringProductsCount();
+        request.setAttribute("expiringProductsCount", expiringProductsCount);
+
         int totalCustomers = userService.getTotalCustomers();
         request.setAttribute("totalCustomers", totalCustomers);
 
-        
         List<Order> recentOrders = orderService.getRecentOrders(5);
         request.setAttribute("recentOrders", recentOrders);
 
-        
         List<Product> bestSellingProducts = productService.getBestSellingProducts(5);
         request.setAttribute("bestSellingProducts", bestSellingProducts);
 
-        
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 }

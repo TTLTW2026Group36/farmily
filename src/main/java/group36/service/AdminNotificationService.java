@@ -5,6 +5,10 @@ import group36.model.AdminNotification;
 import group36.model.Order;
 import group36.model.Product;
 
+import group36.dao.ProductVariantDAO;
+import group36.dao.ProductDAO;
+import group36.model.ProductVariant;
+import java.util.Optional;
 import java.util.List;
 
 
@@ -109,5 +113,38 @@ public class AdminNotificationService {
 
     public int cleanupOldNotifications() {
         return notificationDAO.deleteOlderThan(30);
+    }
+
+    public void checkAndTriggerExpiryNotifications() {
+        ProductVariantDAO variantDAO = new ProductVariantDAO();
+        ProductDAO productDAO = new ProductDAO();
+
+        List<ProductVariant> expiring = variantDAO.findExpiringVariants();
+        for (ProductVariant v : expiring) {
+            Optional<Product> pOpt = productDAO.findById(v.getProductId());
+            if (pOpt.isPresent()) {
+                Product p = pOpt.get();
+                String title = "Biến thể sắp hết hạn: " + p.getName() + " (" + v.getOptionsValue() + ")";
+                String message = "Biến thể \"" + v.getOptionsValue() + "\" của sản phẩm \"" + p.getName() + "\" (Tồn kho: " + v.getStock() + ") sẽ hết hạn vào ngày " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(v.getExpiryDate()) + ".";
+                
+                if (!notificationDAO.existsByTypeReferenceAndTitle(AdminNotification.TYPE_EXPIRING_PRODUCT, p.getId(), "product", title)) {
+                    createNotification(AdminNotification.TYPE_EXPIRING_PRODUCT, title, message, p.getId(), "product");
+                }
+            }
+        }
+
+        List<ProductVariant> expired = variantDAO.findExpiredVariants();
+        for (ProductVariant v : expired) {
+            Optional<Product> pOpt = productDAO.findById(v.getProductId());
+            if (pOpt.isPresent()) {
+                Product p = pOpt.get();
+                String title = "Biến thể đã hết hạn: " + p.getName() + " (" + v.getOptionsValue() + ")";
+                String message = "Biến thể \"" + v.getOptionsValue() + "\" của sản phẩm \"" + p.getName() + "\" (Tồn kho: " + v.getStock() + ") đã hết hạn sử dụng vào ngày " + new java.text.SimpleDateFormat("dd/MM/yyyy").format(v.getExpiryDate()) + ".";
+                
+                if (!notificationDAO.existsByTypeReferenceAndTitle(AdminNotification.TYPE_EXPIRED_PRODUCT, p.getId(), "product", title)) {
+                    createNotification(AdminNotification.TYPE_EXPIRED_PRODUCT, title, message, p.getId(), "product");
+                }
+            }
+        }
     }
 }

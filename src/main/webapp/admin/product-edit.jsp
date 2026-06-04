@@ -85,6 +85,8 @@
                                                 <tr>
                                                     <th>Phân loại</th>
                                                     <th>Giá bán (VNĐ)</th>
+                                                    <th>Giá nhập (VNĐ)</th>
+                                                    <th>Hạn sử dụng</th>
                                                     <th>Tồn kho</th>
                                                     <th style="width: 60px;"></th>
                                                 </tr>
@@ -102,6 +104,33 @@
                                                             <input type="number" name="variantPrice"
                                                                 value="${variant.price}" class="form-control" min="1"
                                                                 required>
+                                                        </td>
+                                                        <td>
+                                                            <input type="number" name="variantImportPrice"
+                                                                value="${variant.importPrice}" class="form-control" min="0">
+                                                        </td>
+                                                        <td>
+                                                            <input type="date" name="variantExpiryDate"
+                                                                value="<fmt:formatDate value="${variant.expiryDate}" pattern="yyyy-MM-dd" />" class="form-control">
+                                                            <c:choose>
+                                                                <c:when test="${variant.expiryStatus == 'đã hết hạn'}">
+                                                                    <div style="font-size: 11px; color: #ef4444; margin-top: 4px; font-weight: 600;">
+                                                                        <i class="fas fa-exclamation-circle"></i> Đã hết hạn
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:when test="${variant.expiryStatus == 'sắp hết hạn'}">
+                                                                    <div style="font-size: 11px; color: #f97316; margin-top: 4px; font-weight: 600;">
+                                                                        <i class="fas fa-exclamation-triangle"></i> Sắp hết hạn
+                                                                    </div>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <c:if test="${not empty variant.expiryDate}">
+                                                                        <div style="font-size: 11px; color: #16a34a; margin-top: 4px; font-weight: 600;">
+                                                                            <i class="fas fa-check-circle"></i> Còn hạn
+                                                                        </div>
+                                                                    </c:if>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </td>
                                                         <td>
                                                             <input type="number" name="variantStock"
@@ -252,6 +281,8 @@
                                 tr.innerHTML =
                                     '<td><input type="text" name="newVariantName" class="form-control" placeholder="Tên biến thể mới..." required></td>' +
                                     '<td><input type="number" name="newVariantPrice" class="form-control" placeholder="Giá" min="1" required></td>' +
+                                    '<td><input type="number" name="newVariantImportPrice" class="form-control" placeholder="Giá nhập" min="0"></td>' +
+                                    '<td><input type="date" name="newVariantExpiryDate" class="form-control"></td>' +
                                     '<td><input type="number" name="newVariantStock" class="form-control" placeholder="Số lượng" min="0" required></td>' +
                                     '<td><button type="button" class="btn btn-sm btn-danger remove-variant-btn" title="Xóa"><i class="fas fa-times"></i></button></td>';
                                 variantsBody.appendChild(tr);

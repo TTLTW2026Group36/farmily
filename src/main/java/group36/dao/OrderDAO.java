@@ -244,6 +244,33 @@ public class OrderDAO extends BaseDao {
                                 .one());
         }
 
+        public double getTotalProfit() {
+                String sql = "SELECT COALESCE(SUM(total_price - shipping_fee - (SELECT COALESCE(SUM(import_price * quantity), 0) FROM order_details WHERE order_id = orders.id)), 0) FROM orders WHERE status = 'completed'";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .mapTo(Double.class)
+                                .one());
+        }
+
+        public double getProfitThisMonth() {
+                String sql = "SELECT COALESCE(SUM(total_price - shipping_fee - (SELECT COALESCE(SUM(import_price * quantity), 0) FROM order_details WHERE order_id = orders.id)), 0) FROM orders " +
+                                "WHERE status = 'completed' " +
+                                "AND MONTH(order_date) = MONTH(CURRENT_DATE()) " +
+                                "AND YEAR(order_date) = YEAR(CURRENT_DATE())";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .mapTo(Double.class)
+                                .one());
+        }
+
+        public double getProfitPreviousMonth() {
+                String sql = "SELECT COALESCE(SUM(total_price - shipping_fee - (SELECT COALESCE(SUM(import_price * quantity), 0) FROM order_details WHERE order_id = orders.id)), 0) FROM orders " +
+                                "WHERE status = 'completed' " +
+                                "AND MONTH(order_date) = MONTH(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH)) " +
+                                "AND YEAR(order_date) = YEAR(DATE_SUB(CURRENT_DATE(), INTERVAL 1 MONTH))";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .mapTo(Double.class)
+                                .one());
+        }
+
         public int countOrdersThisMonth() {
                 String sql = "SELECT COUNT(*) FROM orders " +
                                 "WHERE MONTH(order_date) = MONTH(CURRENT_DATE()) " +

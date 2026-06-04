@@ -86,6 +86,8 @@
                                         <option value="">Tất cả</option>
                                         <option value="instock" ${selectedStatus=='instock' ? 'selected' : '' }>Còn hàng</option>
                                         <option value="outofstock" ${selectedStatus=='outofstock' ? 'selected' : '' }>Hết hàng</option>
+                                        <option value="expiring" ${selectedStatus=='expiring' ? 'selected' : '' }>Sắp hết hạn</option>
+                                        <option value="expired" ${selectedStatus=='expired' ? 'selected' : '' }>Đã hết hạn</option>
                                     </select>
                                 </div>
 
@@ -163,10 +165,30 @@
                                                                             </c:otherwise>
                                                                         </c:choose>
                                                                         <div>
-                                                                            <div class="product-name">${product.name}
-                                                                            </div>
-                                                                            <div class="product-sku">ID: ${product.id}
-                                                                            </div>
+                                                                            <div class="product-name">${product.name}</div>
+                                                                            <div class="product-sku">ID: ${product.id}</div>
+                                                                            <c:if test="${not empty product.variants}">
+                                                                                <div class="variants-expiry-list" style="margin-top: 4px; display: flex; flex-direction: column; gap: 2px;">
+                                                                                    <c:forEach var="variant" items="${product.variants}">
+                                                                                        <c:if test="${not empty variant.expiryDate}">
+                                                                                            <div style="font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px; flex-wrap: wrap;">
+                                                                                                <span>${variant.optionsValue}:</span>
+                                                                                                <c:choose>
+                                                                                                    <c:when test="${variant.expiryStatus == 'đã hết hạn'}">
+                                                                                                        <span class="badge danger" style="padding: 1px 4px; font-size: 10px; line-height: 1; height: auto; text-transform: none; display: inline-flex; align-items: center;">Hết hạn (<fmt:formatDate value="${variant.expiryDate}" pattern="dd/MM/yyyy" />)</span>
+                                                                                                    </c:when>
+                                                                                                    <c:when test="${variant.expiryStatus == 'sắp hết hạn'}">
+                                                                                                        <span class="badge warning" style="padding: 1px 4px; font-size: 10px; line-height: 1; height: auto; text-transform: none; display: inline-flex; align-items: center;">Sắp hết hạn (<fmt:formatDate value="${variant.expiryDate}" pattern="dd/MM/yyyy" />)</span>
+                                                                                                    </c:when>
+                                                                                                    <c:otherwise>
+                                                                                                        <span class="badge success" style="padding: 1px 4px; font-size: 10px; line-height: 1; height: auto; text-transform: none; background: #e2e8f0; color: #475569; border-color: #cbd5e1; display: inline-flex; align-items: center;">Còn hạn (<fmt:formatDate value="${variant.expiryDate}" pattern="dd/MM/yyyy" />)</span>
+                                                                                                    </c:otherwise>
+                                                                                                </c:choose>
+                                                                                            </div>
+                                                                                        </c:if>
+                                                                                    </c:forEach>
+                                                                                </div>
+                                                                            </c:if>
                                                                         </div>
                                                                     </div>
                                                                 </td>

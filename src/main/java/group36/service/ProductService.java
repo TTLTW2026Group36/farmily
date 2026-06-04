@@ -326,4 +326,8 @@ public class ProductService {
             }
         }
     }
+
+    public int getExpiringProductsCount() {
+        return variantDAO.countExpiringVariants();
+    }
 }

@@ -200,15 +200,23 @@ public class ProductDAO extends BaseDao {
     public List<Product> findFiltered(int categoryId, String status, String search, String popular, String sort, int page, int size) {
         int offset = (page - 1) * size;
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT p.* FROM products p ");
-        if ("instock".equals(status) || "outofstock".equals(status) || "price-asc".equals(sort) || "price-desc".equals(sort)) {
+        sql.append("SELECT DISTINCT p.* FROM products p ");
+        boolean needVariantJoin = "instock".equals(status) || "outofstock".equals(status)
+                || "price-asc".equals(sort) || "price-desc".equals(sort);
+        boolean needExpiryJoin = "expiring".equals(status) || "expired".equals(status);
+        if (needVariantJoin) {
             sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock, COALESCE(MIN(price), 0) AS min_price FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
+        }
+        if (needExpiryJoin) {
+            sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
         }
         sql.append("WHERE 1=1 ");
         if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
         if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+        if ("expiring".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date > NOW() AND pvx.expiry_date <= DATE_ADD(NOW(), INTERVAL 3 DAY) ");
+        if ("expired".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date <= NOW() ");
         if ("true".equals(popular)) sql.append("AND p.soild_count > 0 ");
 
         switch (sort != null ? sort : "") {
@@ -233,15 +241,21 @@ public class ProductDAO extends BaseDao {
 
     public int countFiltered(int categoryId, String status, String search, String popular) {
         StringBuilder sql = new StringBuilder();
-        sql.append("SELECT COUNT(*) FROM products p ");
+        boolean needExpiryJoin = "expiring".equals(status) || "expired".equals(status);
+        sql.append("SELECT COUNT(DISTINCT p.id) FROM products p ");
         if ("instock".equals(status) || "outofstock".equals(status)) {
             sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
+        }
+        if (needExpiryJoin) {
+            sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
         }
         sql.append("WHERE 1=1 ");
         if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
         if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+        if ("expiring".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date > NOW() AND pvx.expiry_date <= DATE_ADD(NOW(), INTERVAL 3 DAY) ");
+        if ("expired".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date <= NOW() ");
         if ("true".equals(popular)) sql.append("AND p.soild_count > 0 ");
 
         return get().withHandle(handle -> {
