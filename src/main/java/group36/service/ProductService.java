@@ -47,6 +47,18 @@ public class ProductService {
         return products;
     }
 
+    public List<Product> getProductsFilteredAll(int categoryId, String status, String search, String popular, String sort) {
+        List<Product> products = productDAO.findFilteredAll(categoryId, status, search, popular, sort);
+        loadProductDetails(products);
+        return products;
+    }
+
+    public List<Product> getProductsByIds(List<Integer> ids) {
+        List<Product> products = productDAO.findByIds(ids);
+        loadProductDetails(products);
+        return products;
+    }
+
     public int getTotalProductsFiltered(int categoryId, String status, String search, String popular) {
         return productDAO.countFiltered(categoryId, status, search, popular);
     }

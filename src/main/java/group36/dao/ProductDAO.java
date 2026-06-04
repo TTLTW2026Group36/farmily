@@ -239,6 +239,58 @@ public class ProductDAO extends BaseDao {
         });
     }
 
+    public List<Product> findFilteredAll(int categoryId, String status, String search, String popular, String sort) {
+        StringBuilder sql = new StringBuilder();
+        sql.append("SELECT DISTINCT p.* FROM products p ");
+        boolean needVariantJoin = "instock".equals(status) || "outofstock".equals(status)
+                || "price-asc".equals(sort) || "price-desc".equals(sort);
+        boolean needExpiryJoin = "expiring".equals(status) || "expired".equals(status);
+        if (needVariantJoin) {
+            sql.append("LEFT JOIN (SELECT product_id, COALESCE(SUM(stock), 0) AS total_stock, COALESCE(MIN(price), 0) AS min_price FROM product_variants GROUP BY product_id) pv ON p.id = pv.product_id ");
+        }
+        if (needExpiryJoin) {
+            sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
+        }
+        sql.append("WHERE 1=1 ");
+        if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
+        if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
+        if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
+        if ("outofstock".equals(status)) sql.append("AND (pv.total_stock IS NULL OR pv.total_stock = 0) ");
+        if ("expiring".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date > NOW() AND pvx.expiry_date <= DATE_ADD(NOW(), INTERVAL 3 DAY) ");
+        if ("expired".equals(status)) sql.append("AND pvx.expiry_date IS NOT NULL AND pvx.stock > 0 AND pvx.expiry_date <= NOW() ");
+        if ("true".equals(popular)) sql.append("AND p.soild_count > 0 ");
+
+        switch (sort != null ? sort : "") {
+            case "name-asc": sql.append("ORDER BY p.name ASC "); break;
+            case "name-desc": sql.append("ORDER BY p.name DESC "); break;
+            case "price-asc": sql.append("ORDER BY pv.min_price ASC "); break;
+            case "price-desc": sql.append("ORDER BY pv.min_price DESC "); break;
+            case "newest": sql.append("ORDER BY p.created_at DESC "); break;
+            default: sql.append("ORDER BY p.id DESC "); break;
+        }
+
+        return get().withHandle(handle -> {
+            var query = handle.createQuery(sql.toString());
+            if (categoryId > 0) query.bind("categoryId", categoryId);
+            if (search != null && !search.isEmpty()) query.bind("search", "%" + search + "%");
+            return query.map(new ProductMapper()).list();
+        });
+    }
+
+    public List<Product> findByIds(List<Integer> ids) {
+        if (ids == null || ids.isEmpty()) return new java.util.ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE id IN (");
+        for (int i = 0; i < ids.size(); i++) {
+            sql.append(ids.get(i));
+            if (i < ids.size() - 1) sql.append(",");
+        }
+        sql.append(") ORDER BY id DESC");
+        return get().withHandle(handle -> handle.createQuery(sql.toString())
+                .map(new ProductMapper())
+                .list());
+    }
+
+
     public int countFiltered(int categoryId, String status, String search, String popular) {
         StringBuilder sql = new StringBuilder();
         boolean needExpiryJoin = "expiring".equals(status) || "expired".equals(status);

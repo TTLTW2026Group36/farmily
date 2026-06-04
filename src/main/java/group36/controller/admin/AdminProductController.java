@@ -8,6 +8,7 @@ import group36.model.Product;
 import group36.model.ProductVariant;
 import group36.service.CategoryService;
 import group36.service.ProductService;
+import group36.service.ExcelExportService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,7 +40,9 @@ public class AdminProductController extends HttpServlet {
         String pathInfo = request.getPathInfo();
 
         try {
-            if (pathInfo == null || pathInfo.equals("/")) {
+            if (pathInfo != null && pathInfo.equals("/export")) {
+                exportProducts(request, response);
+            } else if (pathInfo == null || pathInfo.equals("/")) {
                 
                 listProducts(request, response);
             } else if (pathInfo.equals("/add")) {
@@ -474,5 +477,43 @@ public class AdminProductController extends HttpServlet {
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/products");
         }
+    }
+
+    private void exportProducts(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idsParam = request.getParameter("ids");
+        List<Product> productsToExport;
+        if (idsParam != null && !idsParam.trim().isEmpty()) {
+            List<Integer> ids = new ArrayList<>();
+            for (String idStr : idsParam.split(",")) {
+                try {
+                    ids.add(Integer.parseInt(idStr.trim()));
+                } catch (NumberFormatException e) {
+                }
+            }
+            productsToExport = productService.getProductsByIds(ids);
+        } else {
+            String categoryParam = request.getParameter("category");
+            int categoryId = 0;
+            if (categoryParam != null && !categoryParam.isEmpty()) {
+                try {
+                    categoryId = Integer.parseInt(categoryParam);
+                } catch (NumberFormatException e) {
+                    categoryId = 0;
+                }
+            }
+            String status = request.getParameter("status");
+            String sort = request.getParameter("sort");
+            String search = request.getParameter("search");
+            if (search != null) search = search.trim();
+
+            productsToExport = productService.getProductsFilteredAll(categoryId, status, search, null, sort);
+        }
+
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setHeader("Content-Disposition", "attachment; filename=\"products_export.xlsx\"");
+
+        ExcelExportService excelService = new ExcelExportService();
+        excelService.exportProducts(productsToExport, response.getOutputStream());
     }
 }

@@ -343,10 +343,14 @@
 
                     function exportExcel() {
                         var selected = document.querySelectorAll('.product-checkbox:checked');
+                        var url = '${pageContext.request.contextPath}/admin/products/export';
+                        
                         if (selected.length > 0) {
-                            alert("Đang xuất file excel cho " + selected.length + " sản phẩm được chọn");
+                            var ids = Array.from(selected).map(cb => cb.value).join(',');
+                            window.location.href = url + '?ids=' + ids;
                         } else {
-                            alert("Vui lòng chọn ít nhất 1 sản phẩm để xuất file excel!");
+                            var searchParams = new URLSearchParams(window.location.search);
+                            window.location.href = url + '?' + searchParams.toString();
                         }
                     }
                 </script>
