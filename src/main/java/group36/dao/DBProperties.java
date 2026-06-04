@@ -8,6 +8,7 @@ import java.util.Properties;
 public class DBProperties {
     private static Properties prop = new Properties();
     static {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
         try {
             File f = new File("/config.properties");
             if (f.exists()) {

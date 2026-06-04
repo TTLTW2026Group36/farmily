@@ -9,6 +9,10 @@ import javax.sql.DataSource;
 import java.sql.SQLException;
 
 public class JdbiProvider {
+    static {
+        java.util.TimeZone.setDefault(java.util.TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+    }
+
     private static volatile Jdbi instance;
 
     public static Jdbi getInstance() {
@@ -29,11 +33,13 @@ public class JdbiProvider {
             System.out.println("[JdbiProvider] Using JNDI DataSource (Tomcat Connection Pool)");
             return Jdbi.create(ds);
         } catch (Exception e) {
-            System.out.println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
+            System.out
+                    .println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
         }
 
         MysqlDataSource ds = new MysqlDataSource();
-        ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname);
+        ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname
+                + "?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh");
         ds.setUser(DBProperties.username);
         ds.setPassword(DBProperties.password);
         try {

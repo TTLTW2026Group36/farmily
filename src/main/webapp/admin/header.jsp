@@ -10,6 +10,8 @@
             </div>
 
             <div class="header-right">
+                <c:set var="adminRole" value="${sessionScope.adminUser.role}" />
+                <c:if test="${adminRole == 'ADMIN' || adminRole == 'MANAGER' || adminRole == 'STAFF_ORDER'}">
                 <div class="notification-wrapper">
                     <button class="header-btn" id="notificationBtn">
                         <i class="fas fa-bell"></i>
@@ -32,6 +34,7 @@
                         </div>
                     </div>
                 </div>
+                </c:if>
 
                 <div class="user-menu">
                     <c:set var="adminUser" value="${sessionScope.adminUser}" />
@@ -74,187 +77,189 @@
                 var cachedNotifications = null;
                 var currentUnreadCount = 0;
 
-                notificationBtn.addEventListener('click', function (e) {
-                    e.stopPropagation();
-                    notificationDropdown.classList.toggle('show');
-                    if (notificationDropdown.classList.contains('show')) {
-                        loadNotifications();
-                    }
-                });
-
-                var notificationWrapper = document.querySelector('.notification-wrapper');
-                if (notificationWrapper) {
-                    notificationWrapper.addEventListener('mouseenter', function () {
-                        loadNotifications();
+                if (notificationBtn) {
+                    notificationBtn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        notificationDropdown.classList.toggle('show');
+                        if (notificationDropdown.classList.contains('show')) {
+                            loadNotifications();
+                        }
                     });
-                }
 
-                document.addEventListener('click', function (e) {
-                    if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
-                        notificationDropdown.classList.remove('show');
+                    var notificationWrapper = document.querySelector('.notification-wrapper');
+                    if (notificationWrapper) {
+                        notificationWrapper.addEventListener('mouseenter', function () {
+                            loadNotifications();
+                        });
                     }
-                });
 
-                markAllReadBtn.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    fetch(contextPath + '/admin/api/notifications/read-all', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                    })
-                        .then(function (response) { return response.json(); })
-                        .then(function (data) {
-                            if (data.success) {
-                                cachedNotifications = null;
-                                updateBadge(0);
-                                var items = notificationList.querySelectorAll('.notification-item.unread');
-                                items.forEach(function (item) {
-                                    item.classList.remove('unread');
-                                });
-                            }
+                    document.addEventListener('click', function (e) {
+                        if (!notificationDropdown.contains(e.target) && e.target !== notificationBtn) {
+                            notificationDropdown.classList.remove('show');
+                        }
+                    });
+
+                    markAllReadBtn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        fetch(contextPath + '/admin/api/notifications/read-all', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                         })
-                        .catch(function (error) {
-                            console.error('Error marking all as read:', error);
-                        });
-                });
-
-                function loadNotifications() {
-                    if (cachedNotifications) {
-                        renderNotifications(cachedNotifications);
-                    } else {
-                        notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
-                    }
-
-                    fetch(contextPath + '/admin/api/notifications?limit=5')
-                        .then(function (response) { return response.json(); })
-                        .then(function (data) {
-                            cachedNotifications = data.notifications;
-                            updateBadge(data.unreadCount);
-                            renderNotifications(data.notifications);
-                        })
-                        .catch(function (error) {
-                            console.error('Error loading notifications:', error);
-                            if (!cachedNotifications) {
-                                notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Lỗi tải thông báo</div>';
-                            }
-                        });
-                }
-
-                function renderNotifications(notifications) {
-                    if (!notifications || notifications.length === 0) {
-                        notificationList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748b;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>Không có thông báo</div>';
-                        return;
-                    }
-
-                    var html = '';
-                    notifications.forEach(function (n) {
-                        var link = getNotificationLink(n);
-                        html += '<a href="' + link + '" class="notification-item ' + (n.isRead ? '' : 'unread') + '" data-id="' + n.id + '">';
-                        html += '<div class="notification-icon ' + n.iconClass + '">';
-                        html += '<i class="fas ' + n.icon + '"></i>';
-                        html += '</div>';
-                        html += '<div class="notification-content">';
-                        html += '<div class="notification-title">' + escapeHtml(n.title) + '</div>';
-                        html += '<div class="notification-text">' + escapeHtml(n.message) + '</div>';
-                        html += '<div class="notification-time">' + escapeHtml(n.timeAgo) + '</div>';
-                        html += '</div>';
-                        html += '</a>';
+                            .then(function (response) { return response.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    cachedNotifications = null;
+                                    updateBadge(0);
+                                    var items = notificationList.querySelectorAll('.notification-item.unread');
+                                    items.forEach(function (item) {
+                                        item.classList.remove('unread');
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.error('Error marking all as read:', error);
+                            });
                     });
-                    notificationList.innerHTML = html;
 
-                    notificationList.querySelectorAll('.notification-item').forEach(function (item) {
-                        item.addEventListener('click', function () {
-                            var id = this.getAttribute('data-id');
-                            markAsRead(id);
-                        });
-                    });
-                }
+                    function loadNotifications() {
+                        if (cachedNotifications) {
+                            renderNotifications(cachedNotifications);
+                        } else {
+                            notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #64748b;"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+                        }
 
-                function getNotificationLink(notification) {
-                    if (!notification.referenceType || !notification.referenceId) {
-                        return contextPath + '/admin/notifications';
-                    }
-                    switch (notification.referenceType) {
-                        case 'order':
-                            return contextPath + '/admin/orders/detail?id=' + notification.referenceId;
-                        case 'product':
-                            return contextPath + '/admin/products/edit?id=' + notification.referenceId;
-                        case 'contact':
-                            return contextPath + '/admin/contacts';
-                        case 'review':
-                            return contextPath + '/admin/reviews';
-                        case 'flash_sale':
-                            return contextPath + '/admin/flash-sales';
-                        default:
-                            return contextPath + '/admin/notifications';
-                    }
-                }
-
-                function updateBadge(count) {
-                    currentUnreadCount = count;
-                    if (count > 0) {
-                        notificationBadge.textContent = count > 99 ? '99+' : count;
-                        notificationBadge.style.display = 'flex';
-                        notificationCountText.textContent = count + ' mới';
-                    } else {
-                        notificationBadge.style.display = 'none';
-                        notificationCountText.textContent = 'Không có thông báo mới';
-                    }
-                }
-
-                function markAsRead(id) {
-                    cachedNotifications = null;
-                    fetch(contextPath + '/admin/api/notifications/read', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: 'id=' + id
-                    })
-                        .then(function (response) { return response.json(); })
-                        .then(function (data) {
-                            if (data.success) {
+                        fetch(contextPath + '/admin/api/notifications?limit=5')
+                            .then(function (response) { return response.json(); })
+                            .then(function (data) {
+                                cachedNotifications = data.notifications;
                                 updateBadge(data.unreadCount);
-                            }
-                        })
-                        .catch(function (error) {
-                            console.error('Error marking as read:', error);
+                                renderNotifications(data.notifications);
+                            })
+                            .catch(function (error) {
+                                console.error('Error loading notifications:', error);
+                                if (!cachedNotifications) {
+                                    notificationList.innerHTML = '<div style="text-align: center; padding: 20px; color: #dc2626;">Lỗi tải thông báo</div>';
+                                }
+                            });
+                    }
+
+                    function renderNotifications(notifications) {
+                        if (!notifications || notifications.length === 0) {
+                            notificationList.innerHTML = '<div style="text-align: center; padding: 30px; color: #64748b;"><i class="fas fa-bell-slash" style="font-size: 32px; margin-bottom: 10px; display: block;"></i>Không có thông báo</div>';
+                            return;
+                        }
+
+                        var html = '';
+                        notifications.forEach(function (n) {
+                            var link = getNotificationLink(n);
+                            html += '<a href="' + link + '" class="notification-item ' + (n.isRead ? '' : 'unread') + '" data-id="' + n.id + '">';
+                            html += '<div class="notification-icon ' + n.iconClass + '">';
+                            html += '<i class="fas ' + n.icon + '"></i>';
+                            html += '</div>';
+                            html += '<div class="notification-content">';
+                            html += '<div class="notification-title">' + escapeHtml(n.title) + '</div>';
+                            html += '<div class="notification-text">' + escapeHtml(n.message) + '</div>';
+                            html += '<div class="notification-time">' + escapeHtml(n.timeAgo) + '</div>';
+                            html += '</div>';
+                            html += '</a>';
                         });
-                }
+                        notificationList.innerHTML = html;
 
-                function escapeHtml(text) {
-                    if (!text) return '';
-                    var div = document.createElement('div');
-                    div.textContent = text;
-                    return div.innerHTML;
-                }
-
-                function fetchUnreadCount() {
-                    fetch(contextPath + '/admin/api/notifications/count')
-                        .then(function (response) { return response.json(); })
-                        .then(function (data) {
-                            if (data.unreadCount !== currentUnreadCount) {
-                                cachedNotifications = null; // Clear cache to reload fresh notifications next click
-                            }
-                            updateBadge(data.unreadCount);
-                        })
-                        .catch(function (error) {
-                            console.error('Error fetching notification count:', error);
+                        notificationList.querySelectorAll('.notification-item').forEach(function (item) {
+                            item.addEventListener('click', function () {
+                                var id = this.getAttribute('data-id');
+                                markAsRead(id);
+                            });
                         });
-                }
+                    }
 
-                fetchUnreadCount();
+                    function getNotificationLink(notification) {
+                        if (!notification.referenceType || !notification.referenceId) {
+                            return contextPath + '/admin/notifications';
+                        }
+                        switch (notification.referenceType) {
+                            case 'order':
+                                return contextPath + '/admin/orders/detail?id=' + notification.referenceId;
+                            case 'product':
+                                return contextPath + '/admin/products/edit?id=' + notification.referenceId;
+                            case 'contact':
+                                return contextPath + '/admin/contacts';
+                            case 'review':
+                                return contextPath + '/admin/reviews';
+                            case 'flash_sale':
+                                return contextPath + '/admin/flash-sales';
+                            default:
+                                return contextPath + '/admin/notifications';
+                        }
+                    }
 
-                setTimeout(function () {
-                    fetch(contextPath + '/admin/api/notifications?limit=5')
-                        .then(function (response) { return response.json(); })
-                        .then(function (data) {
-                            cachedNotifications = data.notifications;
-                            updateBadge(data.unreadCount);
+                    function updateBadge(count) {
+                        currentUnreadCount = count;
+                        if (count > 0) {
+                            notificationBadge.textContent = count > 99 ? '99+' : count;
+                            notificationBadge.style.display = 'flex';
+                            notificationCountText.textContent = count + ' mới';
+                        } else {
+                            notificationBadge.style.display = 'none';
+                            notificationCountText.textContent = 'Không có thông báo mới';
+                        }
+                    }
+
+                    function markAsRead(id) {
+                        cachedNotifications = null;
+                        fetch(contextPath + '/admin/api/notifications/read', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: 'id=' + id
                         })
-                        .catch(function (error) {
-                            console.error('Error pre-fetching notifications:', error);
-                        });
-                }, 1000);
+                            .then(function (response) { return response.json(); })
+                            .then(function (data) {
+                                if (data.success) {
+                                    updateBadge(data.unreadCount);
+                                }
+                            })
+                            .catch(function (error) {
+                                console.error('Error marking as read:', error);
+                            });
+                    }
 
-                setInterval(fetchUnreadCount, 30000);
+                    function escapeHtml(text) {
+                        if (!text) return '';
+                        var div = document.createElement('div');
+                        div.textContent = text;
+                        return div.innerHTML;
+                    }
+
+                    function fetchUnreadCount() {
+                        fetch(contextPath + '/admin/api/notifications/count')
+                            .then(function (response) { return response.json(); })
+                            .then(function (data) {
+                                if (data.unreadCount !== currentUnreadCount) {
+                                    cachedNotifications = null; 
+                                }
+                                updateBadge(data.unreadCount);
+                            })
+                            .catch(function (error) {
+                                console.error('Error fetching notification count:', error);
+                            });
+                    }
+
+                    fetchUnreadCount();
+
+                    setTimeout(function () {
+                        fetch(contextPath + '/admin/api/notifications?limit=5')
+                            .then(function (response) { return response.json(); })
+                            .then(function (data) {
+                                cachedNotifications = data.notifications;
+                                updateBadge(data.unreadCount);
+                            })
+                            .catch(function (error) {
+                                console.error('Error pre-fetching notifications:', error);
+                            });
+                    }, 1000);
+
+                    setInterval(fetchUnreadCount, 30000);
+                }
                 (function () {
                     var searchInput = document.getElementById('searchTable');
                     if (!searchInput) return;

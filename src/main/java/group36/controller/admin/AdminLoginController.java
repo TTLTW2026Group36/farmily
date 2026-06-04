@@ -132,7 +132,7 @@ public class AdminLoginController extends HttpServlet {
                 + new java.util.Date());
 
         
-        String targetUrl = getRedirectUrl(request, redirectUrl);
+        String targetUrl = getRedirectUrl(request, redirectUrl, user);
         response.sendRedirect(targetUrl);
     }
 
@@ -149,7 +149,7 @@ public class AdminLoginController extends HttpServlet {
     
 
 
-    private String getRedirectUrl(HttpServletRequest request, String redirectUrl) {
+    private String getRedirectUrl(HttpServletRequest request, String redirectUrl, User user) {
         String contextPath = request.getContextPath();
 
         
@@ -165,6 +165,9 @@ public class AdminLoginController extends HttpServlet {
             }
         }
 
+        if (user != null && "STAFF_CONTENT".equals(user.getRole())) {
+            return contextPath + "/admin/posts";
+        }
         
         return contextPath + "/admin/dashboard";
     }

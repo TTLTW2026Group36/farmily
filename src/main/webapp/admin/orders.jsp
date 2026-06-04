@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/orders.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
 </head>
 
 <body data-page="orders">
@@ -101,11 +102,11 @@
                         </div>
                         <div class="bento-filter-group">
                             <label>Từ ngày</label>
-                            <input type="date" name="fromDate" class="bento-input" value="${fromDate}">
+                            <input type="text" id="fromDate" name="fromDate" class="bento-input" placeholder="Chọn ngày" value="${fromDate}">
                         </div>
                         <div class="bento-filter-group">
                             <label>Đến ngày</label>
-                            <input type="date" name="toDate" class="bento-input" value="${toDate}">
+                            <input type="text" id="toDate" name="toDate" class="bento-input" placeholder="Chọn ngày" value="${toDate}">
                         </div>
                         <div class="bento-filter-actions">
                             <button type="submit" class="btn-bento-primary">Lọc</button>
@@ -181,7 +182,7 @@
                                                         <c:when test="${order.status == 'shipping'}"><span class="bento-status-badge bento-badge-shipping">Đang giao</span></c:when>
                                                         <c:when test="${order.status == 'completed'}"><span class="bento-status-badge bento-badge-completed">Hoàn thành</span></c:when>
                                                         <c:when test="${order.status == 'cancelled'}"><span class="bento-status-badge bento-badge-cancelled">Đã hủy</span></c:when>
-                                                        <c:otherwise><span class="bento-status-badge">${order.status}</span></c:otherwise>
+                                                        <c:otherwise><span class="bento-status-badge">${order.statusText}</span></c:otherwise>
                                                     </c:choose>
                                                 </td>
                                                 <td>
@@ -270,8 +271,24 @@
 
     <div class="toast-container" id="toastContainer"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+
     <script>
         var contextPath = '${pageContext.request.contextPath}';
+        
+        document.addEventListener("DOMContentLoaded", function() {
+            var flatpickrConfig = {
+                locale: "vn",
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                altInputClass: "bento-input",
+                allowInput: true
+            };
+            flatpickr("#fromDate", flatpickrConfig);
+            flatpickr("#toDate", flatpickrConfig);
+        });
         var pendingOrderId = null;
         var pendingStatus = null;
 

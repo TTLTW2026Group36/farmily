@@ -105,7 +105,7 @@
                                                         <c:forEach var="fs" items="${flashSales}">
                                                             <tr>
                                                                 <td>
-                                                                    <div class="product-cell">
+                                                                    <div class="product-cell" onclick="window.open('${pageContext.request.contextPath}/chi-tiet-san-pham?id=${fs.productId}', '_blank')" title="Xem trên trang chủ">
                                                                         <c:choose>
                                                                             <c:when
                                                                                 test="${not empty fs.product.primaryImageUrl}">

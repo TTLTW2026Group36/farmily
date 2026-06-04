@@ -5,7 +5,7 @@
               type="javax.sql.DataSource"
               factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
               driverClassName="com.mysql.cj.jdbc.Driver"
-              url="jdbc:mysql://localhost:3306/farmily?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowPublicKeyRetrieval=true&amp;useSSL=false"
+              url="jdbc:mysql://localhost:3306/farmily?useUnicode=true&amp;characterEncoding=UTF-8&amp;allowPublicKeyRetrieval=true&amp;useSSL=false&amp;serverTimezone=Asia/Ho_Chi_Minh&amp;sessionVariables=time_zone='%2B07:00'"
               username="root"
               password="123"
               maxActive="20"

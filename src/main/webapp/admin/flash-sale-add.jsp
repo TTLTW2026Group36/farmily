@@ -11,6 +11,46 @@
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/header.css">
             <link rel="stylesheet" href="${pageContext.request.contextPath}/admin/css/product-add.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <style>
+                .select2-container .select2-selection--single {
+                    height: 43px !important;
+                    border: 1px solid var(--gray-300) !important;
+                    border-radius: var(--border-radius) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    padding: 0 10px !important;
+                }
+                .select2-container--default .select2-selection--single .select2-selection__arrow {
+                    height: 41px !important;
+                    right: 10px !important;
+                }
+                .select2-container--default .select2-selection--single .select2-selection__rendered {
+                    color: var(--gray-900) !important;
+                    padding-left: 5px !important;
+                    font-size: 15px !important;
+                }
+                .select2-container--default.select2-container--focus .select2-selection--single {
+                    border-color: var(--primary) !important;
+                    box-shadow: 0 0 0 3px var(--primary-light) !important;
+                }
+                .select2-dropdown {
+                    border: 1px solid var(--gray-300) !important;
+                    border-radius: var(--border-radius-sm) !important;
+                    box-shadow: var(--shadow) !important;
+                }
+                .select2-search__field {
+                    border-radius: var(--border-radius-sm) !important;
+                    border: 1px solid var(--gray-300) !important;
+                }
+                .select2-search__field:focus {
+                    outline: none !important;
+                    border-color: var(--primary) !important;
+                }
+                .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
+                    background-color: var(--primary) !important;
+                }
+            </style>
         </head>
 
         <body>
@@ -106,6 +146,23 @@
                     </div>
                 </main>
             </div>
+
+            <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+            <script>
+                $(document).ready(function() {
+                    $('#productId').select2({
+                        placeholder: "-- Chọn sản phẩm --",
+                        allowClear: true,
+                        width: '100%',
+                        language: {
+                            noResults: function() {
+                                return "Không tìm thấy sản phẩm nào";
+                            }
+                        }
+                    });
+                });
+            </script>
         </body>
 
         </html>

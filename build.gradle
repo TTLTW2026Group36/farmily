@@ -85,7 +85,7 @@ task docker_app_start {
             session(remotes.host) {
                 execute 'docker stop tomcat9', ignoreError: true
                 execute 'docker rm tomcat9', ignoreError: true
-                execute 'docker run -d --name tomcat9 --add-host localhost:172.17.0.1 -v /usr/deploy:/usr/local/tomcat/webapps -p 80:8080 tomcat:10.1'
+                execute 'docker run -d --name tomcat9 -e TZ=Asia/Ho_Chi_Minh --add-host localhost:172.17.0.1 -v /usr/deploy:/usr/local/tomcat/webapps -p 80:8080 tomcat:10.1'
             }
         }
     }

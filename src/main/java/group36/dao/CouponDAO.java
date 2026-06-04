@@ -124,13 +124,13 @@ public class CouponDAO extends BaseDao {
         if (status != null && !status.isEmpty()) {
             switch (status) {
                 case "active":
-                    sql.append(" AND is_active = 1 AND NOW() BETWEEN start_date AND end_date AND used_count < quantity");
+                    sql.append(" AND is_active = 1 AND :now BETWEEN start_date AND end_date AND used_count < quantity");
                     break;
                 case "upcoming":
-                    sql.append(" AND is_active = 1 AND start_date > NOW()");
+                    sql.append(" AND is_active = 1 AND start_date > :now");
                     break;
                 case "expired":
-                    sql.append(" AND end_date < NOW()");
+                    sql.append(" AND end_date < :now");
                     break;
                 case "disabled":
                     sql.append(" AND is_active = 0");
@@ -142,6 +142,9 @@ public class CouponDAO extends BaseDao {
             var query = handle.createQuery(sql.toString());
             if (keyword != null && !keyword.trim().isEmpty()) {
                 query.bind("keyword", "%" + keyword.trim() + "%");
+            }
+            if (status != null && !status.isEmpty() && !"disabled".equals(status)) {
+                query.bind("now", new java.sql.Timestamp(System.currentTimeMillis()));
             }
             return query.map(new CouponMapper()).list();
         });
@@ -185,10 +188,11 @@ public class CouponDAO extends BaseDao {
 
     public List<Coupon> findActiveCoupons() {
         String sql = "SELECT * FROM coupons WHERE is_active = 1 " +
-                     "AND NOW() BETWEEN start_date AND end_date " +
+                     "AND :now BETWEEN start_date AND end_date " +
                      "AND used_count < quantity " +
                      "ORDER BY created_at DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("now", new java.sql.Timestamp(System.currentTimeMillis()))
                 .map(new CouponMapper())
                 .list());
     }
@@ -196,10 +200,12 @@ public class CouponDAO extends BaseDao {
     public List<Coupon> findActiveCouponsByType(String discountType) {
         String sql = "SELECT * FROM coupons WHERE is_active = 1 " +
                      "AND discount_type = :type " +
-                     "AND NOW() BETWEEN start_date AND end_date " +
+                     "AND :now BETWEEN start_date AND end_date " +
                      "AND used_count < quantity ORDER BY discount_value DESC";
         return get().withHandle(h -> h.createQuery(sql)
-                .bind("type", discountType).map(new CouponMapper()).list());
+                .bind("type", discountType)
+                .bind("now", new java.sql.Timestamp(System.currentTimeMillis()))
+                .map(new CouponMapper()).list());
     }
 }
 

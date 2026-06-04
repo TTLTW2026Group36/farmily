@@ -150,7 +150,7 @@
                                                                 <td><input type="checkbox" class="product-checkbox"
                                                                         name="productIds" value="${product.id}"></td>
                                                                 <td>
-                                                                    <div class="product-cell">
+                                                                    <div class="product-cell" onclick="window.open('${pageContext.request.contextPath}/chi-tiet-san-pham?id=${product.id}', '_blank')" title="Xem trên trang chủ">
                                                                         <c:choose>
                                                                             <c:when
                                                                                 test="${not empty product.primaryImageUrl}">

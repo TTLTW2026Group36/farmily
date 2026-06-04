@@ -201,7 +201,7 @@
                                                                     style="display: flex; gap: 12px; align-items: center;">
                                                                     <img src="${not empty post.imageUrl ? post.imageUrl : 'https://via.placeholder.com/60x40?text=No+Image'}"
                                                                         alt="${post.title}"
-                                                                        style="width: 60px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                                        style="width: 60px; height: 40px; min-width: 60px; min-height: 40px; object-fit: cover; border-radius: 4px; flex-shrink: 0;">
                                                                     <div>
                                                                         <div
                                                                             style="font-weight: 600; margin-bottom: 3px;">
