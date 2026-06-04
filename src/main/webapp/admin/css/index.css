@@ -79,6 +79,11 @@
   color: var(--danger);
 }
 
+.stat-card.success .stat-icon {
+  background: var(--success-light);
+  color: var(--success);
+}
+
 @media (max-width: 1200px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);

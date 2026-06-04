@@ -129,6 +129,17 @@ public class AdminNotificationDAO extends BaseDao {
     
 
 
+    public boolean existsByTypeReferenceAndTitle(String type, int referenceId, String referenceType, String title) {
+        String sql = "SELECT COUNT(*) FROM admin_notifications WHERE type = :type AND reference_id = :referenceId AND reference_type = :referenceType AND title = :title";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("type", type)
+                .bind("referenceId", referenceId)
+                .bind("referenceType", referenceType)
+                .bind("title", title)
+                .mapTo(Integer.class)
+                .one() > 0);
+    }
+
     public int deleteOlderThan(int days) {
         String sql = "DELETE FROM admin_notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL :days DAY)";
         return get().withHandle(handle -> handle.createUpdate(sql)

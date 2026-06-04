@@ -31,6 +31,7 @@ public class OrderDetailDAO extends BaseDao {
             detail.setQuantity(rs.getInt("quantity"));
             detail.setUnitPrice(rs.getDouble("unit_price"));
             detail.setSubtotal(rs.getDouble("subtotal"));
+            detail.setImportPrice(rs.getDouble("import_price"));
             return detail;
         }
     }
@@ -50,8 +51,8 @@ public class OrderDetailDAO extends BaseDao {
 
 
     public int insert(OrderDetail detail) {
-        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal) " +
-                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal)";
+        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal, import_price) " +
+                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal, :importPrice)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("orderId", detail.getOrderId())
                 .bind("productId", detail.getProductId())
@@ -59,6 +60,7 @@ public class OrderDetailDAO extends BaseDao {
                 .bind("quantity", detail.getQuantity())
                 .bind("unitPrice", detail.getUnitPrice())
                 .bind("subtotal", detail.getSubtotal())
+                .bind("importPrice", detail.getImportPrice())
                 .executeAndReturnGeneratedKeys("id")
                 .mapTo(Integer.class)
                 .one());
@@ -69,8 +71,8 @@ public class OrderDetailDAO extends BaseDao {
 
     public void insertBatchWithHandle(org.jdbi.v3.core.Handle h, List<OrderDetail> details) {
         if (details == null || details.isEmpty()) return;
-        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal) " +
-                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal)";
+        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal, import_price) " +
+                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal, :importPrice)";
         var batch = h.prepareBatch(sql);
         for (OrderDetail detail : details) {
             batch.bind("orderId", detail.getOrderId())
@@ -79,6 +81,7 @@ public class OrderDetailDAO extends BaseDao {
                     .bind("quantity", detail.getQuantity())
                     .bind("unitPrice", detail.getUnitPrice())
                     .bind("subtotal", detail.getSubtotal())
+                    .bind("importPrice", detail.getImportPrice())
                     .add();
         }
         batch.execute();
@@ -89,8 +92,8 @@ public class OrderDetailDAO extends BaseDao {
             return;
         }
 
-        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal) " +
-                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal)";
+        String sql = "INSERT INTO order_details (order_id, product_id, variant_id, quantity, unit_price, subtotal, import_price) " +
+                "VALUES (:orderId, :productId, :variantId, :quantity, :unitPrice, :subtotal, :importPrice)";
 
         get().useHandle(handle -> {
             var batch = handle.prepareBatch(sql);
@@ -101,6 +104,7 @@ public class OrderDetailDAO extends BaseDao {
                         .bind("quantity", detail.getQuantity())
                         .bind("unitPrice", detail.getUnitPrice())
                         .bind("subtotal", detail.getSubtotal())
+                        .bind("importPrice", detail.getImportPrice())
                         .add();
             }
             batch.execute();

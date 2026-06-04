@@ -82,6 +82,8 @@
                                             <tr>
                                                 <th>Phân loại <span class="required">*</span></th>
                                                 <th>Giá bán (VNĐ) <span class="required">*</span></th>
+                                                <th>Giá nhập (VNĐ)</th>
+                                                <th>Hạn sử dụng</th>
                                                 <th>Tồn kho <span class="required">*</span></th>
                                                 <th style="width: 60px;"></th>
                                             </tr>
@@ -95,6 +97,13 @@
                                                 <td>
                                                     <input type="number" name="variantPrice" class="form-control"
                                                         placeholder="25000" min="1" required>
+                                                </td>
+                                                <td>
+                                                    <input type="number" name="variantImportPrice" class="form-control"
+                                                        placeholder="20000" min="0">
+                                                </td>
+                                                <td>
+                                                    <input type="date" name="variantExpiryDate" class="form-control">
                                                 </td>
                                                 <td>
                                                     <input type="number" name="variantStock" class="form-control"
@@ -161,6 +170,8 @@
                         tr.innerHTML =
                             '<td><input type="text" name="variantName" class="form-control" placeholder="VD: 500g, 1kg, Hộp nhỏ..." required></td>' +
                             '<td><input type="number" name="variantPrice" class="form-control" placeholder="25000" min="1" required></td>' +
+                            '<td><input type="number" name="variantImportPrice" class="form-control" placeholder="20000" min="0"></td>' +
+                            '<td><input type="date" name="variantExpiryDate" class="form-control"></td>' +
                             '<td><input type="number" name="variantStock" class="form-control" placeholder="100" min="0" required></td>' +
                             '<td><button type="button" class="btn btn-sm btn-danger remove-variant-btn" title="Xóa"><i class="fas fa-times"></i></button></td>';
                         variantsBody.appendChild(tr);

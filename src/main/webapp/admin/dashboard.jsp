@@ -41,7 +41,7 @@
                             <div class="stats-grid">
                                 <div class="stat-card primary">
                                     <div class="stat-info">
-                                        <h3>Tổng doanh thu</h3>
+                                        <h3>Doanh số bán</h3>
                                         <div class="number">
                                             <fmt:formatNumber value="${totalRevenue}" type="number" pattern="#,###" />đ
                                         </div>
@@ -61,6 +61,31 @@
                                     </div>
                                     <div class="stat-icon">
                                         <i class="fas fa-money-bill-wave"></i>
+                                    </div>
+                                </div>
+
+                                <div class="stat-card success">
+                                    <div class="stat-info">
+                                        <h3>Tổng lợi nhuận</h3>
+                                        <div class="number">
+                                            <fmt:formatNumber value="${totalProfit}" type="number" pattern="#,###" />đ
+                                        </div>
+                                        <div class="change ${profitChangePercent >= 0 ? 'up' : 'down'}">
+                                            <c:choose>
+                                                <c:when test="${profitChangePercent >= 0}">
+                                                    <i class="fas fa-arrow-up"></i>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <i class="fas fa-arrow-down"></i>
+                                                </c:otherwise>
+                                            </c:choose>
+                                            <fmt:formatNumber
+                                                value="${profitChangePercent >= 0 ? profitChangePercent : -profitChangePercent}"
+                                                type="number" pattern="#,##0.0" />% so với tháng trước
+                                        </div>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="fas fa-coins"></i>
                                     </div>
                                 </div>
 
@@ -120,6 +145,24 @@
                                         <i class="fas fa-users"></i>
                                     </div>
                                 </div>
+
+                                <a href="${pageContext.request.contextPath}/admin/products?status=expiring" style="text-decoration: none; color: inherit;">
+                                <div class="stat-card danger" style="border-color: #fca5a5; cursor: pointer;">
+                                    <div class="stat-info">
+                                        <h3>Hàng sắp hết hạn</h3>
+                                        <div class="number" style="color: #dc2626;">
+                                            <fmt:formatNumber value="${expiringProductsCount}" type="number" pattern="#,###" />
+                                        </div>
+                                        <div class="change down" style="color: #ef4444; background: #fee2e2;">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            Trong vòng 3 ngày
+                                        </div>
+                                    </div>
+                                    <div class="stat-icon" style="color: #ef4444; background: #fee2e2;">
+                                        <i class="fas fa-hourglass-half"></i>
+                                    </div>
+                                </div>
+                                </a>
                             </div>
 
 

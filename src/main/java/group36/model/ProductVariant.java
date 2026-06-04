@@ -14,6 +14,8 @@ public class ProductVariant implements Serializable {
     private String optionsValue; 
     private int stock;
     private double price;
+    private double importPrice;
+    private Timestamp expiryDate;
     private Timestamp createdAt;
 
     
@@ -27,12 +29,32 @@ public class ProductVariant implements Serializable {
         this.price = price;
     }
 
+    public ProductVariant(int productId, String optionsValue, int stock, double price, double importPrice, Timestamp expiryDate) {
+        this.productId = productId;
+        this.optionsValue = optionsValue;
+        this.stock = stock;
+        this.price = price;
+        this.importPrice = importPrice;
+        this.expiryDate = expiryDate;
+    }
+
     public ProductVariant(int id, int productId, String optionsValue, int stock, double price, Timestamp createdAt) {
         this.id = id;
         this.productId = productId;
         this.optionsValue = optionsValue;
         this.stock = stock;
         this.price = price;
+        this.createdAt = createdAt;
+    }
+
+    public ProductVariant(int id, int productId, String optionsValue, int stock, double price, double importPrice, Timestamp expiryDate, Timestamp createdAt) {
+        this.id = id;
+        this.productId = productId;
+        this.optionsValue = optionsValue;
+        this.stock = stock;
+        this.price = price;
+        this.importPrice = importPrice;
+        this.expiryDate = expiryDate;
         this.createdAt = createdAt;
     }
 
@@ -85,6 +107,41 @@ public class ProductVariant implements Serializable {
         this.createdAt = createdAt;
     }
 
+    public double getImportPrice() {
+        return importPrice;
+    }
+
+    public void setImportPrice(double importPrice) {
+        this.importPrice = importPrice;
+    }
+
+    public Timestamp getExpiryDate() {
+        return expiryDate;
+    }
+
+    public void setExpiryDate(Timestamp expiryDate) {
+        this.expiryDate = expiryDate;
+    }
+
+    public String getFormattedImportPrice() {
+        return String.format("%,.0f", importPrice).replace(",", ".") + "đ";
+    }
+
+    public String getExpiryStatus() {
+        if (expiryDate == null) {
+            return "còn hạn";
+        }
+        long now = System.currentTimeMillis();
+        long expiry = expiryDate.getTime();
+        if (expiry < now) {
+            return "đã hết hạn";
+        }
+        if (expiry - now <= 259200000L) {
+            return "sắp hết hạn";
+        }
+        return "còn hạn";
+    }
+
     
 
 
@@ -121,6 +178,8 @@ public class ProductVariant implements Serializable {
                 ", optionsValue='" + optionsValue + '\'' +
                 ", stock=" + stock +
                 ", price=" + price +
+                ", importPrice=" + importPrice +
+                ", expiryDate=" + expiryDate +
                 ", createdAt=" + createdAt +
                 '}';
     }
