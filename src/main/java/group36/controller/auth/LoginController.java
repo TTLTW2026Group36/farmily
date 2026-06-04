@@ -19,6 +19,12 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("auth") != null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
         String code = request.getParameter("code");
 
         if (code != null && !code.trim().isEmpty()) {
@@ -83,6 +89,12 @@ public class LoginController extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        HttpSession existingSession = request.getSession(false);
+        if (existingSession != null && existingSession.getAttribute("auth") != null) {
+            response.sendRedirect(request.getContextPath() + "/home");
+            return;
+        }
+
         String username = request.getParameter("username") != null ? request.getParameter("username").trim() : null;
         String pass = request.getParameter("password");
         String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
