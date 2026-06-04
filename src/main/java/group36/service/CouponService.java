@@ -46,22 +46,58 @@ public class CouponService {
 
     public Coupon updateCoupon(Coupon coupon) {
         validateCoupon(coupon);
-        couponDAO.findById(coupon.getId())
+        Coupon existing = couponDAO.findById(coupon.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Mã giảm giá không tồn tại: " + coupon.getId()));
-        couponDAO.findByCode(coupon.getCode()).ifPresent(existing -> {
-            if (existing.getId() != coupon.getId()) {
+        couponDAO.findByCode(coupon.getCode()).ifPresent(other -> {
+            if (other.getId() != coupon.getId()) {
                 throw new IllegalArgumentException("Mã giảm giá đã tồn tại: " + coupon.getCode());
             }
         });
+
+        if (hasUsage(coupon.getId())) {
+            if (!existing.getCode().equals(coupon.getCode())) {
+                throw new IllegalArgumentException("Không thể sửa mã code của coupon đã được sử dụng.");
+            }
+            if (!existing.getDiscountType().equals(coupon.getDiscountType())) {
+                throw new IllegalArgumentException("Không thể sửa loại giảm giá của coupon đã được sử dụng.");
+            }
+            if (existing.getDiscountValue() != coupon.getDiscountValue()) {
+                throw new IllegalArgumentException("Không thể sửa giá trị giảm của coupon đã được sử dụng.");
+            }
+            if (!java.util.Objects.equals(existing.getMaxDiscount(), coupon.getMaxDiscount())) {
+                throw new IllegalArgumentException("Không thể sửa giảm tối đa của coupon đã được sử dụng.");
+            }
+            if (existing.getMaxUsagePerUser() != coupon.getMaxUsagePerUser()) {
+                throw new IllegalArgumentException("Không thể sửa giới hạn sử dụng/người của coupon đã được sử dụng.");
+            }
+            int actualUsed = getActualUsedCount(coupon.getId());
+            if (coupon.getQuantity() < actualUsed) {
+                throw new IllegalArgumentException(
+                    "Số lượng mã không được nhỏ hơn số lượt đã sử dụng (" + actualUsed + ").");
+            }
+        }
+
         couponDAO.update(coupon);
         return coupon;
     }
 
     public void deleteCoupon(int id) {
+        if (hasUsage(id)) {
+            throw new IllegalArgumentException(
+                "Không thể xoá mã giảm giá đã được sử dụng. Hãy tắt mã thay vì xoá.");
+        }
         int affected = couponDAO.delete(id);
         if (affected == 0) {
             throw new IllegalArgumentException("Mã giảm giá không tồn tại: " + id);
         }
+    }
+
+    public boolean hasUsage(int couponId) {
+        return couponDAO.countUsageByCouponId(couponId) > 0;
+    }
+
+    public int getActualUsedCount(int couponId) {
+        return couponDAO.countUsageByCouponId(couponId);
     }
 
     private void validateCoupon(Coupon coupon) {

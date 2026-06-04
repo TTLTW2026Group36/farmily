@@ -164,6 +164,14 @@ public class CouponDAO extends BaseDao {
                 .execute());
     }
 
+    public int countUsageByCouponId(int couponId) {
+        String sql = "SELECT COUNT(*) FROM coupon_usage WHERE coupon_id = :couponId";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("couponId", couponId)
+                .mapTo(Integer.class)
+                .one());
+    }
+
     public void insertUsage(int couponId, Integer userId, int orderId, double discountAmount) {
         String sql = "INSERT INTO coupon_usage (coupon_id, user_id, order_id, discount_amount) " +
                      "VALUES (:couponId, :userId, :orderId, :discountAmount)";
