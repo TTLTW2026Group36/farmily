@@ -131,7 +131,12 @@ public class AdminCouponController extends HttpServlet {
 
         int id = Integer.parseInt(idParam);
         Coupon coupon = couponService.getCouponById(id);
+        boolean hasUsage = couponService.hasUsage(id);
+        int actualUsedCount = hasUsage ? couponService.getActualUsedCount(id) : 0;
+
         request.setAttribute("coupon", coupon);
+        request.setAttribute("hasUsage", hasUsage);
+        request.setAttribute("actualUsedCount", actualUsedCount);
         request.getRequestDispatcher("/admin/coupon-edit.jsp").forward(request, response);
     }
 
@@ -290,10 +295,13 @@ public class AdminCouponController extends HttpServlet {
     private void deleteCoupon(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         int id = Integer.parseInt(request.getParameter("id"));
-        couponService.deleteCoupon(id);
-
         HttpSession session = request.getSession();
-        session.setAttribute("success", "Xóa mã giảm giá thành công!");
+        try {
+            couponService.deleteCoupon(id);
+            session.setAttribute("success", "Xóa mã giảm giá thành công!");
+        } catch (IllegalArgumentException e) {
+            session.setAttribute("error", e.getMessage());
+        }
         response.sendRedirect(request.getContextPath() + "/admin/coupons");
     }
 

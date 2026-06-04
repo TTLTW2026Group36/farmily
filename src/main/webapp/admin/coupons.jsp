@@ -234,12 +234,23 @@
                                                             <a href="${pageContext.request.contextPath}/admin/coupons/edit?id=${c.id}" class="btn btn-sm btn-outline" title="Sửa">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                            <form action="${pageContext.request.contextPath}/admin/coupons/delete" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này không?');">
-                                                                <input type="hidden" name="id" value="${c.id}">
-                                                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
-                                                                    <i class="fas fa-trash"></i>
-                                                                </button>
-                                                            </form>
+                                                            <c:choose>
+                                                                <c:when test="${c.usedCount > 0}">
+                                                                    <button class="btn btn-sm btn-danger" disabled
+                                                                        title="Không thể xoá mã đã được sử dụng"
+                                                                        style="opacity: 0.4; cursor: not-allowed;">
+                                                                        <i class="fas fa-trash"></i>
+                                                                    </button>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <form action="${pageContext.request.contextPath}/admin/coupons/delete" method="post" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa mã giảm giá này không?');">
+                                                                        <input type="hidden" name="id" value="${c.id}">
+                                                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </c:otherwise>
+                                                            </c:choose>
                                                         </div>
                                                     </td>
                                                 </tr>

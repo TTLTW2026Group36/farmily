@@ -25,6 +25,16 @@
                     </div>
                 </c:if>
 
+                <c:if test="${hasUsage}">
+                    <div style="background: #fff3cd; color: #856404; padding: 14px 20px; border-radius: 8px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border: 1px solid #ffc107;">
+                        <i class="fas fa-lock"></i>
+                        <div>
+                            <strong>Mã này đã được sử dụng ${actualUsedCount} lượt.</strong>
+                            Một số thông tin không thể sửa để đảm bảo đúng dữ liệu đơn hàng cũ.
+                        </div>
+                    </div>
+                </c:if>
+
                 <div class="content-header">
                     <div>
                         <h1 class="content-title">Sửa mã giảm giá</h1>
@@ -47,18 +57,31 @@
                     <input type="hidden" name="id" value="${coupon.id}">
                     <input type="hidden" name="usedCount" value="${coupon.usedCount}">
 
+                    <c:if test="${hasUsage}">
+                        <input type="hidden" name="code" value="${coupon.code}">
+                        <input type="hidden" name="discountType" value="${coupon.discountType}">
+                        <input type="hidden" name="discountValue" value="${coupon.discountValue}">
+                        <input type="hidden" name="maxDiscount" value="${coupon.maxDiscount}">
+                        <input type="hidden" name="maxUsagePerUser" value="${coupon.maxUsagePerUser}">
+                    </c:if>
+
                     <div class="form-section">
                         <h3 class="form-section-title">Thông tin mã giảm giá</h3>
 
                         <div class="form-group">
                             <label for="code">Mã giảm giá <span class="required">*</span></label>
-                            <input type="text" id="code" name="code" class="form-control" value="${coupon.code}" placeholder="VD: NHAP20, FSHIP" style="text-transform: uppercase;" required>
+                            <input type="text" id="code" name="${hasUsage ? '_code_locked' : 'code'}" class="form-control"
+                                value="${coupon.code}" placeholder="VD: NHAP20, FSHIP"
+                                style="text-transform: uppercase;${hasUsage ? ' opacity: 0.6; cursor: not-allowed;' : ''}"
+                                ${hasUsage ? 'disabled' : ''} required>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="discountType">Loại giảm giá <span class="required">*</span></label>
-                                <select id="discountType" name="discountType" class="form-control" required>
+                                <select id="discountType" name="${hasUsage ? '_discountType_locked' : 'discountType'}" class="form-control"
+                                    ${hasUsage ? 'disabled' : ''} required
+                                    style="${hasUsage ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
                                     <option value="percent" ${coupon.discountType == 'percent' ? 'selected' : ''}>Giảm theo %</option>
                                     <option value="fixed" ${coupon.discountType == 'fixed' ? 'selected' : ''}>Giảm số tiền cố định</option>
                                     <option value="freeship" ${coupon.discountType == 'freeship' ? 'selected' : ''}>Miễn phí vận chuyển</option>
@@ -67,14 +90,20 @@
 
                             <div class="form-group" id="discountValueGroup">
                                 <label for="discountValue">Giá trị giảm <span class="required">*</span></label>
-                                <input type="number" id="discountValue" name="discountValue" class="form-control" value="${coupon.discountValue}" placeholder="VD: 20 hoặc 50000" min="0" required>
+                                <input type="number" id="discountValue" name="${hasUsage ? '_discountValue_locked' : 'discountValue'}" class="form-control"
+                                    value="${coupon.discountValue}" placeholder="VD: 20 hoặc 50000" min="0"
+                                    ${hasUsage ? 'disabled' : ''} required
+                                    style="${hasUsage ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
                             </div>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group" id="maxDiscountGroup">
                                 <label for="maxDiscount">Giảm tối đa (đ)</label>
-                                <input type="number" id="maxDiscount" name="maxDiscount" class="form-control" value="${coupon.maxDiscount}" placeholder="Để trống nếu không giới hạn" min="0">
+                                <input type="number" id="maxDiscount" name="${hasUsage ? '_maxDiscount_locked' : 'maxDiscount'}" class="form-control"
+                                    value="${coupon.maxDiscount}" placeholder="Để trống nếu không giới hạn" min="0"
+                                    ${hasUsage ? 'disabled' : ''}
+                                    style="${hasUsage ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
                             </div>
 
                             <div class="form-group">
@@ -86,12 +115,22 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="quantity">Số lượng mã phát hành <span class="required">*</span></label>
-                                <input type="number" id="quantity" name="quantity" class="form-control" value="${coupon.quantity}" placeholder="VD: 100" min="1" required>
+                                <input type="number" id="quantity" name="quantity" class="form-control"
+                                    value="${coupon.quantity}" placeholder="VD: 100"
+                                    min="${hasUsage ? actualUsedCount : 1}" required>
+                                <c:if test="${hasUsage}">
+                                    <small style="color: #6b7280; font-size: 12px;">
+                                        Tối thiểu: ${actualUsedCount} (số lượt đã dùng)
+                                    </small>
+                                </c:if>
                             </div>
 
                             <div class="form-group">
                                 <label for="maxUsagePerUser">Giới hạn sử dụng/khách hàng <span class="required">*</span></label>
-                                <input type="number" id="maxUsagePerUser" name="maxUsagePerUser" class="form-control" value="${coupon.maxUsagePerUser}" placeholder="VD: 1" min="1" required>
+                                <input type="number" id="maxUsagePerUser" name="${hasUsage ? '_maxUsagePerUser_locked' : 'maxUsagePerUser'}" class="form-control"
+                                    value="${coupon.maxUsagePerUser}" placeholder="VD: 1" min="1"
+                                    ${hasUsage ? 'disabled' : ''} required
+                                    style="${hasUsage ? 'opacity: 0.6; cursor: not-allowed;' : ''}">
                             </div>
 
                             <div class="form-group">
@@ -137,24 +176,24 @@
             var valInput = document.getElementById('discountValue');
             var maxGroup = document.getElementById('maxDiscountGroup');
             var maxInput = document.getElementById('maxDiscount');
+            var hasUsage = ${hasUsage != null && hasUsage ? 'true' : 'false'};
 
             function toggleFields() {
                 var val = typeSelect.value;
                 if (val === 'freeship') {
                     valGroup.style.display = 'none';
-                    valInput.required = false;
-                    valInput.value = '0';
+                    if (!hasUsage) { valInput.required = false; valInput.value = '0'; }
                     maxGroup.style.display = 'none';
-                    maxInput.value = '';
+                    if (!hasUsage) { maxInput.value = ''; }
                 } else if (val === 'percent') {
                     valGroup.style.display = '';
-                    valInput.required = true;
+                    if (!hasUsage) { valInput.required = true; }
                     maxGroup.style.display = '';
                 } else {
                     valGroup.style.display = '';
-                    valInput.required = true;
+                    if (!hasUsage) { valInput.required = true; }
                     maxGroup.style.display = 'none';
-                    maxInput.value = '';
+                    if (!hasUsage) { maxInput.value = ''; }
                 }
             }
 
