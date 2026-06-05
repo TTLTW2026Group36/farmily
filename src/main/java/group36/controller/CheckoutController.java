@@ -56,7 +56,7 @@ public class CheckoutController extends HttpServlet {
                     request.setAttribute("isBuyNow", true);
 
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println("Error: " + e.getMessage());
                     response.sendRedirect(request.getContextPath() + "/san-pham");
                     return;
                 }
@@ -122,7 +122,7 @@ public class CheckoutController extends HttpServlet {
             request.getRequestDispatcher("/ThanhToan.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra");
         }
     }

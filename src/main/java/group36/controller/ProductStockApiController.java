@@ -77,7 +77,7 @@ public class ProductStockApiController extends HttpServlet {
             out.print(gson.toJson(result));
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             result.put("success", false);
             result.put("message", "Lỗi server");
             out.print(gson.toJson(result));

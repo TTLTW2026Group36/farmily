@@ -79,7 +79,7 @@ public class CouponApiController extends HttpServlet {
             Map<String, Object> vouchers = couponService.getAvailableVouchersForCheckout(userId, subtotal);
             response.getWriter().print(gson.toJson(Map.of("success", true, "data", vouchers)));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.getWriter().print(gson.toJson(Map.of("success", false, "message", "Có lỗi xảy ra")));
         }
     }
@@ -135,7 +135,7 @@ public class CouponApiController extends HttpServlet {
             result.put("message", e.getMessage());
             response.getWriter().print(gson.toJson(result));
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             Map<String, Object> result = new HashMap<>();
             result.put("success", false);
             result.put("message", "Có lỗi xảy ra khi áp dụng mã giảm giá");

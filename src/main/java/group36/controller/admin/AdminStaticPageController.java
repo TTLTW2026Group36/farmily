@@ -37,7 +37,7 @@ public class AdminStaticPageController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             request.getRequestDispatcher("/admin/static-pages.jsp").forward(request, response);
         }
@@ -56,7 +56,7 @@ public class AdminStaticPageController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             listStaticPages(request, response);
         }

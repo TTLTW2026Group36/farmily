@@ -66,7 +66,7 @@ public class WishlistController extends HttpServlet {
                 out.print(buildWishlistJson(wishlistItems));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             out.print("{\"success\":false,\"message\":\"Có lỗi xảy ra\"}");
         }
     }
@@ -127,7 +127,7 @@ public class WishlistController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"" + escapeJson(e.getMessage()) + "\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Có lỗi xảy ra\"}");
         }
@@ -194,7 +194,7 @@ public class WishlistController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"" + escapeJson(e.getMessage()) + "\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Có lỗi xảy ra\"}");
         }

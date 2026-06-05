@@ -79,7 +79,7 @@ public class ReviewApiController extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\":\"Internal server error\"}");
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 
@@ -121,7 +121,7 @@ public class ReviewApiController extends HttpServlet {
         } catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write("{\"error\":\"Internal server error\"}");
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 

@@ -80,7 +80,7 @@ public class CartController extends HttpServlet {
             request.getRequestDispatcher("/GioHang.jsp").forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra");
         }
     }

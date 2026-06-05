@@ -182,6 +182,18 @@
                     return new Intl.NumberFormat('vi-VN').format(price) + '₫';
                 }
 
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    var map = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    };
+                    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+                }
+
                 function fetchSuggestions(keyword) {
                     if (!keyword || keyword.trim().length < 2) {
                         hideSuggestions();
@@ -202,16 +214,16 @@
                             var html = '';
                             data.forEach(function (product) {
                                 html += '<a href="' + contextPath + '/chi-tiet-san-pham?id=' + product.id + '" class="search-suggestion-item">';
-                                html += '<img src="' + product.image + '" alt="' + product.name + '" onerror="this.src=\'https://via.placeholder.com/50\'">';
+                                html += '<img src="' + escapeHtml(product.image) + '" alt="' + escapeHtml(product.name) + '" onerror="this.src=\'https://via.placeholder.com/50\'">';
                                 html += '<div class="info">';
-                                html += '<div class="name">' + product.name + '</div>';
-                                html += '<div class="price">' + formatPrice(product.price) + '/' + product.unit + '</div>';
+                                html += '<div class="name">' + escapeHtml(product.name) + '</div>';
+                                html += '<div class="price">' + formatPrice(product.price) + '/' + escapeHtml(product.unit) + '</div>';
                                 html += '</div>';
                                 html += '</a>';
                             });
 
                             html += '<a href="' + contextPath + '/san-pham?keyword=' + encodeURIComponent(keyword) + '" class="search-view-all">';
-                            html += '<i class="fa-solid fa-search"></i> Xem tất cả kết quả cho "' + keyword + '"';
+                            html += '<i class="fa-solid fa-search"></i> Xem tất cả kết quả cho "' + escapeHtml(keyword) + '"';
                             html += '</a>';
 
                             suggestionsContainer.innerHTML = html;

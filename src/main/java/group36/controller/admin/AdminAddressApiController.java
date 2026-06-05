@@ -62,7 +62,7 @@ public class AdminAddressApiController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"userId không hợp lệ\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Lỗi server\"}");
         }
@@ -123,7 +123,7 @@ public class AdminAddressApiController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"userId không hợp lệ\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Lỗi server\"}");
         }
@@ -195,7 +195,7 @@ public class AdminAddressApiController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"ID không hợp lệ\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Lỗi server\"}");
         }
@@ -237,7 +237,7 @@ public class AdminAddressApiController extends HttpServlet {
             response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
             out.print("{\"success\":false,\"message\":\"ID không hợp lệ\"}");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\":false,\"message\":\"Lỗi server\"}");
         }

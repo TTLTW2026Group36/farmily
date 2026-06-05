@@ -65,7 +65,7 @@ public class LoginController extends HttpServlet {
                     request.setAttribute("error", "Failed to login with Facebook.");
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
                 request.setAttribute("error", "Error connecting to provider: " + e.getMessage());
             }
         }

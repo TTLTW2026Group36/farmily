@@ -245,7 +245,7 @@ public class PlaceOrderController extends HttpServlet {
                     out.print(gson.toJson(result));
                 } catch (Exception e) {
                     System.err.println("[PlaceOrder] Payment creation failed: " + e.getMessage());
-                    e.printStackTrace();
+                    System.err.println("Error: " + e.getMessage());
                     sendSuccess(out, order.getId());
                 }
             } else {
@@ -255,7 +255,7 @@ public class PlaceOrderController extends HttpServlet {
         } catch (IllegalArgumentException e) {
             sendError(out, e.getMessage());
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             sendError(out, "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
         }
     }

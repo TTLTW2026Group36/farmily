@@ -88,7 +88,7 @@ public class ContactController extends HttpServlet {
 
         } catch (Exception e) {
             
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"success\": false, \"message\": \"Đã có lỗi xảy ra. Vui lòng thử lại sau.\"}");
         }

@@ -146,6 +146,9 @@ public class AdminNotification implements Serializable {
 
 
     public String getIcon() {
+        if (type == null) {
+            return "fa-bell";
+        }
         switch (type) {
             case TYPE_NEW_ORDER:
                 return "fa-shopping-cart";
@@ -174,6 +177,9 @@ public class AdminNotification implements Serializable {
 
 
     public String getIconClass() {
+        if (type == null) {
+            return "info";
+        }
         switch (type) {
             case TYPE_NEW_ORDER:
                 return "order";

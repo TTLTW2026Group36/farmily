@@ -25,7 +25,7 @@ public class RecaptchaUtil {
             JsonObject jsonObject = new Gson().fromJson(response, JsonObject.class);
             return jsonObject.get("success").getAsBoolean();
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return false;
         }
     }

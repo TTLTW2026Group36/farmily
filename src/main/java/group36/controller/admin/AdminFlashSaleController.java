@@ -43,7 +43,7 @@ public class AdminFlashSaleController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             listFlashSales(request, response);
         }
@@ -68,7 +68,7 @@ public class AdminFlashSaleController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             HttpSession session = request.getSession();
             session.setAttribute("error", "Lỗi: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/flash-sales");

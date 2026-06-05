@@ -65,7 +65,7 @@ public class FarmilyConstants {
                 GOOGLE_REDIRECT_URI = "http://localhost:8080/dang-nhap";
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             FACEBOOK_REDIRECT_URI = "http://localhost:8080/dang-nhap";
             GOOGLE_REDIRECT_URI = "http://localhost:8080/dang-nhap";
         }

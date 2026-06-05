@@ -11,7 +11,7 @@
                 <title>
                     <c:choose>
                         <c:when test="${not empty selectedCategory}">${selectedCategory.name} - </c:when>
-                        <c:when test="${not empty keyword}">Tìm kiếm: ${keyword} - </c:when>
+                        <c:when test="${not empty keyword}">Tìm kiếm: <c:out value="${keyword}" /> - </c:when>
                     </c:choose>
                     Sản Phẩm - Nông Sản Farmily
                 </title>
@@ -51,7 +51,7 @@
                                         <a href="${pageContext.request.contextPath}/san-pham">Sản phẩm</a>
                                     </li>
                                     <li class="breadcrumb-item active" aria-current="page">
-                                        Tìm kiếm: "${keyword}"
+                                        Tìm kiếm: "<c:out value="${keyword}" />"
                                     </li>
                                 </c:when>
                                 <c:otherwise>
@@ -108,7 +108,7 @@
                                             <c:choose>
                                                 <c:when test="${not empty selectedCategory}">${selectedCategory.name}
                                                 </c:when>
-                                                <c:when test="${not empty keyword}">Kết quả tìm kiếm: "${keyword}"
+                                                <c:when test="${not empty keyword}">Kết quả tìm kiếm: "<c:out value="${keyword}" />"
                                                 </c:when>
                                                 <c:otherwise>Sản phẩm</c:otherwise>
                                             </c:choose>
@@ -185,7 +185,7 @@
                                     
                                     <div class="filter-group">
                                         <label>Từ khóa</label>
-                                        <input type="text" name="keyword" class="filter-input" placeholder="Tên sản phẩm..." value="${keyword}">
+                                        <input type="text" name="keyword" class="filter-input" placeholder="Tên sản phẩm..." value="<c:out value="${keyword}" />">
                                     </div>
 
                                     <div class="filter-group">
