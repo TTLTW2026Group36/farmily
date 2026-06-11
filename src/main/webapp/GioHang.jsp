@@ -8,12 +8,13 @@
                 <meta charset="UTF-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Giỏ Hàng - Nông Sản Farmily</title>
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/GioHang.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/GioHang.css?v=3">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-            </head>
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
+</head>
 
             <body>
 
@@ -169,13 +170,16 @@
                                     <label class="bar-select-all" for="selectAllBar">
                                         <input type="checkbox" class="cb" id="selectAllBar"
                                             onclick="toggleSelectAll(this)" checked>
-                                        Chọn Tất Cả (<span id="selectAllCount">${cart.items.size()}</span>)
+                                        <span class="select-text-desktop">Chọn Tất Cả</span>
+                                        <span class="select-text-mobile">Tất Cả</span>
+                                        (<span id="selectAllCount">${cart.items.size()}</span>)
                                     </label>
                                     <button class="bar-btn bar-btn-del" id="deleteSelectedBtn"
                                         onclick="deleteSelectedItems()">Xóa</button>
                                     <button class="bar-btn bar-btn-wish" id="wishSelectedBtn"
                                         onclick="saveToWishlist()">
-                                        Lưu vào mục Yêu thích
+                                        <span class="wish-text-desktop">Lưu vào mục Yêu thích</span>
+                                        <span class="wish-text-mobile">Lưu Yêu thích</span>
                                     </button>
                                 </div>
                                 <div class="bar-right">

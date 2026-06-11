@@ -146,22 +146,24 @@
                                     </div>
                                 </div>
 
-                                <a href="${pageContext.request.contextPath}/admin/products?status=expiring" style="text-decoration: none; color: inherit;">
-                                <div class="stat-card danger" style="border-color: #fca5a5; cursor: pointer;">
-                                    <div class="stat-info">
-                                        <h3>Hàng sắp hết hạn</h3>
-                                        <div class="number" style="color: #dc2626;">
-                                            <fmt:formatNumber value="${expiringProductsCount}" type="number" pattern="#,###" />
+                                <a href="${pageContext.request.contextPath}/admin/products?status=expiring"
+                                    style="text-decoration: none; color: inherit;">
+                                    <div class="stat-card danger" style="border-color: #fca5a5; cursor: pointer;">
+                                        <div class="stat-info">
+                                            <h3>Hàng sắp hết hạn</h3>
+                                            <div class="number" style="color: #dc2626;">
+                                                <fmt:formatNumber value="${expiringProductsCount}" type="number"
+                                                    pattern="#,###" />
+                                            </div>
+                                            <div class="change down" style="color: #ef4444;">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                Trong vòng 3 ngày
+                                            </div>
                                         </div>
-                                        <div class="change down" style="color: #ef4444; background: #fee2e2;">
-                                            <i class="fas fa-exclamation-triangle"></i>
-                                            Trong vòng 3 ngày
+                                        <div class="stat-icon" style="color: #ef4444; background: #fee2e2;">
+                                            <i class="fas fa-hourglass-half"></i>
                                         </div>
                                     </div>
-                                    <div class="stat-icon" style="color: #ef4444; background: #fee2e2;">
-                                        <i class="fas fa-hourglass-half"></i>
-                                    </div>
-                                </div>
                                 </a>
                             </div>
 

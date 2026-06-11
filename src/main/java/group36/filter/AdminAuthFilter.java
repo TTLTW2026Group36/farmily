@@ -19,7 +19,10 @@ public class AdminAuthFilter implements Filter {
     static {
         Map<String, Set<UserRole>> map = new LinkedHashMap<>();
 
-        map.put("/admin/dashboard", UserRole.ALL_STAFF);
+        Set<UserRole> orderStaff = EnumSet.of(
+                UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF_ORDER);
+
+        map.put("/admin/dashboard", orderStaff);
 
         map.put("/admin/users",       EnumSet.of(UserRole.ADMIN));
         map.put("/admin/api/address", EnumSet.of(UserRole.ADMIN));
@@ -31,10 +34,9 @@ public class AdminAuthFilter implements Filter {
         map.put("/admin/coupons",    managerLevel);
         map.put("/admin/flash-sales",managerLevel);
 
-        Set<UserRole> orderStaff = EnumSet.of(
-                UserRole.ADMIN, UserRole.MANAGER, UserRole.STAFF_ORDER);
         map.put("/admin/orders",            orderStaff);
         map.put("/admin/reviews",           orderStaff);
+        
         map.put("/admin/notifications",     orderStaff);
         map.put("/admin/api/notifications", orderStaff);
 

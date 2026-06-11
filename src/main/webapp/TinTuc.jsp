@@ -14,7 +14,7 @@
                             ${selectedCategory.name} - Tin Tức - Farmily
                         </c:when>
                         <c:when test="${not empty keyword}">
-                            Tìm kiếm: ${keyword} - Tin Tức - Farmily
+                            Tìm kiếm: <c:out value="${keyword}" /> - Tin Tức - Farmily
                         </c:when>
                         <c:otherwise>
                             Tin Tức - Farmily
@@ -22,9 +22,10 @@
                     </c:choose>
                 </title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=3">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/TinTuc.css?v=3">
-            </head>
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
+</head>
 
             <body>
                 
@@ -70,7 +71,7 @@
                                         ${selectedCategory.name}
                                     </c:when>
                                     <c:when test="${not empty keyword}">
-                                        Kết quả tìm kiếm: "${keyword}"
+                                        Kết quả tìm kiếm: "<c:out value="${keyword}" />"
                                     </c:when>
                                     <c:otherwise>
                                         Tin Tức Nông Sản
@@ -186,7 +187,7 @@
                                             <p>
                                                 <c:choose>
                                                     <c:when test="${not empty keyword}">
-                                                        Không có bài viết nào phù hợp với từ khóa "${keyword}"
+                                                        Không có bài viết nào phù hợp với từ khóa "<c:out value="${keyword}" />"
                                                     </c:when>
                                                     <c:otherwise>
                                                         Chưa có bài viết nào trong danh mục này
@@ -259,7 +260,7 @@
                                     <form class="search-widget" action="${pageContext.request.contextPath}/tin-tuc"
                                         method="get">
                                         <input type="text" name="keyword" placeholder="Tìm kiếm bài viết..."
-                                            value="${keyword}">
+                                            value="<c:out value="${keyword}" />">
                                         <button type="submit"><i class="fas fa-search"></i></button>
                                     </form>
                                 </div>

@@ -37,7 +37,7 @@ public class AdminOrderController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             listOrders(request, response);
         }
@@ -58,7 +58,7 @@ public class AdminOrderController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setContentType("application/json;charset=UTF-8");
             PrintWriter out = response.getWriter();
             out.print("{\"success\": false, \"message\": \"" + e.getMessage() + "\"}");
@@ -203,7 +203,10 @@ public class AdminOrderController extends HttpServlet {
             String note = request.getParameter("note");
             
             HttpSession session = request.getSession();
-            User admin = (User) session.getAttribute("auth");
+            User admin = (User) session.getAttribute("adminUser");
+            if (admin == null) {
+                admin = (User) session.getAttribute("auth");
+            }
             Integer adminId = admin != null ? admin.getId() : null;
 
             boolean updated = orderService.updateOrderStatus(orderId, newStatus, "admin", adminId, note);

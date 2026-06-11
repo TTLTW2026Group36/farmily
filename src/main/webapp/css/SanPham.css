@@ -717,3 +717,57 @@ body {
         gap: 6px;
     }
 }
+
+@media (max-width: 480px) {
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .product-info {
+        padding: 12px;
+        gap: 8px;
+    }
+
+    .product-title {
+        font-size: 13px;
+        min-height: auto;
+    }
+
+    .product-price {
+        font-size: 13px;
+    }
+
+    .price-current {
+        font-size: 14px;
+    }
+
+    .add-to-cart-btn {
+        padding: 8px 4px;
+        font-size: 11px;
+        letter-spacing: 0;
+        gap: 4px;
+    }
+
+    .add-to-cart-btn i {
+        font-size: 12px;
+    }
+
+    .wishlist-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 14px;
+        top: 8px;
+        right: 8px;
+    }
+
+    .product-badges {
+        top: 8px;
+        left: 8px;
+    }
+
+    .badge {
+        padding: 4px 8px;
+        font-size: 9px;
+    }
+}

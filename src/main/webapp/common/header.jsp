@@ -102,7 +102,7 @@
                             <c:otherwise>
                                 <a class="icon-btn-login" href="${pageContext.request.contextPath}/dang-nhap"
                                     title="Tài khoản">
-                                    <i class="fa-solid fa-user"></i> Đăng nhập
+                                    <i class="fa-solid fa-user"></i> <span>Đăng nhập</span>
                                 </a>
                             </c:otherwise>
                         </c:choose>
@@ -134,6 +134,30 @@
                         </a>
                     </div>
                 </div>
+            </div>
+
+            <!-- Hamburger button — hiện ở ≤768px (mobile-only) -->
+            <button id="hamburger-btn"
+                    class="hamburger-btn mobile-only"
+                    aria-label="Mở menu"
+                    aria-expanded="false"
+                    aria-controls="main-nav-menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+
+            <!-- Mobile search bar (hiện khi menu open) -->
+            <div class="mobile-search-bar" style="display:none;" aria-hidden="true">
+                <form class="mobile-search-form"
+                      action="${pageContext.request.contextPath}/san-pham"
+                      method="GET" autocomplete="off" role="search">
+                    <input type="search" name="keyword"
+                           placeholder="Tìm kiếm sản phẩm..."
+                           aria-label="Tìm kiếm sản phẩm">
+                    <button type="submit" aria-label="Tìm">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
             </div>
 
 
@@ -182,6 +206,18 @@
                     return new Intl.NumberFormat('vi-VN').format(price) + '₫';
                 }
 
+                function escapeHtml(text) {
+                    if (!text) return '';
+                    var map = {
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": '&#039;'
+                    };
+                    return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+                }
+
                 function fetchSuggestions(keyword) {
                     if (!keyword || keyword.trim().length < 2) {
                         hideSuggestions();
@@ -202,16 +238,16 @@
                             var html = '';
                             data.forEach(function (product) {
                                 html += '<a href="' + contextPath + '/chi-tiet-san-pham?id=' + product.id + '" class="search-suggestion-item">';
-                                html += '<img src="' + product.image + '" alt="' + product.name + '" onerror="this.src=\'https://via.placeholder.com/50\'">';
+                                html += '<img src="' + escapeHtml(product.image) + '" alt="' + escapeHtml(product.name) + '" onerror="this.src=\'https://via.placeholder.com/50\'">';
                                 html += '<div class="info">';
-                                html += '<div class="name">' + product.name + '</div>';
-                                html += '<div class="price">' + formatPrice(product.price) + '/' + product.unit + '</div>';
+                                html += '<div class="name">' + escapeHtml(product.name) + '</div>';
+                                html += '<div class="price">' + formatPrice(product.price) + '/' + escapeHtml(product.unit) + '</div>';
                                 html += '</div>';
                                 html += '</a>';
                             });
 
                             html += '<a href="' + contextPath + '/san-pham?keyword=' + encodeURIComponent(keyword) + '" class="search-view-all">';
-                            html += '<i class="fa-solid fa-search"></i> Xem tất cả kết quả cho "' + keyword + '"';
+                            html += '<i class="fa-solid fa-search"></i> Xem tất cả kết quả cho "' + escapeHtml(keyword) + '"';
                             html += '</a>';
 
                             suggestionsContainer.innerHTML = html;
@@ -280,3 +316,4 @@
         </script>
         <script src="${pageContext.request.contextPath}/js/hotline-utils.js"></script>
         <script src="${pageContext.request.contextPath}/js/cart.js"></script>
+        <script src="${pageContext.request.contextPath}/js/mobile-nav.js?v=2"></script>

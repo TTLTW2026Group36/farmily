@@ -60,11 +60,11 @@ public class ForgotPasswordController extends HttpServlet {
             request.setAttribute("email", email);
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP (Email/Mật khẩu ứng dụng).");
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Có lỗi xảy ra. Vui lòng thử lại sau.");
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         }

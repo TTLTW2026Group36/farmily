@@ -20,10 +20,15 @@ public class OrderStatusHistoryDAO extends BaseDao {
             history.setOldStatus(rs.getString("old_status"));
             history.setNewStatus(rs.getString("new_status"));
             history.setChangedBy(rs.getString("changed_by"));
-            
+
             int changedById = rs.getInt("changed_by_id");
             history.setChangedById(rs.wasNull() ? null : changedById);
-            
+
+            try {
+                history.setChangedByName(rs.getString("changed_by_name"));
+            } catch (SQLException e) {
+            }
+
             history.setNote(rs.getString("note"));
             history.setCreatedAt(rs.getTimestamp("created_at"));
             return history;
@@ -31,8 +36,9 @@ public class OrderStatusHistoryDAO extends BaseDao {
     }
 
     public int insert(OrderStatusHistory history) {
-        String sql = "INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, changed_by_id, note) " +
-                     "VALUES (:orderId, :oldStatus, :newStatus, :changedBy, :changedById, :note)";
+        String sql = "INSERT INTO order_status_history (order_id, old_status, new_status, changed_by, changed_by_id, note) "
+                +
+                "VALUES (:orderId, :oldStatus, :newStatus, :changedBy, :changedById, :note)";
         return get().withHandle(handle -> handle.createUpdate(sql)
                 .bind("orderId", history.getOrderId())
                 .bind("oldStatus", history.getOldStatus())
@@ -46,7 +52,11 @@ public class OrderStatusHistoryDAO extends BaseDao {
     }
 
     public List<OrderStatusHistory> findByOrderId(int orderId) {
-        String sql = "SELECT * FROM order_status_history WHERE order_id = :orderId ORDER BY created_at DESC";
+        String sql = "SELECT osh.*, u.name as changed_by_name " +
+                "FROM order_status_history osh " +
+                "LEFT JOIN users u ON osh.changed_by_id = u.id " +
+                "WHERE osh.order_id = :orderId " +
+                "ORDER BY osh.created_at DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("orderId", orderId)
                 .map(new OrderStatusHistoryMapper())
@@ -54,7 +64,11 @@ public class OrderStatusHistoryDAO extends BaseDao {
     }
 
     public Optional<OrderStatusHistory> findLatestByOrderId(int orderId) {
-        String sql = "SELECT * FROM order_status_history WHERE order_id = :orderId ORDER BY created_at DESC LIMIT 1";
+        String sql = "SELECT osh.*, u.name as changed_by_name " +
+                "FROM order_status_history osh " +
+                "LEFT JOIN users u ON osh.changed_by_id = u.id " +
+                "WHERE osh.order_id = :orderId " +
+                "ORDER BY osh.created_at DESC LIMIT 1";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("orderId", orderId)
                 .map(new OrderStatusHistoryMapper())

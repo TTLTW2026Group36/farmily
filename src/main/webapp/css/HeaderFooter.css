@@ -694,12 +694,11 @@ header .mini-nav .wrap {
     }
 
     .icon-btn-login {
-        max-width: 130px;
+        padding: 6px;
     }
 
     .icon-btn-login span {
-        max-width: 80px;
-        font-size: 13px;
+        display: none;
     }
 
     .icon-btn-shopping-cart {
@@ -744,13 +743,7 @@ header .mini-nav .wrap {
     }
 
     .icon-btn-login {
-        max-width: 110px;
-        padding: 6px 8px;
-    }
-
-    .icon-btn-login span {
-        max-width: 60px;
-        font-size: 12px;
+        padding: 6px;
     }
 
     .icon-btn-login i {
@@ -1461,5 +1454,108 @@ header .mini-nav .wrap {
     100% {
         transform: translate(-50%, -10px);
         opacity: 0;
+    }
+}
+
+
+.hamburger-btn {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 22px;
+    padding: 6px 10px;
+    cursor: pointer;
+    margin-left: auto;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+header .mini-nav.mobile-open {
+    display: block !important;
+}
+
+header .mini-nav.mobile-open .wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 16px 12px;
+    gap: 0;
+}
+
+header .mini-nav.mobile-open .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: 0;
+    overflow: visible;
+    white-space: normal;
+}
+
+header .mini-nav.mobile-open .nav-links a {
+    padding: 12px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    display: block;
+    width: 100%;
+    font-size: 15px;
+}
+
+header .mini-nav.mobile-open .cats-toggle {
+    display: none !important;
+}
+
+.mobile-search-bar {
+    background: #fff;
+    padding: 10px 16px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.mobile-search-form {
+    display: flex;
+    align-items: center;
+    background: #f5f5f5;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.mobile-search-form input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    padding: 10px 12px;
+    font-size: 14px;
+    outline: 0;
+}
+
+.mobile-search-form button {
+    background: #219653;
+    border: 0;
+    color: #fff;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+@media (max-width: 768px) {
+    .hamburger-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    header .mini-nav {
+        display: none;
+    }
+
+    header .mini-nav.mobile-open {
+        display: block;
+    }
+
+    .topbar .wrap {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .support-text {
+        display: none;
     }
 }

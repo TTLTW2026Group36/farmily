@@ -1,0 +1,35 @@
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+img, video, svg, canvas, iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+.table-responsive-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+}
+@media (min-width: 769px) {
+  .mobile-only { display: none !important; }
+}
+
+@media (max-width: 480px) {
+  .slide-content h2 { font-size: clamp(16px, 5vw, 24px); }
+  .flash-title h2   { font-size: clamp(16px, 4.5vw, 22px); }
+  .sp-title         { font-size: clamp(18px, 5vw, 26px); }
+}
+
+@media (max-width: 480px) {
+  .ThanhToan_container { padding: 0 8px; }
+  .checkout-info,
+  .checkout-summary   { padding: 12px; }
+  .selected-content .full-addr { max-width: calc(100vw - 120px); }
+}

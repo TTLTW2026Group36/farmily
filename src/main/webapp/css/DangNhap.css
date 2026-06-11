@@ -53,7 +53,7 @@ body {
     color: var(--primary-color, #219653);
     border-left: 1px solid #ccc;
     padding-left: 15px;
-    height: 36px;
+    /* height: 36px; */
     line-height: 28px;
 }
 

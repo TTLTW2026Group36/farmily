@@ -1266,3 +1266,72 @@ a {
     color: var(--primary);
     background-color: rgba(0, 0, 0, 0.05);
 }
+
+
+@media (max-width: 768px) {
+    .sp-title {
+        font-size: clamp(18px, 5vw, 26px);
+    }
+
+    .rating-overview {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .rating-score {
+        padding: 16px;
+    }
+
+    .reviews-summary {
+        padding: 16px;
+    }
+
+    .sp-reviews h2 {
+        margin-left: 0;
+        font-size: 20px;
+    }
+
+    .reviews-filter {
+        padding: 0;
+        gap: 8px;
+    }
+
+    .reviews-list {
+        padding: 0;
+    }
+
+    .review-item {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sp-container {
+        padding: 12px;
+    }
+
+    .sp-price {
+        font-size: 22px;
+    }
+
+    .review-header {
+        gap: 8px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
+    }
+
+    .review-images {
+        grid-template-columns: repeat(auto-fill, 60px);
+    }
+
+    .review-images img,
+    .review-images video,
+    .review-media-thumb {
+        width: 60px;
+        height: 60px;
+    }
+}

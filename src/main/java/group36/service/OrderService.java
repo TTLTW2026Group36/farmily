@@ -152,7 +152,7 @@ public class OrderService {
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
 
         checkAndTriggerFlashSaleNotifications(cartItems);
@@ -258,7 +258,7 @@ public class OrderService {
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
 
         checkAndTriggerFlashSaleNotifications(cartItems);
@@ -399,7 +399,7 @@ public class OrderService {
         try {
             adminNotificationService.createOrderNotification(order);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
 
         checkAndTriggerFlashSaleNotifications(cartItems);
@@ -860,7 +860,7 @@ public class OrderService {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
         }
     }
 }

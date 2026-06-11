@@ -57,7 +57,7 @@ public class PaymentIpnController extends HttpServlet {
 
         } catch (Exception e) {
             System.err.println("[IPN] Error processing webhook: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_OK);
             out.print("{\"success\":false,\"error\":\"Internal error\"}");
         }

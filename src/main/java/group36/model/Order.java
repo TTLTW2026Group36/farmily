@@ -319,16 +319,18 @@ public class Order implements Serializable {
 
     public String getPaymentStatusText() {
         if (!isOnlinePayment()) {
-            if (STATUS_DELIVERED.equals(status)) {
+            if (STATUS_DELIVERED.equalsIgnoreCase(status)) {
                 return "Đã thanh toán";
             }
             return "Thanh toán khi nhận hàng";
         }
-        if (paymentStatus == null || "unpaid".equals(paymentStatus))
+        if (paymentStatus == null || "unpaid".equalsIgnoreCase(paymentStatus))
             return "Chưa thanh toán";
-        switch (paymentStatus) {
+        switch (paymentStatus.toLowerCase()) {
             case "pending":
                 return "Đang chờ thanh toán";
+            case "processing":
+                return "Đang xử lý";
             case "paid":
                 return "Đã thanh toán";
             case "failed":
@@ -342,15 +344,17 @@ public class Order implements Serializable {
 
     public String getPaymentStatusBadgeClass() {
         if (!isOnlinePayment()) {
-            if (STATUS_DELIVERED.equals(status)) {
+            if (STATUS_DELIVERED.equalsIgnoreCase(status)) {
                 return "bento-pay-paid";
             }
             return "bento-pay-cod";
         }
-        if (paymentStatus == null || "unpaid".equals(paymentStatus))
+        if (paymentStatus == null || "unpaid".equalsIgnoreCase(paymentStatus))
             return "bento-pay-unpaid";
-        switch (paymentStatus) {
+        switch (paymentStatus.toLowerCase()) {
             case "pending":
+                return "bento-pay-pending";
+            case "processing":
                 return "bento-pay-pending";
             case "paid":
                 return "bento-pay-paid";
@@ -434,7 +438,8 @@ public class Order implements Serializable {
     }
 
     public String getStatusText() {
-        switch (status) {
+        if (status == null) return "";
+        switch (status.toLowerCase()) {
             case STATUS_PENDING:
                 return "Chờ xác nhận";
             case STATUS_CONFIRMED:
@@ -463,7 +468,8 @@ public class Order implements Serializable {
     }
 
     public String getStatusClass() {
-        switch (status) {
+        if (status == null) return "badge-secondary";
+        switch (status.toLowerCase()) {
             case STATUS_PENDING:
                 return "badge-warning";
             case STATUS_CONFIRMED:

@@ -14,6 +14,7 @@
     <ul class="admin-menu">
 
 
+        <c:if test="${role == 'ADMIN' || role == 'MANAGER' || role == 'STAFF_ORDER'}">
         <li>
             <a href="${cp}/admin/dashboard" data-page="dashboard">
                 <i class="fas fa-home"></i>
@@ -22,7 +23,6 @@
         </li>
 
 
-        <c:if test="${role == 'ADMIN' || role == 'MANAGER' || role == 'STAFF_ORDER'}">
         <li>
             <a href="${cp}/admin/notifications" data-page="notifications">
                 <i class="fas fa-bell"></i>

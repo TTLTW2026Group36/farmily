@@ -32,7 +32,7 @@ public class AuthDao extends BaseDao {
                     .execute());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             return false;
         }
     }
@@ -55,7 +55,7 @@ public class AuthDao extends BaseDao {
                     .execute());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             throw new RuntimeException("Lỗi CSDL khi tạo user FB: " + e.getMessage());
         }
     }
@@ -77,7 +77,7 @@ public class AuthDao extends BaseDao {
                     .execute());
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             throw new RuntimeException("Lỗi CSDL khi tạo user GG: " + e.getMessage());
         }
     }

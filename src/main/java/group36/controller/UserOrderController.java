@@ -82,7 +82,7 @@ public class UserOrderController extends HttpServlet {
                 handleOrderList(request, response, currentUser);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Có lỗi xảy ra");
         }
     }
@@ -290,7 +290,7 @@ public class UserOrderController extends HttpServlet {
             try {
                 notificationService.createOrderCancelledNotification(order);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
             }
 
             request.getSession().setAttribute("successMessage", "Đã hủy đơn hàng thành công");
@@ -299,7 +299,7 @@ public class UserOrderController extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi hủy đơn hàng");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         }
@@ -435,7 +435,7 @@ public class UserOrderController extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi gửi đánh giá");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         }
@@ -562,7 +562,7 @@ public class UserOrderController extends HttpServlet {
             request.getSession().setAttribute("errorMessage", "Dữ liệu không hợp lệ");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi cập nhật đánh giá");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         }
@@ -645,7 +645,7 @@ public class UserOrderController extends HttpServlet {
         } catch (NumberFormatException e) {
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.getSession().setAttribute("errorMessage", "Có lỗi xảy ra khi xác nhận nhận hàng");
             response.sendRedirect(request.getContextPath() + "/ho-so/don-hang");
         }

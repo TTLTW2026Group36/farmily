@@ -55,6 +55,9 @@
                                             <c:when test="${order.status == 'cancelled'}">
                                                 <span class="status-badge status-cancelled">Đã hủy</span>
                                             </c:when>
+                                            <c:otherwise>
+                                                <span class="status-badge">${order.statusText}</span>
+                                            </c:otherwise>
                                         </c:choose>
                                     </div>
                                 </div>
@@ -198,7 +201,7 @@
                                                             <div class="timeline-dot"><i
                                                                     class="fas fa-check-double"></i></div>
                                                             <div class="timeline-content">
-                                                                <div class="timeline-title">Giao hàng thành công ✅</div>
+                                                                <div class="timeline-title">Giao hàng thành công</div>
                                                                 <div class="timeline-desc">Khách hàng đã nhận được hàng
                                                                 </div>
                                                             </div>
@@ -208,7 +211,7 @@
                                                         <div class="timeline-step cancelled final">
                                                             <div class="timeline-dot"><i class="fas fa-ban"></i></div>
                                                             <div class="timeline-content">
-                                                                <div class="timeline-title">Đơn hàng đã bị hủy ❌</div>
+                                                                <div class="timeline-title">Đơn hàng đã bị hủy</div>
                                                                 <div class="timeline-desc">Đơn hàng không được tiếp tục
                                                                     xử lý</div>
                                                             </div>
@@ -254,20 +257,27 @@
                                                             <c:forEach var="history" items="${order.statusHistory}">
                                                                 <tr>
                                                                     <td>
-                                                                        <span class="info-value" style="font-size: 0.9em; color: #64748b;"><fmt:formatDate value="${history.createdAt}" pattern="dd/MM/yyyy HH:mm:ss" /></span>
+                                                                        <span class="info-value"
+                                                                            style="font-size: 0.9em; color: #64748b;">
+                                                                            <fmt:formatDate value="${history.createdAt}"
+                                                                                pattern="dd/MM/yyyy HH:mm:ss" />
+                                                                        </span>
                                                                     </td>
                                                                     <td>
-                                                                        <span style="font-size: 0.85em; padding: 4px 8px; border-radius: 4px; font-weight: 500; ${history.changedBy == 'admin' ? 'background:#e0e7ff;color:#4338ca;' : (history.changedBy == 'user' ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#475569;')}">
+                                                                        <span
+                                                                            style="font-size: 0.85em; padding: 4px 8px; border-radius: 4px; font-weight: 500; ${history.changedBy == 'admin' ? 'background:#e0e7ff;color:#4338ca;' : (history.changedBy == 'user' ? 'background:#dcfce7;color:#15803d;' : 'background:#f1f5f9;color:#475569;')}">
                                                                             ${history.changedByText}
                                                                         </span>
                                                                     </td>
                                                                     <td>
-                                                                        Chuyển sang <strong>${history.newStatusText}</strong>
+                                                                        Chuyển sang
+                                                                        <strong>${history.newStatusText}</strong>
                                                                     </td>
                                                                     <td>
                                                                         <c:choose>
                                                                             <c:when test="${not empty history.note}">
-                                                                                <span style="color: #334155;">${history.note}</span>
+                                                                                <span
+                                                                                    style="color: #334155;">${history.note}</span>
                                                                             </c:when>
                                                                             <c:otherwise>
                                                                                 <span class="empty-val">—</span>
@@ -280,7 +290,8 @@
                                                     </table>
                                                 </c:when>
                                                 <c:otherwise>
-                                                    <div style="padding:24px;text-align:center;color:#94a3b8; font-style: italic;">
+                                                    <div
+                                                        style="padding:24px;text-align:center;color:#94a3b8; font-style: italic;">
                                                         Chưa có nhật ký hoạt động nào.
                                                     </div>
                                                 </c:otherwise>
@@ -309,26 +320,35 @@
                                                     <c:forEach var="item" items="${order.orderDetails}">
                                                         <tr>
                                                             <td>
-                                                                <div class="product-cell">
+                                                                <div class="product-cell"
+                                                                    onclick="window.open('${pageContext.request.contextPath}/chi-tiet-san-pham?id=${item.productId}', '_blank')"
+                                                                    title="Xem trên trang chủ">
                                                                     <img src="${item.imageUrl.startsWith('http') ? item.imageUrl : pageContext.request.contextPath.concat(item.imageUrl)}"
                                                                         alt="${item.productName}" class="product-img"
                                                                         onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
                                                                     <div>
-                                                                        <div class="product-name">${item.productName}</div>
+                                                                        <div class="product-name">${item.productName}
+                                                                        </div>
                                                                     </div>
                                                                 </div>
                                                             </td>
                                                             <td>
                                                                 <c:choose>
                                                                     <c:when test="${not empty item.variantText}">
-                                                                        <span class="variant-badge">${item.variantText}</span>
+                                                                        <span
+                                                                            class="variant-badge">${item.variantText}</span>
                                                                     </c:when>
-                                                                    <c:otherwise><span class="empty-val">—</span></c:otherwise>
+                                                                    <c:otherwise><span class="empty-val">—</span>
+                                                                    </c:otherwise>
                                                                 </c:choose>
                                                             </td>
-                                                            <td><span class="price-value">${item.formattedUnitPrice}</span></td>
+                                                            <td><span
+                                                                    class="price-value">${item.formattedUnitPrice}</span>
+                                                            </td>
                                                             <td><span class="qty-badge">x${item.quantity}</span></td>
-                                                            <td><strong class="price-total">${item.formattedSubtotal}</strong></td>
+                                                            <td><strong
+                                                                    class="price-total">${item.formattedSubtotal}</strong>
+                                                            </td>
                                                         </tr>
                                                     </c:forEach>
                                                     <c:if test="${empty order.orderDetails}">
@@ -348,14 +368,19 @@
                                             </div>
                                             <c:if test="${order.hasCoupon()}">
                                                 <div class="total-row">
-                                                    <span>Khuyến mãi <c:if test="${coupon != null}">(Mã: <a href="${pageContext.request.contextPath}/admin/coupons/detail?id=${coupon.id}" style="color: var(--primary); font-weight: 600; text-decoration: underline;">${coupon.code}</a>)</c:if></span>
-                                                    <span style="color: #22c55e; font-weight: 600;">${order.formattedDiscountAmount}</span>
+                                                    <span>Khuyến mãi <c:if test="${coupon != null}">(Mã: <a
+                                                                href="${pageContext.request.contextPath}/admin/coupons/detail?id=${coupon.id}"
+                                                                style="color: var(--primary); font-weight: 600; text-decoration: underline;">${coupon.code}</a>)
+                                                        </c:if></span>
+                                                    <span
+                                                        style="color: #22c55e; font-weight: 600;">${order.formattedDiscountAmount}</span>
                                                 </div>
                                             </c:if>
                                             <c:if test="${order.hasFreeshipCoupon()}">
                                                 <div class="total-row">
                                                     <span>Giảm phí vận chuyển</span>
-                                                    <span style="color: #22c55e; font-weight: 600;">${order.formattedFreeshipDiscountAmount}</span>
+                                                    <span
+                                                        style="color: #22c55e; font-weight: 600;">${order.formattedFreeshipDiscountAmount}</span>
                                                 </div>
                                             </c:if>
                                             <div class="total-row">
@@ -412,7 +437,7 @@
                                         </div>
                                     </div> -->
 
-                                    
+
                                 </div>
 
                                 <div class="detail-sidebar">
@@ -438,7 +463,7 @@
                                                 <c:choose>
                                                     <c:when test="${not empty order.customerPhone}">
                                                         <a href="tel:${order.customerPhone}" class="phone-link">
-                                                            <i class="fas fa-phone-alt"></i> ${order.customerPhone}
+                                                            ${order.customerPhone}
                                                         </a>
                                                     </c:when>
                                                     <c:otherwise><span class="empty-val">—</span></c:otherwise>
@@ -503,12 +528,14 @@
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Trạng thái TT</span>
-                                                <span class="pay-badge ${order.paymentStatusBadgeClass}">${order.paymentStatusText}</span>
+                                                <span
+                                                    class="pay-badge ${order.paymentStatusBadgeClass}">${order.paymentStatusText}</span>
                                             </div>
                                             <div class="info-row">
                                                 <span class="info-label">Ngày đặt</span>
                                                 <span class="info-value">
-                                                    <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm" />
+                                                    <fmt:formatDate value="${order.orderDate}"
+                                                        pattern="dd/MM/yyyy HH:mm" />
                                                 </span>
                                             </div>
                                             <c:if test="${order.latestPayment != null}">
@@ -521,14 +548,16 @@
                                                 <c:if test="${not empty order.latestPayment.transactionId}">
                                                     <div class="info-row">
                                                         <span class="info-label">Mã giao dịch</span>
-                                                        <span class="info-value payment-txn">${order.latestPayment.transactionId}</span>
+                                                        <span
+                                                            class="info-value payment-txn">${order.latestPayment.transactionId}</span>
                                                     </div>
                                                 </c:if>
                                                 <c:if test="${order.latestPayment.paidAt != null}">
                                                     <div class="info-row">
                                                         <span class="info-label">Thanh toán lúc</span>
                                                         <span class="info-value">
-                                                            <fmt:formatDate value="${order.latestPayment.paidAt}" pattern="dd/MM/yyyy HH:mm" />
+                                                            <fmt:formatDate value="${order.latestPayment.paidAt}"
+                                                                pattern="dd/MM/yyyy HH:mm" />
                                                         </span>
                                                     </div>
                                                 </c:if>

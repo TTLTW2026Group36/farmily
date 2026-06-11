@@ -47,7 +47,7 @@ public class AdminCategoryController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Error: " + e.getMessage());
             request.getRequestDispatcher("/admin/categories.jsp").forward(request, response);
         }
@@ -73,7 +73,7 @@ public class AdminCategoryController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Error: " + e.getMessage());
             listCategories(request, response);
         }

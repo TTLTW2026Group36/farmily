@@ -53,7 +53,7 @@ public class ResetPasswordController extends HttpServlet {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/DatLaiMatKhau.jsp").forward(request, response);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("token", otp);
             request.setAttribute("error", "Có lỗi xảy ra. Vui lòng thử lại.");
             request.getRequestDispatcher("/DatLaiMatKhau.jsp").forward(request, response);

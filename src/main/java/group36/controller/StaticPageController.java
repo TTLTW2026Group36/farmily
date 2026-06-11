@@ -67,7 +67,7 @@ public class StaticPageController extends HttpServlet {
             request.getRequestDispatcher(jspPath).forward(request, response);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             
             request.setAttribute("contentFromDb", false);
             request.getRequestDispatcher(jspPath).forward(request, response);

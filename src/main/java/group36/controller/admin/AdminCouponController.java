@@ -38,7 +38,7 @@ public class AdminCouponController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             listCoupons(request, response);
         }
@@ -65,7 +65,7 @@ public class AdminCouponController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             HttpSession session = request.getSession();
             session.setAttribute("error", "Lỗi: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/coupons");
@@ -167,7 +167,7 @@ public class AdminCouponController extends HttpServlet {
             session.setAttribute("success", "Thêm mã giảm giá thành công!");
             response.sendRedirect(request.getContextPath() + "/admin/coupons");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
 
             Coupon coupon = new Coupon();
@@ -242,7 +242,7 @@ public class AdminCouponController extends HttpServlet {
             session.setAttribute("success", "Cập nhật mã giảm giá thành công!");
             response.sendRedirect(request.getContextPath() + "/admin/coupons");
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
 
             Coupon coupon = new Coupon();

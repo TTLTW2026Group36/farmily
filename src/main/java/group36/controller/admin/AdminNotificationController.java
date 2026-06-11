@@ -45,7 +45,7 @@ public class AdminNotificationController extends HttpServlet {
                 out.print("{\"error\": \"Not found\"}");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"error\": \"" + escapeJson(e.getMessage()) + "\"}");
         }
@@ -71,7 +71,7 @@ public class AdminNotificationController extends HttpServlet {
                 out.print("{\"error\": \"Not found\"}");
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             out.print("{\"error\": \"" + escapeJson(e.getMessage()) + "\"}");
         }

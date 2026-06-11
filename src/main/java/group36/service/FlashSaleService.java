@@ -34,43 +34,44 @@ public class FlashSaleService {
     public List<FlashSale> getActiveFlashSales() {
         List<FlashSale> flashSales = flashSaleDAO.findActiveFlashSales();
         loadProductDetails(flashSales);
+        flashSales.removeIf(fs -> fs.getProduct() == null);
         return flashSales;
     }
 
     
-
-
     public List<FlashSale> getActiveFlashSales(int limit) {
         List<FlashSale> flashSales = flashSaleDAO.findActiveFlashSales(limit);
         loadProductDetails(flashSales);
+        flashSales.removeIf(fs -> fs.getProduct() == null);
         return flashSales;
     }
 
     
-
-
     public FlashSale getFlashSaleById(int id) {
         FlashSale flashSale = flashSaleDAO.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Flash sale not found: " + id));
         loadProductDetail(flashSale);
+        if (flashSale.getProduct() == null) {
+            throw new IllegalArgumentException("Product associated with flash sale has been deleted or not found: " + flashSale.getProductId());
+        }
         return flashSale;
     }
 
     
-
-
     public Optional<FlashSale> getActiveFlashSaleForProduct(int productId) {
         Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
         flashSaleOpt.ifPresent(this::loadProductDetail);
+        if (flashSaleOpt.isPresent() && flashSaleOpt.get().getProduct() == null) {
+            return Optional.empty();
+        }
         return flashSaleOpt;
     }
 
     
-
-
     public List<FlashSale> getAllFlashSales() {
         List<FlashSale> flashSales = flashSaleDAO.findAll();
         loadProductDetails(flashSales);
+        flashSales.removeIf(fs -> fs.getProduct() == null);
         return flashSales;
     }
 

@@ -54,9 +54,9 @@ body {
 .address-book-section {
   background: var(--bg);
   border-radius: var(--radius);
-  padding: 20px 24px;
+  padding: 24px;
   margin-bottom: 24px;
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow);
   border: 1px solid var(--border);
 }
 
@@ -310,7 +310,7 @@ body {
   flex: 1.5;
   background: var(--bg);
   border-radius: var(--radius);
-  padding: 28px;
+  padding: 24px;
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
 }
@@ -957,6 +957,7 @@ textarea {
     gap: 20px;
   }
 
+  .address-book-section,
   .checkout-info,
   .checkout-summary {
     padding: 20px;
@@ -972,6 +973,12 @@ textarea {
   .checkout {
     flex-direction: column;
     gap: 16px;
+    align-items: stretch;
+  }
+
+  .checkout-info,
+  .checkout-summary {
+    width: 100%;
   }
 
   .checkout-summary {
@@ -979,8 +986,11 @@ textarea {
     order: -1;
   }
 
-  .address-book-section {
+  .address-book-section,
+  .checkout-info,
+  .checkout-summary {
     padding: 16px;
+    border-radius: var(--radius-sm);
   }
 
   .address-cards {
@@ -1063,16 +1073,6 @@ textarea {
 }
 
 @media (max-width: 480px) {
-  .checkout-info {
-    padding: 16px;
-    border-radius: var(--radius-sm);
-  }
-
-  .checkout-summary {
-    padding: 16px;
-    border-radius: var(--radius-sm);
-  }
-
   .ct-prod-img {
     width: 52px;
     height: 52px;

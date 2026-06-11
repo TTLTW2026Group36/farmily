@@ -55,7 +55,7 @@ public class AdminProductController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
             listProducts(request, response);
         }
@@ -80,7 +80,7 @@ public class AdminProductController extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.err.println("Error: " + e.getMessage());
             HttpSession session = request.getSession();
             session.setAttribute("error", "Lỗi: " + e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/products");
@@ -349,7 +349,7 @@ public class AdminProductController extends HttpServlet {
 
                 productService.updateVariant(variant);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
             }
         }
     }
@@ -388,7 +388,7 @@ public class AdminProductController extends HttpServlet {
 
                 productService.addVariant(variant);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
             }
         }
     }
@@ -424,7 +424,7 @@ public class AdminProductController extends HttpServlet {
                     productService.addImage(productId, url.trim());
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
             }
         }
     }
@@ -441,7 +441,7 @@ public class AdminProductController extends HttpServlet {
                 
                 productService.deleteImage(imageId);
             } catch (Exception e) {
-                e.printStackTrace();
+                System.err.println("Error: " + e.getMessage());
             }
         }
     }
