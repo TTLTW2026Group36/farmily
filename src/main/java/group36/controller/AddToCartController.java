@@ -103,6 +103,8 @@ public class AddToCartController extends HttpServlet {
                     "\"variantText\":\"" + escapeJson(item.getVariantText()) + "\"," +
                     "\"quantity\":" + item.getQuantity() + "," +
                     "\"unitPrice\":" + item.getUnitPrice() + "," +
+                    "\"originalUnitPrice\":" + item.getOriginalUnitPrice() + "," +
+                    "\"hasFlashSale\":" + item.hasFlashSalePrice() + "," +
                     "\"subtotal\":" + item.getSubtotal() +
                     "}," +
                     "\"cartCount\":" + cartCount + "}");
@@ -179,6 +181,8 @@ public class AddToCartController extends HttpServlet {
                     "\"variantText\":\"" + escapeJson(item.getVariantText()) + "\"," +
                     "\"quantity\":" + item.getQuantity() + "," +
                     "\"unitPrice\":" + item.getUnitPrice() + "," +
+                    "\"originalUnitPrice\":" + item.getOriginalUnitPrice() + "," +
+                    "\"hasFlashSale\":" + item.hasFlashSalePrice() + "," +
                     "\"subtotal\":" + item.getSubtotal() + "," +
                     "\"stock\":" + item.getStock() +
                     "}," +

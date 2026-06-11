@@ -192,7 +192,14 @@
         if (!row) return;
 
         var priceEl = document.getElementById('price-' + itemId);
-        if (priceEl) priceEl.innerHTML = '<span class="price-main">' + formatVND(item.unitPrice) + '</span>';
+        if (priceEl) {
+            if (item.hasFlashSale) {
+                priceEl.innerHTML = '<span class="price-main">' + formatVND(item.unitPrice) + '</span>' +
+                                    '<span class="price-orig">' + formatVND(item.originalUnitPrice) + '</span>';
+            } else {
+                priceEl.innerHTML = '<span class="price-main">' + formatVND(item.unitPrice) + '</span>';
+            }
+        }
 
         row.dataset.price = item.unitPrice;
 

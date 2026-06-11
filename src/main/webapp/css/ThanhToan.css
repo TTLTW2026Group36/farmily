@@ -466,8 +466,8 @@ body {
   color: #94a3b8;
   text-decoration: line-through;
   font-size: 12px;
-  display: block;
-  margin-top: 2px;
+  display: inline-block;
+  margin-left: 6px;
 }
 
 .ct-subtotal {
@@ -1029,6 +1029,15 @@ textarea {
     padding-bottom: 8px;
   }
 
+  .checkout-row td.ct-col-price,
+  .checkout-row td.ct-col-qty,
+  .checkout-row td.ct-col-total {
+    display: inline-block;
+    width: auto;
+    margin-right: 16px;
+    vertical-align: top;
+  }
+
   .checkout-row td[data-label]::before {
     content: attr(data-label) ": ";
     font-weight: 500;
@@ -1048,8 +1057,9 @@ textarea {
     font-size: 15px;
   }
 
-  .actions {
+  .checkout-actions {
     flex-direction: column-reverse;
+    gap: 12px;
   }
 
   .submit-btn {

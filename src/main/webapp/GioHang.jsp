@@ -10,11 +10,11 @@
                 <title>Giỏ Hàng - Nông Sản Farmily</title>
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/GioHang.css?v=3">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/GioHang.css?v=9">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
-</head>
+            </head>
 
             <body>
 
@@ -144,7 +144,8 @@
                                                         onclick="changeQuantity(${item.id}, 1)">+</button>
                                                 </div>
                                                 <c:if test="${item.stock > 0 && item.stock <= 5}">
-                                                    <span class="low-stock-warn" id="stock-warn-${item.id}">Còn lại ${item.stock} sản phẩm</span>
+                                                    <span class="low-stock-warn" id="stock-warn-${item.id}">Còn lại
+                                                        ${item.stock} sản phẩm</span>
                                                 </c:if>
                                             </td>
                                             <td class="col-total">
@@ -202,7 +203,8 @@
                             <h2 class="gh-title">Gợi ý mua thêm</h2>
                             <p>
                                 <c:choose>
-                                    <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng mua</c:when>
+                                    <c:when test="${recommendationSource == 'purchased'}">Dựa trên sản phẩm bạn đã từng
+                                        mua</c:when>
                                     <c:otherwise>Sản phẩm bán chạy</c:otherwise>
                                 </c:choose>
                             </p>
@@ -228,13 +230,15 @@
                                         </div>
                                         <div class="product-info">
                                             <h3 class="product-title">
-                                                <a href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
+                                                <a
+                                                    href="${pageContext.request.contextPath}/chi-tiet-san-pham?id=${rec.id}">
                                                     <c:out value="${rec.name}" />
                                                 </a>
                                             </h3>
                                             <p class="product-price">
                                                 <span class="price-current">
-                                                    <fmt:formatNumber value="${rec.minPrice}" type="number" groupingUsed="true" />đ
+                                                    <fmt:formatNumber value="${rec.minPrice}" type="number"
+                                                        groupingUsed="true" />đ
                                                 </span>
                                                 <c:if test="${not empty rec.minPriceVariant}">
                                                     <span class="price-unit">/${rec.minPriceVariant.optionsValue}</span>
@@ -255,7 +259,7 @@
                 <jsp:include page="common/footer.jsp" />
 
                 <script>window.contextPath = '${pageContext.request.contextPath}';</script>
-                <script src="${pageContext.request.contextPath}/js/GioHang.js"></script>
+                <script src="${pageContext.request.contextPath}/js/GioHang.js?v=2"></script>
             </body>
 
             </html>
