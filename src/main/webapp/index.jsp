@@ -359,6 +359,7 @@
                 </section>
 
 
+                <jsp:include page="common/chat-widget.jsp" />
                 <jsp:include page="common/footer.jsp" />
 
                 <script src="${pageContext.request.contextPath}/js/index.js?v=2"></script>

@@ -326,7 +326,8 @@
             </div>
 
 
-            <jsp:include page="common/footer.jsp" />
+            <jsp:include page="common/chat-widget.jsp" />
+                <jsp:include page="common/footer.jsp" />
 
             <script src="${pageContext.request.contextPath}/js/HoSo.js?v=2"></script>
         </body>

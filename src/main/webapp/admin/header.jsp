@@ -36,6 +36,15 @@
                 </div>
                 </c:if>
 
+                <c:if test="${adminRole == 'ADMIN' || adminRole == 'MANAGER' || adminRole == 'STAFF_ORDER'}">
+                <div class="notification-wrapper" style="position:relative;">
+                    <a href="${pageContext.request.contextPath}/admin/chat" class="header-btn" id="chatHeaderBtn" title="Chat CSKH" style="text-decoration:none;">
+                        <i class="fas fa-comments"></i>
+                        <span class="badge" id="chatUnreadBadge" style="display:none;">0</span>
+                    </a>
+                </div>
+                </c:if>
+
                 <div class="user-menu">
                     <c:set var="adminUser" value="${sessionScope.adminUser}" />
                     <c:set var="firstLetter"
@@ -260,6 +269,26 @@
 
                     setInterval(fetchUnreadCount, 30000);
                 }
+
+                (function() {
+                    var chatBadge = document.getElementById('chatUnreadBadge');
+                    if (!chatBadge) return;
+                    function fetchChatUnread() {
+                        fetch(contextPath + '/admin/chat/unread-count')
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (data.count > 0) {
+                                    chatBadge.textContent = data.count > 99 ? '99+' : data.count;
+                                    chatBadge.style.display = 'flex';
+                                } else {
+                                    chatBadge.style.display = 'none';
+                                }
+                            })
+                            .catch(function() {});
+                    }
+                    fetchChatUnread();
+                    setInterval(fetchChatUnread, 30000);
+                })();
                 (function () {
                     var searchInput = document.getElementById('searchTable');
                     if (!searchInput) return;

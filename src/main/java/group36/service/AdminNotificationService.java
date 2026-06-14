@@ -94,6 +94,18 @@ public class AdminNotificationService {
         return notification;
     }
 
+    public AdminNotification createChatNotification(int conversationId, String customerName) {
+        AdminNotification notification = new AdminNotification();
+        notification.setType(AdminNotification.TYPE_NEW_CHAT_MESSAGE);
+        notification.setTitle("Tin nhắn mới từ " + customerName);
+        notification.setMessage("Khách hàng " + customerName + " đã gửi tin nhắn mới");
+        notification.setReferenceId(conversationId);
+        notification.setReferenceType("chat");
+        int id = notificationDAO.insert(notification);
+        notification.setId(id);
+        return notification;
+    }
+
     
 
 

@@ -31,6 +31,7 @@ public class AdminNotification implements Serializable {
     public static final String TYPE_EXPIRING_PRODUCT = "expiring_product";
     public static final String TYPE_EXPIRED_PRODUCT = "expired_product";
     public static final String TYPE_REFUND_REQUEST = "refund_request";
+    public static final String TYPE_NEW_CHAT_MESSAGE = "new_chat_message";
 
     
     public AdminNotification() {
@@ -171,6 +172,8 @@ public class AdminNotification implements Serializable {
                 return "fa-exclamation-circle";
             case TYPE_REFUND_REQUEST:
                 return "fa-money-bill-wave";
+            case TYPE_NEW_CHAT_MESSAGE:
+                return "fa-comments";
             default:
                 return "fa-bell";
         }
@@ -204,6 +207,8 @@ public class AdminNotification implements Serializable {
                 return "danger";
             case TYPE_REFUND_REQUEST:
                 return "warning";
+            case TYPE_NEW_CHAT_MESSAGE:
+                return "info";
             default:
                 return "info";
         }
@@ -230,6 +235,8 @@ public class AdminNotification implements Serializable {
                 return contextPath + "/admin/flash-sales";
             case "refund":
                 return contextPath + "/admin/refund-requests/detail?id=" + referenceId;
+            case "chat":
+                return contextPath + "/admin/chat";
             default:
                 return contextPath + "/admin/notifications";
         }

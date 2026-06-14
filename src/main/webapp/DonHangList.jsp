@@ -690,7 +690,8 @@
                     </div>
 
 
-                    <jsp:include page="common/footer.jsp" />
+                    <jsp:include page="common/chat-widget.jsp" />
+                <jsp:include page="common/footer.jsp" />
 
                     <script>
                         window.contextPath = '${pageContext.request.contextPath}';

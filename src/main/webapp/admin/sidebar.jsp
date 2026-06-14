@@ -90,6 +90,12 @@
                 <span>Liên hệ</span>
             </a>
         </li>
+        <li>
+            <a href="${cp}/admin/chat" data-page="chat">
+                <i class="fas fa-comments"></i>
+                <span>Chat CSKH</span>
+            </a>
+        </li>
         </c:if>
 
 

@@ -418,6 +418,29 @@
                                         </div>
                                     </c:if>
 
+                                <div class="detail-card" style="margin-top:20px;" id="refundChatSection">
+                                    <h3><i class="fas fa-comments"></i> Trao đổi với khách hàng</h3>
+                                    <div id="refundChatMessages" style="max-height:300px;overflow-y:auto;padding:8px 0;margin-bottom:12px;display:flex;flex-direction:column;gap:8px;">
+                                        <div style="text-align:center;color:#9ca3af;padding:20px;">
+                                            <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                        </div>
+                                    </div>
+                                    <div id="refundChatClosed" style="display:none;background:#fef3c7;color:#92400e;padding:10px 14px;border-radius:8px;font-size:14px;margin-bottom:8px;">
+                                        <i class="fas fa-lock"></i> Cuộc hội thoại đã đóng.
+                                    </div>
+                                    <div id="refundChatInput">
+                                        <textarea id="refundChatContent" rows="2" maxlength="2000"
+                                            style="width:100%;border:1px solid #d1d5db;border-radius:8px;padding:8px 12px;font-size:14px;font-family:inherit;resize:none;box-sizing:border-box;"
+                                            placeholder="Nhập tin nhắn..."></textarea>
+                                        <div style="display:flex;justify-content:flex-end;margin-top:6px;">
+                                            <button onclick="sendRefundChatMsg()"
+                                                style="background:#2d6a2d;color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
+                                                <i class="fas fa-paper-plane"></i> Gửi
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </main>
                     </div>
@@ -587,11 +610,118 @@
                                     </div>
                                     <div class="media-modal-footer">
                                         <button class="media-modal-btn-close"
-                                            onclick="closeMediaModalDirect()">Đóng</button>
                                     </div>
                                 </div>
                             </div>
 
                 </body>
 
-                </html>
+                 <script>
+                 (function() {
+                     var cp = ctxPath;
+                     var refundId = REFUND_ID;
+                     var convId = null;
+                     var convClosed = false;
+
+                     function initRefundChat() {
+                         fetch(cp + '/api/chat/conversations', { credentials: 'same-origin' })
+                             .then(function(r) { return r.json(); })
+                             .catch(function() { return { conversations: [] }; });
+
+                         fetch(cp + '/admin/chat/messages?conversationId=0')
+                             .catch(function() {});
+
+                         var fd = new FormData();
+                         fd.append('refundRequestId', refundId);
+                         fd.append('subject', 'Hỗ trợ hoàn tiền #' + refundId);
+                         fetch(cp + '/api/chat/conversations', { method: 'POST', body: fd, credentials: 'same-origin' })
+                             .then(function(r) { return r.json(); })
+                             .catch(function() { return {}; });
+
+                         fetchRefundConvMessages();
+                     }
+
+                     function fetchRefundConvMessages() {
+                         fetch(cp + '/admin/chat?refundRequestId=' + refundId)
+                             .catch(function() {});
+
+                         fetchAdminChatForRefund();
+                     }
+
+                     function fetchAdminChatForRefund() {
+                         fetch(cp + '/admin/chat/messages?refundId=' + refundId + '&t=' + Date.now())
+                             .then(function(r) { return r.json(); })
+                             .then(function(data) {
+                                 if (data && data.messages) {
+                                     convId = data.conversationId || null;
+                                     renderRefundMessages(data.messages);
+                                     updateRefundChatStatus(data.status);
+                                 }
+                             })
+                             .catch(function() {});
+                     }
+
+                     function renderRefundMessages(messages) {
+                         var container = document.getElementById('refundChatMessages');
+                         if (!messages || messages.length === 0) {
+                             container.innerHTML = '<div style="text-align:center;color:#9ca3af;padding:16px;font-size:13px;">Chưa có tin nhắn nào</div>';
+                             return;
+                         }
+                         var html = '';
+                         messages.forEach(function(msg) {
+                             var isAdmin = msg.senderType === 'admin';
+                             html += '<div style="display:flex;justify-content:' + (isAdmin ? 'flex-end' : 'flex-start') + ';">';
+                             html += '<div style="max-width:70%;background:' + (isAdmin ? '#2d6a2d' : '#f3f4f6') + ';color:' + (isAdmin ? '#fff' : '#1f2937') + ';border-radius:12px;padding:9px 13px;font-size:13px;">';
+                             html += '<div style="word-break:break-word;">' + escHtml(msg.content) + '</div>';
+                             html += '<div style="font-size:11px;opacity:0.65;margin-top:4px;text-align:' + (isAdmin ? 'right' : 'left') + ';">' + escHtml(msg.formattedTime) + (isAdmin ? ' · Admin' : ' · Khách') + '</div>';
+                             html += '</div></div>';
+                         });
+                         container.innerHTML = html;
+                         container.scrollTop = container.scrollHeight;
+                     }
+
+                     function updateRefundChatStatus(status) {
+                         var inputDiv  = document.getElementById('refundChatInput');
+                         var closedDiv = document.getElementById('refundChatClosed');
+                         convClosed = (status === 'closed');
+                         if (convClosed) {
+                             if (inputDiv)  inputDiv.style.display  = 'none';
+                             if (closedDiv) closedDiv.style.display = '';
+                         } else {
+                             if (inputDiv)  inputDiv.style.display  = '';
+                             if (closedDiv) closedDiv.style.display = 'none';
+                         }
+                     }
+
+                     window.sendRefundChatMsg = function() {
+                         var content = document.getElementById('refundChatContent').value.trim();
+                         if (!content || convClosed) return;
+                         if (!convId) { showToast('Chưa có cuộc hội thoại', false); return; }
+                         var fd = new FormData();
+                         fd.append('conversationId', convId);
+                         fd.append('content', content);
+                         fetch(cp + '/admin/chat/reply', { method: 'POST', body: fd })
+                             .then(function(r) { return r.json(); })
+                             .then(function(data) {
+                                 if (data.success) {
+                                     document.getElementById('refundChatContent').value = '';
+                                     fetchAdminChatForRefund();
+                                     showToast('Đã gửi', true);
+                                 } else { showToast(data.message, false); }
+                             })
+                             .catch(function() { showToast('Lỗi kết nối', false); });
+                     };
+
+                     function escHtml(text) {
+                         if (!text) return '';
+                         var d = document.createElement('div');
+                         d.textContent = text;
+                         return d.innerHTML;
+                     }
+
+                     initRefundChat();
+                     setInterval(fetchAdminChatForRefund, 5000);
+                 })();
+                 </script>
+
+                 </html>

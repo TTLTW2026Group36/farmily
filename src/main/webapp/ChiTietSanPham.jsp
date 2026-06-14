@@ -552,6 +552,7 @@
                     </section>
                 </c:if>
 
+                <jsp:include page="common/chat-widget.jsp" />
                 <jsp:include page="common/footer.jsp" />
 
                 <!-- Shared review lightbox -->
