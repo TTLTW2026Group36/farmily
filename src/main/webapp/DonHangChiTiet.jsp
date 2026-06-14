@@ -462,6 +462,12 @@
                                                 <span>${fn:escapeXml(refundRequest.adminNote)}</span>
                                             </div>
                                         </c:if>
+                                        <c:if test="${not empty refundRequest.transactionCode}">
+                                            <div class="refund-info-row">
+                                                <span class="refund-label">Mã giao dịch hoàn tiền:</span>
+                                                <span><strong style="color: #0d6efd; letter-spacing: 0.5px;">${fn:escapeXml(refundRequest.transactionCode)}</strong></span>
+                                            </div>
+                                        </c:if>
                                     </div>
                                 </div>
                             </c:if>

@@ -181,14 +181,14 @@ public class RefundRequestService {
         return updated > 0;
     }
 
-    public boolean confirmRefunded(int refundId, int adminId) {
+    public boolean confirmRefunded(int refundId, String transactionCode, int adminId) {
         Optional<RefundRequest> opt = refundDAO.findById(refundId);
         if (opt.isEmpty()) return false;
 
         RefundRequest refund = opt.get();
         if (!RefundRequest.STATUS_APPROVED.equals(refund.getStatus())) return false;
 
-        int updated = refundDAO.updateStatus(refundId, RefundRequest.STATUS_REFUNDED, refund.getAdminNote());
+        int updated = refundDAO.updateConfirmRefunded(refundId, RefundRequest.STATUS_REFUNDED, transactionCode);
         if (updated == 0) return false;
 
         try {

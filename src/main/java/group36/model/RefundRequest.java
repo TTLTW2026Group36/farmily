@@ -31,6 +31,7 @@ public class RefundRequest implements Serializable {
     private double refundAmount;
     private String status;
     private String adminNote;
+    private String transactionCode;
     private Timestamp createdAt;
     private Timestamp updatedAt;
 
@@ -74,6 +75,9 @@ public class RefundRequest implements Serializable {
 
     public String getAdminNote() { return adminNote; }
     public void setAdminNote(String adminNote) { this.adminNote = adminNote; }
+
+    public String getTransactionCode() { return transactionCode; }
+    public void setTransactionCode(String transactionCode) { this.transactionCode = transactionCode; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }

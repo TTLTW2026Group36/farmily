@@ -26,6 +26,7 @@ public class RefundRequestDAO extends BaseDao {
             r.setRefundAmount(rs.getDouble("refund_amount"));
             r.setStatus(rs.getString("status"));
             r.setAdminNote(rs.getString("admin_note"));
+            r.setTransactionCode(rs.getString("transaction_code"));
             r.setCreatedAt(rs.getTimestamp("created_at"));
             r.setUpdatedAt(rs.getTimestamp("updated_at"));
             return r;
@@ -149,6 +150,15 @@ public class RefundRequestDAO extends BaseDao {
                 .bind("id",        id)
                 .bind("status",    status)
                 .bind("adminNote", adminNote)
+                .execute());
+    }
+
+    public int updateConfirmRefunded(int id, String status, String transactionCode) {
+        String sql = "UPDATE refund_requests SET status = :status, transaction_code = :transactionCode WHERE id = :id";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id",              id)
+                .bind("status",          status)
+                .bind("transactionCode", transactionCode)
                 .execute());
     }
 

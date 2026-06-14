@@ -191,14 +191,19 @@ public class AdminRefundController extends HttpServlet {
             throws IOException {
 
         int refundId = parseIntOrDefault(request.getParameter("refundId"), 0);
+        String transactionCode = request.getParameter("transactionCode");
 
         if (refundId == 0) {
             writeJson(response, false, "Thiếu ID yêu cầu hoàn tiền");
             return;
         }
+        if (transactionCode == null || transactionCode.trim().isEmpty()) {
+            writeJson(response, false, "Vui lòng nhập mã giao dịch");
+            return;
+        }
 
         int adminId = getAdminId(request);
-        boolean ok = refundService.confirmRefunded(refundId, adminId);
+        boolean ok = refundService.confirmRefunded(refundId, transactionCode.trim(), adminId);
 
         if (ok) {
             writeJson(response, true, "Đã xác nhận hoàn tiền thành công");

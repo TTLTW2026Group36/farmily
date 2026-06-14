@@ -122,9 +122,9 @@ public class AdminChatController extends HttpServlet {
         if (conversationId <= 0) {
             int refundId = parseIntOrDefault(request.getParameter("refundId"), 0);
             if (refundId > 0) {
-                Optional<ChatConversation> byRefund = chatService.getConversationByRefundId(refundId);
-                if (byRefund.isPresent()) {
-                    conversationId = byRefund.get().getId();
+                ChatConversation conv = chatService.getOrCreateRefundConversation(refundId);
+                if (conv != null) {
+                    conversationId = conv.getId();
                 } else {
                     JsonObject empty = new JsonObject();
                     empty.add("messages", new JsonArray());

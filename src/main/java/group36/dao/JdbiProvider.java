@@ -27,27 +27,38 @@ public class JdbiProvider {
     }
 
     private static Jdbi createJdbi() {
+        Jdbi jdbi;
         try {
             Context ctx = new InitialContext();
             DataSource ds = (DataSource) ctx.lookup("java:comp/env/jdbc/farmily");
             System.out.println("[JdbiProvider] Using JNDI DataSource (Tomcat Connection Pool)");
-            return Jdbi.create(ds);
+            jdbi = Jdbi.create(ds);
         } catch (Exception e) {
-            System.out
-                    .println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
+            System.out.println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
+            MysqlDataSource ds = new MysqlDataSource();
+            ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname
+                    + "?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh");
+            ds.setUser(DBProperties.username);
+            ds.setPassword(DBProperties.password);
+            try {
+                ds.setUseCompression(true);
+                ds.setAutoReconnect(true);
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            jdbi = Jdbi.create(ds);
         }
 
-        MysqlDataSource ds = new MysqlDataSource();
-        ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname
-                + "?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh");
-        ds.setUser(DBProperties.username);
-        ds.setPassword(DBProperties.password);
+        // Run auto-migration for transaction_code
         try {
-            ds.setUseCompression(true);
-            ds.setAutoReconnect(true);
-        } catch (SQLException ex) {
-            throw new RuntimeException(ex);
+            jdbi.useHandle(handle -> {
+                handle.execute("ALTER TABLE refund_requests ADD COLUMN transaction_code VARCHAR(100) DEFAULT NULL");
+                System.out.println("[JdbiProvider] Added column transaction_code to refund_requests");
+            });
+        } catch (Exception ex) {
+            System.out.println("[JdbiProvider] Migration check/execution finished (column transaction_code might already exist)");
         }
-        return Jdbi.create(ds);
+
+        return jdbi;
     }
 }

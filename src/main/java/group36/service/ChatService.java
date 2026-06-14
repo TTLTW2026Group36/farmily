@@ -50,6 +50,23 @@ public class ChatService {
         return conv;
     }
 
+    public ChatConversation getOrCreateRefundConversation(int refundRequestId) {
+        Optional<ChatConversation> existing = conversationDAO.findByRefundRequestId(refundRequestId);
+        if (existing.isPresent()) {
+            ChatConversation conv = existing.get();
+            if (conv.getRefundRequestId() != null) {
+                refundRequestDAO.findById(conv.getRefundRequestId()).ifPresent(conv::setRefundRequest);
+            }
+            return conv;
+        }
+        Optional<RefundRequest> refOpt = refundRequestDAO.findById(refundRequestId);
+        if (refOpt.isPresent()) {
+            RefundRequest ref = refOpt.get();
+            return getOrCreateRefundConversation(ref.getUserId(), refundRequestId);
+        }
+        return null;
+    }
+
     public List<ChatConversation> getUserConversations(int userId) {
         List<ChatConversation> list = conversationDAO.findByUserId(userId);
         for (ChatConversation conv : list) {

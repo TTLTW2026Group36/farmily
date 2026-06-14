@@ -137,13 +137,15 @@
                             position: fixed;
                             inset: 0;
                             background: rgba(0, 0, 0, 0.5);
-                            z-index: 1000;
+                            z-index: 99999 !important;
                             align-items: center;
                             justify-content: center;
                         }
 
                         .modal-overlay.active {
-                            display: flex;
+                            display: flex !important;
+                            opacity: 1 !important;
+                            pointer-events: auto !important;
                         }
 
                         .modal-box {
@@ -297,6 +299,15 @@
                                                         ${refund.formattedRefundAmount}
                                                     </span>
                                                 </div>
+                                                <c:if test="${not empty refund.transactionCode}">
+                                                    <div class="detail-row">
+                                                        <span class="detail-lbl">Mã giao dịch:</span>
+                                                        <span class="detail-val"
+                                                            style="font-weight:700;color:#0d6efd;font-size:15px;letter-spacing:0.5px;">
+                                                            ${fn:escapeXml(refund.transactionCode)}
+                                                        </span>
+                                                    </div>
+                                                </c:if>
                                             </div>
 
                                             <%-- Bank info --%>
@@ -412,7 +423,7 @@
                                     </c:if>
                                     <c:if test="${refund.status == 'approved'}">
                                         <div class="action-area">
-                                            <button class="action-btn btn-confirm" onclick="confirmRefunded()">
+                                            <button class="action-btn btn-confirm" onclick="openConfirmRefundModal()">
                                                 <i class="fas fa-money-bill-wave"></i> Xác nhận đã chuyển tiền
                                             </button>
                                         </div>
@@ -495,7 +506,46 @@
                                 </div>
                             </div>
 
-                            <div class="toast-msg" id="actionToast"></div>
+                        <%-- Confirm Refunded Modal --%>
+                        <div class="modal-overlay" id="confirmRefundModal">
+                            <div class="modal-box">
+                                <div class="modal-title" style="color:#0d6efd;"><i class="fas fa-money-bill-wave"></i> Xác nhận chuyển khoản hoàn tiền</div>
+                                <div style="margin-bottom:14px; background:#f8f9fa; padding:12px; border-radius:8px; border:1px solid #e9ecef; font-size:14px; line-height:1.6;">
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                                        <span style="color:#6c757d;">Ngân hàng:</span>
+                                        <span style="font-weight:600; color:#212529;">${fn:escapeXml(refund.bankName)}</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                                        <span style="color:#6c757d;">Số tài khoản:</span>
+                                        <span style="font-weight:600; color:#212529;">${fn:escapeXml(refund.bankAccount)}</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                                        <span style="color:#6c757d;">Chủ tài khoản:</span>
+                                        <span style="font-weight:600; color:#212529;">${fn:escapeXml(refund.bankHolder)}</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; border-top:1px solid #dee2e6; padding-top:6px; margin-top:6px;">
+                                        <span style="color:#6c757d; font-weight:600;">Số tiền cần chuyển:</span>
+                                        <span style="font-weight:700; color:#2d6a2d; font-size:15px;">${refund.formattedRefundAmount}</span>
+                                    </div>
+                                </div>
+                                <div style="margin-bottom:14px;">
+                                    <label class="modal-label">Mã giao dịch <span style="color:#dc3545;">*</span></label>
+                                    <input type="text" id="confirmTxCode" class="modal-input"
+                                        placeholder="Nhập mã giao dịch chuyển tiền (VD: FT2310...)" required>
+                                </div>
+                                <div class="modal-actions">
+                                    <button onclick="closeModal('confirmRefundModal')"
+                                        style="padding:10px 18px;border:1px solid #ddd;border-radius:8px;background:#f5f5f5;cursor:pointer;">
+                                        Hủy
+                                    </button>
+                                    <button class="action-btn btn-confirm" onclick="submitConfirmRefunded()">
+                                        <i class="fas fa-check"></i> Xác nhận hoàn tất
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="toast-msg" id="actionToast"></div>
 
                             <script>
                                 var REFUND_ID = ${ refund.id };
@@ -503,6 +553,7 @@
 
                                 function openApproveModal() { document.getElementById('approveModal').classList.add('active'); }
                                 function openRejectModal() { document.getElementById('rejectModal').classList.add('active'); }
+                                function openConfirmRefundModal() { document.getElementById('confirmRefundModal').classList.add('active'); }
                                 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
                                 function submitApprove() {
@@ -529,20 +580,29 @@
                                         });
                                 }
 
-                                function confirmRefunded() {
-                                    if (!confirm('Xác nhận đã chuyển tiền hoàn thành công cho khách?')) return;
+                                function submitConfirmRefunded() {
+                                    var txCode = document.getElementById('confirmTxCode').value.trim();
+                                    if (!txCode) {
+                                        alert('Vui lòng nhập mã giao dịch');
+                                        return;
+                                    }
                                     postAction(ctxPath + '/admin/refund-requests/confirm',
-                                        { refundId: REFUND_ID },
+                                        { refundId: REFUND_ID, transactionCode: txCode },
                                         function (msg) {
+                                            closeModal('confirmRefundModal');
                                             showToast(msg, true);
-                                            setTimeout(function () { location.reload(); }, 1800);
+                                            setTimeout(function () { location.reload(); }, 1500);
                                         });
                                 }
 
                                 function postAction(url, data, onSuccess) {
-                                    var fd = new FormData();
-                                    for (var k in data) fd.append(k, data[k]);
-                                    fetch(url, { method: 'POST', body: fd })
+                                    var params = new URLSearchParams();
+                                    for (var k in data) params.append(k, data[k]);
+                                    fetch(url, {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                                        body: params
+                                    })
                                         .then(function (r) { return r.json(); })
                                         .then(function (json) {
                                             if (json.success) onSuccess(json.message);
@@ -609,7 +669,7 @@
                                             autoplay></video>
                                     </div>
                                     <div class="media-modal-footer">
-                                        <button class="media-modal-btn-close"
+                                        <button class="media-modal-btn-close">Đóng</button>
                                     </div>
                                 </div>
                             </div>
@@ -624,27 +684,6 @@
                      var convClosed = false;
 
                      function initRefundChat() {
-                         fetch(cp + '/api/chat/conversations', { credentials: 'same-origin' })
-                             .then(function(r) { return r.json(); })
-                             .catch(function() { return { conversations: [] }; });
-
-                         fetch(cp + '/admin/chat/messages?conversationId=0')
-                             .catch(function() {});
-
-                         var fd = new FormData();
-                         fd.append('refundRequestId', refundId);
-                         fd.append('subject', 'Hỗ trợ hoàn tiền #' + refundId);
-                         fetch(cp + '/api/chat/conversations', { method: 'POST', body: fd, credentials: 'same-origin' })
-                             .then(function(r) { return r.json(); })
-                             .catch(function() { return {}; });
-
-                         fetchRefundConvMessages();
-                     }
-
-                     function fetchRefundConvMessages() {
-                         fetch(cp + '/admin/chat?refundRequestId=' + refundId)
-                             .catch(function() {});
-
                          fetchAdminChatForRefund();
                      }
 
