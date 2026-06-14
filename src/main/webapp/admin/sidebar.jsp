@@ -79,6 +79,12 @@
             </a>
         </li>
         <li>
+            <a href="${cp}/admin/refund-requests" data-page="refund-requests">
+                <i class="fas fa-undo-alt"></i>
+                <span>Hoàn tiền</span>
+            </a>
+        </li>
+        <li>
             <a href="${cp}/admin/contacts" data-page="contacts">
                 <i class="fas fa-envelope"></i>
                 <span>Liên hệ</span>

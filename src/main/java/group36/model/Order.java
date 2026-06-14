@@ -81,9 +81,10 @@ public class Order implements Serializable {
         shippingNext.add(STATUS_DELIVERY_FAILED);
         ALLOWED_TRANSITIONS.put(STATUS_SHIPPING, shippingNext);
 
-        // From delivered
+        // From delivered (completed)
         Set<String> deliveredNext = new HashSet<>();
         deliveredNext.add(STATUS_RETURNED);
+        deliveredNext.add(STATUS_REFUNDED);  // refund confirm: completed → refunded directly (no returned intermediate)
         ALLOWED_TRANSITIONS.put(STATUS_DELIVERED, deliveredNext);
         
         // From delivery_failed

@@ -11,6 +11,7 @@ import jakarta.servlet.http.Part;
 import group36.dao.ReviewDAO;
 import group36.dao.ReviewImageDAO;
 import group36.model.Order;
+import group36.model.RefundRequest;
 import group36.model.Review;
 import group36.model.ReviewImage;
 import group36.model.User;
@@ -18,6 +19,7 @@ import group36.model.AdminNotification;
 import group36.service.AdminNotificationService;
 import group36.service.CloudinaryService;
 import group36.service.OrderService;
+import group36.service.RefundRequestService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,10 +31,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @WebServlet(name = "UserOrderController", urlPatterns = { "/ho-so/don-hang", "/ho-so/don-hang/chi-tiet" })
-@MultipartConfig(
-        fileSizeThreshold = 1024 * 1024,
-        maxFileSize = 10L * 1024 * 1024,
-        maxRequestSize = 70L * 1024 * 1024)
+@MultipartConfig(fileSizeThreshold = 1024 * 1024, maxFileSize = 10L * 1024 * 1024, maxRequestSize = 70L * 1024 * 1024)
 public class UserOrderController extends HttpServlet {
 
     private static final int MAX_IMAGES = 5;
@@ -48,6 +47,7 @@ public class UserOrderController extends HttpServlet {
     private ReviewDAO reviewDAO;
     private ReviewImageDAO reviewImageDAO;
     private CloudinaryService cloudinaryService;
+    private RefundRequestService refundRequestService;
 
     @Override
     public void init() throws ServletException {
@@ -56,6 +56,7 @@ public class UserOrderController extends HttpServlet {
         reviewDAO = new ReviewDAO();
         reviewImageDAO = new ReviewImageDAO();
         cloudinaryService = new CloudinaryService();
+        refundRequestService = new RefundRequestService();
     }
 
     @Override
@@ -101,6 +102,7 @@ public class UserOrderController extends HttpServlet {
         int countShipping = orderService.countOrdersByUserIdAndStatus(userId, "shipping");
         int countCompleted = orderService.countOrdersByUserIdAndStatus(userId, "completed");
         int countCancelled = orderService.countOrdersByUserIdAndStatus(userId, "cancelled");
+        int countRefund = refundRequestService.countByUserId(userId);
 
         List<Order> orders;
         int totalOrders;
@@ -122,6 +124,15 @@ public class UserOrderController extends HttpServlet {
                 orderReviewMaps.put(order.getId(), productReviewMap);
             }
             request.setAttribute("orderReviewMaps", orderReviewMaps);
+        } else if ("refund".equals(statusFilter)) {
+            List<group36.model.RefundRequest> refundRequests = refundRequestService.getRefundRequestsByUserId(userId,
+                    page, pageSize);
+            orders = new java.util.ArrayList<>();
+            for (group36.model.RefundRequest rr : refundRequests) {
+                orderService.getOrderById(rr.getOrderId()).ifPresent(orders::add);
+            }
+            totalOrders = countRefund;
+            request.setAttribute("refundRequestMap", buildRefundMap(refundRequests));
         } else if (statusFilter != null && !statusFilter.isEmpty() && !"all".equals(statusFilter)) {
             orders = orderService.getOrdersByUserIdAndStatusPaginated(userId, statusFilter, page, pageSize);
             totalOrders = orderService.countOrdersByUserIdAndStatus(userId, statusFilter);
@@ -132,7 +143,15 @@ public class UserOrderController extends HttpServlet {
 
         int totalPages = (int) Math.ceil((double) totalOrders / pageSize);
 
+        java.util.Set<Integer> refundEligibleSet = new java.util.HashSet<>();
+        for (Order order : orders) {
+            if (refundRequestService.isEligibleForRefund(order.getId())) {
+                refundEligibleSet.add(order.getId());
+            }
+        }
+
         request.setAttribute("orders", orders);
+        request.setAttribute("refundEligibleSet", refundEligibleSet);
         request.setAttribute("currentStatus", statusFilter != null ? statusFilter : "all");
         request.setAttribute("countAll", countAll);
         request.setAttribute("countPending", countPending);
@@ -140,6 +159,7 @@ public class UserOrderController extends HttpServlet {
         request.setAttribute("countShipping", countShipping);
         request.setAttribute("countCompleted", countCompleted);
         request.setAttribute("countCancelled", countCancelled);
+        request.setAttribute("countRefund", countRefund);
         request.setAttribute("currentPage", page);
         request.setAttribute("totalPages", totalPages);
         request.setAttribute("pageSize", pageSize);
@@ -149,8 +169,18 @@ public class UserOrderController extends HttpServlet {
         request.getRequestDispatcher("/DonHangList.jsp").forward(request, response);
     }
 
+    private java.util.Map<Integer, group36.model.RefundRequest> buildRefundMap(
+            List<group36.model.RefundRequest> refundRequests) {
+        java.util.Map<Integer, group36.model.RefundRequest> map = new java.util.HashMap<>();
+        for (group36.model.RefundRequest rr : refundRequests) {
+            map.put(rr.getOrderId(), rr);
+        }
+        return map;
+    }
+
     private int parseIntOrDefault(String value, int defaultValue) {
-        if (value == null || value.isEmpty()) return defaultValue;
+        if (value == null || value.isEmpty())
+            return defaultValue;
         try {
             int parsed = Integer.parseInt(value);
             return parsed > 0 ? parsed : defaultValue;
@@ -210,6 +240,27 @@ public class UserOrderController extends HttpServlet {
             request.setAttribute("reviewMap", reviewMap);
             request.setAttribute("pageTitle", "Chi tiết đơn hàng #" + orderId);
             request.setAttribute("activeTab", "orders");
+
+            try {
+                group36.dao.OrderStatusHistoryDAO historyDAO = new group36.dao.OrderStatusHistoryDAO();
+                java.util.Map<String, java.sql.Timestamp> statusTimestamps = new java.util.HashMap<>();
+                for (String status : new String[]{"processing", "shipping", "completed"}) {
+                    historyDAO.findByOrderIdAndNewStatus(orderId, status)
+                            .ifPresent(h -> statusTimestamps.put(h.getNewStatus(), h.getCreatedAt()));
+                }
+                request.setAttribute("statusTimestamps", statusTimestamps);
+            } catch (Exception e) {
+                System.err.println("[UserOrderController] Could not load status timestamps: " + e.getMessage());
+            }
+
+            try {
+                boolean refundEligible = refundRequestService.isEligibleForRefund(orderId);
+                request.setAttribute("refundEligible", refundEligible);
+                refundRequestService.getRefundRequestByOrderId(orderId)
+                        .ifPresent(r -> request.setAttribute("refundRequest", r));
+            } catch (Exception refundEx) {
+                System.err.println("[UserOrderController] Could not load refund info: " + refundEx.getMessage());
+            }
 
             request.getRequestDispatcher("/DonHangChiTiet.jsp").forward(request, response);
 
@@ -368,7 +419,6 @@ public class UserOrderController extends HttpServlet {
                 review.setVariantId(Integer.parseInt(variantIdStr));
             }
 
-
             List<Part> mediaParts = collectMediaParts(request);
             String validationError = validateMedia(mediaParts);
             if (validationError != null) {
@@ -379,12 +429,12 @@ public class UserOrderController extends HttpServlet {
 
             int reviewId = reviewDAO.insert(review);
 
-
             List<CloudinaryService.UploadResult> uploaded = new ArrayList<>();
             try {
                 for (Part part : mediaParts) {
                     CloudinaryService.MediaType type = CloudinaryService.detectType(part.getContentType());
-                    if (type == null) continue;
+                    if (type == null)
+                        continue;
 
                     CloudinaryService.UploadResult result = cloudinaryService.upload(
                             part.getInputStream(), reviewId, type);
@@ -414,14 +464,16 @@ public class UserOrderController extends HttpServlet {
             try {
                 AdminNotificationService notificationService = new AdminNotificationService();
                 notificationService.createNotification(
-                    AdminNotification.TYPE_NEW_REVIEW,
-                    "Đánh giá mới cho sản phẩm",
-                    "Khách hàng " + user.getName() + " đánh giá " + rating + " sao: " + (reviewText.trim().length() > 50 ? reviewText.trim().substring(0, 47) + "..." : reviewText.trim()),
-                    reviewId,
-                    "review"
-                );
+                        AdminNotification.TYPE_NEW_REVIEW,
+                        "Đánh giá mới cho sản phẩm",
+                        "Khách hàng " + user.getName() + " đánh giá " + rating + " sao: "
+                                + (reviewText.trim().length() > 50 ? reviewText.trim().substring(0, 47) + "..."
+                                        : reviewText.trim()),
+                        reviewId,
+                        "review");
             } catch (Exception notiEx) {
-                System.err.println("[UserOrderController] Failed to create review notification: " + notiEx.getMessage());
+                System.err
+                        .println("[UserOrderController] Failed to create review notification: " + notiEx.getMessage());
             }
 
             String returnTo = request.getParameter("returnTo");
@@ -493,42 +545,43 @@ public class UserOrderController extends HttpServlet {
                 return;
             }
 
-
             List<ReviewImage> oldImages = reviewImageDAO.findByReviewId(reviewId);
-
 
             List<CloudinaryService.UploadResult> uploaded = new ArrayList<>();
             try {
                 for (Part part : mediaParts) {
                     CloudinaryService.MediaType type = CloudinaryService.detectType(part.getContentType());
-                    if (type == null) continue;
+                    if (type == null)
+                        continue;
                     CloudinaryService.UploadResult result = cloudinaryService.upload(
                             part.getInputStream(), reviewId, type);
                     uploaded.add(result);
                 }
             } catch (Exception uploadEx) {
                 for (CloudinaryService.UploadResult r : uploaded) {
-                    try { cloudinaryService.delete(r.getPublicId(), r.getType()); }
-                    catch (Exception ignored) {}
+                    try {
+                        cloudinaryService.delete(r.getPublicId(), r.getType());
+                    } catch (Exception ignored) {
+                    }
                 }
                 request.getSession().setAttribute("errorMessage", "Lỗi upload media: " + uploadEx.getMessage());
                 response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
                 return;
             }
 
-
             int updated = reviewDAO.updateIfNotEdited(reviewId, rating, reviewText.trim());
             if (updated == 0) {
 
                 for (CloudinaryService.UploadResult r : uploaded) {
-                    try { cloudinaryService.delete(r.getPublicId(), r.getType()); }
-                    catch (Exception ignored) {}
+                    try {
+                        cloudinaryService.delete(r.getPublicId(), r.getType());
+                    } catch (Exception ignored) {
+                    }
                 }
                 request.getSession().setAttribute("errorMessage", "Đánh giá đã được chỉnh sửa, không thể sửa lại");
                 response.sendRedirect(request.getContextPath() + "/ho-so/don-hang/chi-tiet?id=" + orderId);
                 return;
             }
-
 
             reviewImageDAO.deleteByReviewId(reviewId);
             for (CloudinaryService.UploadResult r : uploaded) {
@@ -539,7 +592,6 @@ public class UserOrderController extends HttpServlet {
                 img.setMediaType(r.getType().value());
                 reviewImageDAO.insert(img);
             }
-
 
             for (ReviewImage old : oldImages) {
                 if (old.getCloudinaryPublicId() != null) {
@@ -592,12 +644,17 @@ public class UserOrderController extends HttpServlet {
                 return "File '" + p.getSubmittedFileName() + "' vượt quá 10MB";
             }
             String mime = p.getContentType();
-            if (ALLOWED_IMAGE_MIMES.contains(mime)) imageCount++;
-            else if (ALLOWED_VIDEO_MIMES.contains(mime)) videoCount++;
-            else return "Định dạng file không hỗ trợ: " + mime;
+            if (ALLOWED_IMAGE_MIMES.contains(mime))
+                imageCount++;
+            else if (ALLOWED_VIDEO_MIMES.contains(mime))
+                videoCount++;
+            else
+                return "Định dạng file không hỗ trợ: " + mime;
         }
-        if (imageCount > MAX_IMAGES) return "Tối đa " + MAX_IMAGES + " ảnh";
-        if (videoCount > MAX_VIDEOS) return "Tối đa " + MAX_VIDEOS + " video";
+        if (imageCount > MAX_IMAGES)
+            return "Tối đa " + MAX_IMAGES + " ảnh";
+        if (videoCount > MAX_VIDEOS)
+            return "Tối đa " + MAX_VIDEOS + " video";
         return null;
     }
 

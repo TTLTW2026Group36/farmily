@@ -1,0 +1,604 @@
+/* ===================================================
+   HoanTien.css — Refund Request Feature Styles
+   Plan: 260612-0035-refund-request
+=================================================== */
+
+/* ─── Refund Form Page (YeuCauHoanTien.jsp) ──────────────────────────── */
+
+.refund-form-container {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  padding: 28px;
+  max-width: 720px;
+}
+
+.refund-form-container h2 {
+  font-size: 20px;
+  color: #2d6a2d;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.refund-form-container .form-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.refund-order-summary {
+  background: #f9fdf9;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.refund-order-summary .order-ref {
+  font-weight: 600;
+  color: #2d6a2d;
+  font-size: 15px;
+}
+
+.refund-order-summary .order-total-ref {
+  font-size: 18px;
+  font-weight: 700;
+  color: #1b5e20;
+}
+
+.refund-notice {
+  background: #fff8e1;
+  border-left: 4px solid #ffc107;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  margin-bottom: 24px;
+  font-size: 13px;
+  color: #5f4a00;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.refund-notice i {
+  color: #f59e0b;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+/* ─── Form Fields ────────────────────────────────────────────────────── */
+
+.refund-form .form-group {
+  margin-bottom: 20px;
+}
+
+.refund-form .form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.refund-form .form-label .required {
+  color: #dc3545;
+  margin-left: 3px;
+}
+
+.refund-form .form-control {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #333;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+
+.refund-form .form-control:focus {
+  border-color: #2d6a2d;
+  box-shadow: 0 0 0 3px rgba(45, 106, 45, 0.12);
+  outline: none;
+}
+
+.refund-form select.form-control {
+  cursor: pointer;
+}
+
+.refund-form textarea.form-control {
+  resize: vertical;
+  min-height: 90px;
+}
+
+.refund-form .form-hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 5px;
+}
+
+/* ─── Section divider inside form ───────────────────────────────────── */
+
+.refund-form .form-section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2d6a2d;
+  border-bottom: 1px solid #e8f5e9;
+  padding-bottom: 8px;
+  margin: 28px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ─── Media Upload ───────────────────────────────────────────────────── */
+
+.refund-media-upload {
+  border: 2px dashed #c8e6c9;
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+  background: #fafff9;
+}
+
+.refund-media-upload:hover {
+  border-color: #2d6a2d;
+  background: #f0faf0;
+}
+
+.refund-media-upload input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.refund-media-upload .upload-icon {
+  font-size: 36px;
+  color: #81c784;
+  margin-bottom: 8px;
+}
+
+.refund-media-upload .upload-text {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 4px;
+}
+
+.refund-media-upload .upload-hint {
+  font-size: 12px;
+  color: #888;
+}
+
+.refund-media-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.refund-media-preview .preview-item {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.refund-media-preview .preview-item img,
+.refund-media-preview .preview-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.refund-media-preview .preview-remove {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 20px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  line-height: 1;
+}
+
+/* ─── Submit button ──────────────────────────────────────────────────── */
+
+.btn-submit-refund {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 32px;
+  background: #2d6a2d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.btn-submit-refund:hover {
+  background: #1f4f1f;
+}
+
+.btn-submit-refund:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.btn-cancel-refund {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 24px;
+  background: #fff;
+  color: #555;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+  font-family: inherit;
+}
+
+.btn-cancel-refund:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.refund-form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+/* ─── Refund Status Card (DonHangChiTiet.jsp) ───────────────────────── */
+
+.refund-status-card {
+  background: #fafff9;
+  border: 1px solid #c8e6c9;
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.refund-info {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.refund-info-row {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  align-items: flex-start;
+}
+
+.refund-label {
+  font-weight: 600;
+  color: #555;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.refund-amount {
+  font-weight: 700;
+  color: #2d6a2d;
+  font-size: 15px;
+}
+
+/* Status badge variants for refund requests */
+.refund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.refund-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.refund-approved {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.refund-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.refund-refunded {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* ─── Refund Request button on DonHangChiTiet ───────────────────────── */
+
+.btn-refund-request {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  background: #fff;
+  color: #e65100;
+  border: 2px solid #e65100;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-refund-request:hover {
+  background: #e65100;
+  color: white;
+}
+
+/* ─── Admin list table badges ────────────────────────────────────────── */
+
+/* (Admin-side admin/refund-requests.jsp) — mirrors above but in admin context */
+.admin-refund-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-refund-badge.pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.admin-refund-badge.approved {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.admin-refund-badge.rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.admin-refund-badge.refunded {
+  background: #d4edda;
+  color: #155724;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .refund-form-container {
+    padding: 18px;
+  }
+
+  .refund-order-summary {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .refund-info-row {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .refund-label {
+    min-width: auto;
+  }
+
+  .refund-form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-submit-refund,
+  .btn-cancel-refund {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .refund-media-gallery {
+    gap: 6px;
+  }
+
+  .refund-media-item {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+.refund-info-block {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.refund-description {
+  white-space: pre-line;
+  color: #444;
+  line-height: 1.6;
+  background: #f7f7f7;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.refund-media-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.refund-media-item {
+  width: 88px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.refund-media-item:hover {
+  transform: scale(1.04);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+video.refund-media-item {
+  cursor: default;
+  width: 160px;
+  height: 100px;
+}
+
+.media-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1200;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.25s ease-in-out;
+}
+
+.media-modal-overlay.active {
+  display: flex;
+  opacity: 1;
+}
+
+.media-modal-box {
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  width: 90%;
+  max-width: 680px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.9);
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.media-modal-overlay.active .media-modal-box {
+  transform: scale(1);
+}
+
+.media-modal-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+}
+
+.media-modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  transition: color 0.15s;
+}
+
+.media-modal-close-btn:hover {
+  color: #333;
+}
+
+.media-modal-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #fafafa;
+  border-radius: 8px;
+  min-height: 250px;
+  max-height: 60vh;
+  overflow: hidden;
+  padding: 10px;
+  border: 1px solid #f0f0f0;
+}
+
+.media-modal-content {
+  max-width: 100%;
+  max-height: 55vh;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.media-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 15px;
+  border-top: 1px solid #eee;
+  padding-top: 10px;
+}
+
+.media-modal-btn-close {
+  padding: 8px 16px;
+  background: #e0e0e0;
+  color: #333;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: background 0.15s;
+}
+
+.media-modal-btn-close:hover {
+  background: #d5d5d5;
+}

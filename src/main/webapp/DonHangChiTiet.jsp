@@ -12,11 +12,12 @@
                     <title>${pageTitle} | Farmily</title>
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DonHang.css">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoanTien.css?v=<%= System.currentTimeMillis() %>">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
                     <link rel="stylesheet"
                         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
-</head>
+                </head>
 
                 <body>
 
@@ -92,7 +93,8 @@
                             </div>
 
 
-                            <c:if test="${order.status != 'cancelled' && order.status != 'cancelled_by_admin' && order.status != 'payment_expired'}">
+                            <c:if
+                                test="${order.status != 'cancelled' && order.status != 'cancelled_by_admin' && order.status != 'payment_expired'}">
                                 <div class="order-progress-tracker">
                                     <div class="progress-steps">
 
@@ -122,7 +124,15 @@
                                             </div>
                                             <div class="step-info">
                                                 <span class="step-title">Đang xử lý</span>
-                                                <span class="step-date">Chuẩn bị hàng</span>
+                                                <span class="step-date">
+                                                    <c:choose>
+                                                        <c:when test="${not empty statusTimestamps['processing']}">
+                                                            <fmt:formatDate value="${statusTimestamps['processing']}"
+                                                                pattern="dd/MM HH:mm" />
+                                                        </c:when>
+                                                        <c:otherwise>Chuẩn bị hàng</c:otherwise>
+                                                    </c:choose>
+                                                </span>
                                             </div>
                                         </div>
 
@@ -139,7 +149,15 @@
                                             </div>
                                             <div class="step-info">
                                                 <span class="step-title">Đang giao hàng</span>
-                                                <span class="step-date">Đang vận chuyển</span>
+                                                <span class="step-date">
+                                                    <c:choose>
+                                                        <c:when test="${not empty statusTimestamps['shipping']}">
+                                                            <fmt:formatDate value="${statusTimestamps['shipping']}"
+                                                                pattern="dd/MM HH:mm" />
+                                                        </c:when>
+                                                        <c:otherwise>Đang vận chuyển</c:otherwise>
+                                                    </c:choose>
+                                                </span>
                                             </div>
                                         </div>
 
@@ -155,7 +173,15 @@
                                             </div>
                                             <div class="step-info">
                                                 <span class="step-title">Hoàn thành</span>
-                                                <span class="step-date">Đã nhận hàng</span>
+                                                <span class="step-date">
+                                                    <c:choose>
+                                                        <c:when test="${not empty statusTimestamps['completed']}">
+                                                            <fmt:formatDate value="${statusTimestamps['completed']}"
+                                                                pattern="dd/MM HH:mm" />
+                                                        </c:when>
+                                                        <c:otherwise>Đã nhận hàng</c:otherwise>
+                                                    </c:choose>
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
@@ -174,11 +200,13 @@
                             </c:if>
 
                             <c:if test="${order.status == 'payment_expired'}">
-                                <div class="order-cancelled-banner" style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">
+                                <div class="order-cancelled-banner"
+                                    style="background-color: #fee2e2; border-color: #fca5a5; color: #991b1b;">
                                     <i class="fas fa-clock" style="color: #dc2626;"></i>
                                     <div class="cancelled-info">
                                         <span class="cancelled-title" style="color: #991b1b;">Thanh toán hết hạn</span>
-                                        <span class="cancelled-desc" style="color: #b91c1c;">Giao dịch thanh toán trực tuyến đã quá hạn. Đơn hàng tự động hủy.</span>
+                                        <span class="cancelled-desc" style="color: #b91c1c;">Giao dịch thanh toán trực
+                                            tuyến đã quá hạn. Đơn hàng tự động hủy.</span>
                                     </div>
                                 </div>
                             </c:if>
@@ -278,13 +306,13 @@
                                 <div class="summary-row">
                                     <span class="summary-label">Tạm tính:</span>
                                     <span class="summary-value">
-                                        <fmt:formatNumber value="${order.subtotal}"
-                                            pattern="#,###" />đ
+                                        <fmt:formatNumber value="${order.subtotal}" pattern="#,###" />đ
                                     </span>
                                 </div>
                                 <c:if test="${order.hasCoupon()}">
                                     <div class="summary-row">
-                                        <span class="summary-label">Khuyến mãi (${coupon != null ? coupon.code : 'Mã giảm giá'}):</span>
+                                        <span class="summary-label">Khuyến mãi (${coupon != null ? coupon.code : 'Mã
+                                            giảm giá'}):</span>
                                         <span class="summary-value" style="color: #22c55e; font-weight: bold;">
                                             ${order.formattedDiscountAmount}
                                         </span>
@@ -329,21 +357,114 @@
                             <c:if test="${order.status == 'pending'}">
                                 <div class="order-actions" style="display: flex; gap: 12px; margin-top: 20px;">
                                     <c:if test="${order.onlinePayment && order.paymentStatus != 'paid'}">
-                                        <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}" class="btn-confirm-received" style="background-color: #22c55e; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
+                                        <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}"
+                                            class="btn-confirm-received"
+                                            style="background-color: #22c55e; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px;">
                                             <i class="fas fa-credit-card"></i> Thanh toán ngay
                                         </a>
                                     </c:if>
                                     <form action="${pageContext.request.contextPath}/ho-so/don-hang" method="post"
-                                         onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');" style="margin: 0;">
-                                         <input type="hidden" name="action" value="cancel">
-                                         <input type="hidden" name="orderId" value="${order.id}">
-                                         <button type="submit" class="btn-cancel-order">
-                                             <i class="fas fa-times"></i> Hủy đơn hàng
-                                         </button>
+                                        onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này?');"
+                                        style="margin: 0;">
+                                        <input type="hidden" name="action" value="cancel">
+                                        <input type="hidden" name="orderId" value="${order.id}">
+                                        <button type="submit" class="btn-cancel-order">
+                                            <i class="fas fa-times"></i> Hủy đơn hàng
+                                        </button>
                                     </form>
                                 </div>
                             </c:if>
 
+
+                            <c:if test="${order.status == 'completed' && refundEligible && empty refundRequest}">
+                                <div class="order-actions" style="margin-top: 16px; margin-bottom: 8px;">
+                                    <a href="${pageContext.request.contextPath}/ho-so/hoan-tien?orderId=${order.id}"
+                                        class="btn-refund-request" id="btn-refund-${order.id}">
+                                        <i class="fas fa-undo-alt"></i> Yêu cầu hoàn tiền
+                                    </a>
+                                </div>
+                            </c:if>
+
+                            <c:if test="${not empty refundRequest}">
+                                <div class="order-section refund-status-card">
+                                    <h3><i class="fas fa-money-bill-wave"></i> Yêu cầu hoàn tiền</h3>
+                                    <div class="refund-info">
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Trạng thái:</span>
+                                            <span class="refund-badge refund-${refundRequest.status}">
+                                                ${refundRequest.statusText}
+                                            </span>
+                                        </div>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Lý do:</span>
+                                            <span>${fn:escapeXml(refundRequest.reason)}</span>
+                                        </div>
+                                        <c:if test="${not empty refundRequest.description}">
+                                            <div class="refund-info-row refund-info-block">
+                                                <span class="refund-label">Mô tả chi tiết:</span>
+                                                <span
+                                                    class="refund-description">${fn:escapeXml(refundRequest.description)}</span>
+                                            </div>
+                                        </c:if>
+                                        <c:if test="${refundRequest.hasImages()}">
+                                            <div class="refund-info-row refund-info-block">
+                                                <span class="refund-label">Ảnh/Video đính kèm:</span>
+                                                <div class="refund-media-gallery">
+                                                    <c:forEach var="img" items="${refundRequest.images}">
+                                                        <c:choose>
+                                                            <c:when test="${img.mediaType == 'video'}">
+                                                                <div
+                                                                    style="position:relative; display:inline-block; cursor:zoom-in;">
+                                                                    <video src="${img.imageUrl}"
+                                                                        class="refund-media-item" muted
+                                                                        preload="metadata"
+                                                                        onclick="openLightbox('${img.imageUrl}', 'video')"></video>
+                                                                    <div onclick="openLightbox('${img.imageUrl}', 'video')"
+                                                                        style="position:absolute; inset:0; background:rgba(0,0,0,0.15); display:flex; align-items:center; justify-content:center; border-radius:8px;">
+                                                                        <i class="fas fa-play"
+                                                                            style="color:#fff; font-size:20px; text-shadow:0 2px 4px rgba(0,0,0,0.5);"></i>
+                                                                    </div>
+                                                                </div>
+                                                            </c:when>
+                                                            <c:otherwise>
+                                                                <img src="${img.imageUrl}" alt="Ảnh hoàn tiền"
+                                                                    class="refund-media-item"
+                                                                    onclick="openLightbox('${img.imageUrl}', 'image')">
+                                                            </c:otherwise>
+                                                        </c:choose>
+                                                    </c:forEach>
+                                                </div>
+                                            </div>
+                                        </c:if>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Số tiền hoàn:</span>
+                                            <span class="refund-amount">${refundRequest.formattedRefundAmount}</span>
+                                        </div>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Ngân hàng:</span>
+                                            <span>${fn:escapeXml(refundRequest.bankName)}</span>
+                                        </div>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Số tài khoản:</span>
+                                            <span><strong>${fn:escapeXml(refundRequest.bankAccount)}</strong></span>
+                                        </div>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Chủ tài khoản:</span>
+                                            <span>${fn:escapeXml(refundRequest.bankHolder)}</span>
+                                        </div>
+                                        <div class="refund-info-row">
+                                            <span class="refund-label">Ngày gửi:</span>
+                                            <span>${refundRequest.formattedDate}</span>
+                                        </div>
+                                        <c:if test="${not empty refundRequest.adminNote}">
+                                            <div class="refund-info-row">
+                                                <span class="refund-label">Phản hồi từ admin:</span>
+                                                <span>${fn:escapeXml(refundRequest.adminNote)}</span>
+                                            </div>
+                                        </c:if>
+                                    </div>
+                                </div>
+                            </c:if>
 
                             <c:if test="${order.status == 'completed' && not empty sessionScope.auth}">
                                 <div class="order-section review-area">
@@ -446,7 +567,8 @@
                                                                         class="media-file-input" hidden>
                                                                 </label>
                                                                 <div class="media-preview"></div>
-                                                                <small class="media-hint">Tối đa 5 ảnh + 1 video, mỗi file ≤ 10MB</small>
+                                                                <small class="media-hint">Tối đa 5 ảnh + 1 video, mỗi
+                                                                    file ≤ 10MB</small>
                                                             </div>
 
                                                             <div class="review-form-actions">
@@ -463,6 +585,7 @@
                                     </c:forEach>
                                 </div>
                             </c:if>
+
                         </div>
                     </div>
 
@@ -538,8 +661,64 @@
                             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
                             return true;
                         }
+
+                        function openLightbox(src, type) {
+                            var modal = document.getElementById('mediaPreviewModal');
+                            var img = document.getElementById('mediaPreviewImg');
+                            var video = document.getElementById('mediaPreviewVideo');
+
+                            img.style.display = 'none';
+                            img.src = '';
+                            video.style.display = 'none';
+                            video.src = '';
+                            video.pause();
+
+                            if (type === 'image') {
+                                img.src = src;
+                                img.style.display = 'block';
+                            } else if (type === 'video') {
+                                video.src = src;
+                                video.style.display = 'block';
+                                video.load();
+                                video.play().catch(function (e) { console.log('Autoplay blocked', e); });
+                            }
+
+                            modal.classList.add('active');
+                        }
+
+                        function closeMediaModal(e) {
+                            if (e.target.id === 'mediaPreviewModal') {
+                                closeMediaModalDirect();
+                            }
+                        }
+
+                        function closeMediaModalDirect() {
+                            var modal = document.getElementById('mediaPreviewModal');
+                            var video = document.getElementById('mediaPreviewVideo');
+                            video.pause();
+                            modal.classList.remove('active');
+                        }
                     </script>
-                    <script src="${pageContext.request.contextPath}/js/review-media-upload.js?v=<%= System.currentTimeMillis() %>"></script>
+                    <script
+                        src="${pageContext.request.contextPath}/js/review-media-upload.js?v=<%= System.currentTimeMillis() %>"></script>
+
+                    <div class="media-modal-overlay" id="mediaPreviewModal" onclick="closeMediaModal(event)">
+                        <div class="media-modal-box">
+                            <div class="media-modal-title">
+                                <span><i class="fas fa-image"></i> Chi tiết minh chứng</span>
+                                <button class="media-modal-close-btn" onclick="closeMediaModalDirect()">&times;</button>
+                            </div>
+                            <div class="media-modal-body">
+                                <img src="" id="mediaPreviewImg" class="media-modal-content" alt="Xem ảnh lớn">
+                                <video src="" id="mediaPreviewVideo" class="media-modal-content" controls
+                                    autoplay></video>
+                            </div>
+                            <div class="media-modal-footer">
+                                <button class="media-modal-btn-close" onclick="closeMediaModalDirect()">Đóng</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </body>
 
                 </html>

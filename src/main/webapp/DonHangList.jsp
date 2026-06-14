@@ -12,6 +12,7 @@
                     <title>${pageTitle} | Farmily</title>
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DonHang.css">
+                    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoanTien.css">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/review-shared.css">
                     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
                     <link rel="stylesheet"
@@ -113,6 +114,10 @@
                                 <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=review"
                                     class="filter-btn ${currentStatus == 'review' ? 'active' : ''}">
                                     <i class="fas fa-star"></i> Đánh giá
+                                </a>
+                                <a href="${pageContext.request.contextPath}/ho-so/don-hang?status=refund"
+                                    class="filter-btn ${currentStatus == 'refund' ? 'active' : ''}">
+                                    <i class="fas fa-undo-alt"></i> Hoàn tiền (${countRefund})
                                 </a>
                             </div>
 
@@ -376,7 +381,128 @@
                                         </c:otherwise>
                                     </c:choose>
                                 </c:when>
-                                <c:when test="${empty orders}">
+                                <c:when test="${currentStatus == 'refund'}">
+                                <c:choose>
+                                    <c:when test="${empty orders}">
+                                        <div class="empty-orders">
+                                            <i class="fas fa-undo-alt"></i>
+                                            <p>Bạn chưa có yêu cầu hoàn tiền nào</p>
+                                            <a href="${pageContext.request.contextPath}/san-pham" class="btn-primary">
+                                                Tiếp tục mua sắm
+                                            </a>
+                                        </div>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <div class="orders-list">
+                                            <c:forEach var="order" items="${orders}">
+                                                <div class="order-card">
+                                                    <div class="order-header">
+                                                        <div class="order-id">
+                                                            <strong>Mã đơn hàng:</strong> #${order.id}
+                                                        </div>
+                                                        <div class="order-date">
+                                                            <fmt:formatDate value="${order.orderDate}" pattern="dd/MM/yyyy HH:mm"/>
+                                                        </div>
+                                                        <div class="order-status">
+                                                            <c:set var="rr" value="${refundRequestMap[order.id]}"/>
+                                                            <c:if test="${not empty rr}">
+                                                                <span class="refund-badge refund-${rr.status}">
+                                                                    Hoàn tiền: ${rr.statusText}
+                                                                </span>
+                                                            </c:if>
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-body">
+                                                        <div class="order-products">
+                                                            <c:forEach var="detail" items="${order.orderDetails}" varStatus="status">
+                                                                <c:if test="${status.index < 3}">
+                                                                    <div class="product-item">
+                                                                        <div class="product-image">
+                                                                            <c:choose>
+                                                                                <c:when test="${detail.imageUrl != null && (fn:startsWith(detail.imageUrl, 'http') || fn:startsWith(detail.imageUrl, 'https'))}">
+                                                                                    <img src="${detail.imageUrl}" alt="${detail.productName}" onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                </c:when>
+                                                                                <c:otherwise>
+                                                                                    <img src="${pageContext.request.contextPath}${detail.imageUrl}" alt="${detail.productName}" onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                </c:otherwise>
+                                                                            </c:choose>
+                                                                        </div>
+                                                                        <div class="product-info">
+                                                                            <p class="product-name">${detail.productName}</p>
+                                                                            <c:if test="${not empty detail.variantText}">
+                                                                                <p class="product-variant">Phân loại: ${detail.variantText}</p>
+                                                                            </c:if>
+                                                                            <p class="product-price-qty">
+                                                                                <span class="unit-price">
+                                                                                    <fmt:formatNumber value="${detail.unitPrice}" pattern="#,###" />đ
+                                                                                </span>
+                                                                                <span class="quantity">x${detail.quantity}</span>
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </c:if>
+                                                            </c:forEach>
+
+                                                            <c:if test="${order.orderDetails.size() > 3}">
+                                                                <div class="hidden-products" id="hidden-products-${order.id}">
+                                                                    <c:forEach var="detail" items="${order.orderDetails}" varStatus="status">
+                                                                        <c:if test="${status.index >= 3}">
+                                                                            <div class="product-item">
+                                                                                <div class="product-image">
+                                                                                    <c:choose>
+                                                                                        <c:when test="${detail.imageUrl != null && (fn:startsWith(detail.imageUrl, 'http') || fn:startsWith(detail.imageUrl, 'https'))}">
+                                                                                            <img src="${detail.imageUrl}" alt="${detail.productName}" onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                        </c:when>
+                                                                                        <c:otherwise>
+                                                                                            <img src="${pageContext.request.contextPath}${detail.imageUrl}" alt="${detail.productName}" onerror="this.src='${pageContext.request.contextPath}/images/placeholder.jpg'">
+                                                                                        </c:otherwise>
+                                                                                    </c:choose>
+                                                                                </div>
+                                                                                <div class="product-info">
+                                                                                    <p class="product-name">${detail.productName}</p>
+                                                                                    <c:if test="${not empty detail.variantText}">
+                                                                                        <p class="product-variant">Phân loại: ${detail.variantText}</p>
+                                                                                    </c:if>
+                                                                                    <p class="product-price-qty">
+                                                                                        <span class="unit-price">
+                                                                                            <fmt:formatNumber value="${detail.unitPrice}" pattern="#,###" />đ
+                                                                                        </span>
+                                                                                        <span class="quantity">x${detail.quantity}</span>
+                                                                                    </p>
+                                                                                </div>
+                                                                            </div>
+                                                                        </c:if>
+                                                                    </c:forEach>
+                                                                </div>
+
+                                                                <button type="button" class="btn-toggle-products" data-order-id="${order.id}" onclick="toggleProductList(${order.id})">
+                                                                    <i class="fas fa-chevron-down"></i>
+                                                                    <span class="toggle-text">Xem đầy đủ (${order.orderDetails.size()} sản phẩm)</span>
+                                                                </button>
+                                                            </c:if>
+                                                        </div>
+
+                                                        <div class="order-total">
+                                                            <p class="total-label">Thành tiền:</p>
+                                                            <p class="total-price">
+                                                                <fmt:formatNumber value="${order.totalPrice}" pattern="#,###" />đ
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-footer" style="display:flex;gap:10px;justify-content:flex-end;align-items:center;">
+                                                        <c:if test="${not empty rr}">
+                                                            <span style="font-size:13px;color:#666;">Số tiền hoàn: <strong style="color:#2d6a2d;">${rr.formattedRefundAmount}</strong></span>
+                                                        </c:if>
+                                                        <a href="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet?id=${order.id}"
+                                                           class="btn-view-detail">Chi tiết đơn hàng</a>
+                                                    </div>
+                                                </div>
+                                            </c:forEach>
+                                        </div>
+                                    </c:otherwise>
+                                </c:choose>
+                            </c:when>
+                            <c:when test="${empty orders}">
                                     <div class="empty-orders">
                                         <i class="fas fa-box-open"></i>
                                         <p>Bạn chưa có đơn hàng nào</p>
@@ -392,11 +518,6 @@
                                                 <div class="order-header">
                                                     <div class="order-id">
                                                         <strong>Mã đơn hàng:</strong> #${order.id}
-                                                        <c:if test="${order.hasCoupon()}">
-                                                            <span class="coupon-badge" style="background: #f0fdf4; color: #22c55e; border: 1px solid #bbf7d0; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 10px; font-weight: normal; display: inline-flex; align-items: center; gap: 4px;">
-                                                                <i class="fas fa-ticket-alt"></i> Có mã giảm giá
-                                                            </span>
-                                                        </c:if>
                                                     </div>
                                                     <div class="order-date">
                                                         <fmt:formatDate value="${order.orderDate}"
@@ -523,6 +644,12 @@
                                                         <a href="${pageContext.request.contextPath}/payment/repay?orderId=${order.id}"
                                                             class="btn-view-detail" style="background-color: #22c55e; border-color: #22c55e; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
                                                             <i class="fas fa-credit-card"></i> Thanh toán ngay
+                                                        </a>
+                                                    </c:if>
+                                                    <c:if test="${refundEligibleSet.contains(order.id)}">
+                                                        <a href="${pageContext.request.contextPath}/ho-so/hoan-tien?orderId=${order.id}"
+                                                            class="btn-view-detail" style="background-color: #f97316; border-color: #f97316; color: #fff; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                                            <i class="fas fa-undo-alt"></i> Hoàn tiền
                                                         </a>
                                                     </c:if>
                                                     <a href="${pageContext.request.contextPath}/ho-so/don-hang/chi-tiet?id=${order.id}"

@@ -74,4 +74,22 @@ public class OrderStatusHistoryDAO extends BaseDao {
                 .map(new OrderStatusHistoryMapper())
                 .findOne());
     }
+
+    /**
+     * Find the most recent history record where new_status = targetStatus.
+     * Used by RefundRequestService to get the "completed" timestamp for 72h check.
+     */
+    public Optional<OrderStatusHistory> findByOrderIdAndNewStatus(int orderId, String newStatus) {
+        String sql = "SELECT osh.*, u.name as changed_by_name " +
+                "FROM order_status_history osh " +
+                "LEFT JOIN users u ON osh.changed_by_id = u.id " +
+                "WHERE osh.order_id = :orderId AND osh.new_status = :newStatus " +
+                "ORDER BY osh.created_at DESC LIMIT 1";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("orderId",   orderId)
+                .bind("newStatus", newStatus)
+                .map(new OrderStatusHistoryMapper())
+                .findOne());
+    }
 }
+
