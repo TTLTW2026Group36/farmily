@@ -69,14 +69,14 @@
                                 class="filters-bar" id="filterForm">
                                 <div class="filter-group">
                                     <label>Tìm kiếm</label>
-                                    <input type="text" name="search" class="form-control"
+                                    <input type="text" name="search" id="searchInput" class="form-control"
                                         placeholder="Tên sản phẩm..." value="${searchKeyword}"
-                                        style="min-width: 180px;">
+                                        style="min-width: 180px;" autocomplete="off">
                                 </div>
 
                                 <div class="filter-group">
                                     <label>Danh mục</label>
-                                    <select name="category" class="form-control" onchange="this.form.submit()">
+                                    <select name="category" class="form-control" onchange="triggerSearch()">
                                         <option value="">Tất cả danh mục</option>
                                         <c:forEach var="cat" items="${categories}">
                                             <option value="${cat.id}" ${selectedCategory==cat.id ? 'selected' : '' }>
@@ -87,7 +87,7 @@
 
                                 <div class="filter-group">
                                     <label>Trạng thái</label>
-                                    <select name="status" class="form-control" onchange="this.form.submit()">
+                                    <select name="status" class="form-control" onchange="triggerSearch()">
                                         <option value="">Tất cả</option>
                                         <option value="instock" ${selectedStatus=='instock' ? 'selected' : '' }>Còn hàng</option>
                                         <option value="outofstock" ${selectedStatus=='outofstock' ? 'selected' : '' }>Hết hàng</option>
@@ -98,7 +98,7 @@
 
                                  <div class="filter-group">
                                     <label>Sắp xếp</label>
-                                    <select name="sort" class="form-control" onchange="this.form.submit()">
+                                    <select name="sort" class="form-control" onchange="triggerSearch()">
                                         <option value="newest" ${selectedSort=='newest' ? 'selected' : '' }>Mới nhất</option>
                                         <option value="name_asc" ${selectedSort=='name_asc' ? 'selected' : '' }>Tên A-Z</option>
                                         <option value="price_asc" ${selectedSort=='price_asc' ? 'selected' : '' }>Giá thấp - cao</option>
@@ -324,10 +324,17 @@
                     </main>
                 </div>
                 <script>
-                    document.addEventListener('DOMContentLoaded', function () {
+                    function debounce(func, wait) {
+                        let timeout;
+                        return function(...args) {
+                            clearTimeout(timeout);
+                            timeout = setTimeout(() => func.apply(this, args), wait);
+                        };
+                    }
+
+                    function bindCheckboxEvents() {
                         var selectAll = document.getElementById('selectAll');
                         var productCheckboxes = document.querySelectorAll('.product-checkbox');
-                        var totalProducts = ${totalProducts != null ? totalProducts : 0};
 
                         if (selectAll) {
                             selectAll.addEventListener('change', function () {
@@ -343,6 +350,83 @@
                                     selectAll.checked = document.querySelectorAll('.product-checkbox:checked').length === productCheckboxes.length;
                                 }
                             });
+                        });
+                    }
+
+                    function triggerSearch() {
+                        const filterForm = document.getElementById('filterForm');
+                        if (!filterForm) return;
+
+                        const formData = new FormData(filterForm);
+                        const params = new URLSearchParams();
+                        for (const [key, value] of formData.entries()) {
+                            if (value !== null && value !== undefined && value.toString().trim() !== '') {
+                                params.append(key, value.trim());
+                            }
+                        }
+                        const url = '${pageContext.request.contextPath}/admin/products?' + params.toString();
+                        updateProducts(url, true);
+                    }
+
+                    function updateProducts(url, updateUrlBar = true) {
+                        const card = document.querySelector('.card');
+                        if (card) {
+                            card.style.transition = 'opacity 0.15s ease';
+                            card.style.opacity = '0.5';
+                        }
+
+                        fetch(url)
+                            .then(response => response.text())
+                            .then(html => {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(html, 'text/html');
+                                const newCard = doc.querySelector('.card');
+                                
+                                if (newCard && card) {
+                                    card.innerHTML = newCard.innerHTML;
+                                    card.style.opacity = '1';
+                                }
+                                bindCheckboxEvents();
+
+                                if (updateUrlBar) {
+                                    history.pushState(null, '', url);
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Lỗi khi tải sản phẩm:', err);
+                                if (card) card.style.opacity = '1';
+                            });
+                    }
+
+                    document.addEventListener('DOMContentLoaded', function () {
+                        bindCheckboxEvents();
+
+                        const searchInput = document.getElementById('searchInput');
+                        if (searchInput) {
+                            searchInput.addEventListener('input', debounce(function() {
+                                triggerSearch();
+                            }, 300));
+                        }
+
+                        const filterForm = document.getElementById('filterForm');
+                        if (filterForm) {
+                            filterForm.addEventListener('submit', function(e) {
+                                e.preventDefault();
+                                triggerSearch();
+                            });
+                        }
+
+                        window.addEventListener('popstate', function() {
+                            updateProducts(window.location.href, false);
+                        });
+
+                        document.addEventListener('click', function(e) {
+                            const paginationLink = e.target.closest('.pagination a');
+                            if (paginationLink) {
+                                e.preventDefault();
+                                const url = paginationLink.getAttribute('href');
+                                updateProducts(url, true);
+                            }
                         });
                     });
 
