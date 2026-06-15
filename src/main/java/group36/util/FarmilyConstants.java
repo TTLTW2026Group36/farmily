@@ -19,12 +19,7 @@ public class FarmilyConstants {
     public static final String GOOGLE_LINK_GET_USER_INFO = "https://www.googleapis.com/oauth2/v1/userinfo?access_token=";
     public static String RECAPTCHA_SITE_KEY;
     public static String RECAPTCHA_SECRET_KEY;
-    public static String MAIL_HOST;
-    public static String MAIL_PORT;
-    public static String MAIL_AUTH;
-    public static String MAIL_STARTTLS;
-    public static String MAIL_USER;
-    public static String MAIL_PASSWORD;
+    public static String RESEND_API_KEY;
 
     public static String GHN_API_TOKEN;
     public static int GHN_SHOP_ID;
@@ -48,12 +43,7 @@ public class FarmilyConstants {
                 GHN_FROM_DISTRICT_ID = Integer.parseInt(pro.getProperty("ghn.from.district.id", "0"));
                 GHN_FROM_WARD_CODE = pro.getProperty("ghn.from.ward.code", "0");
 
-                MAIL_HOST = pro.getProperty("mail.smtp.host");
-                MAIL_PORT = pro.getProperty("mail.smtp.port");
-                MAIL_AUTH = pro.getProperty("mail.smtp.auth");
-                MAIL_STARTTLS = pro.getProperty("mail.smtp.starttls.enable");
-                MAIL_USER = pro.getProperty("mail.user");
-                MAIL_PASSWORD = pro.getProperty("mail.password");
+                RESEND_API_KEY = pro.getProperty("resend.api.key");
 
                 String baseUrl = pro.getProperty("app.base.url", "http://localhost:8080");
                 FACEBOOK_REDIRECT_URI = baseUrl + "/dang-nhap";

@@ -1,31 +1,36 @@
 package group36.util;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
-import java.util.Properties;
+import com.resend.Resend;
+import com.resend.services.emails.model.CreateEmailOptions;
+import com.resend.services.emails.model.CreateEmailResponse;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class EmailUtil {
-    public static void sendEmail(String to, String subject, String content) throws MessagingException {
-        Properties props = new Properties();
-        props.put("mail.smtp.host", FarmilyConstants.MAIL_HOST);
-        props.put("mail.smtp.port", FarmilyConstants.MAIL_PORT);
-        props.put("mail.smtp.auth", FarmilyConstants.MAIL_AUTH);
-        props.put("mail.smtp.starttls.enable", FarmilyConstants.MAIL_STARTTLS);
 
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(FarmilyConstants.MAIL_USER, FarmilyConstants.MAIL_PASSWORD);
+    private static final ExecutorService EMAIL_EXECUTOR = Executors.newFixedThreadPool(4);
+
+    public static void sendEmail(String to, String subject, String content) throws Exception {
+        Resend resend = new Resend(FarmilyConstants.RESEND_API_KEY.trim());
+
+        CreateEmailOptions params = CreateEmailOptions.builder()
+                .from("onboarding@resend.dev")
+                .to(to)
+                .subject(subject)
+                .html(content)
+                .build();
+
+        CreateEmailResponse data = resend.emails().send(params);
+        System.out.println("Email sent successfully via Resend. ID: " + data.getId());
+    }
+
+    public static void sendEmailAsync(String to, String subject, String content) {
+        EMAIL_EXECUTOR.submit(() -> {
+            try {
+                sendEmail(to, subject, content);
+            } catch (Exception e) {
+                System.err.println("[EmailUtil] Async email to " + to + " failed: " + e.getMessage());
             }
         });
-
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(FarmilyConstants.MAIL_USER));
-        message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-        message.setSubject(subject, "UTF-8");
-        message.setContent(content, "text/plain; charset=UTF-8");
-
-        Transport.send(message);
-        System.out.println("Email sent successfully to: " + to);
     }
 }

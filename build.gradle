@@ -42,7 +42,7 @@ dependencies {
     compileOnly 'jakarta.el:jakarta.el-api:5.0.1'
 
     implementation 'org.slf4j:slf4j-simple:2.0.16'
-    implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    implementation 'com.resend:resend-java:3.1.0'
     implementation 'com.cloudinary:cloudinary-http5:2.3.0'
     implementation 'org.apache.poi:poi:5.2.5'
     implementation 'org.apache.poi:poi-ooxml:5.2.5'

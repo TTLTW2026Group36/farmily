@@ -1,7 +1,6 @@
 package group36.controller.auth;
 
 import group36.util.EmailUtil;
-import jakarta.mail.MessagingException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
@@ -45,12 +44,13 @@ public class ForgotPasswordController extends HttpServlet {
         }
         try {
             passwordResetService.validateRateLimit(email);
-            String otp = passwordResetService.generateOTP(email); // tao OTP 6 số
+            String otp = passwordResetService.generateOTP(email);
             String title = "Mã xác nhận bảo mật Farmily";
-            String content = "Chào bạn, mã OTP để đặt lại mật khẩu của bạn là: " + otp 
+            String content = "Chào bạn, mã OTP để đặt lại mật khẩu của bạn là: " + otp
                            + "\n(Mã này có tác dụng trong 5 phút, đừng chia sẻ cho ai nhé!)";
-            
-            EmailUtil.sendEmail(email, title, content);
+
+            EmailUtil.sendEmailAsync(email, title, content);
+
             request.setAttribute("emailSent", email);
             request.setAttribute("message", "Chúng tôi đã gửi mã OTP vào email của bạn.");
             request.getRequestDispatcher("/XacNhanOTP.jsp").forward(request, response);
@@ -59,12 +59,8 @@ public class ForgotPasswordController extends HttpServlet {
             request.setAttribute("error", e.getMessage());
             request.setAttribute("email", email);
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
-        } catch (MessagingException e) {
-            System.err.println("Error: " + e.getMessage());
-            request.setAttribute("error", "Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP (Email/Mật khẩu ứng dụng).");
-            request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         } catch (Exception e) {
-            System.err.println("Error: " + e.getMessage());
+            System.err.println("[ForgotPassword] Error: " + e.getMessage());
             request.setAttribute("error", "Có lỗi xảy ra. Vui lòng thử lại sau.");
             request.getRequestDispatcher("/QuenMatKhau.jsp").forward(request, response);
         }

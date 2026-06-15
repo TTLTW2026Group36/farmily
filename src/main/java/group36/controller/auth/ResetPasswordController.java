@@ -46,7 +46,7 @@ public class ResetPasswordController extends HttpServlet {
                     new RefreshTokenDao().revokeAllByUserId(u.getId());
                 }
             } catch (Exception e) {}
-            response.sendRedirect(request.getContextPath() + "/dang-nhap?reset_success=true");
+            response.sendRedirect(request.getContextPath() + "/home");
 
         } catch (IllegalArgumentException e) {
             request.setAttribute("token", otp);
