@@ -52,6 +52,11 @@
                                     </div>
                                 </div>
                                 <div class="page-actions">
+                                    <a href="${pageContext.request.contextPath}/admin/products/trash"
+                                        class="btn btn-outline">
+                                        <i class="fas fa-trash-alt"></i>
+                                        Thùng rác
+                                    </a>
                                     <a href="${pageContext.request.contextPath}/admin/products/add"
                                         class="btn btn-primary">
                                         <i class="fas fa-plus"></i>
@@ -234,13 +239,13 @@
                                                                         <form
                                                                             action="${pageContext.request.contextPath}/admin/products/delete"
                                                                             method="post" style="display: inline;"
-                                                                            onsubmit="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?');">
+                                                                            onsubmit="return confirm('Sản phẩm sẽ được chuyển vào Thùng rác. Bạn có muốn tiếp tục?');">
                                                                             <input type="hidden" name="id"
                                                                                 value="${product.id}">
                                                                             <button type="submit"
                                                                                 class="btn btn-sm btn-danger"
-                                                                                title="Xóa">
-                                                                                <i class="fas fa-trash"></i>
+                                                                                title="Ẩn sản phẩm">
+                                                                                <i class="fas fa-eye-slash"></i>
                                                                             </button>
                                                                         </form>
                                                                     </div>

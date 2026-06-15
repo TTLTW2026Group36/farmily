@@ -14,14 +14,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
-
-
 @WebServlet(name = "AdminProductController", urlPatterns = { "/admin/products", "/admin/products/*" })
-@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2, 
-        maxFileSize = 1024 * 1024 * 10, 
-        maxRequestSize = 1024 * 1024 * 50 
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 2,
+        maxFileSize = 1024 * 1024 * 10,
+        maxRequestSize = 1024 * 1024 * 50
 )
 public class AdminProductController extends HttpServlet {
     private final ProductService productService;
@@ -43,14 +39,13 @@ public class AdminProductController extends HttpServlet {
             if (pathInfo != null && pathInfo.equals("/export")) {
                 exportProducts(request, response);
             } else if (pathInfo == null || pathInfo.equals("/")) {
-                
                 listProducts(request, response);
             } else if (pathInfo.equals("/add")) {
-                
                 showAddForm(request, response);
             } else if (pathInfo.equals("/edit")) {
-                
                 showEditForm(request, response);
+            } else if (pathInfo.equals("/trash")) {
+                showTrash(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -76,6 +71,10 @@ public class AdminProductController extends HttpServlet {
                 updateProduct(request, response);
             } else if (pathInfo.equals("/delete")) {
                 deleteProduct(request, response);
+            } else if (pathInfo.equals("/restore")) {
+                restoreProduct(request, response);
+            } else if (pathInfo.equals("/hard-delete")) {
+                hardDeleteProduct(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -86,9 +85,6 @@ public class AdminProductController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/products");
         }
     }
-
-    
-
 
     private void listProducts(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -148,18 +144,12 @@ public class AdminProductController extends HttpServlet {
         request.getRequestDispatcher("/admin/products.jsp").forward(request, response);
     }
 
-    
-
-
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Category> categories = categoryService.getAllCategories();
         request.setAttribute("categories", categories);
         request.getRequestDispatcher("/admin/product-add.jsp").forward(request, response);
     }
-
-    
-
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -185,9 +175,6 @@ public class AdminProductController extends HttpServlet {
             listProducts(request, response);
         }
     }
-
-    
-
 
     private void createProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -218,17 +205,17 @@ public class AdminProductController extends HttpServlet {
                 variant.setOptionsValue(vName.trim());
                 variant.setPrice(Double.parseDouble(variantPrices[i]));
                 variant.setStock(Integer.parseInt(variantStocks[i]));
-                
+
                 if (variantImportPrices != null && i < variantImportPrices.length && variantImportPrices[i] != null && !variantImportPrices[i].trim().isEmpty()) {
                     variant.setImportPrice(Double.parseDouble(variantImportPrices[i].trim()));
                 } else {
                     variant.setImportPrice(0.0);
                 }
-                
+
                 if (variantExpiryDates != null && i < variantExpiryDates.length && variantExpiryDates[i] != null && !variantExpiryDates[i].trim().isEmpty()) {
                     variant.setExpiryDate(parseExpiryDate(variantExpiryDates[i]));
                 }
-                
+
                 variants.add(variant);
             }
 
@@ -262,9 +249,6 @@ public class AdminProductController extends HttpServlet {
             showAddForm(request, response);
         }
     }
-
-    
-
 
     private void updateProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -305,9 +289,6 @@ public class AdminProductController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin/products/edit?id=" + idParam);
         }
     }
-
-    
-
 
     private void updateVariantsFromRequest(HttpServletRequest request, int productId) {
         String[] variantIds = request.getParameterValues("variantId");
@@ -438,15 +419,12 @@ public class AdminProductController extends HttpServlet {
         for (String idStr : deleteIds) {
             try {
                 int imageId = Integer.parseInt(idStr);
-                
                 productService.deleteImage(imageId);
             } catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
             }
         }
     }
-
-
 
     private void deleteProduct(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -465,7 +443,7 @@ public class AdminProductController extends HttpServlet {
             productService.deleteProduct(id);
 
             HttpSession session = request.getSession();
-            session.setAttribute("success", "Xóa sản phẩm '" + productName + "' thành công!");
+            session.setAttribute("success", "Đã ẩn sản phẩm '" + productName + "'. Bạn có thể khôi phục trong Thùng rác.");
 
             response.sendRedirect(request.getContextPath() + "/admin/products");
         } catch (NumberFormatException e) {
@@ -476,6 +454,79 @@ public class AdminProductController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/products");
+        }
+    }
+
+    private void showTrash(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        List<Product> deletedProducts = productService.getDeletedProducts();
+        request.setAttribute("products", deletedProducts);
+        request.setAttribute("totalProducts", deletedProducts.size());
+
+        HttpSession session = request.getSession();
+        if (session.getAttribute("success") != null) {
+            request.setAttribute("success", session.getAttribute("success"));
+            session.removeAttribute("success");
+        }
+        if (session.getAttribute("error") != null) {
+            request.setAttribute("error", session.getAttribute("error"));
+            session.removeAttribute("error");
+        }
+
+        request.getRequestDispatcher("/admin/product-trash.jsp").forward(request, response);
+    }
+
+    private void restoreProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            productService.restoreProduct(id);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Đã khôi phục sản phẩm thành công!");
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "ID sản phẩm không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+        } catch (IllegalArgumentException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+        }
+    }
+
+    private void hardDeleteProduct(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        String idParam = request.getParameter("id");
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            productService.hardDeleteProduct(id);
+
+            HttpSession session = request.getSession();
+            session.setAttribute("success", "Đã xóa vĩnh viễn sản phẩm!");
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+        } catch (NumberFormatException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", "ID sản phẩm không hợp lệ");
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
+        } catch (IllegalArgumentException e) {
+            HttpSession session = request.getSession();
+            session.setAttribute("error", e.getMessage());
+            response.sendRedirect(request.getContextPath() + "/admin/products/trash");
         }
     }
 

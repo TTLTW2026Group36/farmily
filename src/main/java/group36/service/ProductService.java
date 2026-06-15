@@ -275,10 +275,38 @@ public class ProductService {
 
         getProductById(id);
 
-        int rowsAffected = productDAO.delete(id);
+        int rowsAffected = productDAO.softDelete(id);
         if (rowsAffected == 0) {
             throw new IllegalStateException("Failed to delete product");
         }
+    }
+
+    public void restoreProduct(int id) {
+        productDAO.findDeletedById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Deleted product not found with ID: " + id));
+        int rowsAffected = productDAO.restore(id);
+        if (rowsAffected == 0) {
+            throw new IllegalStateException("Failed to restore product");
+        }
+    }
+
+    public void hardDeleteProduct(int id) {
+        productDAO.findDeletedById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Deleted product not found with ID: " + id));
+        int rowsAffected = productDAO.delete(id);
+        if (rowsAffected == 0) {
+            throw new IllegalStateException("Failed to permanently delete product");
+        }
+    }
+
+    public List<Product> getDeletedProducts() {
+        List<Product> products = productDAO.findAllDeleted();
+        loadProductDetails(products);
+        return products;
+    }
+
+    public int getDeletedProductsCount() {
+        return productDAO.countDeleted();
     }
 
     public int deleteVariant(int variantId) {

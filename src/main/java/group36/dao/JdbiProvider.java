@@ -85,6 +85,26 @@ public class JdbiProvider {
                     "[JdbiProvider] Migration check/execution finished (table email_verification_tokens might already exist)");
         }
 
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("ALTER TABLE products ADD COLUMN deleted_at TIMESTAMP NULL DEFAULT NULL");
+                System.out.println("[JdbiProvider] Added column deleted_at to products");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (column deleted_at might already exist)");
+        }
+
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("CREATE INDEX idx_products_deleted_at ON products (deleted_at)");
+                System.out.println("[JdbiProvider] Created index idx_products_deleted_at");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (index idx_products_deleted_at might already exist)");
+        }
+
         return jdbi;
     }
 }

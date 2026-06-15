@@ -123,7 +123,7 @@ public class CategoryDAO extends BaseDao {
 
 
     public boolean hasProducts(int categoryId) {
-        String sql = "SELECT COUNT(*) FROM products WHERE category_id = :categoryId";
+        String sql = "SELECT COUNT(*) FROM products WHERE category_id = :categoryId AND deleted_at IS NULL";
         Integer count = get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
                 .mapTo(Integer.class)

@@ -4,10 +4,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.List;
 
-
-
-
-
 public class Product implements Serializable {
     private int id;
     private int categoryId;
@@ -17,13 +13,12 @@ public class Product implements Serializable {
     private int soldCount;
     private Timestamp createdAt;
     private Timestamp updatedAt;
+    private Timestamp deletedAt;
 
-    
     private Category category;
     private List<ProductVariant> variants;
     private List<ProductImage> images;
 
-    
     public Product() {
     }
 
@@ -45,7 +40,6 @@ public class Product implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    
     public int getId() {
         return id;
     }
@@ -69,8 +63,6 @@ public class Product implements Serializable {
     public void setName(String name) {
         this.name = name;
     }
-
-
 
     public double getAvgRating() {
         return avgRating;
@@ -112,6 +104,18 @@ public class Product implements Serializable {
         this.updatedAt = updatedAt;
     }
 
+    public Timestamp getDeletedAt() {
+        return deletedAt;
+    }
+
+    public void setDeletedAt(Timestamp deletedAt) {
+        this.deletedAt = deletedAt;
+    }
+
+    public boolean isDeleted() {
+        return deletedAt != null;
+    }
+
     public Category getCategory() {
         return category;
     }
@@ -136,12 +140,6 @@ public class Product implements Serializable {
         this.images = images;
     }
 
-    
-    
-
-
-
-
     public double getMinPrice() {
         if (variants == null || variants.isEmpty()) {
             return 0;
@@ -152,20 +150,9 @@ public class Product implements Serializable {
                 .orElse(0);
     }
 
-    
-
-
-
-
-
     public double getSalePrice(double discountPercent) {
         return getMinPrice() * (1 - discountPercent / 100);
     }
-
-    
-
-
-
 
     public int getTotalStock() {
         if (variants == null || variants.isEmpty()) {
@@ -176,22 +163,12 @@ public class Product implements Serializable {
                 .sum();
     }
 
-    
-
-
-
-
     public String getPrimaryImageUrl() {
         if (images == null || images.isEmpty()) {
             return null;
         }
         return images.get(0).getImageUrl();
     }
-
-    
-
-
-
 
     public ProductVariant getMinPriceVariant() {
         if (variants == null || variants.isEmpty()) {

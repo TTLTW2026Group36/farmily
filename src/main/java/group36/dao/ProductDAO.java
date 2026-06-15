@@ -9,15 +9,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-
-
-
-
 public class ProductDAO extends BaseDao {
-
-    
-
-
 
     private static class ProductMapper implements RowMapper<Product> {
         @Override
@@ -28,35 +20,24 @@ public class ProductDAO extends BaseDao {
             product.setName(rs.getString("name"));
             product.setAvgRating(rs.getDouble("avg_rating"));
             product.setReviewCount(rs.getInt("review_count"));
-            product.setSoldCount(rs.getInt("soild_count")); 
+            product.setSoldCount(rs.getInt("soild_count"));
             product.setCreatedAt(rs.getTimestamp("created_at"));
             product.setUpdatedAt(rs.getTimestamp("updated_at"));
+            product.setDeletedAt(rs.getTimestamp("deleted_at"));
             return product;
         }
     }
 
-    
-
-
-
-
     public List<Product> findAll() {
-        String sql = "SELECT * FROM products ORDER BY id DESC";
+        String sql = "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .map(new ProductMapper())
                 .list());
     }
 
-    
-
-
-
-
-
-
     public List<Product> findAllPaginated(int page, int size) {
         int offset = (page - 1) * size;
-        String sql = "SELECT * FROM products ORDER BY id DESC LIMIT :size OFFSET :offset";
+        String sql = "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY id DESC LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("size", size)
                 .bind("offset", offset)
@@ -64,45 +45,25 @@ public class ProductDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
     public Optional<Product> findById(int id) {
-        String sql = "SELECT * FROM products WHERE id = :id";
+        String sql = "SELECT * FROM products WHERE id = :id AND deleted_at IS NULL";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("id", id)
                 .map(new ProductMapper())
                 .findOne());
     }
 
-    
-
-
-
-
-
     public List<Product> findByCategoryId(int categoryId) {
-        String sql = "SELECT * FROM products WHERE category_id = :categoryId ORDER BY id DESC";
+        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND deleted_at IS NULL ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
                 .map(new ProductMapper())
                 .list());
     }
 
-    
-
-
-
-
-
-
-
     public List<Product> findByCategoryIdPaginated(int categoryId, int page, int size) {
         int offset = (page - 1) * size;
-        String sql = "SELECT * FROM products WHERE category_id = :categoryId ORDER BY id DESC LIMIT :size OFFSET :offset";
+        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND deleted_at IS NULL ORDER BY id DESC LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
                 .bind("size", size)
@@ -111,25 +72,13 @@ public class ProductDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
     public List<Product> searchByName(String keyword) {
-        String sql = "SELECT * FROM products WHERE name LIKE :keyword ORDER BY id DESC";
+        String sql = "SELECT * FROM products WHERE name LIKE :keyword AND deleted_at IS NULL ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("keyword", "%" + keyword + "%")
                 .map(new ProductMapper())
                 .list());
     }
-
-    
-
-
-
-
 
     public int insert(Product product) {
         String sql = "INSERT INTO products (category_id, name) VALUES (:categoryId, :name)";
@@ -141,12 +90,6 @@ public class ProductDAO extends BaseDao {
                 .one());
     }
 
-    
-
-
-
-
-
     public int update(Product product) {
         String sql = "UPDATE products SET category_id = :categoryId, name = :name WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -156,14 +99,6 @@ public class ProductDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
-
-
     public int delete(int id) {
         String sql = "DELETE FROM products WHERE id = :id";
         return get().withHandle(handle -> handle.createUpdate(sql)
@@ -171,26 +106,51 @@ public class ProductDAO extends BaseDao {
                 .execute());
     }
 
-    
+    public int softDelete(int id) {
+        String sql = "UPDATE products SET deleted_at = NOW() WHERE id = :id AND deleted_at IS NULL";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", id)
+                .execute());
+    }
 
+    public int restore(int id) {
+        String sql = "UPDATE products SET deleted_at = NULL WHERE id = :id AND deleted_at IS NOT NULL";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", id)
+                .execute());
+    }
 
+    public List<Product> findAllDeleted() {
+        String sql = "SELECT * FROM products WHERE deleted_at IS NOT NULL ORDER BY deleted_at DESC";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .map(new ProductMapper())
+                .list());
+    }
 
+    public Optional<Product> findDeletedById(int id) {
+        String sql = "SELECT * FROM products WHERE id = :id AND deleted_at IS NOT NULL";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("id", id)
+                .map(new ProductMapper())
+                .findOne());
+    }
 
-    public int count() {
-        String sql = "SELECT COUNT(*) FROM products";
+    public int countDeleted() {
+        String sql = "SELECT COUNT(*) FROM products WHERE deleted_at IS NOT NULL";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .mapTo(Integer.class)
                 .one());
     }
 
-    
-
-
-
-
+    public int count() {
+        String sql = "SELECT COUNT(*) FROM products WHERE deleted_at IS NULL";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .mapTo(Integer.class)
+                .one());
+    }
 
     public int countByCategoryId(int categoryId) {
-        String sql = "SELECT COUNT(*) FROM products WHERE category_id = :categoryId";
+        String sql = "SELECT COUNT(*) FROM products WHERE category_id = :categoryId AND deleted_at IS NULL";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
                 .mapTo(Integer.class)
@@ -210,7 +170,7 @@ public class ProductDAO extends BaseDao {
         if (needExpiryJoin) {
             sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
         }
-        sql.append("WHERE 1=1 ");
+        sql.append("WHERE p.deleted_at IS NULL ");
         if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
@@ -251,7 +211,7 @@ public class ProductDAO extends BaseDao {
         if (needExpiryJoin) {
             sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
         }
-        sql.append("WHERE 1=1 ");
+        sql.append("WHERE p.deleted_at IS NULL ");
         if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
@@ -279,7 +239,7 @@ public class ProductDAO extends BaseDao {
 
     public List<Product> findByIds(List<Integer> ids) {
         if (ids == null || ids.isEmpty()) return new java.util.ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE id IN (");
+        StringBuilder sql = new StringBuilder("SELECT * FROM products WHERE deleted_at IS NULL AND id IN (");
         for (int i = 0; i < ids.size(); i++) {
             sql.append(ids.get(i));
             if (i < ids.size() - 1) sql.append(",");
@@ -289,7 +249,6 @@ public class ProductDAO extends BaseDao {
                 .map(new ProductMapper())
                 .list());
     }
-
 
     public int countFiltered(int categoryId, String status, String search, String popular) {
         StringBuilder sql = new StringBuilder();
@@ -301,7 +260,7 @@ public class ProductDAO extends BaseDao {
         if (needExpiryJoin) {
             sql.append("INNER JOIN product_variants pvx ON p.id = pvx.product_id ");
         }
-        sql.append("WHERE 1=1 ");
+        sql.append("WHERE p.deleted_at IS NULL ");
         if (categoryId > 0) sql.append("AND p.category_id = :categoryId ");
         if (search != null && !search.isEmpty()) sql.append("AND p.name LIKE :search ");
         if ("instock".equals(status)) sql.append("AND pv.total_stock > 0 ");
@@ -317,14 +276,6 @@ public class ProductDAO extends BaseDao {
             return query.mapTo(Integer.class).one();
         });
     }
-
-
-    
-
-
-
-
-
 
     public int incrementSoldCountWithHandle(org.jdbi.v3.core.Handle h, int productId, int quantity) {
         String sql = "UPDATE products SET soild_count = soild_count + :quantity WHERE id = :id";
@@ -342,21 +293,12 @@ public class ProductDAO extends BaseDao {
                 .execute());
     }
 
-    
-
-
-
-
-
-
-
-
     public List<Product> findAllPaginatedSorted(int page, int size, String sortBy, String sortDir) {
         int offset = (page - 1) * size;
         String orderColumn = getSafeOrderColumn(sortBy);
         String orderDir = "DESC".equalsIgnoreCase(sortDir) ? "DESC" : "ASC";
 
-        String sql = "SELECT * FROM products ORDER BY " + orderColumn + " " + orderDir + " LIMIT :size OFFSET :offset";
+        String sql = "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY " + orderColumn + " " + orderDir + " LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("size", size)
                 .bind("offset", offset)
@@ -364,23 +306,13 @@ public class ProductDAO extends BaseDao {
                 .list());
     }
 
-    
-
-
-
-
-
-
-
-
-
     public List<Product> findByCategoryIdPaginatedSorted(int categoryId, int page, int size,
             String sortBy, String sortDir) {
         int offset = (page - 1) * size;
         String orderColumn = getSafeOrderColumn(sortBy);
         String orderDir = "DESC".equalsIgnoreCase(sortDir) ? "DESC" : "ASC";
 
-        String sql = "SELECT * FROM products WHERE category_id = :categoryId ORDER BY "
+        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND deleted_at IS NULL ORDER BY "
                 + orderColumn + " " + orderDir + " LIMIT :size OFFSET :offset";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
@@ -391,7 +323,7 @@ public class ProductDAO extends BaseDao {
     }
 
     public List<Product> findBestSelling(int limit) {
-        String sql = "SELECT * FROM products ORDER BY soild_count DESC, id DESC LIMIT :limit";
+        String sql = "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY soild_count DESC, id DESC LIMIT :limit";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("limit", limit)
                 .map(new ProductMapper())
@@ -399,7 +331,7 @@ public class ProductDAO extends BaseDao {
     }
 
     public List<Product> findNewest(int limit) {
-        String sql = "SELECT * FROM products ORDER BY created_at DESC, id DESC LIMIT :limit";
+        String sql = "SELECT * FROM products WHERE deleted_at IS NULL ORDER BY created_at DESC, id DESC LIMIT :limit";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("limit", limit)
                 .map(new ProductMapper())
@@ -407,7 +339,7 @@ public class ProductDAO extends BaseDao {
     }
 
     public List<Product> findByCategoryIdExcluding(int categoryId, int excludeProductId, int limit) {
-        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND id != :excludeId ORDER BY soild_count DESC, id DESC LIMIT :limit";
+        String sql = "SELECT * FROM products WHERE category_id = :categoryId AND id != :excludeId AND deleted_at IS NULL ORDER BY soild_count DESC, id DESC LIMIT :limit";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("categoryId", categoryId)
                 .bind("excludeId", excludeProductId)
@@ -424,7 +356,7 @@ public class ProductDAO extends BaseDao {
                 return "name";
             case "sold_count":
             case "popular":
-                return "soild_count"; 
+                return "soild_count";
             case "created_at":
             case "newest":
                 return "created_at";
