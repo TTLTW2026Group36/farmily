@@ -36,6 +36,8 @@ public class AdminAuthFilter implements Filter {
 
         map.put("/admin/orders",            orderStaff);
         map.put("/admin/reviews",           orderStaff);
+        map.put("/admin/chat",              orderStaff);
+        map.put("/admin/refund-requests",   orderStaff);
         
         map.put("/admin/notifications",     orderStaff);
         map.put("/admin/api/notifications", orderStaff);

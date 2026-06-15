@@ -2,6 +2,7 @@
     <%@ taglib prefix="c" uri="jakarta.tags.core" %>
         <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
             <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+            <c:set var="isAdminOrManager" value="${sessionScope.adminUser.role == 'ADMIN' || sessionScope.adminUser.role == 'MANAGER'}" />
                 <!DOCTYPE html>
                 <html lang="vi">
 
@@ -411,7 +412,7 @@
                                 </div>
 
                                 <%-- Action buttons --%>
-                                    <c:if test="${refund.status == 'pending'}">
+                                    <c:if test="${refund.status == 'pending' && isAdminOrManager}">
                                         <div class="action-area">
                                             <button class="action-btn btn-approve" onclick="openApproveModal()">
                                                 <i class="fas fa-check"></i> Duyệt yêu cầu
@@ -421,7 +422,7 @@
                                             </button>
                                         </div>
                                     </c:if>
-                                    <c:if test="${refund.status == 'approved'}">
+                                    <c:if test="${refund.status == 'approved' && isAdminOrManager}">
                                         <div class="action-area">
                                             <button class="action-btn btn-confirm" onclick="openConfirmRefundModal()">
                                                 <i class="fas fa-money-bill-wave"></i> Xác nhận đã chuyển tiền

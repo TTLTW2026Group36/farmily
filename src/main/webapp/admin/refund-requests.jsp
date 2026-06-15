@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<c:set var="isAdminOrManager" value="${sessionScope.adminUser.role == 'ADMIN' || sessionScope.adminUser.role == 'MANAGER'}" />
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -199,7 +200,7 @@
                                                    class="btn-bento-icon bento-icon-primary" title="Chi tiết">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <c:if test="${r.status == 'pending'}">
+                                                <c:if test="${r.status == 'pending' && isAdminOrManager}">
                                                     <button type="button"
                                                             class="btn-bento-icon bento-icon-primary"
                                                             title="Duyệt"
@@ -213,7 +214,7 @@
                                                         <i class="fas fa-times"></i>
                                                     </button>
                                                 </c:if>
-                                                <c:if test="${r.status == 'approved'}">
+                                                <c:if test="${r.status == 'approved' && isAdminOrManager}">
                                                     <button type="button"
                                                             class="btn-bento-icon bento-icon-primary"
                                                             title="Xác nhận đã chuyển tiền"

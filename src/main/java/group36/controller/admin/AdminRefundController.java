@@ -2,6 +2,7 @@ package group36.controller.admin;
 
 import group36.model.RefundRequest;
 import group36.model.User;
+import group36.model.UserRole;
 import group36.service.RefundRequestService;
 
 import jakarta.servlet.ServletException;
@@ -56,6 +57,13 @@ public class AdminRefundController extends HttpServlet {
         response.setContentType("application/json;charset=UTF-8");
 
         try {
+            if ("/approve".equals(pathInfo) || "/reject".equals(pathInfo) || "/confirm".equals(pathInfo)) {
+                if (!isAdminOrManager(request)) {
+                    writeJson(response, false, "Bạn không có quyền thực hiện hành động này.");
+                    return;
+                }
+            }
+
             if ("/approve".equals(pathInfo)) {
                 handleApprove(request, response);
             } else if ("/reject".equals(pathInfo)) {
@@ -223,6 +231,16 @@ public class AdminRefundController extends HttpServlet {
         User admin = (User) session.getAttribute("adminUser");
         if (admin == null) admin = (User) session.getAttribute("auth");
         return admin != null ? admin.getId() : 0;
+    }
+
+    private boolean isAdminOrManager(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) return false;
+        User admin = (User) session.getAttribute("adminUser");
+        if (admin == null) admin = (User) session.getAttribute("auth");
+        if (admin == null) return false;
+        UserRole role = UserRole.fromString(admin.getRole());
+        return role == UserRole.ADMIN || role == UserRole.MANAGER;
     }
 
     private int parseIntOrDefault(String value, int def) {
