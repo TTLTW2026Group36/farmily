@@ -14,7 +14,7 @@ public class EmailUtil {
         Resend resend = new Resend(FarmilyConstants.RESEND_API_KEY.trim());
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("onboarding@resend.dev")
+                .from("no-reply@nongsanfarmily.site")
                 .to(to)
                 .subject(subject)
                 .html(content)

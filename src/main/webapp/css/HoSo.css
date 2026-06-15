@@ -1439,3 +1439,48 @@ input.field-invalid,
     max-width: 100%;
   }
 }
+
+.badge-status {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-left: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.badge-status.verified {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+}
+
+.badge-status.unverified {
+  background-color: #ffebee;
+  color: #c62828;
+  border: 1px solid #ffcdd2;
+}
+
+.btn-verify-now {
+  background: #0288d1;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 10px;
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+.btn-verify-now:hover {
+  background: #01579b;
+}
+
+.btn-verify-now:disabled {
+  background: #b0bec5;
+  cursor: not-allowed;
+}

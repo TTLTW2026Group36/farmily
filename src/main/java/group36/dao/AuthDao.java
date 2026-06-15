@@ -20,6 +20,13 @@ public class AuthDao extends BaseDao {
                 .execute());
     }
 
+    public void updateEmailVerificationStatus(int userId, boolean isVerified) {
+        get().useHandle(h -> h.createUpdate("UPDATE users SET is_email_verified = :isVerified WHERE id = :id")
+                .bind("isVerified", isVerified)
+                .bind("id", userId)
+                .execute());
+    }
+
     public boolean insertUser(User user) {
         try {
             get().useHandle(h -> h.createUpdate(

@@ -20,6 +20,7 @@ public class FarmilyConstants {
     public static String RECAPTCHA_SITE_KEY;
     public static String RECAPTCHA_SECRET_KEY;
     public static String RESEND_API_KEY;
+    public static String BASE_URL;
 
     public static String GHN_API_TOKEN;
     public static int GHN_SHOP_ID;
@@ -46,16 +47,18 @@ public class FarmilyConstants {
                 RESEND_API_KEY = pro.getProperty("resend.api.key");
 
                 String baseUrl = pro.getProperty("app.base.url", "http://localhost:8080");
+                BASE_URL = baseUrl;
                 FACEBOOK_REDIRECT_URI = baseUrl + "/dang-nhap";
                 GOOGLE_REDIRECT_URI = baseUrl + "/dang-nhap";
             } else {
                 System.out.println("Lỗi: Không tìm thấy file config.properties");
-                // Fallback cho môi trường dev local
+                BASE_URL = "http://localhost:8080";
                 FACEBOOK_REDIRECT_URI = "http://localhost:8080/dang-nhap";
                 GOOGLE_REDIRECT_URI = "http://localhost:8080/dang-nhap";
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
+            BASE_URL = "http://localhost:8080";
             FACEBOOK_REDIRECT_URI = "http://localhost:8080/dang-nhap";
             GOOGLE_REDIRECT_URI = "http://localhost:8080/dang-nhap";
         }

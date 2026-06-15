@@ -61,6 +61,10 @@ document.addEventListener('DOMContentLoaded', function () {
   
   function clearAllErrors() {
     Object.keys(validators).forEach(fieldId => clearError(fieldId));
+    const captchaErr = document.getElementById('err-captcha');
+    if (captchaErr) {
+      captchaErr.style.display = 'none';
+    }
     if (errorNotice) {
       errorNotice.style.display = 'none';
       errorNotice.textContent = '';
@@ -83,6 +87,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
     });
+
+    // Verify Google reCAPTCHA
+    const recaptchaResponse = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
+    if (!recaptchaResponse) {
+      const captchaErr = document.getElementById('err-captcha');
+      if (captchaErr) {
+        captchaErr.style.display = 'block';
+      }
+      isValid = false;
+    }
 
     return isValid;
   }
@@ -174,14 +188,17 @@ document.addEventListener('DOMContentLoaded', function () {
           
           showSuccess(data.message);
           form.reset();
+          if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
         } else {
           
           showServerError(data.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
+          if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
         }
 
       } catch (error) {
         console.error('Error:', error);
         showServerError('Không thể kết nối đến máy chủ. Vui lòng thử lại sau.');
+        if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
       } finally {
         setLoading(false);
       }

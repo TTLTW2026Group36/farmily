@@ -34,7 +34,8 @@ public class JdbiProvider {
             System.out.println("[JdbiProvider] Using JNDI DataSource (Tomcat Connection Pool)");
             jdbi = Jdbi.create(ds);
         } catch (Exception e) {
-            System.out.println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
+            System.out
+                    .println("[JdbiProvider] JNDI not available, falling back to direct connection: " + e.getMessage());
             MysqlDataSource ds = new MysqlDataSource();
             ds.setURL("jdbc:mysql://" + DBProperties.host + ":" + DBProperties.port + "/" + DBProperties.dbname
                     + "?useUnicode=true&characterEncoding=UTF-8&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Ho_Chi_Minh");
@@ -49,14 +50,39 @@ public class JdbiProvider {
             jdbi = Jdbi.create(ds);
         }
 
-        // Run auto-migration for transaction_code
         try {
             jdbi.useHandle(handle -> {
                 handle.execute("ALTER TABLE refund_requests ADD COLUMN transaction_code VARCHAR(100) DEFAULT NULL");
                 System.out.println("[JdbiProvider] Added column transaction_code to refund_requests");
             });
         } catch (Exception ex) {
-            System.out.println("[JdbiProvider] Migration check/execution finished (column transaction_code might already exist)");
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (column transaction_code might already exist)");
+        }
+
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("ALTER TABLE users ADD COLUMN is_email_verified BOOLEAN DEFAULT FALSE");
+                System.out.println("[JdbiProvider] Added column is_email_verified to users");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (column is_email_verified might already exist)");
+        }
+
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("CREATE TABLE IF NOT EXISTS email_verification_tokens (" +
+                        "id INT AUTO_INCREMENT PRIMARY KEY, " +
+                        "user_id INT NOT NULL, " +
+                        "token VARCHAR(255) NOT NULL UNIQUE, " +
+                        "expire_at TIMESTAMP NOT NULL, " +
+                        "FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE)");
+                System.out.println("[JdbiProvider] Created table email_verification_tokens");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (table email_verification_tokens might already exist)");
         }
 
         return jdbi;

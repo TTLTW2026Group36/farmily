@@ -18,7 +18,7 @@ public class User implements Serializable {
     private int loginAttempts;
     private Timestamp lockoutUntil;
     private Timestamp deletedAt;
-
+    private boolean isEmailVerified;
 
     public User() {
     }
@@ -143,6 +143,13 @@ public class User implements Serializable {
         this.deletedAt = deletedAt;
     }
 
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        isEmailVerified = emailVerified;
+    }
 
     @Override
     public String toString() {

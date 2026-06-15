@@ -14,6 +14,7 @@
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <script>
                 window.contextPath = '${pageContext.request.contextPath}';
+                window.emailVerificationCooldown = ${requestScope.emailVerificationCooldown != null ? requestScope.emailVerificationCooldown : 0};
             </script>
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
 </head>
@@ -110,7 +111,18 @@
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="fas fa-envelope"></i> Email:</span>
-                                <span class="info-value">${sessionScope.auth.email}</span>
+                                <span class="info-value">
+                                    ${sessionScope.auth.email}
+                                    <c:choose>
+                                        <c:when test="${sessionScope.auth.isEmailVerified()}">
+                                            <span class="badge-status verified"><i class="fas fa-check-circle"></i> Đã xác thực</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge-status unverified"><i class="fas fa-times-circle"></i> Chưa xác thực</span>
+                                            <button type="button" id="btn-request-verification" class="btn-verify-now" onclick="requestEmailVerification()">Xác thực ngay</button>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </span>
                             </div>
                             <div class="info-row">
                                 <span class="info-label"><i class="fas fa-phone"></i> Số Điện Thoại:</span>

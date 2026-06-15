@@ -47,7 +47,11 @@ public class ContactController extends HttpServlet {
         PrintWriter out = response.getWriter();
 
         try {
-            
+            String gRecaptchaResponse = request.getParameter("g-recaptcha-response");
+            if (!group36.util.RecaptchaUtil.verify(gRecaptchaResponse)) {
+                throw new IllegalArgumentException("Vui lòng xác minh mã Captcha hợp lệ!");
+            }
+
             String fullname = request.getParameter("name");
             String email = request.getParameter("email");
             String phone = request.getParameter("phone");

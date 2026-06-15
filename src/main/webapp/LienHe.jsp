@@ -12,6 +12,7 @@
       <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
       <link rel="stylesheet" href="${pageContext.request.contextPath}/css/LienHe.css">
         <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
+      <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
     <body>
@@ -167,6 +168,13 @@
                   <textarea id="message" name="message" required
                     placeholder="Nhập nội dung chi tiết bạn muốn gửi đến chúng tôi..."></textarea>
                   <div class="err" id="err-message">Vui lòng nhập nội dung.</div>
+                </div>
+              </div>
+
+              <div class="row">
+                <div>
+                  <div class="g-recaptcha" data-sitekey="<%= group36.util.FarmilyConstants.RECAPTCHA_SITE_KEY %>"></div>
+                  <div class="err" id="err-captcha">Vui lòng xác minh mã Captcha.</div>
                 </div>
               </div>
 

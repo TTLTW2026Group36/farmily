@@ -42,10 +42,32 @@ public class ResetPasswordController extends HttpServlet {
             try {
                 AuthDao authDao = new AuthDao();
                 User u = authDao.getUserByUsername(email);
-                if(u != null) {
+                if (u != null) {
                     new RefreshTokenDao().revokeAllByUserId(u.getId());
+                    
+                    HttpSession session = request.getSession(true);
+                    session.setAttribute("auth", u);
+                    session.setMaxInactiveInterval(15 * 60);
+
+                    try {
+                        group36.service.CartService cartService = new group36.service.CartService();
+                        int cartCount = cartService.getCartItemCount(u.getId());
+                        session.setAttribute("cartCount", cartCount);
+                    } catch (Exception e) {
+                        session.setAttribute("cartCount", 0);
+                    }
+
+                    try {
+                        group36.service.WishlistService wishlistService = new group36.service.WishlistService();
+                        int wishlistCount = wishlistService.getWishlistCount(u.getId());
+                        session.setAttribute("wishlistCount", wishlistCount);
+                    } catch (Exception e) {
+                        session.setAttribute("wishlistCount", 0);
+                    }
                 }
-            } catch (Exception e) {}
+            } catch (Exception e) {
+                System.err.println("Error auto-login: " + e.getMessage());
+            }
             response.sendRedirect(request.getContextPath() + "/home");
 
         } catch (IllegalArgumentException e) {

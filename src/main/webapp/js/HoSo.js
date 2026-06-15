@@ -10,6 +10,19 @@ document.addEventListener('DOMContentLoaded', function () {
         loadAddresses();
     }
 
+    if (urlParams.get('verification_success') === 'true') {
+        showToast('Xác thực email thành công!', 'success');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (urlParams.get('verification_error')) {
+        const errorType = urlParams.get('verification_error');
+        let errorMsg = 'Xác thực email thất bại hoặc liên kết đã hết hạn.';
+        if (errorType === 'missing_token') {
+            errorMsg = 'Mã xác thực không hợp lệ.';
+        }
+        showToast(errorMsg, 'error');
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     initAddressForm();
     initPasswordForm();
     initProfileForm();
@@ -1166,3 +1179,68 @@ function renderWalletCoupons(coupons, statuses) {
 
     container.innerHTML = html;
 }
+
+let verificationCooldownInterval = null;
+
+function startVerificationCooldown(seconds) {
+    const btn = document.getElementById('btn-request-verification');
+    if (!btn) return;
+    
+    if (verificationCooldownInterval) {
+        clearInterval(verificationCooldownInterval);
+    }
+    
+    btn.disabled = true;
+    let timeLeft = seconds;
+    btn.textContent = `Gửi lại sau (${timeLeft}s)`;
+    
+    verificationCooldownInterval = setInterval(() => {
+        timeLeft--;
+        if (timeLeft <= 0) {
+            clearInterval(verificationCooldownInterval);
+            btn.disabled = false;
+            btn.textContent = 'Xác thực ngay';
+        } else {
+            btn.textContent = `Gửi lại sau (${timeLeft}s)`;
+        }
+    }, 1000);
+}
+
+function requestEmailVerification() {
+    const btn = document.getElementById('btn-request-verification');
+    if (!btn) return;
+    btn.disabled = true;
+    btn.textContent = 'Đang gửi...';
+
+    fetch(window.contextPath + '/api/user/verify-email/request', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Đã gửi liên kết xác thực vào email của bạn. Vui lòng kiểm tra hộp thư.', 'success');
+            startVerificationCooldown(60);
+        } else {
+            showToast(data.message || 'Gửi yêu cầu thất bại', 'error');
+            const match = (data.message || '').match(/(\d+)\s*giây/);
+            if (match) {
+                startVerificationCooldown(parseInt(match[1], 10));
+            } else {
+                btn.disabled = false;
+                btn.textContent = 'Xác thực ngay';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error requesting email verification:', error);
+        showToast('Có lỗi xảy ra khi kết nối máy chủ.', 'error');
+        btn.disabled = false;
+        btn.textContent = 'Xác thực ngay';
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.emailVerificationCooldown && window.emailVerificationCooldown > 0) {
+        startVerificationCooldown(window.emailVerificationCooldown);
+    }
+});

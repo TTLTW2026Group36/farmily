@@ -45,9 +45,26 @@ public class ForgotPasswordController extends HttpServlet {
         try {
             passwordResetService.validateRateLimit(email);
             String otp = passwordResetService.generateOTP(email);
-            String title = "Mã xác nhận bảo mật Farmily";
-            String content = "Chào bạn, mã OTP để đặt lại mật khẩu của bạn là: " + otp
-                           + "\n(Mã này có tác dụng trong 5 phút, đừng chia sẻ cho ai nhé!)";
+            String title = "[Farmily] Mã xác nhận đặt lại mật khẩu";
+            String content = """
+                    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
+                      <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="color: #2e7d32; margin: 0;">Nông Sản Farmily</h2>
+                      </div>
+                      <div style="background-color: #f9f9f9; padding: 20px; border-radius: 6px; border-left: 4px solid #2e7d32;">
+                        <h3 style="color: #333; margin-top: 0;">Yêu cầu đặt lại mật khẩu</h3>
+                        <p style="color: #555; line-height: 1.5;">Chào bạn,</p>
+                        <p style="color: #555; line-height: 1.5;">Chúng tôi nhận được yêu cầu đặt lại mật khẩu cho tài khoản Farmily của bạn. Dưới đây là mã xác minh OTP của bạn:</p>
+                        <div style="text-align: center; margin: 24px 0;">
+                          <span style="font-size: 32px; font-weight: bold; letter-spacing: 6px; color: #2e7d32; background: #e8f5e9; padding: 10px 24px; border-radius: 6px; border: 1px dashed #2e7d32; display: inline-block;">%s</span>
+                        </div>
+                        <p style="color: #777; font-size: 13px; line-height: 1.5;">Mã xác minh này có hiệu lực trong vòng <strong>5 phút</strong>. Vì lý do bảo mật, vui lòng tuyệt đối không chia sẻ mã này với bất kỳ ai.</p>
+                      </div>
+                      <div style="margin-top: 20px; text-align: center; color: #999; font-size: 12px;">
+                        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này hoặc liên hệ bộ phận hỗ trợ.</p>
+                      </div>
+                    </div>
+                    """.formatted(otp);
 
             EmailUtil.sendEmailAsync(email, title, content);
 
