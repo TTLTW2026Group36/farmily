@@ -49,6 +49,40 @@
                             </div>
 
 
+                            <div class="broadcast-section" style="margin-bottom: 24px;">
+                                <h3 style="font-size:15px; font-weight:700; color:#333; margin:0 0 16px; display:flex; align-items:center; gap:8px;">
+                                    <i class="fas fa-bullhorn" style="color:#2f8f3f;"></i> Gửi thông báo cho tất cả khách hàng
+                                </h3>
+                                <form id="broadcast-form">
+                                    <div style="margin-bottom:12px;">
+                                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">
+                                            Tiêu đề <span style="color:#e53e3e;">*</span>
+                                        </label>
+                                        <input type="text" id="broadcast-title" placeholder="VD: Khuyến mãi cuối tuần giảm 30%!" maxlength="255" required
+                                               style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                                    </div>
+                                    <div style="margin-bottom:12px;">
+                                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">
+                                            Nội dung <span style="color:#e53e3e;">*</span>
+                                        </label>
+                                        <textarea id="broadcast-message" rows="2" placeholder="VD: Giảm 30% tất cả rau củ hữu cơ từ 8h-20h hôm nay!" required
+                                                  style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px; resize:vertical;"></textarea>
+                                    </div>
+                                    <div style="margin-bottom:14px;">
+                                        <label style="display:block; font-weight:600; font-size:13px; margin-bottom:5px;">
+                                            Link điều hướng (tùy chọn)
+                                        </label>
+                                        <input type="text" id="broadcast-link" placeholder="VD: /san-pham hoặc /ma-giam-gia"
+                                               style="width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:6px; font-size:14px;">
+                                    </div>
+                                    <button type="submit" id="btn-broadcast"
+                                            style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#2f8f3f; color:#fff; border:none; border-radius:6px; font-size:14px; cursor:pointer;">
+                                        <i class="fas fa-paper-plane"></i> Gửi cho tất cả khách hàng
+                                    </button>
+                                </form>
+                                <div id="broadcast-result" style="display:none; margin-top:10px; padding:10px 14px; border-radius:6px; font-size:13px;"></div>
+                            </div>
+
                             <div class="notification-card">
                                 <c:choose>
                                     <c:when test="${empty notifications}">
@@ -134,6 +168,56 @@
                             }
                         });
                 }
+
+                document.getElementById('broadcast-form').addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var btn = document.getElementById('btn-broadcast');
+                    var result = document.getElementById('broadcast-result');
+                    var title = document.getElementById('broadcast-title').value.trim();
+                    var message = document.getElementById('broadcast-message').value.trim();
+                    var link = document.getElementById('broadcast-link').value.trim();
+
+                    if (!title || !message) return;
+
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+
+                    fetch(contextPath + '/admin/api/notifications/broadcast', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'title=' + encodeURIComponent(title)
+                            + '&message=' + encodeURIComponent(message)
+                            + '&link=' + encodeURIComponent(link)
+                    })
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        if (data.success) {
+                            result.style.background = '#e8f5e9';
+                            result.style.color = '#2e7d32';
+                            result.style.border = '1px solid #a5d6a7';
+                            result.textContent = '✓ Đã gửi thông báo cho ' + data.userCount + ' khách hàng';
+                            document.getElementById('broadcast-form').reset();
+                        } else {
+                            result.style.background = '#fce4ec';
+                            result.style.color = '#c62828';
+                            result.style.border = '1px solid #ef9a9a';
+                            result.textContent = '✗ Lỗi: ' + (data.error || 'Không xác định');
+                        }
+                        result.style.display = 'block';
+                        setTimeout(function() { result.style.display = 'none'; }, 5000);
+                    })
+                    .catch(function() {
+                        result.style.background = '#fce4ec';
+                        result.style.color = '#c62828';
+                        result.style.border = '1px solid #ef9a9a';
+                        result.textContent = '✗ Có lỗi xảy ra, vui lòng thử lại';
+                        result.style.display = 'block';
+                    })
+                    .finally(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi cho tất cả khách hàng';
+                    });
+                });
             </script>
         </body>
 

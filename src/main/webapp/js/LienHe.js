@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
   const btnText = submitBtn.querySelector('.btn-text');
   const btnLoading = submitBtn.querySelector('.btn-loading');
 
-  
+
   const validators = {
     name: {
       validate: (value) => value.trim().length >= 2,
@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   };
 
-  
+
   function showError(fieldId, message) {
     const field = document.getElementById(fieldId);
     const errorDiv = document.getElementById('err-' + fieldId);
@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   function clearError(fieldId) {
     const field = document.getElementById(fieldId);
     const errorDiv = document.getElementById('err-' + fieldId);
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   function clearAllErrors() {
     Object.keys(validators).forEach(fieldId => clearError(fieldId));
     const captchaErr = document.getElementById('err-captcha');
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   function validateForm() {
     let isValid = true;
     clearAllErrors();
@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
 
-    // Verify Google reCAPTCHA
     const recaptchaResponse = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
     if (!recaptchaResponse) {
       const captchaErr = document.getElementById('err-captcha');
@@ -101,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return isValid;
   }
 
-  
+
   function setLoading(loading) {
     submitBtn.disabled = loading;
     if (loading) {
@@ -115,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   function showSuccess(message) {
     if (notice) {
       notice.textContent = message;
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   function showServerError(message) {
     if (errorNotice) {
       errorNotice.textContent = message;
@@ -133,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  
+
   Object.keys(validators).forEach(fieldId => {
     const field = document.getElementById(fieldId);
     if (field) {
@@ -152,28 +151,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 
-  
+
   if (form) {
     form.addEventListener('submit', async function (e) {
       e.preventDefault();
 
-      
+
       if (notice) notice.style.display = 'none';
       if (errorNotice) errorNotice.style.display = 'none';
 
-      
+
       if (!validateForm()) {
         return;
       }
 
-      
+
       setLoading(true);
 
       try {
-        
+
         const formData = new FormData(form);
 
-        
+
         const response = await fetch(form.action, {
           method: 'POST',
           body: new URLSearchParams(formData),
@@ -185,12 +184,12 @@ document.addEventListener('DOMContentLoaded', function () {
         const data = await response.json();
 
         if (response.ok && data.success) {
-          
+
           showSuccess(data.message);
           form.reset();
           if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
         } else {
-          
+
           showServerError(data.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
           if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
         }

@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/DonHang.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoanTien.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=5">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
 </head>

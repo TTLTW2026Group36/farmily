@@ -1484,3 +1484,133 @@ input.field-invalid,
   background: #b0bec5;
   cursor: not-allowed;
 }
+
+/* ============================================================
+   Notifications Tab (Profile page)
+   ============================================================ */
+.notifications-page-section { }
+
+.notifications-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e8e8e8;
+}
+.notifications-page-header h2 {
+  font-size: 18px;
+  color: #1b301b;
+  font-weight: 600;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.btn-mark-all-read {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #fff;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.btn-mark-all-read:hover {
+  background: #2e7d32;
+  color: #fff;
+}
+
+.notifications-page-list { }
+
+.notif-page-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  text-decoration: none;
+  color: inherit;
+}
+.notif-page-item:hover {
+  border-color: #a5d6a7;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.notif-page-item.unread {
+  background: #f0f7ff;
+  border-color: #c4deff;
+}
+.notif-page-item.unread:hover {
+  border-color: #90beff;
+}
+
+.notif-page-content { flex: 1; min-width: 0; }
+.notif-page-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 4px;
+}
+.notif-page-msg {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 6px;
+}
+.notif-page-time {
+  font-size: 12px;
+  color: #aaa;
+}
+
+.empty-notifications {
+  text-align: center;
+  padding: 50px 20px;
+  color: #bbb;
+}
+.empty-notifications i {
+  font-size: 48px;
+  color: #ddd;
+  margin-bottom: 16px;
+}
+.empty-notifications h3 {
+  color: #999;
+  font-size: 18px;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+.empty-notifications p {
+  font-size: 14px;
+}
+
+.notifications-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+.notif-page-btn {
+  padding: 8px 18px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  color: #333;
+  transition: all 0.15s;
+}
+.notif-page-btn:hover {
+  border-color: #2e7d32;
+  color: #2e7d32;
+}
+
+@media (max-width: 600px) {
+  .notif-page-item { padding: 12px; gap: 10px; }
+  .notifications-page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

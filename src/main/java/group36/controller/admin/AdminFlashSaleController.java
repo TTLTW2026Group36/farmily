@@ -7,6 +7,7 @@ import group36.model.FlashSale;
 import group36.model.Product;
 import group36.service.FlashSaleService;
 import group36.service.ProductService;
+import group36.service.UserNotificationService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -21,10 +22,12 @@ import java.util.List;
 public class AdminFlashSaleController extends HttpServlet {
     private final FlashSaleService flashSaleService;
     private final ProductService productService;
+    private final UserNotificationService userNotificationService;
 
     public AdminFlashSaleController() {
         this.flashSaleService = new FlashSaleService();
         this.productService = new ProductService();
+        this.userNotificationService = new UserNotificationService();
     }
 
     @Override
@@ -131,6 +134,14 @@ public class AdminFlashSaleController extends HttpServlet {
 
         FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime);
         flashSaleService.createFlashSale(flashSale);
+
+        try {
+            Product product = productService.getProductById(productId);
+            String productName = (product != null) ? product.getName() : "Sản phẩm";
+            userNotificationService.createFlashSaleNotificationForAll(productName, discountPercent);
+        } catch (Exception e) {
+            System.err.println("[FlashSale] Error broadcasting notification: " + e.getMessage());
+        }
 
         HttpSession session = request.getSession();
         session.setAttribute("success", "Thêm Flash Sale thành công!");

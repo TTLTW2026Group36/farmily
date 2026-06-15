@@ -23,6 +23,7 @@ public class OrderService {
     private final ProductDAO productDAO;
     private final ProductImageDAO productImageDAO;
     private final AdminNotificationService adminNotificationService;
+    private final UserNotificationService userNotificationService;
     private final UserDAO userDAO;
     private final FlashSaleDAO flashSaleDAO;
     private final OrderStatusHistoryDAO orderStatusHistoryDAO;
@@ -41,6 +42,7 @@ public class OrderService {
         this.productDAO = new ProductDAO();
         this.productImageDAO = new ProductImageDAO();
         this.adminNotificationService = new AdminNotificationService();
+        this.userNotificationService = new UserNotificationService();
         this.userDAO = new UserDAO();
         this.flashSaleDAO = new FlashSaleDAO();
         this.orderStatusHistoryDAO = new OrderStatusHistoryDAO();
@@ -639,6 +641,14 @@ public class OrderService {
             history.setChangedById(changedById);
             history.setNote(note);
             orderStatusHistoryDAO.insert(history);
+
+            if (order.getUserId() != null) {
+                try {
+                    userNotificationService.createOrderStatusNotification(order, oldStatus, newStatus);
+                } catch (Exception e) {
+                    System.err.println("[OrderService] Error creating user notification: " + e.getMessage());
+                }
+            }
         }
         return updated;
     }

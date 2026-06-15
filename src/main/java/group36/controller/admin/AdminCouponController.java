@@ -5,6 +5,7 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.Coupon;
 import group36.service.CouponService;
+import group36.service.UserNotificationService;
 
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -15,9 +16,11 @@ import java.util.List;
 @WebServlet(name = "AdminCouponController", urlPatterns = { "/admin/coupons", "/admin/coupons/*" })
 public class AdminCouponController extends HttpServlet {
     private final CouponService couponService;
+    private final UserNotificationService userNotificationService;
 
     public AdminCouponController() {
         this.couponService = new CouponService();
+        this.userNotificationService = new UserNotificationService();
     }
 
     @Override
@@ -162,6 +165,13 @@ public class AdminCouponController extends HttpServlet {
 
             Coupon coupon = new Coupon(code, discountType, discountValue, maxDiscount, minOrderValue, quantity, maxUsagePerUser, startDate, endDate, isActive);
             couponService.createCoupon(coupon);
+
+            try {
+                String desc = coupon.getCode();
+                userNotificationService.createCouponNotificationForAll(coupon.getCode(), "Mã giảm giá mới có sẵn!");
+            } catch (Exception ne) {
+                System.err.println("[Coupon] Error broadcasting notification: " + ne.getMessage());
+            }
 
             HttpSession session = request.getSession();
             session.setAttribute("success", "Thêm mã giảm giá thành công!");

@@ -10,7 +10,7 @@
             <title>Hồ sơ cá nhân | Farmily</title>
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=4">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=5">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <script>
                 window.contextPath = '${pageContext.request.contextPath}';
@@ -45,6 +45,7 @@
                                         <c:when test="${param.tab == 'password'}">Đổi mật khẩu</c:when>
                                         <c:when test="${param.tab == 'wishlist'}">Sản phẩm yêu thích</c:when>
                                         <c:when test="${param.tab == 'coupons'}">Ví voucher</c:when>
+                                        <c:when test="${param.tab == 'notifications'}">Thông báo</c:when>
                                         <c:otherwise>Chi tiết</c:otherwise>
                                     </c:choose>
                                 </li>
@@ -88,6 +89,11 @@
                         <li class="${param.tab == 'coupons' ? 'active' : ''}">
                             <a href="${pageContext.request.contextPath}/ho-so?tab=coupons">
                                 <i class="fas fa-ticket-alt"></i> Ví voucher
+                            </a>
+                        </li>
+                        <li class="${param.tab == 'notifications' ? 'active' : ''}">
+                            <a href="${pageContext.request.contextPath}/ho-so?tab=notifications">
+                                <i class="fas fa-bell"></i> Thông báo của tôi
                             </a>
                         </li>
                     </ul>
@@ -247,6 +253,112 @@
                                 </a>
                             </div>
                         </div>
+                    </c:if>
+
+                    <c:if test="${param.tab == 'notifications'}">
+                        <div class="notifications-page-section">
+                            <div class="notifications-page-header">
+                                <h2>THÔNG BÁO CỦA TÔI</h2>
+                                <button class="btn-mark-all-read" id="btn-mark-all-read-page">
+                                    <i class="fas fa-check-double"></i> Đọc tất cả
+                                </button>
+                            </div>
+                            <div id="notifications-page-list" class="notifications-page-list">
+                                <div class="loading-spinner">
+                                    <i class="fas fa-spinner fa-spin"></i> Đang tải...
+                                </div>
+                            </div>
+                            <div id="notifications-page-empty" class="empty-notifications" style="display: none;">
+                                <i class="far fa-bell-slash"></i>
+                                <h3>Chưa có thông báo</h3>
+                                <p>Bạn sẽ nhận thông báo khi có cập nhật đơn hàng hoặc khuyến mãi mới.</p>
+                            </div>
+                            <div id="notifications-page-pagination" class="notifications-pagination"></div>
+                        </div>
+                        <script>
+                        (function() {
+                            var ctxPath = window.contextPath || '';
+                            var limit = 15;
+                            var offset = 0;
+                            var listEl    = document.getElementById('notifications-page-list');
+                            var emptyEl   = document.getElementById('notifications-page-empty');
+                            var paginEl   = document.getElementById('notifications-page-pagination');
+                            var btnAll    = document.getElementById('btn-mark-all-read-page');
+
+                            function loadNotifications(reset) {
+                                if (reset) offset = 0;
+                                listEl.innerHTML = '<div class="loading-spinner"><i class="fas fa-spinner fa-spin"></i> Đang tải...</div>';
+                                fetch(ctxPath + '/api/user-notifications/latest?limit=' + limit + '&offset=' + offset, {credentials:'same-origin'})
+                                    .then(function(r){ return r.ok ? r.json() : null; })
+                                    .then(function(data) {
+                                        if (!data) { listEl.innerHTML = '<p>Có lỗi xảy ra.</p>'; return; }
+                                        renderPage(data.notifications || []);
+                                    })
+                                    .catch(function(){ listEl.innerHTML = '<p>Có lỗi xảy ra.</p>'; });
+                            }
+
+                            function renderPage(items) {
+                                if (!items.length && offset === 0) {
+                                    listEl.style.display = 'none';
+                                    emptyEl.style.display = '';
+                                    paginEl.innerHTML = '';
+                                    return;
+                                }
+                                emptyEl.style.display = 'none';
+                                listEl.style.display = '';
+                                var html = '';
+                                items.forEach(function(n) {
+                                    var unread = n.isRead ? '' : ' unread';
+                                    html += '<a class="notif-page-item' + unread + '" href="' + (n.link||'#') + '" data-id="' + n.id + '"' + (n.isRead ? '' : ' data-unread="1"') + '>'
+                                          + '<div class="notification-item-icon ' + n.iconClass + '"><i class="fa-solid ' + n.icon + '"></i></div>'
+                                          + '<div class="notif-page-content">'
+                                          + '<div class="notif-page-title">' + escHtml(n.title) + '</div>'
+                                          + '<div class="notif-page-msg">' + escHtml(n.message||'') + '</div>'
+                                          + '<div class="notif-page-time">' + escHtml(n.timeAgo) + '</div>'
+                                          + '</div></a>';
+                                });
+                                listEl.innerHTML = html;
+                                listEl.querySelectorAll('.notif-page-item[data-unread]').forEach(function(el){
+                                    el.addEventListener('click', function(){
+                                        var id = this.getAttribute('data-id');
+                                        if(id) markRead(parseInt(id,10));
+                                    });
+                                });
+                                var btnHtml = '';
+                                if (offset > 0) btnHtml += '<button class="notif-page-btn" id="btn-prev-page">← Trước</button>';
+                                if (items.length === limit) btnHtml += '<button class="notif-page-btn" id="btn-next-page">Tiếp →</button>';
+                                paginEl.innerHTML = btnHtml;
+                                if (document.getElementById('btn-prev-page')) {
+                                    document.getElementById('btn-prev-page').onclick = function(){ offset = Math.max(0, offset-limit); loadNotifications(false); };
+                                }
+                                if (document.getElementById('btn-next-page')) {
+                                    document.getElementById('btn-next-page').onclick = function(){ offset += limit; loadNotifications(false); };
+                                }
+                            }
+
+                            function markRead(id) {
+                                fetch(ctxPath + '/api/user-notifications/read', {
+                                    method:'POST', credentials:'same-origin',
+                                    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                                    body:'id='+id
+                                }).catch(function(){});
+                            }
+
+                            if (btnAll) {
+                                btnAll.addEventListener('click', function(){
+                                    fetch(ctxPath + '/api/user-notifications/read-all', {method:'POST',credentials:'same-origin'})
+                                        .then(function(){ loadNotifications(true); }).catch(function(){});
+                                });
+                            }
+
+                            function escHtml(t) {
+                                if (!t) return '';
+                                var d = document.createElement('div'); d.textContent=t; return d.innerHTML;
+                            }
+
+                            loadNotifications(true);
+                        })();
+                        </script>
                     </c:if>
                 </div>
             </div>

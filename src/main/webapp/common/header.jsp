@@ -107,7 +107,26 @@
                             </c:otherwise>
                         </c:choose>
 
-
+                        <c:if test="${not empty sessionScope.auth}">
+                        <div class="notification-bell" id="notification-bell">
+                            <a class="icon-btn-notification" href="#" title="Thông báo" id="bell-trigger">
+                                <i class="fa-solid fa-bell"></i>
+                                <span class="notification-badge badge-hidden" id="notificationCount">0</span>
+                            </a>
+                            <div class="notification-dropdown" id="notification-dropdown">
+                                <div class="notification-dropdown-header">
+                                    <span class="notification-dropdown-title">Thông báo</span>
+                                    <a href="#" class="notification-read-all" id="btn-read-all">Đọc tất cả</a>
+                                </div>
+                                <div class="notification-dropdown-body" id="notification-list">
+                                    <div class="notification-empty">Không có thông báo mới</div>
+                                </div>
+                                <div class="notification-dropdown-footer">
+                                    <a href="${pageContext.request.contextPath}/ho-so?tab=notifications">Xem tất cả</a>
+                                </div>
+                            </div>
+                        </div>
+                        </c:if>
 
                         <a class="icon-btn-wishlist" href="${pageContext.request.contextPath}/ho-so?tab=wishlist"
                             title="Yêu thích">
@@ -317,3 +336,6 @@
         <script src="${pageContext.request.contextPath}/js/hotline-utils.js"></script>
         <script src="${pageContext.request.contextPath}/js/cart.js"></script>
         <script src="${pageContext.request.contextPath}/js/mobile-nav.js?v=2"></script>
+        <c:if test="${not empty sessionScope.auth}">
+        <script src="${pageContext.request.contextPath}/js/user-notifications.js?v=2"></script>
+        </c:if>

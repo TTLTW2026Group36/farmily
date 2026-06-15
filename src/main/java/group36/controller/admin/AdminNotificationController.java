@@ -5,24 +5,23 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.AdminNotification;
 import group36.service.AdminNotificationService;
+import group36.service.UserNotificationService;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
-
-
-
-
 
 @WebServlet(name = "AdminNotificationController", urlPatterns = { "/admin/api/notifications",
         "/admin/api/notifications/*" })
 public class AdminNotificationController extends HttpServlet {
 
     private AdminNotificationService notificationService;
+    private UserNotificationService userNotificationService;
 
     @Override
     public void init() throws ServletException {
         notificationService = new AdminNotificationService();
+        userNotificationService = new UserNotificationService();
     }
 
     @Override
@@ -35,10 +34,8 @@ public class AdminNotificationController extends HttpServlet {
 
         try {
             if (pathInfo == null || pathInfo.equals("/")) {
-                
                 getNotifications(request, out);
             } else if (pathInfo.equals("/count")) {
-                
                 getUnreadCount(out);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
@@ -61,11 +58,11 @@ public class AdminNotificationController extends HttpServlet {
 
         try {
             if (pathInfo != null && pathInfo.equals("/read")) {
-                
                 markAsRead(request, out);
             } else if (pathInfo != null && pathInfo.equals("/read-all")) {
-                
                 markAllAsRead(out);
+            } else if (pathInfo != null && pathInfo.equals("/broadcast")) {
+                handleBroadcast(request, response, out);
             } else {
                 response.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 out.print("{\"error\": \"Not found\"}");
@@ -76,9 +73,6 @@ public class AdminNotificationController extends HttpServlet {
             out.print("{\"error\": \"" + escapeJson(e.getMessage()) + "\"}");
         }
     }
-
-    
-
 
     private void getNotifications(HttpServletRequest request, PrintWriter out) {
         int limit = 5;
@@ -91,7 +85,6 @@ public class AdminNotificationController extends HttpServlet {
                 if (limit > 50)
                     limit = 50;
             } catch (NumberFormatException e) {
-                
             }
         }
 
@@ -128,16 +121,10 @@ public class AdminNotificationController extends HttpServlet {
         out.print(json.toString());
     }
 
-    
-
-
     private void getUnreadCount(PrintWriter out) {
         int count = notificationService.getUnreadCount();
         out.print("{\"unreadCount\": " + count + "}");
     }
-
-    
-
 
     private void markAsRead(HttpServletRequest request, PrintWriter out) {
         String idParam = request.getParameter("id");
@@ -156,16 +143,27 @@ public class AdminNotificationController extends HttpServlet {
         }
     }
 
-    
-
-
     private void markAllAsRead(PrintWriter out) {
         int updated = notificationService.markAllAsRead();
         out.print("{\"success\": true, \"updated\": " + updated + ", \"unreadCount\": 0}");
     }
 
-    
+    private void handleBroadcast(HttpServletRequest request, HttpServletResponse response, PrintWriter out) {
+        String title   = request.getParameter("title");
+        String message = request.getParameter("message");
+        String link    = request.getParameter("link");
 
+        if (title == null || title.trim().isEmpty() || message == null || message.trim().isEmpty()) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"success\": false, \"error\": \"Ti\u00eau \u0111\u1ec1 v\u00e0 n\u1ed9i dung l\u00e0 b\u1eaft bu\u1ed9c\"}");
+            return;
+        }
+
+        String linkVal = (link != null && !link.trim().isEmpty()) ? link.trim() : null;
+        int count = userNotificationService.createBroadcastNotification(
+                title.trim(), message.trim(), linkVal);
+        out.print("{\"success\": true, \"userCount\": " + count + "}");
+    }
 
     private String escapeJson(String text) {
         if (text == null)
