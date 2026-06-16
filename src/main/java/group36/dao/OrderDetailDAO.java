@@ -158,4 +158,21 @@ public class OrderDetailDAO extends BaseDao {
                 .mapTo(Integer.class)
                 .one());
     }
+
+    public int getPurchasedQuantityInTimeRange(int userId, int productId, java.sql.Timestamp startTime, java.sql.Timestamp endTime) {
+        String sql = "SELECT COALESCE(SUM(od.quantity), 0) " +
+                "FROM order_details od " +
+                "JOIN orders o ON o.id = od.order_id " +
+                "WHERE o.user_id = :userId " +
+                "AND od.product_id = :productId " +
+                "AND o.status != 'cancelled' " +
+                "AND o.order_date BETWEEN :startTime AND :endTime";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("userId", userId)
+                .bind("productId", productId)
+                .bind("startTime", startTime)
+                .bind("endTime", endTime)
+                .mapTo(Integer.class)
+                .one());
+    }
 }

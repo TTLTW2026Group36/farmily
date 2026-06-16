@@ -15,6 +15,7 @@ public class FlashSale implements Serializable {
     private int stockLimit;
     private Timestamp startTime;
     private Timestamp endTime;
+    private int maxQtyPerUser;
 
     
     private Product product;
@@ -30,6 +31,16 @@ public class FlashSale implements Serializable {
         this.stockLimit = stockLimit;
         this.startTime = startTime;
         this.endTime = endTime;
+    }
+
+    public FlashSale(int productId, double discountPercent,
+            int stockLimit, Timestamp startTime, Timestamp endTime, int maxQtyPerUser) {
+        this.productId = productId;
+        this.discountPercent = discountPercent;
+        this.stockLimit = stockLimit;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.maxQtyPerUser = maxQtyPerUser;
     }
 
     
@@ -95,6 +106,14 @@ public class FlashSale implements Serializable {
 
     public void setProduct(Product product) {
         this.product = product;
+    }
+
+    public int getMaxQtyPerUser() {
+        return maxQtyPerUser;
+    }
+
+    public void setMaxQtyPerUser(int maxQtyPerUser) {
+        this.maxQtyPerUser = maxQtyPerUser;
     }
 
     
@@ -171,6 +190,7 @@ public class FlashSale implements Serializable {
                 ", stockLimit=" + stockLimit +
                 ", startTime=" + startTime +
                 ", endTime=" + endTime +
+                ", maxQtyPerUser=" + maxQtyPerUser +
                 '}';
     }
 }

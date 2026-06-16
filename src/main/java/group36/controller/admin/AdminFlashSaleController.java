@@ -5,8 +5,10 @@ import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.*;
 import group36.model.FlashSale;
 import group36.model.Product;
+import group36.model.Category;
 import group36.service.FlashSaleService;
 import group36.service.ProductService;
+import group36.service.CategoryService;
 import group36.service.UserNotificationService;
 
 import java.io.IOException;
@@ -22,11 +24,13 @@ import java.util.List;
 public class AdminFlashSaleController extends HttpServlet {
     private final FlashSaleService flashSaleService;
     private final ProductService productService;
+    private final CategoryService categoryService;
     private final UserNotificationService userNotificationService;
 
     public AdminFlashSaleController() {
         this.flashSaleService = new FlashSaleService();
         this.productService = new ProductService();
+        this.categoryService = new CategoryService();
         this.userNotificationService = new UserNotificationService();
     }
 
@@ -99,7 +103,16 @@ public class AdminFlashSaleController extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         List<Product> products = productService.getAllProducts();
+        List<Category> categories = categoryService.getAllActiveCategories();
+        
+        List<FlashSale> activeFlashSales = flashSaleService.getActiveFlashSales();
+        List<Integer> activeFlashSaleProductIds = activeFlashSales.stream()
+                .map(FlashSale::getProductId)
+                .toList();
+
         request.setAttribute("products", products);
+        request.setAttribute("categories", categories);
+        request.setAttribute("activeFlashSaleProductIds", activeFlashSaleProductIds);
         request.getRequestDispatcher("/admin/flash-sale-add.jsp").forward(request, response);
     }
 
@@ -122,9 +135,14 @@ public class AdminFlashSaleController extends HttpServlet {
 
     private void createFlashSale(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        int productId = Integer.parseInt(request.getParameter("productId"));
+        String[] productIdsStr = request.getParameterValues("productIds");
         double discountPercent = Double.parseDouble(request.getParameter("discountPercent"));
         int stockLimit = Integer.parseInt(request.getParameter("stockLimit"));
+        int maxQtyPerUser = 0;
+        String maxQtyPerUserStr = request.getParameter("maxQtyPerUser");
+        if (maxQtyPerUserStr != null && !maxQtyPerUserStr.trim().isEmpty()) {
+            maxQtyPerUser = Integer.parseInt(maxQtyPerUserStr.trim());
+        }
 
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
@@ -132,19 +150,48 @@ public class AdminFlashSaleController extends HttpServlet {
         Timestamp startTime = parseTimestamp(startTimeStr);
         Timestamp endTime = parseTimestamp(endTimeStr);
 
-        FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime);
-        flashSaleService.createFlashSale(flashSale);
+        int count = 0;
+        HttpSession session = request.getSession();
 
-        try {
-            Product product = productService.getProductById(productId);
-            String productName = (product != null) ? product.getName() : "Sản phẩm";
-            userNotificationService.createFlashSaleNotificationForAll(productName, discountPercent);
-        } catch (Exception e) {
-            System.err.println("[FlashSale] Error broadcasting notification: " + e.getMessage());
+        if (productIdsStr != null && productIdsStr.length > 0) {
+            for (String pidStr : productIdsStr) {
+                if (pidStr == null || pidStr.trim().isEmpty()) continue;
+                int productId = Integer.parseInt(pidStr.trim());
+                FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime, maxQtyPerUser);
+                flashSaleService.createFlashSale(flashSale);
+
+                try {
+                    Product product = productService.getProductById(productId);
+                    String productName = (product != null) ? product.getName() : "Sản phẩm";
+                    userNotificationService.createFlashSaleNotificationForAll(productName, discountPercent);
+                } catch (Exception e) {
+                    System.err.println("[FlashSale] Error broadcasting notification: " + e.getMessage());
+                }
+                count++;
+            }
+        } else {
+            String singleProductIdStr = request.getParameter("productId");
+            if (singleProductIdStr != null && !singleProductIdStr.trim().isEmpty()) {
+                int productId = Integer.parseInt(singleProductIdStr.trim());
+                FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime, maxQtyPerUser);
+                flashSaleService.createFlashSale(flashSale);
+
+                try {
+                    Product product = productService.getProductById(productId);
+                    String productName = (product != null) ? product.getName() : "Sản phẩm";
+                    userNotificationService.createFlashSaleNotificationForAll(productName, discountPercent);
+                } catch (Exception e) {
+                    System.err.println("[FlashSale] Error broadcasting notification: " + e.getMessage());
+                }
+                count++;
+            }
         }
 
-        HttpSession session = request.getSession();
-        session.setAttribute("success", "Thêm Flash Sale thành công!");
+        if (count > 0) {
+            session.setAttribute("success", "Thêm thành công " + count + " Flash Sale!");
+        } else {
+            session.setAttribute("error", "Không có sản phẩm nào được chọn!");
+        }
         response.sendRedirect(request.getContextPath() + "/admin/flash-sales");
     }
 
@@ -155,6 +202,11 @@ public class AdminFlashSaleController extends HttpServlet {
         double discountPercent = Double.parseDouble(request.getParameter("discountPercent"));
         int stockLimit = Integer.parseInt(request.getParameter("stockLimit"));
         int soldCount = Integer.parseInt(request.getParameter("soldCount"));
+        int maxQtyPerUser = 0;
+        String maxQtyPerUserStr = request.getParameter("maxQtyPerUser");
+        if (maxQtyPerUserStr != null && !maxQtyPerUserStr.trim().isEmpty()) {
+            maxQtyPerUser = Integer.parseInt(maxQtyPerUserStr.trim());
+        }
 
         String startTimeStr = request.getParameter("startTime");
         String endTimeStr = request.getParameter("endTime");
@@ -162,7 +214,7 @@ public class AdminFlashSaleController extends HttpServlet {
         Timestamp startTime = parseTimestamp(startTimeStr);
         Timestamp endTime = parseTimestamp(endTimeStr);
 
-        FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime);
+        FlashSale flashSale = new FlashSale(productId, discountPercent, stockLimit, startTime, endTime, maxQtyPerUser);
         flashSale.setId(id);
         flashSale.setSoldCount(soldCount);
 

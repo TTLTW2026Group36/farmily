@@ -3,6 +3,7 @@ package group36.service;
 import group36.dao.CartDAO;
 import group36.dao.CartItemDAO;
 import group36.dao.FlashSaleDAO;
+import group36.dao.OrderDetailDAO;
 import group36.dao.ProductDAO;
 import group36.dao.ProductImageDAO;
 import group36.dao.ProductVariantDAO;
@@ -22,6 +23,7 @@ public class CartService {
     private final ProductVariantDAO variantDAO;
     private final ProductImageDAO imageDAO;
     private final FlashSaleDAO flashSaleDAO;
+    private final OrderDetailDAO orderDetailDAO;
 
     public CartService() {
         this.cartDAO = new CartDAO();
@@ -30,6 +32,7 @@ public class CartService {
         this.variantDAO = new ProductVariantDAO();
         this.imageDAO = new ProductImageDAO();
         this.flashSaleDAO = new FlashSaleDAO();
+        this.orderDetailDAO = new OrderDetailDAO();
     }
 
     public Cart getCartByUserId(int userId) {
@@ -90,6 +93,23 @@ public class CartService {
 
         Optional<CartItem> existingItem = cartItemDAO.findByCartAndProduct(cart.getId(), productId, variantId);
 
+        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
+        if (flashSaleOpt.isPresent()) {
+            FlashSale fs = flashSaleOpt.get();
+            if (fs.getMaxQtyPerUser() > 0) {
+                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, productId, fs.getStartTime(), fs.getEndTime());
+                int currentInCart = existingItem.map(CartItem::getQuantity).orElse(0);
+                int newQty = currentInCart + quantity;
+                if (purchased >= fs.getMaxQtyPerUser()) {
+                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                }
+                if (purchased + newQty > fs.getMaxQtyPerUser()) {
+                    int allowed = fs.getMaxQtyPerUser() - purchased - currentInCart;
+                    throw new IllegalArgumentException("Bạn chỉ được mua thêm tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                }
+            }
+        }
+
         if (existingItem.isPresent()) {
             CartItem item = existingItem.get();
             int newQuantity = item.getQuantity() + quantity;
@@ -137,10 +157,25 @@ public class CartService {
             }
         }
 
+        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
+        if (flashSaleOpt.isPresent()) {
+            FlashSale fs = flashSaleOpt.get();
+            if (fs.getMaxQtyPerUser() > 0) {
+                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, item.getProductId(), fs.getStartTime(), fs.getEndTime());
+                if (purchased >= fs.getMaxQtyPerUser()) {
+                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                }
+                if (purchased + quantity > fs.getMaxQtyPerUser()) {
+                    int allowed = fs.getMaxQtyPerUser() - purchased;
+                    throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                }
+            }
+        }
+
         cartItemDAO.updateQuantity(itemId, quantity);
         item.setQuantity(quantity);
 
-        loadItemDetails(item);
+        loadItemDetails(item, userId);
 
         return item;
     }
@@ -191,27 +226,47 @@ public class CartService {
         }
 
         Optional<CartItem> existing = cartItemDAO.findByCartAndProduct(cart.getId(), item.getProductId(), variantId);
+        int newQty = item.getQuantity();
+        if (existing.isPresent() && existing.get().getId() != itemId) {
+            newQty += existing.get().getQuantity();
+        }
+
+        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
+        if (flashSaleOpt.isPresent()) {
+            FlashSale fs = flashSaleOpt.get();
+            if (fs.getMaxQtyPerUser() > 0) {
+                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, item.getProductId(), fs.getStartTime(), fs.getEndTime());
+                if (purchased >= fs.getMaxQtyPerUser()) {
+                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                }
+                if (purchased + newQty > fs.getMaxQtyPerUser()) {
+                    int allowed = fs.getMaxQtyPerUser() - purchased;
+                    throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                }
+            }
+        }
+
         if (existing.isPresent() && existing.get().getId() != itemId) {
             CartItem existingItem = existing.get();
-            int newQty = existingItem.getQuantity() + item.getQuantity();
+            int finalQty = existingItem.getQuantity() + item.getQuantity();
 
-            if (variant.getStock() < newQty) {
+            if (variant.getStock() < finalQty) {
                 throw new IllegalArgumentException(
                         "Số lượng tồn kho không đủ cho việc gộp. Chỉ còn " + variant.getStock() + " sản phẩm.");
             }
 
-            cartItemDAO.updateQuantity(existingItem.getId(), newQty);
+            cartItemDAO.updateQuantity(existingItem.getId(), finalQty);
             cartItemDAO.delete(itemId);
 
-            existingItem.setQuantity(newQty);
-            loadItemDetails(existingItem);
+            existingItem.setQuantity(finalQty);
+            loadItemDetails(existingItem, userId);
             return existingItem;
         }
 
         cartItemDAO.updateVariant(itemId, variantId);
         item.setVariantId(variantId);
 
-        loadItemDetails(item);
+        loadItemDetails(item, userId);
 
         return item;
     }
@@ -227,13 +282,13 @@ public class CartService {
         List<CartItem> items = cartItemDAO.findByCartId(cart.getId());
 
         for (CartItem item : items) {
-            loadItemDetails(item);
+            loadItemDetails(item, cart.getUserId());
         }
 
         cart.setItems(items);
     }
 
-    private void loadItemDetails(CartItem item) {
+    private void loadItemDetails(CartItem item, Integer userId) {
         if (item == null)
             return;
 
@@ -257,10 +312,10 @@ public class CartService {
             variantDAO.findById(item.getVariantId()).ifPresent(item::setVariant);
         }
 
-        applyFlashSalePrice(item);
+        applyFlashSalePrice(item, userId);
     }
 
-    private void applyFlashSalePrice(CartItem item) {
+    private void applyFlashSalePrice(CartItem item, Integer userId) {
         if (item == null)
             return;
 
@@ -270,11 +325,16 @@ public class CartService {
             FlashSale flashSale = flashSaleOpt.get();
 
             if (flashSale.getRemainingStock() > 0) {
+                if (userId != null && userId > 0 && flashSale.getMaxQtyPerUser() > 0) {
+                    int purchasedQty = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, flashSale.getProductId(), flashSale.getStartTime(), flashSale.getEndTime());
+                    if (purchasedQty >= flashSale.getMaxQtyPerUser()) {
+                        return;
+                    }
+                }
 
                 double originalPrice = item.getOriginalUnitPrice();
 
                 if (originalPrice > 0) {
-
                     double salePrice = flashSale.getSalePrice(originalPrice);
                     item.setFlashSalePrice(salePrice);
                 }
@@ -300,15 +360,27 @@ public class CartService {
             }
         }
 
+        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
+        if (flashSaleOpt.isPresent()) {
+            FlashSale fs = flashSaleOpt.get();
+            if (fs.getMaxQtyPerUser() > 0) {
+                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, productId, fs.getStartTime(), fs.getEndTime());
+                if (purchased >= fs.getMaxQtyPerUser()) {
+                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                }
+                if (purchased + quantity > fs.getMaxQtyPerUser()) {
+                    int allowed = fs.getMaxQtyPerUser() - purchased;
+                    throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                }
+            }
+        }
+
         Cart cart = new Cart(userId);
         CartItem item = new CartItem(0, productId, variantId, quantity);
         item.setProduct(product);
         item.setVariant(variant);
+        applyFlashSalePrice(item, userId);
         
-        // This sets the correct price and attributes without pushing to DB
-        applyFlashSalePrice(item);
-        
-        // Let's make sure it contains variants + images so ThanhToan.jsp doesn't crash on null properties 
         product.setImages(imageDAO.findByProductId(product.getId()));
         List<ProductVariant> variants = variantDAO.findByProductId(product.getId());
         product.setVariants(variants);

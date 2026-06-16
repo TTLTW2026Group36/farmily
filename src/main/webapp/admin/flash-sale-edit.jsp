@@ -120,7 +120,6 @@
                                             <input type="number" id="soldCount" name="soldCount" class="form-control"
                                                 value="${flashSale.soldCount}" min="0">
                                         </div>
-                                    </div>
                                     <div class="form-row">
                                         <div class="form-group">
                                             <label for="startTime">Thời gian bắt đầu <span
@@ -137,6 +136,16 @@
                                                 class="form-control"
                                                 value="<fmt:formatDate value='${flashSale.endTime}' pattern='yyyy-MM-dd' />T<fmt:formatDate value='${flashSale.endTime}' pattern='HH:mm' />"
                                                 required>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group">
+                                            <label for="maxQtyPerUser">Giới hạn mua tối đa của 1 user</label>
+                                            <input type="number" id="maxQtyPerUser" name="maxQtyPerUser" class="form-control"
+                                                value="${flashSale.maxQtyPerUser}" min="0">
+                                            <span style="font-size: 12px; color: var(--gray-500); margin-top: 4px; display: block;">
+                                                Số lượng tối đa sản phẩm giảm giá này mà mỗi khách hàng được phép mua. Lần thứ 2 hoặc số lượng vượt quá sẽ tính theo giá gốc. Nhập 0 hoặc để trống để không giới hạn.
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

@@ -29,6 +29,7 @@ public class FlashSaleDAO extends BaseDao {
                         flashSale.setStockLimit(rs.getInt("stock_limit"));
                         flashSale.setStartTime(rs.getTimestamp("start_time"));
                         flashSale.setEndTime(rs.getTimestamp("end_time"));
+                        flashSale.setMaxQtyPerUser(rs.getInt("max_qty_per_user"));
                         return flashSale;
                 }
         }
@@ -128,9 +129,9 @@ public class FlashSaleDAO extends BaseDao {
 
         public int insert(FlashSale flashSale) {
                 String sql = "INSERT INTO flash_sales (product_id, discount_percent, " +
-                                "sold_count, stock_limit, start_time, end_time) " +
+                                "sold_count, stock_limit, start_time, end_time, max_qty_per_user) " +
                                 "VALUES (:productId, :discountPercent, :soldCount, " +
-                                ":stockLimit, :startTime, :endTime)";
+                                ":stockLimit, :startTime, :endTime, :maxQtyPerUser)";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("productId", flashSale.getProductId())
                                 .bind("discountPercent", flashSale.getDiscountPercent())
@@ -138,6 +139,7 @@ public class FlashSaleDAO extends BaseDao {
                                 .bind("stockLimit", flashSale.getStockLimit())
                                 .bind("startTime", flashSale.getStartTime())
                                 .bind("endTime", flashSale.getEndTime())
+                                .bind("maxQtyPerUser", flashSale.getMaxQtyPerUser())
                                 .executeAndReturnGeneratedKeys("id")
                                 .mapTo(Integer.class)
                                 .one());
@@ -152,7 +154,8 @@ public class FlashSaleDAO extends BaseDao {
         public int update(FlashSale flashSale) {
                 String sql = "UPDATE flash_sales SET product_id = :productId, " +
                                 "discount_percent = :discountPercent, sold_count = :soldCount, " +
-                                "stock_limit = :stockLimit, start_time = :startTime, end_time = :endTime " +
+                                "stock_limit = :stockLimit, start_time = :startTime, end_time = :endTime, " +
+                                "max_qty_per_user = :maxQtyPerUser " +
                                 "WHERE id = :id";
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", flashSale.getId())
@@ -162,6 +165,7 @@ public class FlashSaleDAO extends BaseDao {
                                 .bind("stockLimit", flashSale.getStockLimit())
                                 .bind("startTime", flashSale.getStartTime())
                                 .bind("endTime", flashSale.getEndTime())
+                                .bind("maxQtyPerUser", flashSale.getMaxQtyPerUser())
                                 .execute());
         }
 

@@ -105,6 +105,16 @@ public class JdbiProvider {
                     "[JdbiProvider] Migration check/execution finished (index idx_products_deleted_at might already exist)");
         }
 
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("ALTER TABLE flash_sales ADD COLUMN max_qty_per_user INT DEFAULT 0");
+                System.out.println("[JdbiProvider] Added column max_qty_per_user to flash_sales");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (column max_qty_per_user might already exist)");
+        }
+
         return jdbi;
     }
 }

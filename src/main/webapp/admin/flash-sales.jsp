@@ -138,6 +138,16 @@
                                                                     <span
                                                                         style="font-size: 12px; color: #666;">${fs.soldCount}
                                                                         / ${fs.stockLimit}</span>
+                                                                    <div style="font-size: 11px; color: #888; margin-top: 2px;">
+                                                                        <c:choose>
+                                                                            <c:when test="${fs.maxQtyPerUser > 0}">
+                                                                                <i class="fas fa-user-shield"></i> Tối đa: ${fs.maxQtyPerUser} / user
+                                                                            </c:when>
+                                                                            <c:otherwise>
+                                                                                <i class="fas fa-user-friends"></i> Không giới hạn
+                                                                            </c:otherwise>
+                                                                        </c:choose>
+                                                                    </div>
                                                                 </td>
                                                                 <td>
                                                                     <div style="font-size: 13px;">
