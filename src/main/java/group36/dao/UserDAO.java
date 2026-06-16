@@ -23,10 +23,13 @@ public class UserDAO extends BaseDao {
             user.setPhone(rs.getString("phone"));
 
             user.setRole(UserRole.fromString(rs.getString("role")).name());
+            user.setStatus(rs.getString("status"));
             user.setCreated_at(rs.getTimestamp("created_at"));
             user.setUpdated_at(rs.getTimestamp("updated_at"));
             user.setLoginAttempts(rs.getInt("login_attempts"));
             user.setLockoutUntil(rs.getTimestamp("lockout_until"));
+            user.setEmailVerified(rs.getBoolean("is_email_verified"));
+            user.setLockedReason(rs.getString("locked_reason"));
             return user;
         }
     }
@@ -84,7 +87,7 @@ public class UserDAO extends BaseDao {
     }
 
     public List<User> searchByNameOrEmail(String keyword) {
-        String sql = "SELECT * FROM users WHERE name LIKE :keyword OR email LIKE :keyword ORDER BY id DESC";
+        String sql = "SELECT * FROM users WHERE name LIKE :keyword OR email LIKE :keyword OR phone LIKE :keyword ORDER BY id DESC";
         return get().withHandle(handle -> handle.createQuery(sql)
                 .bind("keyword", "%" + keyword + "%")
                 .map(new UserMapper())
@@ -131,6 +134,15 @@ public class UserDAO extends BaseDao {
                 .execute());
     }
 
+    public int updateStatus(int userId, String status, String lockedReason) {
+        String sql = "UPDATE users SET status = :status, locked_reason = :reason WHERE id = :id";
+        return get().withHandle(handle -> handle.createUpdate(sql)
+                .bind("id", userId)
+                .bind("status", status)
+                .bind("reason", lockedReason)
+                .execute());
+    }
+
     public int count() {
         String sql = "SELECT COUNT(*) FROM users";
         return get().withHandle(handle -> handle.createQuery(sql)
@@ -162,14 +174,24 @@ public class UserDAO extends BaseDao {
         get().useHandle(handle -> handle.createUpdate(sql).bind("id", userId).bind("until", until).execute());
     }
 
-    public List<User> findUsers(String keyword, String role, int page, int size) {
+    public List<User> findUsers(String keyword, String role, String status, String verified, int page, int size) {
         StringBuilder sql = new StringBuilder("SELECT * FROM users WHERE 1=1");
 
         if (role != null && !role.isEmpty() && !"all".equals(role)) {
             sql.append(" AND role = :role");
         }
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword)");
+            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword OR phone LIKE :keyword)");
+        }
+        if ("locked".equals(status)) {
+            sql.append(" AND status = 'locked'");
+        } else if ("active".equals(status)) {
+            sql.append(" AND status = 'active'");
+        }
+        if ("verified".equals(verified)) {
+            sql.append(" AND is_email_verified = TRUE");
+        } else if ("unverified".equals(verified)) {
+            sql.append(" AND is_email_verified = FALSE");
         }
         sql.append(" ORDER BY id DESC");
 
@@ -194,14 +216,24 @@ public class UserDAO extends BaseDao {
         });
     }
 
-    public int countUsers(String keyword, String role) {
+    public int countUsers(String keyword, String role, String status, String verified) {
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM users WHERE 1=1");
 
         if (role != null && !role.isEmpty() && !"all".equals(role)) {
             sql.append(" AND role = :role");
         }
         if (keyword != null && !keyword.trim().isEmpty()) {
-            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword)");
+            sql.append(" AND (name LIKE :keyword OR email LIKE :keyword OR phone LIKE :keyword)");
+        }
+        if ("locked".equals(status)) {
+            sql.append(" AND status = 'locked'");
+        } else if ("active".equals(status)) {
+            sql.append(" AND status = 'active'");
+        }
+        if ("verified".equals(verified)) {
+            sql.append(" AND is_email_verified = TRUE");
+        } else if ("unverified".equals(verified)) {
+            sql.append(" AND is_email_verified = FALSE");
         }
 
         return get().withHandle(handle -> {

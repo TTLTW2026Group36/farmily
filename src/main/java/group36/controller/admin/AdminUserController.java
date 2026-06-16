@@ -63,6 +63,8 @@ public class AdminUserController extends HttpServlet {
                 deleteUser(request, response);
             } else if (pathInfo.equals("/reset-password")) {
                 resetPassword(request, response);
+            } else if (pathInfo.equals("/toggle-status")) {
+                toggleUserStatus(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -107,9 +109,11 @@ public class AdminUserController extends HttpServlet {
         if (role == null || role.isEmpty()) {
             role = "all";
         }
+        String statusFilter = request.getParameter("status");
+        String verifiedFilter = request.getParameter("verified");
 
-        List<User> users = userService.findUsers(keyword, role, page, size);
-        int totalUsers = userService.countUsers(keyword, role);
+        List<User> users = userService.findUsers(keyword, role, statusFilter, verifiedFilter, page, size);
+        int totalUsers = userService.countUsers(keyword, role, statusFilter, verifiedFilter);
         int totalPages = size > 0 ? (int) Math.ceil((double) totalUsers / size) : 1;
 
         Map<Integer, Integer> addressCountMap = new HashMap<>();
@@ -124,6 +128,8 @@ public class AdminUserController extends HttpServlet {
         request.setAttribute("totalUsers", totalUsers);
         request.setAttribute("searchKeyword", keyword);
         request.setAttribute("selectedRole", role);
+        request.setAttribute("selectedStatus", statusFilter);
+        request.setAttribute("selectedVerified", verifiedFilter);
         request.setAttribute("pageSize", size);
 
         HttpSession session = request.getSession();
@@ -259,6 +265,37 @@ public class AdminUserController extends HttpServlet {
             HttpSession session = request.getSession();
             session.setAttribute("error", e.getMessage());
             response.sendRedirect(request.getContextPath() + "/admin/users");
+        }
+    }
+
+    private void toggleUserStatus(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("application/json;charset=UTF-8");
+        String idParam = request.getParameter("id");
+        String action = request.getParameter("action");
+        String reason = request.getParameter("reason");
+
+        try {
+            int id = Integer.parseInt(idParam);
+            HttpSession session = request.getSession();
+            User currentAdmin = (User) session.getAttribute("adminUser");
+            if (currentAdmin != null && currentAdmin.getId() == id) {
+                response.getWriter().write("{\"success\":false,\"message\":\"Kh\u00f4ng th\u1ec3 kh\u00f3a t\u00e0i kho\u1ea3n c\u1ee7a ch\u00ednh m\u00ecnh!\"}");
+                return;
+            }
+
+            if ("lock".equals(action)) {
+                userService.lockUser(id, reason);
+                response.getWriter().write("{\"success\":true,\"message\":\"\u0110\u00e3 kh\u00f3a t\u00e0i kho\u1ea3n\",\"newStatus\":\"locked\"}");
+            } else if ("unlock".equals(action)) {
+                userService.unlockUser(id);
+                response.getWriter().write("{\"success\":true,\"message\":\"\u0110\u00e3 m\u1edf kh\u00f3a t\u00e0i kho\u1ea3n\",\"newStatus\":\"active\"}");
+            } else {
+                response.getWriter().write("{\"success\":false,\"message\":\"H\u00e0nh \u0111\u1ed9ng kh\u00f4ng h\u1ee3p l\u1ec7\"}");
+            }
+        } catch (Exception e) {
+            String msg = e.getMessage() != null ? e.getMessage().replace("\"", "'") : "L\u1ed7i h\u1ec7 th\u1ed1ng";
+            response.getWriter().write("{\"success\":false,\"message\":\"" + msg + "\"}");
         }
     }
 

@@ -9,6 +9,12 @@ public class AuthDao extends BaseDao {
                         .mapToBean(User.class).stream().findFirst().orElse(null));
 
     }
+
+    public User getUserByEmailAnyStatus(String email) {
+        return get().withHandle(h -> h.createQuery("SELECT * FROM users WHERE email = :email")
+                .bind("email", email)
+                .mapToBean(User.class).stream().findFirst().orElse(null));
+    }
     public User getUserById(int id) {
         return get().withHandle(h -> h.createQuery("select * from users where id = :id")
                 .bind("id", id).mapToBean(User.class).stream().findFirst().orElse(null));

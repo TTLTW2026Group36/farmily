@@ -102,6 +102,20 @@ public class LoginController extends HttpServlet {
         AuthService as = new AuthService();
         User existingUser = as.findUserByEmail(username);
 
+        User anyStatusUser = as.findUserByEmailAnyStatus(username);
+        if (anyStatusUser != null && "locked".equals(anyStatusUser.getStatus())) {
+            String reason = anyStatusUser.getLockedReason();
+            String msg = "Tài khoản của bạn đã bị khóa.";
+            if (reason != null && !reason.isEmpty()) {
+                msg += " Lý do: " + reason;
+            }
+            msg += " Vui lòng liên hệ hỗ trợ để được giải quyết.";
+            request.setAttribute("error", msg);
+            request.setAttribute("username", username);
+            request.getRequestDispatcher("/DangNhap.jsp").forward(request, response);
+            return;
+        }
+
         // ktra Lockout
         if (existingUser != null && existingUser.getLockoutUntil() != null && 
             existingUser.getLockoutUntil().after(new Timestamp(System.currentTimeMillis()))) {

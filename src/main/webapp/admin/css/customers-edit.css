@@ -448,7 +448,67 @@
   transition: all 0.2s;
 }
 
-.btn-cancel:hover {
-  background: var(--gray-200);
-  color: var(--gray-900);
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
 }
+
+.status-active {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.status-locked {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.verify-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: default;
+}
+
+.verify-badge.verified {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.verify-badge.unverified {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.verify-badge.unverified i {
+  color: #16a34a;
+}
+
+#lockReason {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--gray-300);
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+#lockReason:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+

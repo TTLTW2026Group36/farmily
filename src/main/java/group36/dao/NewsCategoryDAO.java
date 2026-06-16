@@ -150,4 +150,12 @@ public class NewsCategoryDAO extends BaseDao {
                 .mapTo(Integer.class)
                 .one());
     }
+
+    public int countNews(int categoryId) {
+        String sql = "SELECT COUNT(*) FROM news WHERE category_id = :categoryId";
+        return get().withHandle(handle -> handle.createQuery(sql)
+                .bind("categoryId", categoryId)
+                .mapTo(Integer.class)
+                .one());
+    }
 }

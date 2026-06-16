@@ -50,12 +50,12 @@ public class UserService {
         return userDAO.searchByNameOrEmail(keyword.trim());
     }
 
-    public List<User> findUsers(String keyword, String role, int page, int size) {
-        return userDAO.findUsers(keyword, role, page, size);
+    public List<User> findUsers(String keyword, String role, String status, String verified, int page, int size) {
+        return userDAO.findUsers(keyword, role, status, verified, page, size);
     }
 
-    public int countUsers(String keyword, String role) {
-        return userDAO.countUsers(keyword, role);
+    public int countUsers(String keyword, String role, String status, String verified) {
+        return userDAO.countUsers(keyword, role, status, verified);
     }
 
     public int getTotalUsers() {
@@ -146,13 +146,25 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
-
         getUserById(id);
-
         int rowsAffected = userDAO.delete(id);
         if (rowsAffected == 0) {
             throw new IllegalStateException("Failed to delete user");
         }
+    }
+
+    public void lockUser(int userId, String reason) {
+        getUserById(userId);
+        if (reason == null || reason.trim().isEmpty()) {
+            throw new IllegalArgumentException("Lý do khóa tài khoản không được để trống");
+        }
+        userDAO.updateStatus(userId, "locked", reason.trim());
+    }
+
+    public void unlockUser(int userId) {
+        getUserById(userId);
+        userDAO.updateStatus(userId, "active", null);
+        userDAO.resetLoginAttempts(userId);
     }
 
     private void validateEmail(String email) {

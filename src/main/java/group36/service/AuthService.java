@@ -72,7 +72,11 @@ public class AuthService {
     }
 
     public void lockAccount(int userId) {
-        new UserDAO().lockAccount(userId, 30); // Lock for 30 minutes
+        new UserDAO().lockAccount(userId, 30);
+    }
+
+    public User findUserByEmailAnyStatus(String email) {
+        return new AuthDao().getUserByEmailAnyStatus(email);
     }
 }
 

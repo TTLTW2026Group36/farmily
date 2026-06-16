@@ -47,13 +47,23 @@
                                     <div class="search-group">
                                         <i class="fas fa-search search-icon"></i>
                                         <input type="text" name="search" class="search-input"
-                                            placeholder="Tìm theo tên hoặc email..." value="${searchKeyword}">
+                                            placeholder="Tìm theo tên, email hoặc số điện thoại..." value="${searchKeyword}">
                                     </div>
                                     <select name="role" class="role-select" onchange="this.form.submit()">
-                                        <option value="all" ${selectedRole=='all' ? 'selected' : '' }>Tất cả</option>
+                                        <option value="all" ${selectedRole=='all' ? 'selected' : '' }>Tất cả vai trò</option>
                                         <option value="user" ${selectedRole=='user' ? 'selected' : '' }>Người dùng
                                         </option>
                                         <option value="admin" ${selectedRole=='admin' ? 'selected' : '' }>Admin</option>
+                                    </select>
+                                    <select name="status" class="role-select" onchange="this.form.submit()">
+                                        <option value="all" ${empty selectedStatus || selectedStatus=='all' ? 'selected' : ''}>Tất cả trạng thái</option>
+                                        <option value="active" ${selectedStatus=='active' ? 'selected' : ''}>Đang hoạt động</option>
+                                        <option value="locked" ${selectedStatus=='locked' ? 'selected' : ''}>Bị khóa</option>
+                                    </select>
+                                    <select name="verified" class="role-select" onchange="this.form.submit()">
+                                        <option value="all" ${empty selectedVerified || selectedVerified=='all' ? 'selected' : ''}>Tất cả xác thực</option>
+                                        <option value="verified" ${selectedVerified=='verified' ? 'selected' : ''}>Đã xác thực</option>
+                                        <option value="unverified" ${selectedVerified=='unverified' ? 'selected' : ''}>Chưa xác thực</option>
                                     </select>
                                     <input type="hidden" name="size" value="${pageSize}">
                                     <button type="submit" class="btn btn-secondary">
@@ -102,6 +112,8 @@
                                                 <th>Số điện thoại</th>
                                                 <th>Địa chỉ</th>
                                                 <th>Vai trò</th>
+                                                <th>Trạng thái</th>
+                                                <th>Xác thực</th>
                                                 <th>Ngày đăng ký</th>
                                                 <th>Thao tác</th>
                                             </tr>
@@ -110,7 +122,7 @@
                                             <c:choose>
                                                 <c:when test="${empty users}">
                                                     <tr>
-                                                        <td colspan="9" class="empty-state">
+                                                        <td colspan="11" class="empty-state">
                                                             <i class="fas fa-users"></i>
                                                             <p>Chưa có khách hàng nào</p>
                                                         </td>
@@ -164,6 +176,43 @@
                                                                 </span>
                                                             </td>
                                                             <td>
+                                                                <div class="status-toggle-wrapper">
+                                                                    <c:choose>
+                                                                        <c:when test="${user.status == 'locked'}">
+                                                                            <div class="status-lock-cell">
+                                                                                <div class="status-lock-top">
+                                                                                    <span class="status-badge status-locked"><i class="fas fa-lock"></i> Bị khóa</span>
+                                                                                    <button class="btn btn-sm btn-success toggle-status-btn" onclick="toggleStatus(${user.id}, 'unlock')" title="Mở khóa">
+                                                                                        <i class="fas fa-lock-open"></i>
+                                                                                    </button>
+                                                                                </div>
+                                                                                <c:if test="${not empty user.lockedReason}">
+                                                                                    <div class="lock-reason-text" title="${user.lockedReason}">
+                                                                                        <i class="fas fa-comment-alt"></i> <c:out value="${user.lockedReason}"/>
+                                                                                    </div>
+                                                                                </c:if>
+                                                                            </div>
+                                                                        </c:when>
+                                                                        <c:otherwise>
+                                                                            <span class="status-badge status-active"><i class="fas fa-check-circle"></i> Hoạt động</span>
+                                                                             <button class="btn btn-sm btn-warning toggle-status-btn" data-id="${user.id}" data-name="<c:out value="${user.name}"/>" onclick="openLockModal(this)" title="Khóa">
+                                                                                 <i class="fas fa-lock"></i>
+                                                                             </button>
+                                                                        </c:otherwise>
+                                                                    </c:choose>
+                                                                </div>
+                                                            </td>
+                                                            <td>
+                                                                <c:choose>
+                                                                    <c:when test="${user.emailVerified}">
+                                                                        <span class="verify-badge verified"><i class="fas fa-check-circle"></i> Đã xác thực</span>
+                                                                    </c:when>
+                                                                    <c:otherwise>
+                                                                        <span class="verify-badge unverified"><i class="fas fa-times-circle"></i> Chưa xác thực</span>
+                                                                    </c:otherwise>
+                                                                </c:choose>
+                                                            </td>
+                                                            <td>
                                                                 <fmt:formatDate value="${user.created_at}"
                                                                     pattern="dd/MM/yyyy" />
                                                             </td>
@@ -193,7 +242,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <a
-                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&size=${pageSize}">
+                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage - 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${selectedStatus}&verified=${selectedVerified}&size=${pageSize}">
                                                         <i class="fas fa-chevron-left"></i>
                                                     </a>
                                                 </c:otherwise>
@@ -205,7 +254,7 @@
                                                     <c:when
                                                         test="${i <= 3 || i > totalPages - 2 || (i >= currentPage - 1 && i <= currentPage + 1)}">
                                                         <a
-                                                            href="${pageContext.request.contextPath}/admin/users?page=${i}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&size=${pageSize}">${i}</a>
+                                                            href="${pageContext.request.contextPath}/admin/users?page=${i}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${selectedStatus}&verified=${selectedVerified}&size=${pageSize}">${i}</a>
                                                     </c:when>
                                                     <c:when test="${i == 4 && currentPage > 5}"><span>...</span>
                                                     </c:when>
@@ -221,7 +270,7 @@
                                                 </c:when>
                                                 <c:otherwise>
                                                     <a
-                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&size=${pageSize}">
+                                                        href="${pageContext.request.contextPath}/admin/users?page=${currentPage + 1}${not empty searchKeyword ? '&search='.concat(searchKeyword) : ''}&role=${selectedRole}&status=${selectedStatus}&verified=${selectedVerified}&size=${pageSize}">
                                                         <i class="fas fa-chevron-right"></i>
                                                     </a>
                                                 </c:otherwise>
@@ -234,7 +283,32 @@
                     </main>
                 </div>
 
+                <div class="modal-overlay" id="lockModal">
+                    <div class="modal-box modal-sm">
+                        <div class="modal-header">
+                            <h4 class="modal-title"><i class="fas fa-lock" style="color:#ef4444;"></i> Khóa tài khoản</h4>
+                            <button class="modal-close" onclick="closeLockModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Bạn đang khóa tài khoản: <strong id="lockUserName"></strong></p>
+                            <div class="form-group">
+                                <label for="lockReason">Lý do khóa <span class="required">*</span></label>
+                                <textarea id="lockReason" rows="3" placeholder="Nhập lý do khóa tài khoản..."></textarea>
+                            </div>
+                            <input type="hidden" id="lockUserId">
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-outline" onclick="closeLockModal()">Hủy</button>
+                            <button class="btn btn-danger" onclick="confirmLock()" id="confirmLockBtn">
+                                <i class="fas fa-lock"></i> Xác nhận khóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <script>
+                    const CTX = '${pageContext.request.contextPath}';
+
                     function onMasterCheckChange() {
                         const master = document.getElementById('masterCheck');
                         document.querySelectorAll('.data-row .row-check').forEach(cb => cb.checked = master.checked);
@@ -317,6 +391,66 @@
                         urlParams.set('size', size);
                         window.location.search = urlParams.toString();
                     }
+
+                    function openLockModal(btn) {
+                        const userId = btn.getAttribute('data-id');
+                        const userName = btn.getAttribute('data-name');
+                        document.getElementById('lockUserId').value = userId;
+                        document.getElementById('lockUserName').textContent = userName || '#' + userId;
+                        document.getElementById('lockReason').value = '';
+                        document.getElementById('lockModal').classList.add('open');
+                    }
+
+                    function closeLockModal() {
+                        document.getElementById('lockModal').classList.remove('open');
+                    }
+
+                    function confirmLock() {
+                        const userId = document.getElementById('lockUserId').value;
+                        const reason = document.getElementById('lockReason').value.trim();
+                        if (!reason) { alert('Vui lòng nhập lý do khóa!'); return; }
+
+                        const btn = document.getElementById('confirmLockBtn');
+                        btn.disabled = true;
+
+                        const params = new URLSearchParams();
+                        params.append('id', userId);
+                        params.append('action', 'lock');
+                        params.append('reason', reason);
+
+                        fetch(CTX + '/admin/users/toggle-status', { method: 'POST', body: params })
+                            .then(r => r.json())
+                            .then(data => {
+                                btn.disabled = false;
+                                if (data.success) {
+                                    closeLockModal();
+                                    location.reload();
+                                } else {
+                                    alert(data.message || 'Lỗi khi khóa tài khoản');
+                                }
+                            })
+                            .catch(() => { btn.disabled = false; alert('Lỗi kết nối server'); });
+                    }
+
+                    function toggleStatus(userId, action) {
+                        if (!confirm(action === 'unlock' ? 'Mở khóa tài khoản này?' : 'Khóa tài khoản này?')) return;
+
+                        const params = new URLSearchParams();
+                        params.append('id', userId);
+                        params.append('action', action);
+
+                        fetch(CTX + '/admin/users/toggle-status', { method: 'POST', body: params })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) location.reload();
+                                else alert(data.message || 'Lỗi');
+                            })
+                            .catch(() => alert('Lỗi kết nối server'));
+                    }
+
+                    document.getElementById('lockModal').addEventListener('click', function(e) {
+                        if (e.target === this) closeLockModal();
+                    });
                 </script>
             </body>
 

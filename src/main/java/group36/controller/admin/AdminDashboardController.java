@@ -79,6 +79,15 @@ public class AdminDashboardController extends HttpServlet {
         List<Product> bestSellingProducts = productService.getBestSellingProducts(5);
         request.setAttribute("bestSellingProducts", bestSellingProducts);
 
+        List<group36.dao.OrderDAO.RevenueRecord> weekly = orderService.getWeeklyRevenueChartData();
+        List<group36.dao.OrderDAO.RevenueRecord> monthly = orderService.getMonthlyRevenueChartData();
+
+        request.setAttribute("weeklyLabels", weekly.stream().map(group36.dao.OrderDAO.RevenueRecord::getLabel).toList());
+        request.setAttribute("weeklyData", weekly.stream().map(group36.dao.OrderDAO.RevenueRecord::getRevenue).toList());
+
+        request.setAttribute("monthlyLabels", monthly.stream().map(group36.dao.OrderDAO.RevenueRecord::getLabel).toList());
+        request.setAttribute("monthlyData", monthly.stream().map(group36.dao.OrderDAO.RevenueRecord::getRevenue).toList());
+
         request.getRequestDispatcher("/admin/dashboard.jsp").forward(request, response);
     }
 }

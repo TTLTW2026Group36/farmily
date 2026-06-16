@@ -167,6 +167,25 @@
                                 </a>
                             </div>
 
+                            <!-- Charts Section -->
+                            <div class="charts-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                                <div class="card" style="padding: 20px;">
+                                    <div class="card-header" style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                                        <h3 class="card-title" style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i class="fas fa-chart-line" style="margin-right: 8px; color: #3b82f6;"></i>Doanh thu 7 ngày qua</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="weeklyRevenueChart" style="width: 100%; max-height: 280px;"></canvas>
+                                    </div>
+                                </div>
+                                <div class="card" style="padding: 20px;">
+                                    <div class="card-header" style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                                        <h3 class="card-title" style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i class="fas fa-chart-bar" style="margin-right: 8px; color: #10b981;"></i>Doanh thu 6 tháng qua</h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <canvas id="monthlyRevenueChart" style="width: 100%; max-height: 280px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-top: 20px;">
 
@@ -374,6 +393,172 @@
                         </div>
                     </main>
                 </div>
+
+                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                <script>
+                    document.addEventListener("DOMContentLoaded", function () {
+                        // Data from Server (weekly)
+                        const weeklyLabels = [
+                            <c:forEach var="lbl" items="${weeklyLabels}" varStatus="status">
+                                "${lbl}"${!status.last ? ',' : ''}
+                            </c:forEach>
+                        ];
+                        const weeklyData = [
+                            <c:forEach var="val" items="${weeklyData}" varStatus="status">
+                                ${val}${!status.last ? ',' : ''}
+                            </c:forEach>
+                        ];
+
+                        // Data from Server (monthly)
+                        const monthlyLabels = [
+                            <c:forEach var="lbl" items="${monthlyLabels}" varStatus="status">
+                                "${lbl}"${!status.last ? ',' : ''}
+                            </c:forEach>
+                        ];
+                        const monthlyData = [
+                            <c:forEach var="val" items="${monthlyData}" varStatus="status">
+                                ${val}${!status.last ? ',' : ''}
+                            </c:forEach>
+                        ];
+
+                        // Format Currency helper
+                        const formatCurrency = (value) => {
+                            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('₫', 'đ');
+                        };
+
+                        // 1. Weekly Revenue Line Chart
+                        const ctxWeekly = document.getElementById('weeklyRevenueChart').getContext('2d');
+                        new Chart(ctxWeekly, {
+                            type: 'line',
+                            data: {
+                                labels: weeklyLabels,
+                                datasets: [{
+                                    label: 'Doanh thu (đ)',
+                                    data: weeklyData,
+                                    borderColor: '#3b82f6',
+                                    backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                                    borderWidth: 3,
+                                    fill: true,
+                                    tension: 0.3,
+                                    pointBackgroundColor: '#3b82f6',
+                                    pointBorderColor: '#ffffff',
+                                    pointBorderWidth: 2,
+                                    pointRadius: 4,
+                                    pointHoverRadius: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return ' Doanh thu: ' + formatCurrency(context.raw);
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                if (value >= 1000000) {
+                                                    return (value / 1000000) + 'M';
+                                                }
+                                                if (value >= 1000) {
+                                                    return (value / 1000) + 'k';
+                                                }
+                                                return value;
+                                            },
+                                            color: '#64748b',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            color: '#f1f5f9'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#64748b',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        // 2. Monthly Revenue Bar Chart
+                        const ctxMonthly = document.getElementById('monthlyRevenueChart').getContext('2d');
+                        new Chart(ctxMonthly, {
+                            type: 'bar',
+                            data: {
+                                labels: monthlyLabels,
+                                datasets: [{
+                                    label: 'Doanh thu (đ)',
+                                    data: monthlyData,
+                                    backgroundColor: '#10b981',
+                                    borderRadius: 6,
+                                    borderSkipped: false,
+                                    hoverBackgroundColor: '#059669'
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                return ' Doanh thu: ' + formatCurrency(context.raw);
+                                            }
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        ticks: {
+                                            callback: function(value) {
+                                                if (value >= 1000000) {
+                                                    return (value / 1000000) + 'M';
+                                                }
+                                                if (value >= 1000) {
+                                                    return (value / 1000) + 'k';
+                                                }
+                                                return value;
+                                            },
+                                            color: '#64748b',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            color: '#f1f5f9'
+                                        }
+                                    },
+                                    x: {
+                                        ticks: {
+                                            color: '#64748b',
+                                            font: { size: 11 }
+                                        },
+                                        grid: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    });
+                </script>
             </body>
 
             </html>

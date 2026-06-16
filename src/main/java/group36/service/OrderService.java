@@ -913,4 +913,50 @@ public class OrderService {
             System.err.println("Error: " + e.getMessage());
         }
     }
+
+    public List<OrderDAO.RevenueRecord> getWeeklyRevenueChartData() {
+        List<OrderDAO.RevenueRecord> dbData = orderDAO.getWeeklyRevenue();
+        List<OrderDAO.RevenueRecord> result = new ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        java.time.format.DateTimeFormatter displayDtf = java.time.format.DateTimeFormatter.ofPattern("dd/MM");
+        
+        for (int i = 6; i >= 0; i--) {
+            java.time.LocalDate date = today.minusDays(i);
+            String dbKey = date.format(dtf);
+            String displayLabel = date.format(displayDtf);
+            
+            double revenue = dbData.stream()
+                .filter(r -> dbKey.equals(r.getLabel()))
+                .mapToDouble(OrderDAO.RevenueRecord::getRevenue)
+                .findFirst()
+                .orElse(0.0);
+                
+            result.add(new OrderDAO.RevenueRecord(displayLabel, revenue));
+        }
+        return result;
+    }
+
+    public List<OrderDAO.RevenueRecord> getMonthlyRevenueChartData() {
+        List<OrderDAO.RevenueRecord> dbData = orderDAO.getMonthlyRevenue();
+        List<OrderDAO.RevenueRecord> result = new ArrayList<>();
+        java.time.LocalDate today = java.time.LocalDate.now();
+        java.time.format.DateTimeFormatter dtf = java.time.format.DateTimeFormatter.ofPattern("yyyy-MM");
+        java.time.format.DateTimeFormatter displayDtf = java.time.format.DateTimeFormatter.ofPattern("'Tháng' MM");
+        
+        for (int i = 5; i >= 0; i--) {
+            java.time.LocalDate month = today.minusMonths(i);
+            String dbKey = month.format(dtf);
+            String displayLabel = month.format(displayDtf);
+            
+            double revenue = dbData.stream()
+                .filter(r -> dbKey.equals(r.getLabel()))
+                .mapToDouble(OrderDAO.RevenueRecord::getRevenue)
+                .findFirst()
+                .orElse(0.0);
+                
+            result.add(new OrderDAO.RevenueRecord(displayLabel, revenue));
+        }
+        return result;
+    }
 }

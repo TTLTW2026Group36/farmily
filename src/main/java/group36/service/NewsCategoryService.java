@@ -117,6 +117,12 @@ public class NewsCategoryService {
     public void deleteCategory(int id) {
         getCategoryById(id);
 
+        int newsCount = categoryDAO.countNews(id);
+        if (newsCount > 0) {
+            throw new IllegalArgumentException(
+                    "Không thể xóa danh mục này vì đang chứa " + newsCount + " bài viết. Hãy chuyển bài viết sang danh mục khác trước");
+        }
+
         int rowsAffected = categoryDAO.delete(id);
         if (rowsAffected == 0) {
             throw new IllegalStateException("Failed to delete category");
@@ -156,5 +162,9 @@ public class NewsCategoryService {
                 .replaceAll("\\s+", "-")
                 .replaceAll("-+", "-")
                 .replaceAll("^-|-$", "");
+    }
+
+    public int getNewsCount(int categoryId) {
+        return categoryDAO.countNews(categoryId);
     }
 }

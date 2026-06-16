@@ -115,6 +115,16 @@ public class JdbiProvider {
                     "[JdbiProvider] Migration check/execution finished (column max_qty_per_user might already exist)");
         }
 
+        try {
+            jdbi.useHandle(handle -> {
+                handle.execute("ALTER TABLE users ADD COLUMN locked_reason VARCHAR(500) DEFAULT NULL");
+                System.out.println("[JdbiProvider] Added column locked_reason to users");
+            });
+        } catch (Exception ex) {
+            System.out.println(
+                    "[JdbiProvider] Migration check/execution finished (column locked_reason might already exist)");
+        }
+
         return jdbi;
     }
 }

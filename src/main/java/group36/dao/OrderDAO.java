@@ -465,4 +465,51 @@ public class OrderDAO extends BaseDao {
                         return q.mapTo(Integer.class).one();
                 });
         }
+
+        public static class RevenueRecord {
+                private String label;
+                private double revenue;
+
+                public RevenueRecord() {}
+
+                public RevenueRecord(String label, double revenue) {
+                        this.label = label;
+                        this.revenue = revenue;
+                }
+
+                public String getLabel() { return label; }
+                public void setLabel(String label) { this.label = label; }
+                public double getRevenue() { return revenue; }
+                public void setRevenue(double revenue) { this.revenue = revenue; }
+        }
+
+        public List<RevenueRecord> getWeeklyRevenue() {
+                String sql = "SELECT DATE_FORMAT(order_date, '%Y-%m-%d') as order_date, COALESCE(SUM(total_price), 0) as revenue " +
+                                "FROM orders " +
+                                "WHERE status = 'completed' " +
+                                "AND order_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) " +
+                                "GROUP BY DATE_FORMAT(order_date, '%Y-%m-%d') " +
+                                "ORDER BY DATE_FORMAT(order_date, '%Y-%m-%d') ASC";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .map((rs, ctx) -> new RevenueRecord(
+                                                rs.getString("order_date"),
+                                                rs.getDouble("revenue")
+                                ))
+                                .list());
+        }
+
+        public List<RevenueRecord> getMonthlyRevenue() {
+                String sql = "SELECT DATE_FORMAT(order_date, '%Y-%m') as order_month, COALESCE(SUM(total_price), 0) as revenue " +
+                                "FROM orders " +
+                                "WHERE status = 'completed' " +
+                                "AND order_date >= DATE_SUB(DATE_FORMAT(NOW(), '%Y-%m-01'), INTERVAL 5 MONTH) " +
+                                "GROUP BY DATE_FORMAT(order_date, '%Y-%m') " +
+                                "ORDER BY DATE_FORMAT(order_date, '%Y-%m') ASC";
+                return get().withHandle(handle -> handle.createQuery(sql)
+                                .map((rs, ctx) -> new RevenueRecord(
+                                                rs.getString("order_month"),
+                                                rs.getDouble("revenue")
+                                ))
+                                .list());
+        }
 }

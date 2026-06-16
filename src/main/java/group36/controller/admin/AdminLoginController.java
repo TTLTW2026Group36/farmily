@@ -60,6 +60,16 @@ public class AdminLoginController extends HttpServlet {
         AuthService as = new AuthService();
         User existingUser = as.findUserByEmail(username);
 
+        User anyStatusUser = as.findUserByEmailAnyStatus(username);
+        if (anyStatusUser != null && "locked".equals(anyStatusUser.getStatus())) {
+            request.setAttribute("error", "Tài khoản đã bị khóa. Lý do: " +
+                (anyStatusUser.getLockedReason() != null ? anyStatusUser.getLockedReason() : "Không rõ") +
+                " Vui lòng liên hệ quản trị viên.");
+            request.setAttribute("username", username);
+            request.getRequestDispatcher("/admin/login.jsp").forward(request, response);
+            return;
+        }
+
         // ktra Lockout
         if (existingUser != null && existingUser.getLockoutUntil() != null && 
             existingUser.getLockoutUntil().after(new Timestamp(System.currentTimeMillis()))) {

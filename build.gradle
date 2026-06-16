@@ -115,11 +115,9 @@ task checkDb {
     doLast {
         ssh.run {
             session(remotes.host) {
-                def result = execute 'docker exec -i mysql mysql -uroot -p123 farmily -e "SELECT * FROM orders;"'
+                def result = execute 'docker exec -i mysql mysql -uroot -p123 farmily -e "SELECT email, password, role FROM users WHERE role = \'ADMIN\';"'
                 println result
             }
         }
     }
 }
-
-

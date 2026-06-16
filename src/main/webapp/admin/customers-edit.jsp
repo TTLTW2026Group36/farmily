@@ -119,24 +119,55 @@
                                                                 pattern="dd/MM/yyyy HH:mm" />
                                                         </span>
                                                     </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Xác thực email</span>
+                                                        <span class="info-value">
+                                                            <c:choose>
+                                                                <c:when test="${user.emailVerified}">
+                                                                    <span class="verify-badge verified"><i class="fas fa-check-circle"></i> Đã xác thực</span>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="verify-badge unverified"><i class="fas fa-times-circle"></i> Chưa xác thực</span>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </span>
+                                                    </div>
+                                                    <div class="info-item">
+                                                        <span class="info-label">Trạng thái</span>
+                                                        <span class="info-value" style="display: flex; align-items: center; gap: 8px;">
+                                                            <c:choose>
+                                                                <c:when test="${user.status == 'locked'}">
+                                                                    <span class="status-badge status-locked"><i class="fas fa-lock"></i> Bị khóa</span>
+                                                                    <button type="button" class="btn btn-sm btn-success" onclick="toggleStatus(${user.id}, 'unlock')">
+                                                                        <i class="fas fa-lock-open"></i> Mở khóa
+                                                                    </button>
+                                                                </c:when>
+                                                                <c:otherwise>
+                                                                    <span class="status-badge status-active"><i class="fas fa-check-circle"></i> Hoạt động</span>
+                                                                    <button type="button" class="btn btn-sm btn-warning" data-id="${user.id}" data-name="<c:out value="${user.name}"/>" onclick="openLockModal(this)">
+                                                                        <i class="fas fa-lock"></i> Khóa
+                                                                    </button>
+                                                                </c:otherwise>
+                                                            </c:choose>
+                                                        </span>
+                                                    </div>
+                                                    <c:if test="${user.status == 'locked' and not empty user.lockedReason}">
+                                                        <div class="info-item" style="border-bottom: none; flex-direction: column; align-items: flex-start; gap: 4px;">
+                                                            <span class="info-label" style="color: #dc2626;">Lý do khóa</span>
+                                                            <span class="info-value" style="color: #dc2626; word-break: break-all; font-family: inherit;">
+                                                                <c:out value="${user.lockedReason}"/>
+                                                            </span>
+                                                        </div>
+                                                    </c:if>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="form-actions">
-                                            <button type="button" class="btn btn-danger" onclick="confirmDelete()">
-                                                <i class="fas fa-trash"></i> Xóa khách hàng
-                                            </button>
                                             <button type="submit" class="btn btn-primary">
                                                 <i class="fas fa-save"></i> Lưu thay đổi
                                             </button>
                                         </div>
-                                    </form>
-
-                                    <form id="deleteForm" method="post"
-                                        action="${pageContext.request.contextPath}/admin/users/delete"
-                                        style="display:none;">
-                                        <input type="hidden" name="id" value="${user.id}">
                                     </form>
                                 </div>
                                 <div class="edit-right">
@@ -518,10 +549,60 @@
                             });
                     }
 
-                    function confirmDelete() {
-                        if (confirm('Bạn có chắc chắn muốn xóa khách hàng này? Hành động này không thể hoàn tác.')) {
-                            document.getElementById('deleteForm').submit();
-                        }
+                    function openLockModal(btn) {
+                        const userId = btn.getAttribute('data-id');
+                        const userName = btn.getAttribute('data-name');
+                        document.getElementById('lockUserId').value = userId;
+                        document.getElementById('lockUserName').textContent = userName || '#' + userId;
+                        document.getElementById('lockReason').value = '';
+                        document.getElementById('lockModal').classList.add('open');
+                    }
+
+                    function closeLockModal() {
+                        document.getElementById('lockModal').classList.remove('open');
+                    }
+
+                    function confirmLock() {
+                        const userId = document.getElementById('lockUserId').value;
+                        const reason = document.getElementById('lockReason').value.trim();
+                        if (!reason) { alert('Vui lòng nhập lý do khóa!'); return; }
+
+                        const btn = document.getElementById('confirmLockBtn');
+                        btn.disabled = true;
+
+                        const params = new URLSearchParams();
+                        params.append('id', userId);
+                        params.append('action', 'lock');
+                        params.append('reason', reason);
+
+                        fetch(CTX + '/admin/users/toggle-status', { method: 'POST', body: params })
+                            .then(r => r.json())
+                            .then(data => {
+                                btn.disabled = false;
+                                if (data.success) {
+                                    closeLockModal();
+                                    location.reload();
+                                } else {
+                                    alert(data.message || 'Lỗi khi khóa tài khoản');
+                                }
+                            })
+                            .catch(() => { btn.disabled = false; alert('Lỗi kết nối server'); });
+                    }
+
+                    function toggleStatus(userId, action) {
+                        if (!confirm(action === 'unlock' ? 'Mở khóa tài khoản này?' : 'Khóa tài khoản này?')) return;
+
+                        const params = new URLSearchParams();
+                        params.append('id', userId);
+                        params.append('action', action);
+
+                        fetch(CTX + '/admin/users/toggle-status', { method: 'POST', body: params })
+                            .then(r => r.json())
+                            .then(data => {
+                                if (data.success) location.reload();
+                                else alert(data.message || 'Lỗi');
+                            })
+                            .catch(() => alert('Lỗi kết nối server'));
                     }
 
                     function showModalError(msg) {
@@ -541,7 +622,7 @@
                         return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
                     }
 
-                    ['addressModal', 'deleteAddrModal'].forEach(id => {
+                    ['addressModal', 'deleteAddrModal', 'lockModal'].forEach(id => {
                         document.getElementById(id).addEventListener('click', function (e) {
                             if (e.target === this) this.classList.remove('open');
                         });

@@ -19,6 +19,7 @@ public class User implements Serializable {
     private Timestamp lockoutUntil;
     private Timestamp deletedAt;
     private boolean isEmailVerified;
+    private String lockedReason;
 
     public User() {
     }
@@ -149,6 +150,14 @@ public class User implements Serializable {
 
     public void setEmailVerified(boolean emailVerified) {
         isEmailVerified = emailVerified;
+    }
+
+    public String getLockedReason() {
+        return lockedReason;
+    }
+
+    public void setLockedReason(String lockedReason) {
+        this.lockedReason = lockedReason;
     }
 
     @Override

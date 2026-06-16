@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 
 
@@ -42,13 +44,19 @@ public class AdminPostController extends HttpServlet {
                 showAddForm(request, response);
             } else if (pathInfo.equals("/edit")) {
                 showEditForm(request, response);
+            } else if (pathInfo.equals("/categories")) {
+                listCategories(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
         } catch (Exception e) {
             System.err.println("Error: " + e.getMessage());
             request.setAttribute("error", "Lỗi: " + e.getMessage());
-            listPosts(request, response);
+            if (pathInfo != null && pathInfo.startsWith("/categories")) {
+                response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+            } else {
+                listPosts(request, response);
+            }
         }
     }
 
@@ -67,6 +75,12 @@ public class AdminPostController extends HttpServlet {
                 deletePost(request, response);
             } else if (pathInfo != null && pathInfo.equals("/toggle")) {
                 togglePost(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/categories/add")) {
+                createCategory(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/categories/edit")) {
+                updateCategory(request, response);
+            } else if (pathInfo != null && pathInfo.equals("/categories/delete")) {
+                deleteCategory(request, response);
             } else {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND);
             }
@@ -74,7 +88,11 @@ public class AdminPostController extends HttpServlet {
             System.err.println("Error: " + e.getMessage());
             HttpSession session = request.getSession();
             session.setAttribute("error", "Lỗi: " + e.getMessage());
-            response.sendRedirect(request.getContextPath() + "/admin/posts");
+            if (pathInfo != null && pathInfo.startsWith("/categories")) {
+                response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+            } else {
+                response.sendRedirect(request.getContextPath() + "/admin/posts");
+            }
         }
     }
 
@@ -363,5 +381,111 @@ public class AdminPostController extends HttpServlet {
         } catch (Exception e) {
             out.print("{\"success\": false, \"message\": \"Đã xảy ra lỗi khi thay đổi trạng thái\"}");
         }
+    }
+
+    private void listCategories(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String success = (String) session.getAttribute("success");
+        String error = (String) session.getAttribute("error");
+        if (success != null) {
+            request.setAttribute("success", success);
+            session.removeAttribute("success");
+        }
+        if (error != null) {
+            request.setAttribute("error", error);
+            session.removeAttribute("error");
+        }
+
+        List<NewsCategory> categories = categoryService.getAllCategories();
+        Map<Integer, Integer> newsCountMap = new HashMap<>();
+        for (NewsCategory cat : categories) {
+            newsCountMap.put(cat.getId(), categoryService.getNewsCount(cat.getId()));
+        }
+
+        request.setAttribute("categories", categories);
+        request.setAttribute("totalCategories", categories.size());
+        request.setAttribute("newsCountMap", newsCountMap);
+        request.getRequestDispatcher("/admin/posts-categories.jsp").forward(request, response);
+    }
+
+    private void createCategory(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        HttpSession session = request.getSession();
+
+        try {
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Tên danh mục không được để trống");
+            }
+            NewsCategory category = new NewsCategory();
+            category.setName(name.trim());
+            category.setDescription(description != null ? description.trim() : "");
+            
+            categoryService.createCategory(category);
+            session.setAttribute("success", "Đã thêm danh mục '" + category.getName() + "' thành công!");
+        } catch (IllegalArgumentException e) {
+            session.setAttribute("error", e.getMessage());
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+    }
+
+    private void updateCategory(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String idParam = request.getParameter("id");
+        String name = request.getParameter("name");
+        String description = request.getParameter("description");
+        HttpSession session = request.getSession();
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            if (name == null || name.trim().isEmpty()) {
+                throw new IllegalArgumentException("Tên danh mục không được để trống");
+            }
+            NewsCategory category = categoryService.getCategoryById(id);
+            category.setName(name.trim());
+            category.setDescription(description != null ? description.trim() : "");
+
+            categoryService.updateCategory(category);
+            session.setAttribute("success", "Đã cập nhật danh mục '" + category.getName() + "' thành công!");
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "ID danh mục không hợp lệ");
+        } catch (IllegalArgumentException e) {
+            session.setAttribute("error", e.getMessage());
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+    }
+
+    private void deleteCategory(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        String idParam = request.getParameter("id");
+        HttpSession session = request.getSession();
+
+        if (idParam == null || idParam.trim().isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idParam);
+            NewsCategory category = categoryService.getCategoryById(id);
+            String categoryName = category.getName();
+
+            categoryService.deleteCategory(id);
+            session.setAttribute("success", "Đã xóa danh mục '" + categoryName + "' thành công!");
+        } catch (NumberFormatException e) {
+            session.setAttribute("error", "ID danh mục không hợp lệ");
+        } catch (IllegalArgumentException e) {
+            session.setAttribute("error", e.getMessage());
+        } catch (Exception e) {
+            session.setAttribute("error", "Lỗi khi xóa danh mục: " + e.getMessage());
+        }
+        response.sendRedirect(request.getContextPath() + "/admin/posts/categories");
     }
 }

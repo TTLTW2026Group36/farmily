@@ -125,6 +125,10 @@
                                     </div>
                                 </div>
                                 <div class="page-actions">
+                                    <a href="${pageContext.request.contextPath}/admin/posts/categories"
+                                        class="btn btn-outline" style="margin-right: 8px;">
+                                        <i class="fas fa-list"></i> Quản lý danh mục
+                                    </a>
                                     <a href="${pageContext.request.contextPath}/admin/posts/add"
                                         class="btn btn-primary">
                                         <i class="fas fa-plus"></i> Thêm bài viết
