@@ -102,7 +102,57 @@ header .logo {
     height: auto;
     width: 170px;
     object-fit: contain;
-    display: block
+    display: block;
+}
+
+header.scrolled {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+header.scrolled .topbar .wrap {
+    padding: 8px 16px;
+}
+
+header.scrolled .logo .img {
+    height: 48px;
+}
+
+header.scrolled .logo img {
+    width: 120px;
+}
+
+header.scrolled .mini-nav .wrap {
+    padding: 4px 16px;
+}
+
+@media (max-width: 1024px) {
+    header.scrolled .logo .img {
+        height: 44px;
+    }
+
+    header.scrolled .logo img {
+        width: 110px;
+    }
+}
+
+@media (max-width: 768px) {
+    header.scrolled .topbar .wrap {
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 600px) {
+    header.scrolled .topbar .wrap {
+        padding: 4px 10px;
+    }
+
+    header.scrolled .logo .img {
+        height: 36px;
+    }
+
+    header.scrolled .logo img {
+        width: 90px;
+    }
 }
 
 .logo .title {
@@ -334,7 +384,7 @@ header .mini-nav .wrap {
     margin: 0 auto;
     display: flex;
     align-items: center;
-    gap: 12px
+    gap: 12px;
 }
 
 .cats-toggle {
@@ -1650,8 +1700,15 @@ header .mini-nav.mobile-open .cats-toggle {
 }
 
 @keyframes notifFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .notification-dropdown-header {
@@ -1723,11 +1780,30 @@ header .mini-nav.mobile-open .cats-toggle {
     font-size: 14px;
 }
 
-.notification-item-icon.order   { background: #e3f2fd; color: #1565c0; }
-.notification-item-icon.success  { background: #e8f5e9; color: #2e7d32; }
-.notification-item-icon.warning  { background: #fff8e1; color: #e65100; }
-.notification-item-icon.danger   { background: #fce4ec; color: #b71c1c; }
-.notification-item-icon.info     { background: #e8eaf6; color: #283593; }
+.notification-item-icon.order {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.notification-item-icon.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.notification-item-icon.warning {
+    background: #fff8e1;
+    color: #e65100;
+}
+
+.notification-item-icon.danger {
+    background: #fce4ec;
+    color: #b71c1c;
+}
+
+.notification-item-icon.info {
+    background: #e8eaf6;
+    color: #283593;
+}
 
 .notification-item-content {
     flex: 1;

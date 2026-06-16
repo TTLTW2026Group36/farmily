@@ -2,6 +2,19 @@
   'use strict';
 
   document.addEventListener('DOMContentLoaded', function () {
+    var header = document.querySelector('header');
+    if (header) {
+      var checkScroll = function () {
+        if (window.scrollY > 20) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      };
+      window.addEventListener('scroll', checkScroll);
+      checkScroll();
+    }
+
     var hamburger = document.getElementById('hamburger-btn');
     var miniNav = document.querySelector('header .mini-nav');
     var mobileSearchBar = document.querySelector('.mobile-search-bar');

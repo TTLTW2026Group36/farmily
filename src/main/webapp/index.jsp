@@ -9,12 +9,12 @@
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
                 <title>Farmily - Rau Củ Quả Tươi Sạch Giao Tận Nhà 24h</title>
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=5">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=9">
                 <link rel="stylesheet" href="${pageContext.request.contextPath}/css/index.css?v=2">
                 <script>
                     window.contextPath = '${pageContext.request.contextPath}';
                 </script>
-                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
+                <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css?v=2">
             </head>
 
             <body>

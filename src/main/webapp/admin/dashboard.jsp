@@ -167,22 +167,33 @@
                                 </a>
                             </div>
 
-                            <!-- Charts Section -->
-                            <div class="charts-container" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                            <div class="charts-container"
+                                style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                                 <div class="card" style="padding: 20px;">
-                                    <div class="card-header" style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
-                                        <h3 class="card-title" style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i class="fas fa-chart-line" style="margin-right: 8px; color: #3b82f6;"></i>Doanh thu 7 ngày qua</h3>
+                                    <div class="card-header"
+                                        style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                                        <h3 class="card-title"
+                                            style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i
+                                                class="fas fa-chart-line"
+                                                style="margin-right: 8px; color: #3b82f6;"></i>Doanh thu 7 ngày qua</h3>
                                     </div>
                                     <div class="card-body">
-                                        <canvas id="weeklyRevenueChart" style="width: 100%; max-height: 280px;"></canvas>
+                                        <canvas id="weeklyRevenueChart"
+                                            style="width: 100%; max-height: 280px;"></canvas>
                                     </div>
                                 </div>
                                 <div class="card" style="padding: 20px;">
-                                    <div class="card-header" style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
-                                        <h3 class="card-title" style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i class="fas fa-chart-bar" style="margin-right: 8px; color: #10b981;"></i>Doanh thu 6 tháng qua</h3>
+                                    <div class="card-header"
+                                        style="padding-bottom: 15px; border-bottom: 1px solid #f1f5f9; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                                        <h3 class="card-title"
+                                            style="font-size: 16px; font-weight: 600; color: #1e293b; margin: 0;"><i
+                                                class="fas fa-chart-bar"
+                                                style="margin-right: 8px; color: #10b981;"></i>Doanh thu 6 tháng qua
+                                        </h3>
                                     </div>
                                     <div class="card-body">
-                                        <canvas id="monthlyRevenueChart" style="width: 100%; max-height: 280px;"></canvas>
+                                        <canvas id="monthlyRevenueChart"
+                                            style="width: 100%; max-height: 280px;"></canvas>
                                     </div>
                                 </div>
                             </div>
@@ -397,7 +408,6 @@
                 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                 <script>
                     document.addEventListener("DOMContentLoaded", function () {
-                        // Data from Server (weekly)
                         const weeklyLabels = [
                             <c:forEach var="lbl" items="${weeklyLabels}" varStatus="status">
                                 "${lbl}"${!status.last ? ',' : ''}
@@ -409,7 +419,6 @@
                             </c:forEach>
                         ];
 
-                        // Data from Server (monthly)
                         const monthlyLabels = [
                             <c:forEach var="lbl" items="${monthlyLabels}" varStatus="status">
                                 "${lbl}"${!status.last ? ',' : ''}
@@ -421,12 +430,10 @@
                             </c:forEach>
                         ];
 
-                        // Format Currency helper
                         const formatCurrency = (value) => {
                             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value).replace('₫', 'đ');
                         };
 
-                        // 1. Weekly Revenue Line Chart
                         const ctxWeekly = document.getElementById('weeklyRevenueChart').getContext('2d');
                         new Chart(ctxWeekly, {
                             type: 'line',
@@ -466,7 +473,7 @@
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
-                                            callback: function(value) {
+                                            callback: function (value) {
                                                 if (value >= 1000000) {
                                                     return (value / 1000000) + 'M';
                                                 }
@@ -495,7 +502,6 @@
                             }
                         });
 
-                        // 2. Monthly Revenue Bar Chart
                         const ctxMonthly = document.getElementById('monthlyRevenueChart').getContext('2d');
                         new Chart(ctxMonthly, {
                             type: 'bar',
@@ -529,7 +535,7 @@
                                     y: {
                                         beginAtZero: true,
                                         ticks: {
-                                            callback: function(value) {
+                                            callback: function (value) {
                                                 if (value >= 1000000) {
                                                     return (value / 1000000) + 'M';
                                                 }

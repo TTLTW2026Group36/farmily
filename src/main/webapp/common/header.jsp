@@ -335,7 +335,7 @@
         </script>
         <script src="${pageContext.request.contextPath}/js/hotline-utils.js"></script>
         <script src="${pageContext.request.contextPath}/js/cart.js"></script>
-        <script src="${pageContext.request.contextPath}/js/mobile-nav.js?v=2"></script>
+        <script src="${pageContext.request.contextPath}/js/mobile-nav.js?v=3"></script>
         <c:if test="${not empty sessionScope.auth}">
         <script src="${pageContext.request.contextPath}/js/user-notifications.js?v=2"></script>
         </c:if>

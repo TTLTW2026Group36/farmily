@@ -10,13 +10,13 @@
             <title>Hồ sơ cá nhân | Farmily</title>
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/SanPham.css">
             <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HoSo.css">
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=5">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/HeaderFooter.css?v=9">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
             <script>
                 window.contextPath = '${pageContext.request.contextPath}';
                 window.emailVerificationCooldown = ${requestScope.emailVerificationCooldown != null ? requestScope.emailVerificationCooldown : 0};
             </script>
-            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css">
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/css/responsive.css?v=2">
 </head>
 
         <body>
