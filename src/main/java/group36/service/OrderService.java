@@ -29,6 +29,7 @@ public class OrderService {
     private final OrderStatusHistoryDAO orderStatusHistoryDAO;
     private final CouponDAO couponDAO;
     private final CouponService couponService;
+    private final GhnService ghnService;
 
     public OrderService() {
         this.orderDAO = new OrderDAO();
@@ -48,6 +49,7 @@ public class OrderService {
         this.orderStatusHistoryDAO = new OrderStatusHistoryDAO();
         this.couponDAO = new CouponDAO();
         this.couponService = new CouponService();
+        this.ghnService = new GhnService();
     }
 
     public Order createOrder(int userId, int addressId, int paymentMethodId, String note, double shippingFee)
@@ -677,6 +679,39 @@ public class OrderService {
                     userNotificationService.createOrderStatusNotification(order, oldStatus, newStatus);
                 } catch (Exception e) {
                     System.err.println("[OrderService] Error creating user notification: " + e.getMessage());
+                }
+            }
+
+            if ((Order.STATUS_CONFIRMED.equals(newStatus) || Order.STATUS_PROCESSING.equals(newStatus))
+                    && order.getGhnOrderCode() == null) {
+                try {
+                    Optional<Address> addrOpt = addressDAO.findById(order.getAddressId());
+                    if (addrOpt.isPresent()) {
+                        Address addr = addrOpt.get();
+                        if (addr.getGhnDistrictId() != null && addr.getGhnWardCode() != null) {
+                            paymentMethodDAO.findById(order.getPaymentMethodId()).ifPresent(order::setPaymentMethod);
+                            double codAmount = order.isOnlinePayment() ? 0 : order.getTotalPrice();
+                            int paymentTypeId = order.isOnlinePayment() ? 1 : 2;
+                            String ghnCode = ghnService.createShippingOrder(
+                                orderId,
+                                addr.getReceiver(),
+                                addr.getPhone(),
+                                addr.getAddressDetail(),
+                                addr.getGhnDistrictId(),
+                                addr.getGhnWardCode(),
+                                codAmount,
+                                order.getTotalPrice(),
+                                order.getNote(),
+                                paymentTypeId
+                            );
+                            orderDAO.saveGhnOrderCode(orderId, ghnCode);
+                            System.out.println("[OrderService] GHN order created: " + ghnCode + " for order #" + orderId);
+                        } else {
+                            System.err.println("[OrderService] Address #" + order.getAddressId() + " missing GHN district/ward, skip GHN create");
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("[OrderService] Failed to create GHN order for #" + orderId + ": " + e.getMessage());
                 }
             }
         }

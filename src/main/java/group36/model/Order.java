@@ -37,6 +37,7 @@ public class Order implements Serializable {
     private Integer freeshipCouponId;
     private double freeshipDiscountAmount;
     private List<OrderStatusHistory> statusHistory;
+    private String ghnOrderCode;
 
     public static final String STATUS_PENDING = "pending";
     public static final String STATUS_CONFIRMED = "confirmed";
@@ -523,6 +524,14 @@ public class Order implements Serializable {
             return guestPhone;
         }
         return user != null ? user.getPhone() : "";
+    }
+
+    public String getGhnOrderCode() {
+        return ghnOrderCode;
+    }
+
+    public void setGhnOrderCode(String ghnOrderCode) {
+        this.ghnOrderCode = ghnOrderCode;
     }
 
     @Override

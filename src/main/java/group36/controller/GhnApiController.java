@@ -65,6 +65,16 @@ public class GhnApiController extends HttpServlet {
                     response.getWriter().write(wards);
                     break;
 
+                case "/order-status":
+                    String orderCode = request.getParameter("orderCode");
+                    if (orderCode == null || orderCode.isEmpty()) {
+                        sendError(response, 400, "Thiếu tham số orderCode");
+                        return;
+                    }
+                    String detail = ghnService.getOrderDetail(orderCode);
+                    response.getWriter().write(detail);
+                    break;
+
                 default:
                     sendError(response, 404, "Endpoint không tồn tại: " + pathInfo);
                     break;

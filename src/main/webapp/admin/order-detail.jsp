@@ -394,48 +394,30 @@
                                         </div>
                                     </div>
 
-                                    <!-- <div class="card shipping-block">
+                                    <div class="card" id="ghn-tracking-card" style="border-left: 3px solid #ff6600;">
                                         <div class="card-header">
-                                            <h3 class="card-title">
-                                                <i class="fas fa-truck" style="color:#7c3aed;margin-right:6px;"></i>
-                                                Thông tin vận chuyển
-                                            </h3>
-                                            <span class="placeholder-badge"><i class="fas fa-code-branch"></i> Sẵn sàng
-                                                tích hợp API</span>
+                                            <h3 class="card-title"><i class="fas fa-truck" style="color:#ff6600;margin-right:6px;"></i> Vận chuyển GHN</h3>
                                         </div>
                                         <div class="card-body">
-                                            <div class="shipping-manual">
-                                                <div class="shipping-field">
-                                                    <label class="field-label">Đơn vị vận chuyển</label>
-                                                    <select class="form-control" id="shippingCarrier"
-                                                        style="max-width:280px;">
-                                                        <option value="">— Chọn đơn vị —</option>
-                                                        <option value="ghn">GHN (Giao Hàng Nhanh)</option>
-                                                        <option value="ghtk">GHTK (Giao Hàng Tiết Kiệm)</option>
-                                                        <option value="viettel">Viettel Post</option>
-                                                        <option value="vnpost">Vietnam Post</option>
-                                                        <option value="other">Khác</option>
-                                                    </select>
-                                                </div>
-                                                <div class="shipping-field">
-                                                    <label class="field-label">Mã vận đơn</label>
-                                                    <div
-                                                        style="display:flex;gap:8px;align-items:center;max-width:400px;">
-                                                        <input type="text" class="form-control" id="trackingCode"
-                                                            placeholder="Nhập mã vận đơn thủ công..." style="flex:1;">
-                                                        <button class="btn btn-secondary btn-sm"
-                                                            onclick="saveTracking()"><i class="fas fa-save"></i>
-                                                            Lưu</button>
+                                            <c:choose>
+                                                <c:when test="${not empty order.ghnOrderCode}">
+                                                    <div class="info-row">
+                                                        <span class="info-label">Mã vận đơn</span>
+                                                        <strong class="info-value" style="font-family:monospace;color:#ff6600;">${order.ghnOrderCode}</strong>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="api-notice">
-                                                <i class="fas fa-plug"></i>
-                                                <span>Tích hợp API GHN/GHTK để tạo vận đơn và theo dõi tự động sẽ được
-                                                    thêm vào đây trong phiên bản tiếp theo.</span>
-                                            </div>
+                                                    <div style="margin-top:10px;">
+                                                        <button onclick="checkGhnStatus('${order.ghnOrderCode}')" class="btn btn-secondary btn-sm" style="width:100%;">
+                                                            <i class="fas fa-search"></i> Kiểm tra trạng thái GHN
+                                                        </button>
+                                                    </div>
+                                                    <div id="ghn-status-result" style="margin-top:10px;display:none;"></div>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <p style="color:#94a3b8;font-style:italic;font-size:0.9em;">Chưa có mã vận đơn GHN. Mã sẽ được tạo tự động khi xác nhận đơn.</p>
+                                                </c:otherwise>
+                                            </c:choose>
                                         </div>
-                                    </div> -->
+                                    </div>
 
 
                                 </div>
@@ -662,9 +644,38 @@
                     });
 
                     function saveTracking() {
-                        var code = document.getElementById('trackingCode').value.trim();
+                        var code = document.getElementById('trackingCode');
+                        if (!code) return;
+                        code = code.value.trim();
                         if (!code) { showToast('Vui lòng nhập mã vận đơn', 'error'); return; }
                         showToast('Đã lưu mã vận đơn: ' + code, 'success');
+                    }
+
+                    function checkGhnStatus(orderCode) {
+                        var resultDiv = document.getElementById('ghn-status-result');
+                        resultDiv.style.display = 'block';
+                        resultDiv.innerHTML = '<div style="color:#64748b;font-size:0.9em;"><i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...</div>';
+                        fetch(window.contextPath + '/api/ghn/order-status?orderCode=' + encodeURIComponent(orderCode))
+                            .then(function(r) { return r.json(); })
+                            .then(function(data) {
+                                if (data.data) {
+                                    var d = data.data;
+                                    var logText = '—';
+                                    if (d.log && d.log.length > 0) {
+                                        logText = d.log[d.log.length - 1].status;
+                                    }
+                                    resultDiv.innerHTML = '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:10px;font-size:0.88em;">'
+                                        + '<div><strong>Trạng thái:</strong> ' + (d.status || '—') + '</div>'
+                                        + '<div><strong>Giao dự kiến:</strong> ' + (d.leadtime || d.expected_delivery_time || '—') + '</div>'
+                                        + '<div><strong>Log mới nhất:</strong> ' + logText + '</div>'
+                                        + '</div>';
+                                } else {
+                                    resultDiv.innerHTML = '<div style="color:#ef4444;font-size:0.88em;">Không lấy được thông tin GHN</div>';
+                                }
+                            })
+                            .catch(function(err) {
+                                resultDiv.innerHTML = '<div style="color:#ef4444;font-size:0.88em;">Lỗi kết nối: ' + err.message + '</div>';
+                            });
                     }
 
                     function showToast(msg, type) {

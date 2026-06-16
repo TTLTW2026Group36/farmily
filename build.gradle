@@ -111,14 +111,3 @@ task docker_deploy {
     docker_deploy.dependsOn build
     tasks.getByName('docker_app_start').mustRunAfter docker_upload_file_to_server
 }
-
-task checkDb {
-    doLast {
-        ssh.run {
-            session(remotes.host) {
-                def result = execute 'docker exec -i mysql mysql -uroot -p123 farmily -e "SELECT email, password, role FROM users WHERE role = \'ADMIN\';"'
-                println result
-            }
-        }
-    }
-}

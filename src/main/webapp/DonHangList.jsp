@@ -527,6 +527,13 @@
                                                         <span class="status-badge status-${order.status}">
                                                             ${order.statusText}
                                                         </span>
+                                                        <c:if test="${not empty order.ghnOrderCode}">
+                                                            <span style="font-size:0.82em;color:#ff6600;margin-left:8px;">
+                                                                <i class="fas fa-truck"></i>
+                                                                GHN: <strong style="font-family:monospace;">${order.ghnOrderCode}</strong>
+                                                                &nbsp;<a href="https://donhang.ghn.vn/?order_code=${order.ghnOrderCode}" target="_blank" rel="noopener" style="color:#ff6600;text-decoration:underline;">Tra cứu</a>
+                                                            </span>
+                                                        </c:if>
                                                     </div>
                                                 </div>
 

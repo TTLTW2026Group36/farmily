@@ -232,6 +232,15 @@
                                         <p class="info-label">Phương thức thanh toán:</p>
                                         <p class="info-value">${order.paymentMethod.name}</p>
                                     </div>
+                                    <c:if test="${not empty order.ghnOrderCode}">
+                                        <div class="info-col">
+                                            <p class="info-label">Mã vận đơn (GHN):</p>
+                                            <p class="info-value">
+                                                <strong style="font-family:monospace; color: #ff6600;">${order.ghnOrderCode}</strong>
+                                                &nbsp;<a href="https://donhang.ghn.vn/?order_code=${order.ghnOrderCode}" target="_blank" rel="noopener" style="color:#ff6600;text-decoration:underline; font-size: 0.95em;"><i class="fas fa-search"></i> Tra cứu</a>
+                                            </p>
+                                        </div>
+                                    </c:if>
                                 </div>
                             </div>
 

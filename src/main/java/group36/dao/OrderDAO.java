@@ -60,6 +60,11 @@ public class OrderDAO extends BaseDao {
                         } catch (SQLException e) {
                         }
 
+                        try {
+                                order.setGhnOrderCode(rs.getString("ghn_order_code"));
+                        } catch (SQLException e) {
+                        }
+
                         return order;
                 }
         }
@@ -183,6 +188,14 @@ public class OrderDAO extends BaseDao {
                 return get().withHandle(handle -> handle.createUpdate(sql)
                                 .bind("id", orderId)
                                 .bind("adminNote", adminNote)
+                                .execute());
+        }
+
+        public int saveGhnOrderCode(int orderId, String ghnOrderCode) {
+                String sql = "UPDATE orders SET ghn_order_code = :ghnOrderCode WHERE id = :id";
+                return get().withHandle(handle -> handle.createUpdate(sql)
+                                .bind("id", orderId)
+                                .bind("ghnOrderCode", ghnOrderCode)
                                 .execute());
         }
 
