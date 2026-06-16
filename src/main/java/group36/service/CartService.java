@@ -1,7 +1,5 @@
 package group36.service;
 
-import group36.dao.CartDAO;
-import group36.dao.CartItemDAO;
 import group36.dao.FlashSaleDAO;
 import group36.dao.OrderDetailDAO;
 import group36.dao.ProductDAO;
@@ -12,22 +10,44 @@ import group36.model.CartItem;
 import group36.model.FlashSale;
 import group36.model.Product;
 import group36.model.ProductVariant;
+import group36.util.RedisPool;
+import redis.clients.jedis.Jedis;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
 
 public class CartService {
-    private final CartDAO cartDAO;
-    private final CartItemDAO cartItemDAO;
+
     private final ProductDAO productDAO;
     private final ProductVariantDAO variantDAO;
     private final ProductImageDAO imageDAO;
     private final FlashSaleDAO flashSaleDAO;
     private final OrderDetailDAO orderDetailDAO;
 
+    private static final int CART_TTL_SECONDS;
+
+    static {
+        Properties props = new Properties();
+        int ttl = 2592000;
+        try (InputStream in = CartService.class.getClassLoader().getResourceAsStream("config.properties")) {
+            if (in != null) {
+                props.load(in);
+                String val = props.getProperty("redis.cart.ttl.seconds");
+                if (val != null && !val.trim().isEmpty()) {
+                    ttl = Integer.parseInt(val.trim());
+                }
+            }
+        } catch (IOException | NumberFormatException ignored) {
+        }
+        CART_TTL_SECONDS = ttl;
+    }
+
     public CartService() {
-        this.cartDAO = new CartDAO();
-        this.cartItemDAO = new CartItemDAO();
         this.productDAO = new ProductDAO();
         this.variantDAO = new ProductVariantDAO();
         this.imageDAO = new ProductImageDAO();
@@ -35,42 +55,56 @@ public class CartService {
         this.orderDetailDAO = new OrderDetailDAO();
     }
 
-    public Cart getCartByUserId(int userId) {
-        Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
-
-        if (cartOpt.isPresent()) {
-            Cart cart = cartOpt.get();
-            loadCartItems(cart);
-            return cart;
-        }
-
-        Cart emptyCart = new Cart(userId);
-        return emptyCart;
+    private String cartKey(int userId) {
+        return "cart:user:" + userId;
     }
 
-    public Cart getOrCreateCart(int userId) {
-        Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
+    private String encodeField(int productId, Integer variantId) {
+        return productId + "_" + (variantId != null ? variantId : 0);
+    }
 
-        if (cartOpt.isPresent()) {
-            return cartOpt.get();
-        }
+    private int encodeItemId(int productId, Integer variantId) {
+        return productId * 1000000 + (variantId != null ? variantId : 0);
+    }
 
+    private int[] decodeItemId(int itemId) {
+        int productId = itemId / 1000000;
+        int variantId = itemId % 1000000;
+        return new int[]{productId, variantId};
+    }
+
+    public Cart getCartByUserId(int userId) {
         Cart cart = new Cart(userId);
-        int cartId = cartDAO.insert(cart);
-        cart.setId(cartId);
+        try (Jedis jedis = RedisPool.getConnection()) {
+            Map<String, String> hash = jedis.hgetAll(cartKey(userId));
+            if (hash == null || hash.isEmpty()) {
+                return cart;
+            }
+            List<CartItem> items = new ArrayList<>();
+            for (Map.Entry<String, String> entry : hash.entrySet()) {
+                String[] parts = entry.getKey().split("_");
+                int productId = Integer.parseInt(parts[0]);
+                int variantIdRaw = Integer.parseInt(parts[1]);
+                Integer variantId = variantIdRaw == 0 ? null : variantIdRaw;
+                int quantity = Integer.parseInt(entry.getValue());
+
+                CartItem item = new CartItem(0, productId, variantId, quantity);
+                item.setId(encodeItemId(productId, variantId));
+                loadItemDetails(item, userId);
+                items.add(item);
+            }
+            cart.setItems(items);
+        }
         return cart;
     }
 
     public int getCartItemCount(int userId) {
-        Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
-        if (cartOpt.isPresent()) {
-            return cartItemDAO.countByCartId(cartOpt.get().getId());
+        try (Jedis jedis = RedisPool.getConnection()) {
+            return (int) jedis.hlen(cartKey(userId));
         }
-        return 0;
     }
 
     public CartItem addToCart(int userId, int productId, Integer variantId, int quantity) {
-
         if (quantity <= 0) {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
@@ -89,16 +123,12 @@ public class CartService {
             }
         }
 
-        Cart cart = getOrCreateCart(userId);
-
-        Optional<CartItem> existingItem = cartItemDAO.findByCartAndProduct(cart.getId(), productId, variantId);
-
         Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
         if (flashSaleOpt.isPresent()) {
             FlashSale fs = flashSaleOpt.get();
             if (fs.getMaxQtyPerUser() > 0) {
                 int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, productId, fs.getStartTime(), fs.getEndTime());
-                int currentInCart = existingItem.map(CartItem::getQuantity).orElse(0);
+                int currentInCart = getCurrentQuantityFromRedis(userId, productId, variantId);
                 int newQty = currentInCart + quantity;
                 if (purchased >= fs.getMaxQtyPerUser()) {
                     throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
@@ -110,28 +140,28 @@ public class CartService {
             }
         }
 
-        if (existingItem.isPresent()) {
-            CartItem item = existingItem.get();
-            int newQuantity = item.getQuantity() + quantity;
+        String field = encodeField(productId, variantId);
+        int newQuantity;
+        try (Jedis jedis = RedisPool.getConnection()) {
+            String current = jedis.hget(cartKey(userId), field);
+            int currentQty = current != null ? Integer.parseInt(current) : 0;
+            newQuantity = currentQty + quantity;
 
             if (variant != null && variant.getStock() < newQuantity) {
                 throw new IllegalArgumentException(
                         "Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
             }
 
-            cartItemDAO.updateQuantity(item.getId(), newQuantity);
-            item.setQuantity(newQuantity);
-            item.setProduct(product);
-            item.setVariant(variant);
-            return item;
-        } else {
-            CartItem item = new CartItem(cart.getId(), productId, variantId, quantity);
-            int itemId = cartItemDAO.insert(item);
-            item.setId(itemId);
-            item.setProduct(product);
-            item.setVariant(variant);
-            return item;
+            jedis.hset(cartKey(userId), field, String.valueOf(newQuantity));
+            jedis.expire(cartKey(userId), CART_TTL_SECONDS);
         }
+
+        CartItem item = new CartItem(0, productId, variantId, newQuantity);
+        item.setId(encodeItemId(productId, variantId));
+        item.setProduct(product);
+        item.setVariant(variant);
+        applyFlashSalePrice(item, userId);
+        return item;
     }
 
     public CartItem updateQuantity(int userId, int itemId, int quantity) {
@@ -139,135 +169,133 @@ public class CartService {
             throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
 
-        CartItem item = cartItemDAO.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng"));
+        int[] decoded = decodeItemId(itemId);
+        int productId = decoded[0];
+        Integer variantId = decoded[1] == 0 ? null : decoded[1];
 
-        Cart cart = cartDAO.findById(item.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại"));
-
-        if (cart.getUserId() != userId) {
-            throw new IllegalArgumentException("Không có quyền cập nhật giỏ hàng này");
+        if (productId <= 0) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng");
         }
 
-        if (item.getVariantId() != null) {
-            ProductVariant variant = variantDAO.findById(item.getVariantId()).orElse(null);
-            if (variant != null && variant.getStock() < quantity) {
-                throw new IllegalArgumentException(
-                        "Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
+        try (Jedis jedis = RedisPool.getConnection()) {
+            String field = encodeField(productId, variantId);
+            String existing = jedis.hget(cartKey(userId), field);
+            if (existing == null) {
+                throw new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng");
             }
-        }
 
-        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
-        if (flashSaleOpt.isPresent()) {
-            FlashSale fs = flashSaleOpt.get();
-            if (fs.getMaxQtyPerUser() > 0) {
-                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, item.getProductId(), fs.getStartTime(), fs.getEndTime());
-                if (purchased >= fs.getMaxQtyPerUser()) {
-                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
-                }
-                if (purchased + quantity > fs.getMaxQtyPerUser()) {
-                    int allowed = fs.getMaxQtyPerUser() - purchased;
-                    throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+            if (variantId != null) {
+                ProductVariant variant = variantDAO.findById(variantId).orElse(null);
+                if (variant != null && variant.getStock() < quantity) {
+                    throw new IllegalArgumentException(
+                            "Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
                 }
             }
+
+            Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
+            if (flashSaleOpt.isPresent()) {
+                FlashSale fs = flashSaleOpt.get();
+                if (fs.getMaxQtyPerUser() > 0) {
+                    int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, productId, fs.getStartTime(), fs.getEndTime());
+                    if (purchased >= fs.getMaxQtyPerUser()) {
+                        throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                    }
+                    if (purchased + quantity > fs.getMaxQtyPerUser()) {
+                        int allowed = fs.getMaxQtyPerUser() - purchased;
+                        throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                    }
+                }
+            }
+
+            jedis.hset(cartKey(userId), field, String.valueOf(quantity));
+            jedis.expire(cartKey(userId), CART_TTL_SECONDS);
         }
 
-        cartItemDAO.updateQuantity(itemId, quantity);
-        item.setQuantity(quantity);
-
+        CartItem item = new CartItem(0, productId, variantId, quantity);
+        item.setId(itemId);
         loadItemDetails(item, userId);
-
         return item;
     }
 
     public void removeItem(int userId, int itemId) {
+        int[] decoded = decodeItemId(itemId);
+        int productId = decoded[0];
+        Integer variantId = decoded[1] == 0 ? null : decoded[1];
 
-        CartItem item = cartItemDAO.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng"));
-
-        Cart cart = cartDAO.findById(item.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại"));
-
-        if (cart.getUserId() != userId) {
-            throw new IllegalArgumentException("Không có quyền xóa sản phẩm này");
+        if (productId <= 0) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng");
         }
 
-        cartItemDAO.delete(itemId);
+        try (Jedis jedis = RedisPool.getConnection()) {
+            jedis.hdel(cartKey(userId), encodeField(productId, variantId));
+        }
     }
 
     public void clearCart(int userId) {
-        Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
-        if (cartOpt.isPresent()) {
-            cartItemDAO.deleteByCartId(cartOpt.get().getId());
+        try (Jedis jedis = RedisPool.getConnection()) {
+            jedis.del(cartKey(userId));
         }
     }
 
-    public CartItem updateVariant(int userId, int itemId, int variantId) {
-        CartItem item = cartItemDAO.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng"));
+    public CartItem updateVariant(int userId, int itemId, int newVariantId) {
+        int[] decoded = decodeItemId(itemId);
+        int productId = decoded[0];
+        Integer oldVariantId = decoded[1] == 0 ? null : decoded[1];
 
-        Cart cart = cartDAO.findById(item.getCartId())
-                .orElseThrow(() -> new IllegalArgumentException("Giỏ hàng không tồn tại"));
-
-        if (cart.getUserId() != userId) {
-            throw new IllegalArgumentException("Không có quyền cập nhật giỏ hàng này");
+        if (productId <= 0) {
+            throw new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng");
         }
 
-        ProductVariant variant = variantDAO.findById(variantId)
+        ProductVariant newVariant = variantDAO.findById(newVariantId)
                 .orElseThrow(() -> new IllegalArgumentException("Phân loại sản phẩm không tồn tại"));
 
-        if (variant.getProductId() != item.getProductId()) {
+        if (newVariant.getProductId() != productId) {
             throw new IllegalArgumentException("Phân loại không thuộc sản phẩm này");
         }
 
-        if (variant.getStock() < item.getQuantity()) {
-            throw new IllegalArgumentException(
-                    "Số lượng tồn kho không đủ. Chỉ còn " + variant.getStock() + " sản phẩm.");
-        }
+        String oldField = encodeField(productId, oldVariantId);
+        String newField = encodeField(productId, newVariantId);
 
-        Optional<CartItem> existing = cartItemDAO.findByCartAndProduct(cart.getId(), item.getProductId(), variantId);
-        int newQty = item.getQuantity();
-        if (existing.isPresent() && existing.get().getId() != itemId) {
-            newQty += existing.get().getQuantity();
-        }
-
-        Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
-        if (flashSaleOpt.isPresent()) {
-            FlashSale fs = flashSaleOpt.get();
-            if (fs.getMaxQtyPerUser() > 0) {
-                int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, item.getProductId(), fs.getStartTime(), fs.getEndTime());
-                if (purchased >= fs.getMaxQtyPerUser()) {
-                    throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
-                }
-                if (purchased + newQty > fs.getMaxQtyPerUser()) {
-                    int allowed = fs.getMaxQtyPerUser() - purchased;
-                    throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
-                }
+        int finalQty;
+        try (Jedis jedis = RedisPool.getConnection()) {
+            String oldQtyStr = jedis.hget(cartKey(userId), oldField);
+            if (oldQtyStr == null) {
+                throw new IllegalArgumentException("Sản phẩm không tồn tại trong giỏ hàng");
             }
-        }
+            int oldQty = Integer.parseInt(oldQtyStr);
 
-        if (existing.isPresent() && existing.get().getId() != itemId) {
-            CartItem existingItem = existing.get();
-            int finalQty = existingItem.getQuantity() + item.getQuantity();
+            String existingNewStr = jedis.hget(cartKey(userId), newField);
+            int existingNewQty = existingNewStr != null ? Integer.parseInt(existingNewStr) : 0;
+            finalQty = oldQty + existingNewQty;
 
-            if (variant.getStock() < finalQty) {
+            if (newVariant.getStock() < finalQty) {
                 throw new IllegalArgumentException(
-                        "Số lượng tồn kho không đủ cho việc gộp. Chỉ còn " + variant.getStock() + " sản phẩm.");
+                        "Số lượng tồn kho không đủ cho việc gộp. Chỉ còn " + newVariant.getStock() + " sản phẩm.");
             }
 
-            cartItemDAO.updateQuantity(existingItem.getId(), finalQty);
-            cartItemDAO.delete(itemId);
+            Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(productId);
+            if (flashSaleOpt.isPresent()) {
+                FlashSale fs = flashSaleOpt.get();
+                if (fs.getMaxQtyPerUser() > 0) {
+                    int purchased = orderDetailDAO.getPurchasedQuantityInTimeRange(userId, productId, fs.getStartTime(), fs.getEndTime());
+                    if (purchased >= fs.getMaxQtyPerUser()) {
+                        throw new IllegalArgumentException("Bạn đã mua sản phẩm này đạt giới hạn tối đa của chương trình Flash Sale (" + fs.getMaxQtyPerUser() + " sản phẩm)");
+                    }
+                    if (purchased + finalQty > fs.getMaxQtyPerUser()) {
+                        int allowed = fs.getMaxQtyPerUser() - purchased;
+                        throw new IllegalArgumentException("Bạn chỉ được mua tối đa " + allowed + " sản phẩm này trong chương trình Flash Sale (đã mua: " + purchased + ")");
+                    }
+                }
+            }
 
-            existingItem.setQuantity(finalQty);
-            loadItemDetails(existingItem, userId);
-            return existingItem;
+            jedis.hdel(cartKey(userId), oldField);
+            jedis.hset(cartKey(userId), newField, String.valueOf(finalQty));
+            jedis.expire(cartKey(userId), CART_TTL_SECONDS);
         }
 
-        cartItemDAO.updateVariant(itemId, variantId);
-        item.setVariantId(variantId);
-
+        CartItem item = new CartItem(0, productId, newVariantId, finalQty);
+        item.setId(encodeItemId(productId, newVariantId));
         loadItemDetails(item, userId);
-
         return item;
     }
 
@@ -275,22 +303,15 @@ public class CartService {
         return variantDAO.findByProductId(productId);
     }
 
-    private void loadCartItems(Cart cart) {
-        if (cart == null)
-            return;
-
-        List<CartItem> items = cartItemDAO.findByCartId(cart.getId());
-
-        for (CartItem item : items) {
-            loadItemDetails(item, cart.getUserId());
+    private int getCurrentQuantityFromRedis(int userId, int productId, Integer variantId) {
+        try (Jedis jedis = RedisPool.getConnection()) {
+            String val = jedis.hget(cartKey(userId), encodeField(productId, variantId));
+            return val != null ? Integer.parseInt(val) : 0;
         }
-
-        cart.setItems(items);
     }
 
     private void loadItemDetails(CartItem item, Integer userId) {
-        if (item == null)
-            return;
+        if (item == null) return;
 
         productDAO.findById(item.getProductId()).ifPresent(product -> {
             product.setImages(imageDAO.findByProductId(product.getId()));
@@ -316,8 +337,7 @@ public class CartService {
     }
 
     private void applyFlashSalePrice(CartItem item, Integer userId) {
-        if (item == null)
-            return;
+        if (item == null) return;
 
         Optional<FlashSale> flashSaleOpt = flashSaleDAO.findActiveByProductId(item.getProductId());
 
@@ -333,7 +353,6 @@ public class CartService {
                 }
 
                 double originalPrice = item.getOriginalUnitPrice();
-
                 if (originalPrice > 0) {
                     double salePrice = flashSale.getSalePrice(originalPrice);
                     item.setFlashSalePrice(salePrice);
@@ -380,7 +399,7 @@ public class CartService {
         item.setProduct(product);
         item.setVariant(variant);
         applyFlashSalePrice(item, userId);
-        
+
         product.setImages(imageDAO.findByProductId(product.getId()));
         List<ProductVariant> variants = variantDAO.findByProductId(product.getId());
         product.setVariants(variants);

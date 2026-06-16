@@ -185,8 +185,9 @@ public class PlaceOrderController extends HttpServlet {
                             buyNowCart.getItems(), shippingFee, couponCode, appliedDiscountAmount, freeshipCouponCode, appliedFreeshipDiscountAmount);
                     session.removeAttribute("buyNowCart");
                 } else {
-                    order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note,
+                order = orderService.createOrder(user.getId(), addressId, paymentMethodId, note,
                             shippingFee, couponCode, appliedDiscountAmount, freeshipCouponCode, appliedFreeshipDiscountAmount);
+                    cartService.clearCart(user.getId());
                     session.setAttribute("cartCount", 0);
                 }
 

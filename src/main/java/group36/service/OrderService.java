@@ -76,13 +76,9 @@ public class OrderService {
             throw new IllegalArgumentException("Phương thức thanh toán không hợp lệ");
         }
 
-        Optional<Cart> cartOpt = cartDAO.findByUserId(userId);
-        if (cartOpt.isEmpty()) {
-            throw new IllegalArgumentException("Giỏ hàng trống");
-        }
-
-        Cart cart = cartOpt.get();
-        List<CartItem> cartItems = cartItemDAO.findByCartId(cart.getId());
+        CartService cartService = new CartService();
+        Cart cart = cartService.getCartByUserId(userId);
+        List<CartItem> cartItems = cart.getItems();
         if (cartItems.isEmpty()) {
             throw new IllegalArgumentException("Giỏ hàng trống");
         }
@@ -153,7 +149,7 @@ public class OrderService {
             o.setFreeshipCouponId(finalFreeshipCouponId);
             o.setFreeshipDiscountAmount(finalFreeshipDiscountAmount);
             o.setStatus(Order.STATUS_PENDING);
-            return executeOrderTransaction(handle, o, cartItems, cart.getId());
+            return executeOrderTransaction(handle, o, cartItems, null);
         });
 
         if (couponId != null && discountAmount > 0) {

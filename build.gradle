@@ -41,6 +41,7 @@ dependencies {
     compileOnly 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:3.1.1'
     compileOnly 'jakarta.el:jakarta.el-api:5.0.1'
 
+    implementation 'redis.clients:jedis:5.1.2'
     implementation 'org.slf4j:slf4j-simple:2.0.16'
     implementation 'com.resend:resend-java:3.1.0'
     implementation 'com.cloudinary:cloudinary-http5:2.3.0'
