@@ -1,0 +1,1128 @@
+Trang,STT,Chức năng,Trạng thái,Hiện trạng,Giải pháp và Flow hoạt động
+Đăng nhập,1,Đăng nhập thông thường,Hoàn Thành,"- Đã có các trường Username/Password cơ bản, check thông tin trùng với db sẽ login thành công","Giải pháp:
+- Servlet LoginController.java, Service AuthService.java, DAO UserDAO.java
+- Mã hóa so khớp mật khẩu bằng thư viện PasswordUtil (BCrypt)
+Flow:
+- Người dùng nhập Email và Mật khẩu tại DangNhap.jsp, gửi request POST đến /login
+- LoginController.doPost() nhận tham số, gọi AuthService.checkLogin(username, password)
+- AuthService truy vấn user bằng UserDAO.findByEmail(email)
+- Nếu tìm thấy, so khớp hash mật khẩu bằng PasswordUtil.checkPassword(rawPassword, hashedPassword)
+- Nếu khớp, trả về đối tượng User và lưu vào session.setAttribute(""auth"", u)"
+,2,Chức năng qua FB và GG,Hoàn Thành,- Đã tích hợp đăng nhập qua bên thứ 3 nền tảng FB và Gmail,"Giải pháp:
+- LoginController.java (doGet), GoogleAuthService.java, FacebookAuthService.java
+- Gọi REST API lấy OAuth Token và User Info từ Google/Facebook
+Flow:
+- Người dùng nhấn nút ""Đăng nhập với Google/Facebook""
+- Hệ thống chuyển hướng sang Authorization Server của Google/Facebook
+- Sau khi xác thực, Google/Facebook redirect về /login kèm theo code (Authorization Code)
+- LoginController.doGet() bắt tham số code, gọi GoogleAuthService.getToken(code) lấy Access Token, sau đó gọi GoogleAuthService.getUserInfo(accessToken)
+- Gọi tiếp GoogleAuthService.loginOrRegister(ggAccount) để kiểm tra trong database: nếu email chưa tồn tại thì tự động tạo tài khoản mới, ngược lại lấy thông tin tài khoản cũ
+- Lưu user vào session và redirect về /home"
+,3,Hiện thị mật khẩu (Login user),Hoàn Thành,"-Người dùng có thể kiểm tra lại mật khẩu mình đã nhập để tránh sai sót
+- Thêm biểu tượng con mắt ở góc phải của input password.
+- Khi click vào icon, trạng thái input sẽ chuyển đổi qua lại giữa dạng ẩn và dạng văn bản rõ (plaintext).
+- Icon cũng cần thay đổi hình ảnh khi được click","Giải pháp:
+- Xử lý bằng Vanilla JavaScript ở Frontend (phía client), thay đổi thuộc tính type của thẻ input
+Flow:
+- Người dùng click vào icon con mắt (.toggle-password) bên cạnh ô nhập mật khẩu
+- JavaScript bắt sự kiện click, kiểm tra thuộc tính type của input mật khẩu
+- Nếu type === ""password"", đổi sang ""text"" và đổi class icon sang con mắt gạch chéo
+- Nếu type === ""text"", đổi về ""password"""
+,4,Kiểm tra độ mạnh của mật khẩu (Login user),Hoàn Thành,"-Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để bảo mật
+- UI hiển thị 1 thanh cho thấy độ mạnh mật khẩu của người dùng đang nhập vào theo màu sắc.
+- Khi người dùng gõ thoả mãn những mong đợi thì dòng chữ đổi màu
+- Mật khẩu chỉ được chấp nhận khi đạt mức độ từ trung bình ","Giải pháp:
+- Kết hợp frontend JS tính điểm động và backend Java dùng java.util.regex.Pattern kiểm duyệt chặt chẽ khi submit
+Flow:
+- Người dùng gõ mật khẩu -> JS đo bằng regex, thay đổi chiều rộng và màu sắc thanh progress bar tương ứng với số điểm đạt được (Yếu, Trung bình, Mạnh)
+- Khi gửi request đăng ký -> RegisterController.doPost() dùng 5 biểu thức chính quy (Regex) kiểm tra. Nếu tổng điểm < 3, từ chối đăng ký và trả lỗi"
+,5,Tích hợp ghi nhớ đăng nhập (Login user),Hoàn Thành,"- tích hợp Remember me, người dùng phải đăng nhập lại mỗi khi tắt web hoặc hết hạn session
+- Khách hàng sẽ không cần phải đăng nhập lại mỗi khi khởi động trình duyệt
+-Thêm checkbox ghi nhớ trên form login
+- Khi người dùng click vào checkbox thì hệ thống lưu lại token, lần sau đăng nhập hệ thống sẽ cấp quyền truy cập và không bắt đăng nhập lại","Giải pháp:
+- Sử dụng Cookie remember_me có cấu hình HttpOnly, Secure, SameSite=Strict và lưu trữ UUID Token tương ứng trong bảng refresh_tokens trong database
+- Kiểm soát bằng RememberMeFilter.java
+Flow:
+- Đăng nhập thành công và tick checkbox ""Ghi nhớ"" -> Servlet sinh UUID Token ngẫu nhiên
+- Gọi RefreshTokenDao.insertToken(userId, token, expireAt) lưu vào DB với hạn dùng 30 ngày
+- Trả về client cookie remember_me chứa giá trị token
+- Lần truy cập sau, RememberMeFilter.doFilter() chặn request -> Đọc cookie remember_me -> Gọi tokenDao.findByToken(token)
+- Nếu token tồn tại và chưa hết hạn, truy xuất user tương ứng và set vào session: session.setAttribute(""auth"", user)"
+,6,Khi nhập sai thông tin ,Hoàn Thành,"- Thay đổi cơ chế khi sai chỉ cần gửi 1 thông báo ""Email or password invalid"" mà không xoá đi những thông tin do người dùng đã nhập vào giúp tối ưu thời gian và trãi nghiệm của người dùng tốt hơn","Giải pháp:
+- Sử dụng cơ chế Request Forwarding kết hợp Request Attributes
+Flow:
+- Người dùng nhập sai mật khẩu -> LoginController.doPost() nhận diện đăng nhập thất bại
+- Servlet gọi request.setAttribute(""username"", username) và request.setAttribute(""error"", ""Email hoặc mật khẩu không chính xác!"")
+- Servlet forward request về /DangNhap.jsp bằng request.getRequestDispatcher(""/DangNhap.jsp"").forward(...)
+- File JSP lấy attribute và hiển thị lại: <input name=""username"" value=""${username}"" />"
+Đăng ký (user),7,Đăng ký thông thường,Hoàn Thành,"Người dùng có thể nhập thông tin vào cái ô để tạo tài khoản, đã có thể xác thực dịnh dạng số điện thoại ít nhất 10 ký tự và bắt đầu bằng 0, password phải có ít nhất 5 ký tự","Giải pháp:
+- Servlet RegisterController.java, Service AuthService.java, DAO UserDAO.java
+Flow:
+- Người dùng gửi dữ liệu đăng ký -> RegisterController.doPost() validate định dạng SĐT (Regex ^0\\d{9,}$)
+- Kiểm tra email đã được đăng ký chưa qua authService.isEmailExists(email)
+- Gọi authService.register(user) -> Thực hiện mã hóa mật khẩu -> Gọi UserDAO.insert(user) lưu vào DB"
+,8,Xác thực email ,Hoàn Thành,"- Xác thực trong phần hồ sơ tài khoản, nếu nguời dùng chưa xác thực thì hiện thị chưa xác thực, đã xác thực thì hiện thị đã xác thực
+- Gửi một đường link kích hoạt (có thời hạn) vào email người dùng.","Giải pháp:
+- EmailVerificationService.sendVerificationEmail() sinh UUID token -> Lưu DB tokenDao.insertToken (hạn 24h) -> Gửi mail chứa link /verify-email?token=.... Click link -> VerifyEmailController.doGet() gọi verifyToken(token) -> Cập nhật DB qua authDao.updateEmailVerificationStatus(userId, true)
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,9,Thừa khoảng trắng khi đăng ký ,Hoàn Thành,"- Hệ thống tự động dọn dẹp các lỗi gõ phím nhỏ nhặt để người dùng không bị cản trở bởi những lỗi vô lý
+- Trước khi kiểm tra dữ liệu hoặc lưu vào Database, hệ thống ngầm tự động cắt bỏ các khoảng trắng thừa ở đầu và cuối (Trim) của trường Email.","Giải pháp:
+- Sử dụng hàm trim() của lớp String trong Java trước khi thực hiện validate hoặc lưu vào Database
+Flow:
+- Khi nhận dữ liệu từ request -> Servlet xử lý cắt bỏ khoảng trắng: request.getParameter(""email"").trim()"
+Quên mật khẩu,10,Gửi OTP,Hoàn Thành,"- Mã OTP được hệ thống sinh ngẫu nhiên cho mỗi yêu cầu.
+- Tích hợp dịch vụ gửi mã tự động qua Email hoặc SMS thay vì dữ liệu tĩnh
+- Mã hóa OTP khi lưu trữ tạm thời dưới Database để đảm bảo an ninh","Giải pháp:
+- ForgotPasswordController.java, PasswordResetService.java, PasswordResetTokenDAO.java
+- Sử dụng lớp SecureRandom để tạo mã và gửi email bất đồng bộ bằng EmailUtil.sendEmailAsync
+Flow:
+- Nhập email quên mật khẩu -> ForgotPasswordController.doPost()
+- Gọi passwordResetService.generateOTP(email)
+- Sinh mã OTP ngẫu nhiên -> Vô hiệu hóa các mã OTP cũ của user -> Lưu mã OTP mới vào bảng password_reset_tokens
+- Gửi email chứa mã OTP đến người dùng"
+,11,Thời hạn tồn tại của OTP,Hoàn Thành,"- Thiết lập thời gian hết hạn cụ thể cho mã OTP
+- Hiển thị thời gian đếm ngược trên giao diện để người dùng biết ","Giải pháp:
+- Lưu trữ thuộc tính expire_at kiểu Timestamp trong bảng password_reset_tokens
+- Đếm ngược 300 giây bằng JavaScript trên file JSP XacNhanOTP.jsp
+Flow:
+- Khi sinh mã OTP, tính expireAt = CurrentTime + 5 phút
+- Khi người dùng nhập OTP và submit -> PasswordResetService.validateOTP() được gọi
+- So sánh expireAt với thời gian hiện tại (System.currentTimeMillis()). Nếu vượt quá, ném lỗi hết hạn"
+,12,Kiểm soát việc gửi lại mã OTP ,Hoàn Thành,"- Có cooldown giữa các lần gửi lại mã
+- Thêm logic đếm số lần gửi lại để chống spam API
+- Vô hiệu nút gửi lại chỉ (làm mờ) và chỉ sáng lên sau cooldown (vd: 60s)","Giải pháp:
+- Xử lý chặn rate limit dựa trên thời gian tạo của OTP cũ trong DB và tăng số lần nhập sai so_lan_sai trong DB
+Flow:
+- Nhấn nút ""Gửi lại mã"" -> Gọi passwordResetService.validateRateLimit(email)
+- Truy vấn token gần nhất. Nếu thời gian chênh lệch < 60s, chặn và bắt đợi
+- Khi nhập sai OTP -> PasswordResetService.validateOTP() gọi tokenDAO.tangSoLanSai(tokenId). Nếu số lần sai đạt 5, vô hiệu hóa mã OTP lập tức"
+Thanh header,13,Tìm kiếm sản phẩm,Hoàn Thành,"- Lọc được các sản phẩm theo chữ cái gõ vào và đưa ra được các gợi ý
+- Có thể lọc được sản phẩm khi nhập không dấu
+- Danh sách hiển thị sản phẩm có tên, giá và cả hình ảnh của sản phẩm
+","Giải pháp:
+- Endpoint API JSON /api/search xử lý bởi SearchController.java, Service ProductService.java, DAO ProductDAO.java
+- Sử dụng truy vấn SQL LIKE trên Collation không phân biệt dấu (utf8mb4_general_ci hoặc tương đương của MySQL)
+Flow:
+- Người dùng gõ chữ vào thanh tìm kiếm -> JS trigger sự kiện input -> Gửi AJAX GET tới /api/search?q=keyword
+- SearchController.doGet() gọi productService.searchProducts(keyword)
+- ProductDAO.searchByName(keyword) thực thi câu lệnh SQL tìm kiếm
+- Trả về danh sách JSON chứa tối đa 8 sản phẩm. JS vẽ giao diện dropdown gợi ý kết quả dưới thanh tìm kiếm"
+,14,Lịch sử tìm kiếm,Giảm tải,"Mong muốn: ""- Người dùng không phải gõ lại từ đầu mỗi khi muốn tìm lại sản phẩm trước đó.
+- Hỗ trợ nhu cầu của khách hàng bằng cách tìm kiếm sản phẩm theo chữ cái và tên của các loại rau/ củ/ quả""",
+,15,Hỗ trợ khách hàng,Hoàn Thành,"- Tích hợp thành nút bấm để chuyển tiếp tới cuộc gọi trực tiếp, hay Zalo để nhanh chóng liên lạc.","Giải pháp:
+- Thẻ HTML static link <a> trên header/footer
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,16,Tài khoản,Hoàn Thành,"- Khi chưa đăng nhập sẽ chỉ hiện phần đăng nhập
+- Sau khi đăng nhập nếu user di chuyển con trỏ vào sẽ hiển thị gồm: 
++ Hồ sơ của tôi
++ Đơn hàng
++ Ví voucher
++ Đăng xuất
+","Giải pháp:
+- Conditional rendering trong JSTL (c:if) kiểm tra đối tượng auth trong Session
+Flow:
+- Khi server render file JSP, kiểm tra ${sessionScope.auth}
+- Nếu null, hiển thị nút đăng nhập
+- Nếu khác null, hiển thị tên user và khối HTML dropdown chứa các liên kết: /ho-so, /ho-so/don-hang, /ho-so?tab=wishlist, /logout"
+,17,Wishlist,Hoàn Thành,"- Có icon trái tim và hiện được số lượng sản phẩm đang được thêm vào
+- Khi click vào icon, dẫn người dùng đến trang danh sách sản phẩm yêu thích.
+- Đồng bộ Wishlist theo tài khoản
+- Icon tự động nảy số khi được người dùng ấn vào biểu tượng trái tim từ thẻ Sản phẩm.","Giải pháp:
+- API /api/wishlist, servlet WishlistController.java
+- Lưu trữ danh sách yêu thích trong DB qua bảng wishlists
+Flow:
+- Khi người dùng load trang, Servlet lấy số lượng yêu thích từ wishlistService.getWishlistCount(userId) và set vào session.setAttribute(""wishlistCount"", count)
+- Khi nhấn nút yêu thích ở thẻ sản phẩm -> Gửi AJAX POST /api/wishlist?productId=X -> WishlistController.doPost() thêm/xóa DB -> Trả về JSON chứa wishlistCount mới -> JS cập nhật số lượng hiển thị trên Badge trái tim ở header"
+,18,Thông báo,Hoàn Thành,"- Thông báo khuyến mãi 
+- Thông báo thông tin đơn hàng, trạng thái (chờ xác nhận, đang xử lý, đang giao, hoàn thành, đã hủy, đã được hoàn tiền)...","Giải pháp:
+- UserNotificationService.java và NotificationDAO.java lưu dữ liệu vào bảng notifications
+Flow:
+- Các nghiệp vụ đặt hàng, hủy đơn, hoặc Admin tạo Flash Sale sẽ gọi userNotificationService.createNotification(...)
+- Khi người dùng xem danh sách thông báo trên header -> JS gọi API lấy thông báo -> Hiển thị danh sách thông báo của user sắp xếp theo thời gian mới nhất"
+,19,Giỏ hàng,Hoàn Thành,"- Có biểu tượng giỏ hàng và hiển thị số lượng sản phẩm được thêm vào bên trong giỏ.
+- tự động reload khi thêm sản phẩm vào giỏ.","Giải pháp:
+- Lưu trữ giỏ hàng trong Redis kết hợp AJAX
+Flow:
+- Click thêm vào giỏ -> Gửi POST tới /api/cart -> AddToCartController.doPost() thêm sản phẩm -> Cập nhật session.setAttribute(""cartCount"", cartCount) -> Trả về JSON -> Frontend JS cập nhật badge giỏ hàng trên header không cần tải lại trang"
+Thanh footer,20,Đăng ký email nhận tin,Hoàn Thành,"- Đã cho phép nhập email và có thông báo thành công.
+- Có validation để email đúng định dạng.","Giải pháp:
+- Form đăng ký gửi AJAX POST, kiểm tra định dạng email bằng JavaScript trước khi gửi và Servlet Regex ở backend
+Flow:
+- Người dùng nhập email ở footer, nhấn đăng ký -> JS kiểm tra format email -> Gửi POST /api/newsletter -> Lưu email vào bảng newsletters trong DB"
+,21,Theo dõi chúng tôi ,Hoàn Thành,- Các icon mạng xã hội giúp người dùng có thể tìm kiếm thêm nhiều nguồn thông tin về Web,"Giải pháp:
+- Static HTML links trỏ tới URL mạng xã hội và các trang tĩnh động /static-page?type=policy_xyz quản lý bởi Admin
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,22,Chính sách,Hoàn Thành,- Các chính sách có đường dẫn chuyển trang khi click vào hỗ trợ người dùng nắm được các thông tin của web,"Giải pháp:
+- Static HTML links trỏ tới URL mạng xã hội và các trang tĩnh động /static-page?type=policy_xyz quản lý bởi Admin
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Thông tin tài khoản 
+/ho-so",23,Thông tin người dùng,Hoàn Thành,"Đã lấy được thông tin người dùng nhập vào để hiển thị lên trang hồ sơ (tên, email, sdt) ","Giải pháp:
+- Đọc đối tượng User từ Session attribute auth và hiển thị bằng Expression Language (EL) trên HoSo.jsp
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,24,Chỉnh sửa thông tin user,Hoàn Thành,"- Chỉnh sửa các thông tin Tên người dùng, Số điện thoại.
+- Đã tích hợp validation SĐT đề phòng user nhập bừa, thiếu.","Giải pháp:
+- Servlet /ho-so/update xử lý POST, UserService.java
+Flow:
+- Khách hàng thay đổi Tên hoặc SĐT -> Nhấn Lưu -> Gửi POST lên Servlet
+- Servlet validate SĐT bằng Regex ^0\\d{9,}$
+- Gọi userService.updateProfile(userId, name, phone) cập nhật DB
+- Cập nhật lại đối tượng user mới trong session"
+,25,Xác thực email,Hoàn Thành,"- Thiết lập hệ thống tự gửi mã xác nhận đến hòm thư email của user để xác thực email Tài khoản.
+- Mở rộng thêm: về cơ chế web bán hàng thì việc xác nhận email của khách hàng chỉ mang tính chất xác thực, và người sử dụng có thể là người lớn tuổi không hiểu rõ về công nghệ, nên có thể không cần đến email, hay xác thực email.","Giải pháp:
+- Thực hiện nghiệp vụ logic trên server.
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,26,Xác thực SĐT,Giảm tải,"Mong muốn: ""- Thiết lập hệ thống tự gửi mã xác nhận đến Zalo user hoặc trình giả lập sms tới SĐT để xác thực.
+- Mở rộng thêm: Nên có cơ chế này để tránh Spam, đặt đơn ảo, thuận tiện cho việc mkt các chương trình hay hỗ trợ chăm sóc khách hàng xử lý vấn đề nhanh chóng tiện lợi hơn.""",
+,27,Điểm thưởng của tôi,Giảm tải,"Mong muốn: ""- Thiết lập hệ thống tự gửi mã xác nhận đến Zalo user hoặc trình giả lập sms tới SĐT để xác thực.
+- Mở rộng thêm: Nên có cơ chế này để tránh Spam, đặt đơn ảo, thuận tiện cho việc mkt các chương trình hay hỗ trợ chăm sóc khách hàng xử lý vấn đề nhanh chóng tiện lợi hơn.""",
+,28,Lưu thay đổi,Hoàn Thành,"- Sau khi lưu trang web tự động cập nhật dữ liệu mới nhất mà không cần người dùng phải tải lại trang (F5) thủ công.
+- Nút lưu có thể tạm ẩn hoặc mờ đi sau khi nhấn để tránh việc người dùng bấm liên tục gây trùng lặp dữ liệu ","Giải pháp:
+- Sử dụng Fetch API (AJAX) kết hợp thuộc tính disabled của nút submit trong JavaScript
+Flow:
+- Click ""Lưu thay đổi"" -> JS chặn hành vi submit mặc định -> Set btnSave.disabled = true và đổi nhãn thành ""Đang lưu...""
+- Gửi request AJAX POST chứa dữ liệu form -> Nhận phản hồi JSON thành công -> Hiển thị Toast thông báo thành công -> Set btnSave.disabled = false"
+"Đơn hàng của bạn 
+/ho-so/don-hang",29,Tất cả,Hoàn Thành,- Hiện thị tất cá đơn hàng đang có,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,30,Chờ xác nhận,Hoàn Thành,- Hiện thị đơn hàng đang Chờ xác nhận,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,31,Đang xử lý,Hoàn Thành,- Hiện thị đơn hàng đang Đang xử lý,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,32,Đang giao,Hoàn Thành,- Hiện thị đơn hàng đang Đang giao,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,33,Hoàn thành,Hoàn Thành,- Hiện thị đơn hàng đang Hoàn thành,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,34,Hoàn tiền,Hoàn Thành,"- Sẽ có một from để gửi yêu cầu, kèm các thông tin như: thông tin đơn hàng, tổng số tiền, thời gian hoàn tiền, lý do, mô tả chi tiết, hình ảnh, video , có hệ thống chat chăm sóc khách hàng, và hiện thị các thông tin về đơn hàng hoàn tiền như ngân hàng, số tài khoản, tên chủ tài khoản.","Giải pháp:
+- RefundRequestController.java, RefundService.java, RefundDAO.java, CloudinaryService.java
+Flow:
+- Khách hàng click ""Yêu cầu hoàn tiền"" tại đơn hàng đã hoàn thành -> Điền form, tải ảnh/video minh chứng
+- Hệ thống gọi CloudinaryService upload ảnh/video lên Cloudinary và lấy URL
+- Lưu thông tin yêu cầu hoàn tiền vào DB với trạng thái PENDING
+- Tạo một AdminNotification báo cho Admin xử lý"
+,35,Đánh giá sản phẩm,Hoàn Thành,"Người dùng đánh giá được sản phẩm:                                                                                                                                                                                    - Chỉ user đã mua sản phẩm trong đơn hàng của chính họ mới được đánh giá.
+- Đơn hàng đó phải ở trạng thái hoàn thành thì mới được đánh giá
+- Mỗi dòng sản phẩm trong đơn hàng chỉ được đánh giá 1 lần.
+- Dù mua số lượng bao nhiêu trong cùng một dòng sản phẩm thì cũng chỉ được đánh giá 1 lần.
+- Nội dung đánh giá: Số sao: bắt buộc; nội dung: có thể có hoặc không; ảnh: có thể không có, hoặc tối đa 5 ảnh + 1 video mỗi file <= 10MB
+- Ở trang ho-so/don-hang có nút đánh giá,  sản phẩm chư đánh giá thì sẽ đánh giá , đánh giá rôi có quyền sửa đánh giá 1 lần","Giải pháp:
+- UserOrderController.java (doPost), ReviewDAO.java, ReviewImageDAO.java, CloudinaryService.java
+Flow:
+- Khách hàng click ""Đánh giá sản phẩm"" ở đơn hàng
+- Gửi POST tới /ho-so/don-hang với action=review kèm: orderId, productId, variantId, rating, reviewText, và mediaFiles (ảnh/video)
+- UserOrderController.handleSubmitReview() kiểm tra trạng thái đơn hàng (completed), kiểm tra xem sản phẩm trong đơn hàng đã được đánh giá chưa qua reviewDAO.existsByUserAndOrderAndProduct
+- Xác thực số lượng file (tối đa 5 ảnh, 1 video) và kích thước (<=10MB)
+- Thực hiện upload media lên Cloudinary, lưu thông tin đánh giá vào DB (reviewDAO.insert), và lưu các link ảnh/video vào bảng review_images"
+,36,Đã hủy,Hoàn Thành,- Hiện thị đơn hàng đang đã hủy,"Giải pháp:
+- Servlet UserOrderController.java, Service OrderService.java, DAO OrderDAO.java
+Flow:
+- Người dùng chọn tab trạng thái -> Gọi GET /ho-so/don-hang?status=status_name
+- UserOrderController.doGet() bắt tham số status
+- Gọi orderService.getOrdersByUserIdAndStatus(userId, status)
+- Trả về danh sách đơn hàng và chuyển tiếp sang JSP vẽ giao diện"
+,37,Chi tiết đơn hàng,Hoàn Thành,"- Xem đẩy đủ các thông tin, sản phẩm thuộc đơn hàng đó","Giải pháp:
+- UserOrderController.java (doGet với tham số id), OrderService.java
+Flow:
+- Click ""Xem chi tiết"" đơn hàng -> Gọi /ho-so/don-hang/detail?id=X
+- Servlet lấy thông tin đơn hàng (orderService.getOrderById), danh sách items (orderService.getOrderItems), lịch sử trạng thái (orderService.getStatusHistory)
+- Forward dữ liệu sang ChiTietDonHang.jsp"
+"Sổ địa chỉ
+/ho-so?tab=address",38,Thêm địa chỉ mới,Hoàn Thành,"- Có tích hợp validation SĐT, địa chỉ, đề phòng user nhập sai/thiếu
+- Đồng bộ với địa chỉ trang thanh toán.","Giải pháp:
+- AddressApiController.java (doGet/doPost/doPut/doDelete), AddressService.java, AddressDAO.java
+- Sử dụng Soft Delete (ẩn địa chỉ) để không làm ảnh hưởng tới các đơn hàng cũ đã đặt
+Flow:
+- Thêm địa chỉ mới (POST)**: Nhận thông tin địa chỉ -> Validate định dạng -> Gọi addressService.createAddress(address) lưu DB
+- Xóa địa chỉ (DELETE)**: Gọi /api/address?id=X -> Chuyển thành câu lệnh update cột is_deleted = true
+- Đặt mặc định (PUT)**: Gọi /api/address/default?id=X -> Chạy transaction: set is_default = false cho tất cả địa chỉ của user, sau đó set is_default = true cho địa chỉ X"
+,39,Cập nhật địa chỉ cũ,Hoàn Thành,"- Có tích hợp validation SĐT, địa chỉ, đề phòng user nhập sai/thiếu
+- đồng bộ với sổ địa chỉ.","Giải pháp:
+- AddressApiController.java (doGet/doPost/doPut/doDelete), AddressService.java, AddressDAO.java
+- Sử dụng Soft Delete (ẩn địa chỉ) để không làm ảnh hưởng tới các đơn hàng cũ đã đặt
+Flow:
+- Thêm địa chỉ mới (POST)**: Nhận thông tin địa chỉ -> Validate định dạng -> Gọi addressService.createAddress(address) lưu DB
+- Xóa địa chỉ (DELETE)**: Gọi /api/address?id=X -> Chuyển thành câu lệnh update cột is_deleted = true
+- Đặt mặc định (PUT)**: Gọi /api/address/default?id=X -> Chạy transaction: set is_default = false cho tất cả địa chỉ của user, sau đó set is_default = true cho địa chỉ X"
+,40,Người dùng xóa địa chỉ ( ẩn địa chỉ ),Hoàn Thành,- Người dùng có thể xóa đi địa chỉ ,"Giải pháp:
+- AddressApiController.java (doGet/doPost/doPut/doDelete), AddressService.java, AddressDAO.java
+- Sử dụng Soft Delete (ẩn địa chỉ) để không làm ảnh hưởng tới các đơn hàng cũ đã đặt
+Flow:
+- Thêm địa chỉ mới (POST)**: Nhận thông tin địa chỉ -> Validate định dạng -> Gọi addressService.createAddress(address) lưu DB
+- Xóa địa chỉ (DELETE)**: Gọi /api/address?id=X -> Chuyển thành câu lệnh update cột is_deleted = true
+- Đặt mặc định (PUT)**: Gọi /api/address/default?id=X -> Chạy transaction: set is_default = false cho tất cả địa chỉ của user, sau đó set is_default = true cho địa chỉ X"
+,41,Thiết lập mặc định,Hoàn Thành,- Chọn một địa chỉ trong sổ địa chỉ thành địa chỉ chính tự động chọn trong phần thanh toán,"Giải pháp:
+- AddressApiController.java (doGet/doPost/doPut/doDelete), AddressService.java, AddressDAO.java
+- Sử dụng Soft Delete (ẩn địa chỉ) để không làm ảnh hưởng tới các đơn hàng cũ đã đặt
+Flow:
+- Thêm địa chỉ mới (POST)**: Nhận thông tin địa chỉ -> Validate định dạng -> Gọi addressService.createAddress(address) lưu DB
+- Xóa địa chỉ (DELETE)**: Gọi /api/address?id=X -> Chuyển thành câu lệnh update cột is_deleted = true
+- Đặt mặc định (PUT)**: Gọi /api/address/default?id=X -> Chạy transaction: set is_default = false cho tất cả địa chỉ của user, sau đó set is_default = true cho địa chỉ X"
+"Đổi mật khẩu 
+/ho-so?tab=password",42,Đổi mật khẩu người dùng,Hoàn Thành,"- Vô hiệu hoá toàn bộ session cũ, buộc tất cả out ra để yêu cầu đăng nhập lại mật khẩu mới
+- Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt để bảo mật
+- UI hiển thị 1 thanh cho thấy độ mạnh mật khẩu của người dùng đang nhập vào theo màu sắc.
+- Khi người dùng gõ thoả mãn những mong đợi thì dòng chữ đổi màu
+- Mật khẩu chỉ được chấp nhận khi đạt mức độ từ trung bình","Giải pháp:
+- ChangePasswordController.java (doPost), AuthService.java
+Flow:
+- Người dùng nhập: Mật khẩu cũ, Mật khẩu mới, Xác nhận mật khẩu mới
+- Servlet validate mật khẩu cũ khớp mật khẩu hiện tại trong DB
+- Validate độ mạnh mật khẩu mới (Regex điểm $\ge 3$)
+- Gọi authService.updatePassword(userId, newPassword) -> Cập nhật DB
+- Hủy session hiện tại bằng session.invalidate() và redirect về /login"
+"Sản phẩm yêu thích
+/ho-so?tab=wishlist",43,Xóa khỏi yêu thích,Hoàn Thành,"Tích hợp tùy chọn sản phẩm hay toàn bộ sản phẩm có trong wishlist để xóa nhanh:
+- Đã có checkbox để chọn 1 hoặc nhiều sản phẩm
+- Có chức năng chọn tất cả 
+- Cho phép xóa hàng loạt sản phẩm đã chọn","Giải pháp:
+- WishlistController.java (doDelete) hỗ trợ nhận danh sách IDs phân cách bởi dấu phẩy
+Flow:
+- Người dùng tick chọn các sản phẩm yêu thích, click ""Xóa đã chọn""
+- Gửi request DELETE tới /api/wishlist?productIds=12,15,18
+- Servlet đọc tham số productIds, split chuỗi bằng dấu phẩy , thành danh sách các ID
+- Lần lượt gọi wishlistService.removeFromWishlist(userId, productId) để xóa DB
+- Cập nhật lại wishlistCount trên session và trả về JSON"
+,44,Hiển thị hết hàng khi sản phẩm yêu thích hết hàng,Hoàn Thành,- Tự động hiển thị hết hàng trên các món đã hết tồn kho,"Giải pháp:
+- So sánh tổng số lượng tồn kho totalStock của các biến thể sản phẩm khi render danh sách
+Flow:
+- Khi người dùng truy cập trang sản phẩm yêu thích -> Lấy danh sách wishlist từ DB
+- Với mỗi item, truy xuất thuộc tính totalStock của sản phẩm đó
+- Nếu totalStock <= 0, hiển thị tag ""Hết hàng"" màu xám đè lên sản phẩm và vô hiệu hóa nút thêm vào giỏ"
+,45,Nút thêm sản phẩm vào giỏ hàng,Hoàn Thành,- Tích hợp nút thêm vào giỏ hàng ở ngay sản phẩm luôn để thêm vào giỏ hàng nhanh không cần phải bấm vào sản phẩm rồi mới thêm được sản phẩm vào giỏ hàng,"Giải pháp:
+- Gửi AJAX POST lên /api/cart
+Flow:
+- Người dùng click nút ""Thêm vào giỏ"" dưới card sản phẩm yêu thích
+- JS gọi AJAX POST /api/cart gửi kèm productId, variantId (mặc định lấy variant rẻ nhất minPriceVariant của sản phẩm) và quantity=1
+- Server thêm vào giỏ hàng thành công -> Trả về cartCount mới -> Cập nhật badge giỏ hàng"
+Mã giảm giá ,46,Danh sách mã giảm giá,Hoàn Thành,"- Danh sách mã thì hiển thị:  Tên mã, loại mã( giảm theo phần trăm/ số tiền cố định/ phí vận chuyển) , số tiền được giảm tối đa, điều kiện đơn tối thiểu, hạn dử dụng
+- Mã có trạng thái như: Lưu mã, đã lưu, sắp hết hạn, đã dùng
+- Có chức năng lưu mã giảm giá
+","Giải pháp:
+- CouponListController.java, CouponService.java, CouponDAO.java
+Flow:
+- Người dùng truy cập trang ""Ví voucher"" -> Gọi GET /ho-so?tab=vouchers
+- Servlet lấy danh sách tất cả các coupon khả dụng và danh sách coupon đã lưu của user
+- Với mỗi coupon, tính toán trạng thái đối với user hiện tại (ví dụ: đã dùng hay đã lưu)
+- Trả về trang JSP hiển thị danh sách"
+,47,"Hiển thị trạng thái mã: Lưu mã, đã lưu, sắp hết hạn, đã dùng",Hoàn Thành,"- Hiển thị trạng thái lưu mã, đã lưu, sắp hết hạn, đã dùng thành công 
+- Khi ấn vào lưu mã, nút chuyển sang màu xanh với nhãn đã lưu: Mã đã được lưu vào ví voucher
+- Có hiển thị sắp hết hạn
+","Giải pháp:
+- API /api/coupon/save, CouponApiController.java (handleSave)
+Flow:
+- Click ""Lưu mã"" -> Gửi request POST tới /api/coupon/save?couponId=X
+- CouponApiController.handleSave() gọi couponService.saveCoupon(userId, couponId)
+- Lưu một bản ghi vào bảng user_coupons kết nối user và coupon
+- Trả về JSON { ""success"": true }. JS đổi style nút trên giao diện"
+,48,Sao chéo mã giảm giá,Hoàn Thành,"- Khi ấn vào nút sao chép, sao chép được mã để copy nhanh vào ô nhập mã voucher trong trang checkout","Giải pháp:
+- Frontend JavaScript sử dụng Web API navigator.clipboard
+Flow:
+- Người dùng nhấn nút ""Sao chép"" bên cạnh mã giảm giá
+- JS copy mã vào bộ nhớ đệm thiết bị và hiển thị Toast thông báo"
+Trang chủ,49,Một giao diện trực quan về tổng thể của website,Hoàn Thành,"- Hiện thị các thông tin, banner, danh mục sản phẩm, giá tốt, sản phẩm bán chạy, sản phẩm mới, tin tức một cách tổng quan để người dùng kịp nắm bắt thông tin cũng như kích thích user cảm thấy chuyển nghiệp và ấn mua hàng.","Giải pháp:
+- HomeController.java (doGet), các service ProductService, FlashSaleService, PostService, CategoryService
+Flow:
+- Client truy cập / hoặc /home
+- HomeController.doGet() lấy danh sách danh mục hoạt động, sản phẩm mới (productService.getNewestProducts(8)), sản phẩm bán chạy (productService.getBestSellingProducts(8)), flash sale đang hoạt động (flashSaleService.getActiveFlashSales()), bài viết mới (postService.getNewestPosts(4))
+- Set tất cả vào request attributes và forward sang index.jsp để render"
+"Giới thiệu
+/GioiThieu",50,Giới thiệu được sơ lược về website,Hoàn Thành,"- Chuyển nội dung sang dạng động, cho phép Admin chỉnh sửa văn bản và hình ảnh thông qua trang admin.","Giải pháp:
+- StaticPageService.java lấy nội dung trang tĩnh có type = 'about' từ bảng static_pages trong database
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+Danh mục sản phẩm,51,Menu các danh mục,Hoàn Thành,"- Hiển thị các danh mục sản phẩm và cho phép người dùng chuyển hướng khi click vào danh mục đó.
+- Tự động cập nhật khi thêm/sửa/xóa danh mục trong phần Admin","Giải pháp:
+- CategoryService.java và CategoryDAO.java
+Flow:
+- Trang JSP hoặc filter load danh sách danh mục đang hoạt động (categoryService.getAllActiveCategories())
+- JSP dùng vòng lặp <c:forEach> để render các item menu tương ứng"
+"Sản phẩm
+/san-pham",52,"Hiển thị danh mục sản phẩm, và các sản phẩm",Hoàn Thành,- Hiển thị đầy đủ các thông tin cơ bản về sản phẩm.,"Giải pháp:
+- ProductController.java (doGet), ProductService.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,53,Lọc sản phẩm đa thuộc tính,Hoàn Thành,"- Cho phép chọn nhiều điều kiện lọc cùng lúc(danh mục, trạng thái, từ khóa tìm kiếm, sản phẩm nổi bật) 
+- Có nút ""Áp dụng"" và ""Xóa bộ lọc"".","Giải pháp:
+- Servlet ProductController.java (doGet), gọi ProductService.getProductsFiltered(...) để lấy danh sách sản phẩm theo bộ lọc và forward sang SanPham.jsp render trực tiếp ở server-side.
+Flow:
+- Người dùng chọn các tiêu chí lọc trên sidebar trang sản phẩm (danh mục, trạng thái, từ khóa) và chọn sắp xếp.
+- Hệ thống gửi request GET tới /san-pham?categoryId=A&status=B&keyword=C&sort=D&page=1.
+- ProductController bắt các tham số query, parse dữ liệu và gọi service truy vấn cơ sở dữ liệu.
+- Trang SanPham.jsp nhận danh sách sản phẩm từ request attributes và hiển thị."
+,54,Hiển thị đã hết hàng ngoài card sản phẩm,Hoàn Thành,"- Đã hiển thị đã  nút ""Hết hàng"" màu xám khi sản phẩm hết tôn kho","Giải pháp:
+- Kiểm tra thuộc tính totalStock của sản phẩm
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,55,"Hiển thị tag hot, nút yêu thích",Hoàn Thành,"- Đã hiển thị tag hót nếu lượt bán hơn 50
+- Hiển thị chút yêu thích, khi ấn vào trái tim thì sản phẩm được thêm vào sản phẩm yêu thích","Giải pháp:
+- Logic render trên JSP dựa trên product.soldCount và gọi AJAX /api/wishlist khi click trái tim
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,56,"Bộ lọc sản phẩm: mặc định, sắp xếp theo giá, chữ cái, độ hot",Hoàn Thành,"- Người dùng có tìm kiếm nhanh sản phẩm phù hợp với nhu cầu, tiêu chí của mình.","Giải pháp:
+- Tham số sort truyền vào SQL Query
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Chi tiết sản phẩm
+/chi-tiet-san-pham",57,Hiển thị tình trạng sản phẩm,Hoàn Thành,- Hiển thị tình trạng sản phẩm còn hàng hay hết hàng theo tồn kho sản phẩm,"Giải pháp:
+- ProductDetailController.java (doGet), FlashSaleService.java
+Flow:
+- Người dùng vào /chi-tiet-san-pham?id=X
+- Servlet lấy thông tin sản phẩm và kiểm tra xem có chương trình Flash Sale nào đang áp dụng cho sản phẩm này không thông qua flashSaleService.getActiveFlashSaleByProductId(productId)
+- Lấy thời gian kết thúc flash sale truyền vào attribute flashSaleEndTime
+- Forward sang ChiTietSanPham.jsp chạy đồng hồ đếm ngược bằng JS"
+,58,Hiển thị số lượng sản phẩm đã bán ,Hoàn Thành,- Khách hàng xem được lượt bán của sản phẩm,"Giải pháp:
+- ProductDetailController.java (doGet), FlashSaleService.java
+Flow:
+- Người dùng vào /chi-tiet-san-pham?id=X
+- Servlet lấy thông tin sản phẩm và kiểm tra xem có chương trình Flash Sale nào đang áp dụng cho sản phẩm này không thông qua flashSaleService.getActiveFlashSaleByProductId(productId)
+- Lấy thời gian kết thúc flash sale truyền vào attribute flashSaleEndTime
+- Forward sang ChiTietSanPham.jsp chạy đồng hồ đếm ngược bằng JS"
+,59,Hiển thị flash sale,Hoàn Thành,- Khách hàng xem được sản phẩm đang được giảm bao nhiêu phần trăm và thời gian giảm giá kết thúc,"Giải pháp:
+- ProductDetailController.java (doGet), FlashSaleService.java
+Flow:
+- Người dùng vào /chi-tiet-san-pham?id=X
+- Servlet lấy thông tin sản phẩm và kiểm tra xem có chương trình Flash Sale nào đang áp dụng cho sản phẩm này không thông qua flashSaleService.getActiveFlashSaleByProductId(productId)
+- Lấy thời gian kết thúc flash sale truyền vào attribute flashSaleEndTime
+- Forward sang ChiTietSanPham.jsp chạy đồng hồ đếm ngược bằng JS"
+,60,Hiển số lượng sản phẩm được thêm vào theo phân loại dựa trên sản phẩm tồn kho khi ấn vào dấu +(tăng số lượng sản phẩm thêm vào),Hoàn Thành,"- Truy xuất trực tiếp số lượng theo phân loại trong kho để giới hạn sản phẩm thêm vào giỏ hàng theo từng phân loại
+- Hiển thị thông báo giới hạn khi người dùng ấn thêm vào quá số lượng hàng tồn kho theo phân loại","Giải pháp:
+- JavaScript trên frontend kiểm tra số lượng dựa trên thuộc tính data-stock của biến thể sản phẩm đang active
+Flow:
+- Khi người dùng click chọn biến thể (ví dụ: Gói 500g, Hộp 1kg) -> JS đọc số lượng tồn kho của biến thể đó
+- Khi người dùng nhấn nút + -> JS so sánh currentQty + 1 với tồn kho. Nếu vượt quá, vô hiệu hóa nút + và hiển thị cảnh báo ""Số lượng vượt quá hàng tồn kho"""
+,61,Nút mua ngay,Hoàn Thành,- Người dùng có thể mua ngay sản phẩn và chuyển tiếp đến phần thanh toán luôn không phải theo từng bước thêm vào giỏ rồi mới thanh toán ,"Giải pháp:
+- Gửi request chuyển hướng kèm tham số buyNow=true sang trang /checkout
+Flow:
+- Người dùng click ""Mua ngay"" -> JS redirect sang /checkout?buyNow=true&productId=X&variantId=Y&quantity=Z
+- CheckoutController.doGet() nhận diện tham số buyNow == true
+- Gọi cartService.createBuyNowCart(userId, productId, variantId, quantity) để sinh một giỏ hàng ảo và lưu vào session.setAttribute(""buyNowCart"", cart)
+- Giao diện checkout load dữ liệu từ buyNowCart thay vì giỏ hàng chính trong Redis"
+,62,Xem đánh giá sản phẩm ,Hoàn Thành,"- Người dùng đọc được đánh giá của sản phẩm
+-  Thống kê đánh giá: số sao trung bình, tổng số lượt đánh giá 
+- Bộ lọc danh mục bình luận:Tất cả, có hình ảnh, theo số lượng sao, phân loại                                                                                                                                                  - Trang chi tiết bình luận thì hiển thị các đánh giá của sản phẩm đó.Mỗi đánh giá hiển thị:tên người đánh giá, số sao, ngày đánh giá, nội dung, phân loại, hình ảnh, video, nút báo cáo và hữu ích
+- Phân trang, không load tất cả bình luận cùng một lúc, có nút xem thêm để xem thêm các bình luận
+","Giải pháp:
+- ReviewApiController.java, ReviewReportController.java, ReviewService.java
+Flow:
+- Trang chi tiết gọi API /review-api?productId=X&page=1 -> Hiển thị danh sách đánh giá
+- Người dùng nhấn ""Hữu ích"" -> Gửi POST /review-api/helpful?reviewId=X -> Tăng số lượt thích đánh giá
+- Người dùng nhấn ""Báo cáo"" -> Gửi POST /api/review/report?reviewId=X -> Lưu AdminNotification báo cho Admin -> Đổi màu nút báo cáo trên UI sang đỏ"
+,63,Báo cáo bình luận,Hoàn Thành,"- Nút báo cáo chuyển sang màu đỏ nêu khi được ấn vào, chuyển thành đã báo cáo  gửi về thông báo cho admin","Giải pháp:
+- ReviewReportController.java, AdminNotificationService.java
+Flow:
+- Người dùng nhấn ""Báo cáo"" -> Gửi POST tới /api/review/report?reviewId=X
+- ReviewReportController.doPost() tăng số lần báo cáo của đánh giá đó và gọi AdminNotificationService để tạo thông báo cho Admin
+- Phản hồi JSON -> Giao diện đổi màu nút báo cáo sang đỏ và vô hiệu hóa nút"
+,64,Hình ảnh về sản phẩm,Hoàn Thành,- Mỗi sản phẩm điều có hình ảnh minh hoạ,"Giải pháp:
+- productService.getRelatedProducts(productId, categoryId, limit) gọi ProductDAO.findByCategoryIdExcluding(...)
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,65,Gợi ý sản phẩm,Hoàn Thành,- Đang hiển thị là sản phẩm liên quan theo sản phẩm cùng danh mục,"Giải pháp:
+- productService.getRelatedProducts(productId, categoryId, limit) gọi ProductDAO.findByCategoryIdExcluding(...)
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,66,Cross-selling ,Giảm tải,"- Khách hàng mua sản phẩm lẻ, không biết nấu món gì có thể dẫn đến giá trị đơn thấp
+Mong muốn: 
+- Gợi ý công thức nấu các món ăn cùng nguyên liệu (rau) kèm nút thêm tất cả nguyên liệu của món vào giỏ hàng ",
+,67,tùy chọn nhiều phân loại,Giảm tải,"- Khách muốn mua 1.2kg nhưng hệ thống chỉ cho chọn lẻ 500g hoặc 1kg (gây khó khăn khi đóng gói).
+Mong muốn: 
+- Bổ sung thêm chọn nhiều phân loại hoặc nhập số lượng lẻ (ví dụ: 1.2kg) nếu hàng không đóng gói/ hộp sẵn.",
+,68,Thông tin bảo quản sản phẩm,Giảm tải,"Mong muốn
+-Thêm thông tin về độ tươi và cách bảo quản của từng loại rau, củ
+-Bổ sung ngày thu hoạch/nhập và hướng dẫn bảo quản cũng như hạn sử dụng khuyên dùng (vd 2-3 ngày đối với sản phẩm bất kỳ) hiển thị ở trang chi tiết ",
+,69,Bảng thành phần dinh dưỡng ,Giảm tải,"Mong muốn:
+- Khách hàng mua đồ hữu cơ quan tâm đến giá trị sức khỏe nên sẽ phải cập nhật thông số cụ thể (Vitamins, khoáng chất).
+- Có bảng hiển thị thành phần dinh dưỡng chi tiết cho từng loại rau củ tương ứng trên trang chi tiết sản phẩm",
+,70,Thông tin nguồn gốc sản phẩm,Giảm tải,"Mong muốn: 
+-Thêm mục truy xuất nguồn gốc, logo, dấu chứng nhận và mã QR của nông trại
+- Thêm bằng chứng chứng minh chất lượng hữu cơ",
+,71,Điểm thưởng,Giảm tải,"Mong muốn: 
+- Cho khách hàng biết nếu mua với số lượng bao nhiêu của sản phẩm này thì sẽ tích/thêm bao nhiêu điểm thưởng (vd: mua 1kg cà chua đạt 50đ thưởng) 
+- Giúp thu hút người mua qua tâm lý tặng phẩm",
+"Giỏ hàng
+/gio-hang",72,Số lượng sản phẩm trong giỏ hàng,Hoàn Thành,- Hiển thị số lượng sản phẩm trong giỏ hàng,"Giải pháp:
+- JavaScript quản lý DOM trên trang GioHang.jsp kết hợp gọi API /api/wishlist
+Flow:
+- Người dùng tích chọn checkbox sản phẩm -> JS tính tổng số tiền tạm tính của các sản phẩm được tích chọn
+- Nhấn nút ""Yêu thích"" tại sản phẩm trong giỏ -> Gửi POST tới /api/wishlist?productId=X để đồng bộ"
+,73,Chọn  từng sản phẩm,Hoàn Thành,- Người dùng có thể lựa chọn các sản phẩm cần mua có trong giỏ hàng.,"Giải pháp:
+- JavaScript quản lý DOM trên trang GioHang.jsp kết hợp gọi API /api/wishlist
+Flow:
+- Người dùng tích chọn checkbox sản phẩm -> JS tính tổng số tiền tạm tính của các sản phẩm được tích chọn
+- Nhấn nút ""Yêu thích"" tại sản phẩm trong giỏ -> Gửi POST tới /api/wishlist?productId=X để đồng bộ"
+,74,Chọn tất cả sản phẩm,Hoàn Thành,- Người dùng có thể chọn nhanh tất cả sản phẩm trong giỏ hàng để thanh toán.,"Giải pháp:
+- JavaScript quản lý DOM trên trang GioHang.jsp kết hợp gọi API /api/wishlist
+Flow:
+- Người dùng tích chọn checkbox sản phẩm -> JS tính tổng số tiền tạm tính của các sản phẩm được tích chọn
+- Nhấn nút ""Yêu thích"" tại sản phẩm trong giỏ -> Gửi POST tới /api/wishlist?productId=X để đồng bộ"
+,75,Thêm wishlist sản phẩm đang có trong giỏ hàng,Hoàn Thành,- Người dùng có thể thêm sản phẩm trong giỏ hàng vào sản phẩm iu thích nhanh chóng.,"Giải pháp:
+- JavaScript quản lý DOM trên trang GioHang.jsp kết hợp gọi API /api/wishlist
+Flow:
+- Người dùng tích chọn checkbox sản phẩm -> JS tính tổng số tiền tạm tính của các sản phẩm được tích chọn
+- Nhấn nút ""Yêu thích"" tại sản phẩm trong giỏ -> Gửi POST tới /api/wishlist?productId=X để đồng bộ"
+,76,Đổi phân loại ,Giảm tải,"- Hiển tại cơ sở dữ liệu chỉ có 2 phân loại nên Hiển thị dạng tags/chips giúp người dùng chọn nhanh chóng phân loại sản phẩm.
+Mong muốn:
+- Tương lai nếu có nhiều phân loại sản phẩm có thể tùy biến lại thành dạng downdrop menu.",
+,77,Đơn giá,Hoàn Thành,- Hiển thị đơn giá của sản phẩm,"Giải pháp:
+- JavaScript kết hợp với API PUT /api/cart
+Flow:
+- Click nút +/- trên dòng sản phẩm trong giỏ
+- JS gửi request PUT /api/cart?itemId=X&quantity=NewQty
+- AddToCartController.doPut() kiểm tra tồn kho trong DB. Nếu không đủ, ném ngoại lệ thông báo số lượng tối đa. Nếu đủ, thực hiện update và trả về JSON chứa subtotal, cartCount
+- JS cập nhật số lượng, số tiền dòng sản phẩm và tổng tiền giỏ hàng trên UI
+- Nếu tồn kho của phân loại sản phẩm < 5, hiển thị dòng chữ cảnh báo đỏ"
+,78,Số lượng sản phẩm(phân loại),Hoàn Thành,"- Tăng giảm số lượng bình thường, không giảm số lượng thấp hơn 1.
+- Sẽ hiển thị thông báo khi vượt quá số lượng tồn kho của từng phân loại","Giải pháp:
+- JavaScript kết hợp với API PUT /api/cart
+Flow:
+- Click nút +/- trên dòng sản phẩm trong giỏ
+- JS gửi request PUT /api/cart?itemId=X&quantity=NewQty
+- AddToCartController.doPut() kiểm tra tồn kho trong DB. Nếu không đủ, ném ngoại lệ thông báo số lượng tối đa. Nếu đủ, thực hiện update và trả về JSON chứa subtotal, cartCount
+- JS cập nhật số lượng, số tiền dòng sản phẩm và tổng tiền giỏ hàng trên UI
+- Nếu tồn kho của phân loại sản phẩm < 5, hiển thị dòng chữ cảnh báo đỏ"
+,79,Hiển thị còn số lượng sản phẩm bé hơn 5 ,Hoàn Thành,"Nếu sản phẩm còn dưới 5 sản phẩm hiển thị ra số sản phẩm còn lại để kích cầu người mua, tâm lý sợ hết hàng khi đã thêm vòa giỏ hàng                                                                                                                                       - Khi số lượng tồn kho bé hơn 5 thì tự động cập nhật chỉ còn X sản phẩm
+- Mục thêm sản phẩm (+) trong giỏ hàng: nếu chọn đủ số lượng còn lại trong giỏ hàng cũng hiển thông báo, số lượng bạn chọn đã đạt mức tối da của sản phẩm này. 
+","Giải pháp:
+- JavaScript kết hợp với API PUT /api/cart
+Flow:
+- Click nút +/- trên dòng sản phẩm trong giỏ
+- JS gửi request PUT /api/cart?itemId=X&quantity=NewQty
+- AddToCartController.doPut() kiểm tra tồn kho trong DB. Nếu không đủ, ném ngoại lệ thông báo số lượng tối đa. Nếu đủ, thực hiện update và trả về JSON chứa subtotal, cartCount
+- JS cập nhật số lượng, số tiền dòng sản phẩm và tổng tiền giỏ hàng trên UI
+- Nếu tồn kho của phân loại sản phẩm < 5, hiển thị dòng chữ cảnh báo đỏ"
+,80,Số tiền,Hoàn Thành,- Tổng số tiền của số lượng sản phẩm đơn giá,"Giải pháp:
+- JavaScript kết hợp với API PUT /api/cart
+Flow:
+- Click nút +/- trên dòng sản phẩm trong giỏ
+- JS gửi request PUT /api/cart?itemId=X&quantity=NewQty
+- AddToCartController.doPut() kiểm tra tồn kho trong DB. Nếu không đủ, ném ngoại lệ thông báo số lượng tối đa. Nếu đủ, thực hiện update và trả về JSON chứa subtotal, cartCount
+- JS cập nhật số lượng, số tiền dòng sản phẩm và tổng tiền giỏ hàng trên UI
+- Nếu tồn kho của phân loại sản phẩm < 5, hiển thị dòng chữ cảnh báo đỏ"
+,81,Tổng số tiền,Hoàn Thành,- Hiển thị tổng số tiền sản phẩm(chưa tính voucher giảm giá),"Giải pháp:
+- API DELETE /api/cart?itemId=X
+- CartController lấy gợi ý sản phẩm bán chạy loại trừ các sản phẩm đã có trong giỏ hàng
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,82,Thao tác,Hoàn Thành,- Có nút xóa sản phẩm khi không cần đến sản phẩm đó nữa,"Giải pháp:
+- API DELETE /api/cart?itemId=X
+- CartController lấy gợi ý sản phẩm bán chạy loại trừ các sản phẩm đã có trong giỏ hàng
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,83,Gợi ý giỏ hàng,Hoàn Thành,"- Thêm tính năng ""Mua định kỳ"" hoặc là gợi ý giỏ hàng của tuần trước","Giải pháp:
+- API DELETE /api/cart?itemId=X
+- CartController lấy gợi ý sản phẩm bán chạy loại trừ các sản phẩm đã có trong giỏ hàng
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,84,Áp dụng điểm thưởng ,Giảm tải,"Mong muốn:
+- Hiển thị tổng số điểm dự kiến nhận được cho cả đơn hàng, là nơi cho phép khách hàng chọn Dùng điểm để giảm giá trực tiếp vào đơn hàng Hiển tại.",
+,85,Nút Mua hàng,Hoàn Thành,- Khi ấn nút mua hàng sẽ chuyển tiếp sang trang thanh toán.,"Giải pháp:
+- Chuyển hướng sang /checkout
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Thanh toán
+/checkout",86,"Thêm thông tin, địa chỉ mới ",Hoàn Thành,"- Có tích hợp validation SĐT, địa chỉ, đề phòng user nhập sai/thiếu
+- Đồng bộ với sổ địa chỉ.","Giải pháp:
+- CheckoutController.doGet() chuẩn bị dữ liệu, forward tới ThanhToan.jsp
+Flow:
+- Người dùng truy cập /checkout
+- Servlet lấy danh sách địa chỉ đã lưu (addressService.getAddressesByUserId), nạp thông tin giỏ hàng hiện tại, nạp danh sách phương thức thanh toán
+- Hiển thị thông tin lên giao diện. Người dùng có thể điền địa chỉ mới (nút Thêm địa chỉ gọi API POST lưu DB)"
+,87,Sản phẩm đặt mua,Hoàn Thành,- Hiển thị sản phẩm đã được chọn tại phần giỏ hàng,"Giải pháp:
+- CheckoutController.doGet() chuẩn bị dữ liệu, forward tới ThanhToan.jsp
+Flow:
+- Người dùng truy cập /checkout
+- Servlet lấy danh sách địa chỉ đã lưu (addressService.getAddressesByUserId), nạp thông tin giỏ hàng hiện tại, nạp danh sách phương thức thanh toán
+- Hiển thị thông tin lên giao diện. Người dùng có thể điền địa chỉ mới (nút Thêm địa chỉ gọi API POST lưu DB)"
+,88,Ghi chú,Hoàn Thành,- User nhập các ghi chú cho đơn hàng,"Giải pháp:
+- CheckoutController.doGet() chuẩn bị dữ liệu, forward tới ThanhToan.jsp
+Flow:
+- Người dùng truy cập /checkout
+- Servlet lấy danh sách địa chỉ đã lưu (addressService.getAddressesByUserId), nạp thông tin giỏ hàng hiện tại, nạp danh sách phương thức thanh toán
+- Hiển thị thông tin lên giao diện. Người dùng có thể điền địa chỉ mới (nút Thêm địa chỉ gọi API POST lưu DB)"
+,89,Phương thức thanh toán COD,Hoàn Thành,"- Thông báo thành công, và chuyển đơn cho admin quản lý xác nhận đơn trước rồi mới xử lý và giao hàng.","Giải pháp:
+- PlaceOrderController.java tạo đơn hàng với trạng thái PENDING
+Flow:
+- Người dùng chọn phương thức COD, click đặt hàng -> Gửi request POST tới /place-order
+- PlaceOrderController.doPost() gọi orderService.createOrder(...)
+- Tạo đơn hàng và các order items trong DB. Trạng thái thanh toán mặc định là UNPAID
+- Trả về JSON chứa redirectUrl = ""/order-confirmation?id=OrderId"""
+,90,Phương thức thanh toán Online,Hoàn Thành,"- Tích hợp các api thanh toán ngân hàng,sepay qr, ví điện tử, thẻ tín dụng,.. Để người dùng tùy chọn phương thức thanh toán.
+- Khi thanh toán online thanh công, lập tức xử lý đơn và giao hàng, không cần xác nhận lại đơn hàng.
+Cần hiển thị mã QR code tự động điền mọi thông tin đơn hàng (giá tiền, nội dung,..) để khách hàng quét mã thanh toán","Giải pháp:
+- PlaceOrderController.java, PaymentService.java, SepayProvider.java, Webhook IPN PaymentIpnController.java
+Flow:
+- Khách chọn thanh toán Chuyển khoản ngân hàng -> Gửi POST /place-order
+- PlaceOrderController gọi paymentService.createPayment(order)
+- SepayProvider tạo mã QR VietQR với nội dung chuyển khoản là mã đơn hàng đặc trưng (FARMILY_DH_OrderId) và số tiền chính xác của đơn hàng
+- Trả về JSON chứa link QR hoặc form submit thanh toán -> Giao diện checkout hiển thị popup mã QR cho khách quét
+- Khách chuyển khoản thành công -> Ngân hàng gửi tin nhắn -> Cổng SePay bắt giao dịch -> SePay gọi Webhook IPN gửi dữ liệu JSON về /api/payment/ipn
+- PaymentIpnController xác thực header X-Secret-Key, kiểm tra mã đơn hàng và số tiền giao dịch
+- Gọi orderService.updateOrderStatus(orderId, ""CONFIRMED"") và cập nhật trạng thái thanh toán thành PAID
+- Giao diện của khách tự động chuyển sang trang ""Đặt hàng thành công"""
+,91,Tóm tắt đơn hàng,Hoàn Thành,"- Hiển thị các thông tin: tạm tính, tổng tiền, phí vận chuyển, giảm giá, tổng cộng","Giải pháp:
+- Tích hợp API của Giao Hàng Nhanh (GhnService.java), áp dụng mã giảm giá bằng CouponApiController.java
+Flow:
+- Tính phí vận chuyển**: Người dùng chọn Tỉnh/Quận/Phường -> JS gửi POST tới /api/ghn/calculate-fee với body toDistrictId và toWardCode -> GhnService.calculateFee() gọi API GHN -> Trả về phí vận chuyển -> JS cập nhật số tiền ship và cộng vào tổng tiền
+- Áp dụng mã giảm giá**: Người dùng nhập/chọn mã -> Gửi POST /api/coupon/apply -> CouponService kiểm tra điều kiện đơn tối thiểu (minOrderValue), thời hạn sử dụng. Nếu hợp lệ, tính số tiền được giảm -> Set vào session attribute appliedDiscountAmount -> Trả về JSON -> JS trừ trực tiếp tiền giảm giá trên UI"
+,92,Phí vận chuyển,Hoàn Thành,- Tích hợp các api của Giao hàng nhanh  để tính giá phí vận chuyển,"Giải pháp:
+- Tích hợp API của Giao Hàng Nhanh (GhnService.java), áp dụng mã giảm giá bằng CouponApiController.java
+Flow:
+- Tính phí vận chuyển**: Người dùng chọn Tỉnh/Quận/Phường -> JS gửi POST tới /api/ghn/calculate-fee với body toDistrictId và toWardCode -> GhnService.calculateFee() gọi API GHN -> Trả về phí vận chuyển -> JS cập nhật số tiền ship và cộng vào tổng tiền
+- Áp dụng mã giảm giá**: Người dùng nhập/chọn mã -> Gửi POST /api/coupon/apply -> CouponService kiểm tra điều kiện đơn tối thiểu (minOrderValue), thời hạn sử dụng. Nếu hợp lệ, tính số tiền được giảm -> Set vào session attribute appliedDiscountAmount -> Trả về JSON -> JS trừ trực tiếp tiền giảm giá trên UI"
+,93,Mã giảm giá,Hoàn Thành,"- Khi ấn vào mã giảm giá , thì Hiển thị ra ô nhập mã giảm giá và ấn áp dụng
+- Gợi ý các mã giảm giá khách hàng đủ điều kiện sử dụng","Giải pháp:
+- Tích hợp API của Giao Hàng Nhanh (GhnService.java), áp dụng mã giảm giá bằng CouponApiController.java
+Flow:
+- Tính phí vận chuyển**: Người dùng chọn Tỉnh/Quận/Phường -> JS gửi POST tới /api/ghn/calculate-fee với body toDistrictId và toWardCode -> GhnService.calculateFee() gọi API GHN -> Trả về phí vận chuyển -> JS cập nhật số tiền ship và cộng vào tổng tiền
+- Áp dụng mã giảm giá**: Người dùng nhập/chọn mã -> Gửi POST /api/coupon/apply -> CouponService kiểm tra điều kiện đơn tối thiểu (minOrderValue), thời hạn sử dụng. Nếu hợp lệ, tính số tiền được giảm -> Set vào session attribute appliedDiscountAmount -> Trả về JSON -> JS trừ trực tiếp tiền giảm giá trên UI"
+,94,Tổng số tiền,Hoàn Thành,"- Hiển thị số tiền cần thanh toán sau phí vận chuyển, mã giảm giá,...","Giải pháp:
+- Tích hợp API của Giao Hàng Nhanh (GhnService.java), áp dụng mã giảm giá bằng CouponApiController.java
+Flow:
+- Tính phí vận chuyển**: Người dùng chọn Tỉnh/Quận/Phường -> JS gửi POST tới /api/ghn/calculate-fee với body toDistrictId và toWardCode -> GhnService.calculateFee() gọi API GHN -> Trả về phí vận chuyển -> JS cập nhật số tiền ship và cộng vào tổng tiền
+- Áp dụng mã giảm giá**: Người dùng nhập/chọn mã -> Gửi POST /api/coupon/apply -> CouponService kiểm tra điều kiện đơn tối thiểu (minOrderValue), thời hạn sử dụng. Nếu hợp lệ, tính số tiền được giảm -> Set vào session attribute appliedDiscountAmount -> Trả về JSON -> JS trừ trực tiếp tiền giảm giá trên UI"
+,95,Tính phí Ship theo quãng đường,Giảm tải,"Mong muốn:
+- Phí ship cố định gây khó khăn khi phải giao hỏa tốc rau tươi
+- Tính phí ship tự động theo quãng đường giao cho khách
+",
+,96,Theo dõi đơn hàng,Giảm tải,"Mong muốn:
+- Khách hàng không biết khi nào hàng sẽ được giao đến, lau củ để ngoài dễ hư hỏng
+- Thêm tính năng chọn khung giờ giao hàng (sáng 8-11h, chiều 14h-17h) lúc thanh toán",
+,97,Tính phí Ship theo trọng lượng,Giảm tải,"Mong muốn:
+- Phí ship bị nhảy bậc (vd: từ 1.9kg lên 2.1kg phí tăng) khiến khách hủy đơn
+- Cho phép Admin làm tròn hoặc giữ nguyên phí ship nếu trọng lượng thực tế lệch không đáng kể so với mức cũ.",
+,98,Xác nhận dùng điểm thưởng,Giảm tải,"Mong muốn:
+- Xác nhận lần nữa quyết định của người dùng có sử dụng điểm thưởng hay không và điểm sẽ tích luỹ được sau khi thanh toán thành công",
+,99,Nút đặt hàng,Hoàn Thành,"- Tự động check các dữ liệu địa chỉ đã đầy đủ thì thông báo thành công, còn thiếu dữ liệu sẽ không cho thanh toán.","Giải pháp:
+- Kiểm tra ở cả frontend (JS validate required fields) và backend
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Xác nhận đơn hàng
+/order-confirmation",100,Sau khi thanh toán thành công thêm các button về trang chủ/ tiếp tục mua sắm / Xem chi tiết đơn hàng,Hoàn Thành,"- User có thể check lại đơn hàng của mình xem có gì sai xót không, hoặc tiếp tục mua hàng.","Giải pháp:
+- Sử dụng thẻ <a> trỏ tới /home, /products, và /ho-so/don-hang/detail?id=X
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,101,Thông báo điểm tích luỹ,Giảm tải,"Mong muốn:
+- Chúc mừng khách hàng đã tích lũy thêm điểm. (Vd: Chúc mừng! Bạn vừa tích thêm 100 điểm vào tài khoản). 
+- Giúp tạo cảm giác hài lòng và thu hút khách hàng quay lại mua hàng",
+,102,Hiển thị Phương thức vận chuyển & Thời gian,Giảm tải,"- chỉ tính được giá vận chuyển 
+Mong muốn:
+- Chỉ hiển thị sản phẩm, thiếu thông tin về đơn vị vận chuyển và thời gian nhận hàng dự kiến.        
+- Hiển thị rõ: Đơn vị giao hàng (GHTK, Grab...) và ước tính ngày nhận hàng (vd: Thứ 3, ngày 31/03)",
+"Tin Tức
+/tin-tuc",103,Chi tiết tin tức,Hoàn Thành,"- Hiển thị Ảnh đại diện, Tiêu đề, Mô tả ngắn, Ngày đăng, Nội dung và Lượt xem","Giải pháp:
+- PostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,104,Bộ lọc bài viết theo Thẻ (Tags),Hoàn Thành,"- Danh sách thẻ đang hiển thị ngẫu nhiên hoặc theo thứ tự bảng chữ cái, chưa làm nổi bật các chủ đề được quan tâm
+- Cho phép Admin trong trang quản trị (CMS) sắp xếp thứ tự các thẻ theo độ phổ biến (dựa trên số lượt click hoặc số bài viết).
+- Giới hạn số lượng thẻ hiển thị ở Sidebar (VD: tối đa 10 thẻ hot nhất) và thêm nút xem tất cả để tránh làm loãng giao diện.","Giải pháp:
+- PostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,105,tìm kiếm bài viết,Hoàn Thành,- Tìm kiếm các bài tin tức,"Giải pháp:
+- PostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,106,Trạng thái hoạt động danh mục,Hoàn Thành,"- Hiển thị danh sách: An toàn thực phẩm, Công thức, Dinh dưỡng... kèm số lượng bài viết.","Giải pháp:
+- PostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,107,Bài viết phổ biến,Hoàn Thành,- Hệ thống tự động lấy dữ liệu 4 bài viết có lượt xem cao nhất để gợi ý cho khách hàng,"Giải pháp:
+- PostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Chi tiết tin tức
+/chi-tiet-tin-tuc",108,Chia sẻ bài viết ,Hoàn Thành,- Người dùng đã có thể nhấn vào các biểu tượng mạng xã hội và hệ thống thực Hiển chuyển hướng sang tab mới thành công.,"Giải pháp:
+- Static share links (target=""_blank"") và postService.getRelatedPosts(postId, categoryId, limit)
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,109,Tính năng bình luận tin tức,Giảm tải,"Mong muốn:
+- Cho phép người dùng đăng bình luận, trả lời bình luận và thảo luận với nhau về nội dung bài viết.",
+,110,"đánh giá bình luận, và reply lại bình luận",Giảm tải,"Mong muốn:
+- Thêm nút hữu ích hay like để biết bình luận hữu ích hay không.
+- Thêm nút trả lời để bàn luận sâu hơn về chủ đề đó.",
+,111,"Lọc từ khóa bình luận, nút báo cáo bình luận",Giảm tải,"Mong muốn:
+- Hệ thống tự lọc từ khóa và tự ẩn bình luận đó.
+- Nút báo cáo để người dùng có thể phản ánh tới admin hệ thống.",
+,112,Bài viết liên quan,Hoàn Thành,"Tự động hiển thị danh sách 3-4 bài viết có cùng Thẻ hoặc cùng Danh mục (ví dụ: đang xem bài về Rau củ sẽ gợi ý bài về Dinh dưỡng).
+- Giao diện hiển thị bao gồm: Tiêu đề và Ngày đăng.
+- Tăng khả năng điều hướng và giữ chân người dùng ở lại website lâu hơn.","Giải pháp:
+- Static share links (target=""_blank"") và postService.getRelatedPosts(postId, categoryId, limit)
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Giá tốt
+/gia-tot",113,Số sản phẩm giá tốt,Hoàn Thành,- Hiển thị đúng số lượng sản phẩm đang trong chương trình ưu đãi ,"Giải pháp:
+- GiaTotController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Người dùng vào /gia-tot
+- Servlet lấy danh sách flash sale đang chạy (flashSaleService.getActiveFlashSales())
+- Lấy thời gian kết thúc flash sale gần nhất (flashSaleService.getNearestFlashSaleEndTime()) gửi sang JSP để chạy đồng hồ đếm ngược
+- Sắp xếp danh sách trên giao diện theo filter (giá, % giảm)"
+,114,Thời gian kết thúc flash sale,Hoàn Thành,"- Đồng hồ đếm ngược hoạt động bình thường, hiển thị rõ Giờ : Phút : Giây.","Giải pháp:
+- GiaTotController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Người dùng vào /gia-tot
+- Servlet lấy danh sách flash sale đang chạy (flashSaleService.getActiveFlashSales())
+- Lấy thời gian kết thúc flash sale gần nhất (flashSaleService.getNearestFlashSaleEndTime()) gửi sang JSP để chạy đồng hồ đếm ngược
+- Sắp xếp danh sách trên giao diện theo filter (giá, % giảm)"
+,115,Tăng giá/ giảm giá,Hoàn Thành,"- Khi nhấn Giá tăng sản phẩm rẻ nhất lên đầu, khi nhấn Giá giảm, sản phẩm giảm sâu nhất lên đầu","Giải pháp:
+- GiaTotController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Người dùng vào /gia-tot
+- Servlet lấy danh sách flash sale đang chạy (flashSaleService.getActiveFlashSales())
+- Lấy thời gian kết thúc flash sale gần nhất (flashSaleService.getNearestFlashSaleEndTime()) gửi sang JSP để chạy đồng hồ đếm ngược
+- Sắp xếp danh sách trên giao,147,tìm kiếm theo tên,Hoàn Thành,Admin tìm kiếm sản phẩm theo từ khóa tên sản phẩm để nhanh chóng lọc ra danh sách mong muốn.,"Giải pháp:
+- AdminProductController.java (doGet), ProductService.java, ProductDAO.java
+Flow:
+- Admin nhập từ khóa tên sản phẩm và nhấn tìm kiếm hoặc thay đổi giá trị ô nhập liệu.
+- Frontend gửi request GET /admin/products?search=<từ_khóa> lên máy chủ.
+- AdminProductController.doGet() lấy tham số search, gọi productService.getProductsFiltered(...) để thực thi câu lệnh SQL LIKE truy vấn dữ liệu.
+- Forward danh sách kết quả lọc sang /admin/products.jsp hiển thị."
+,148,"Bộ lọc danh mục, trạng thái, sắp xếp ",Hoàn Thành,Lọc sản phẩm theo danh mục và trạng thái tồn kho/hạn dùng; sắp xếp danh sách theo tên/giá/ngày tạo.,"Giải pháp:
+- AdminProductController.java (doGet), ProductService.java, ProductDAO.java
+Flow:
+- Admin chọn danh mục, trạng thái (ví dụ: instock, expiring, expired...) hoặc tiêu chí sắp xếp trên bộ lọc UI.
+- Browser gửi request GET /admin/products kèm theo các tham số category, status, sort lên server.
+- Controller tiếp nhận tham số, gọi productService.getProductsFiltered(...) để truy vấn dữ liệu đã lọc ở DB, sau đó render lại danh sách."
+,149,Lọc theo hạn sử dụng,Hoàn Thành,"- Lọc và hiển thị trạng thái hạn sử dụng (Còn hạn, Sắp hết hạn trong 3 ngày, Hết hạn).
+- Hỗ trợ Admin lọc nhanh hàng cận date để tạo chiến dịch Flash Sale nhằm xả kho.","Giải pháp:
+- AdminProductController.java, AdminFlashSaleController.java, ProductVariant.java
+Flow:
+- Ở trang quản lý sản phẩm, hệ thống tự động xác định trạng thái của từng biến thể (còn hạn, sắp hết hạn, hết hạn) bằng logic so sánh hạn dùng với thời gian hiện tại trong hàm ProductVariant.getExpiryStatus().
+- Tại trang thêm Flash Sale (/admin/flash-sales/add), Admin check chọn ""Chỉ hiển thị sản phẩm sắp hết hạn"" để JavaScript lọc nhanh các sản phẩm có biến thể cận date và chọn nhanh hàng loạt đưa vào chiến dịch giảm giá."�n thoại, tiêu đề, nội dung thì không gửi được tin nhắn","Giải pháp:
+- ContactController.java, ContactService.java, ContactDAO.java, RecaptchaUtil.java
+Flow:
+- Khách hàng điền form liên hệ và xác nhận reCAPTCHA
+- Submit form -> ContactController.doPost() gọi RecaptchaUtil.verify(recaptchaResponse)
+- Nếu Captcha không hợp lệ, trả lỗi. Nếu hợp lệ, lưu thông tin liên hệ vào DB và gửi email thông báo cho Admin"
+,121,Spam liên hệ,Hoàn Thành,"- Form liên hệ đã tích hợp mã captcha.
+- Khắc phục được lỗ hổng bảo mật gây spam email ","Giải pháp:
+- ContactController.java, ContactService.java, ContactDAO.java, RecaptchaUtil.java
+Flow:
+- Khách hàng điền form liên hệ và xác nhận reCAPTCHA
+- Submit form -> ContactController.doPost() gọi RecaptchaUtil.verify(recaptchaResponse)
+- Nếu Captcha không hợp lệ, trả lỗi. Nếu hợp lệ, lưu thông tin liên hệ vào DB và gửi email thông báo cho Admin"
+"Admin Login
+/admin/login",122,Đăng nhập admin,Hoàn Thành,"""Tài khoản có quyền admin có thể đăng nhập vào trang quản trị 
+Luôn báo sai tên tài khoản hoặc mật khẩu để tránh dò tài khoản""","Giải pháp:
+- AdminLoginController.java, AuthService.java
+Flow:
+- Admin gửi POST đăng nhập -> Servlet kiểm tra trạng thái khóa tạm thời lockoutUntil
+- Nếu số lần sai loginAttempts >= 3, bắt buộc verify Captcha
+- Kiểm tra thông tin tài khoản bằng authService.checkLogin(username, password)
+- Nếu thành công, kiểm tra vai trò (role khác ""user""). Reset số lần đăng nhập sai
+- Đăng nhập sai: tăng loginAttempts. Nếu đạt 5 lần, set lockoutUntil = CurrentTime + 30 phút"
+,123,Chống tấn công dò mật khẩu (Admin login),Hoàn Thành,"- Hệ thống giới hạn số lần thử đăng nhập để bảo vệ khu vực quản trị khỏi việc bị rà quét tự động
+- Đếm số lần login thất bại, nếu sai nhìu -> khoá tài khoản 15-30p
+- Sau 3 lần sai hiển thị captcha ","Giải pháp:
+- AdminLoginController.java, AuthService.java
+Flow:
+- Admin gửi POST đăng nhập -> Servlet kiểm tra trạng thái khóa tạm thời lockoutUntil
+- Nếu số lần sai loginAttempts >= 3, bắt buộc verify Captcha
+- Kiểm tra thông tin tài khoản bằng authService.checkLogin(username, password)
+- Nếu thành công, kiểm tra vai trò (role khác ""user""). Reset số lần đăng nhập sai
+- Đăng nhập sai: tăng loginAttempts. Nếu đạt 5 lần, set lockoutUntil = CurrentTime + 30 phút"
+,124,Xác thực đăng nhập (Admin),Giảm tải,"Mong muốn:
+- Áp dụng bắt buộc xác thực 2 bước (gg auth 2FA/ Email OTP) cho tài khoản có quyền admin.",
+,125,Đăng xuất admin,Hoàn Thành,"Khi đăng xuất thì sẽ xóa toàn bộ session, cookie đề phòng bị tấn công mạng virut.","Giải pháp:
+- AdminLoginController.java, AuthService.java
+Flow:
+- Admin gửi POST đăng nhập -> Servlet kiểm tra trạng thái khóa tạm thời lockoutUntil
+- Nếu số lần sai loginAttempts >= 3, bắt buộc verify Captcha
+- Kiểm tra thông tin tài khoản bằng authService.checkLogin(username, password)
+- Nếu thành công, kiểm tra vai trò (role khác ""user""). Reset số lần đăng nhập sai
+- Đăng nhập sai: tăng loginAttempts. Nếu đạt 5 lần, set lockoutUntil = CurrentTime + 30 phút"
+"Admin Dashboard
+/admin/dashboard",126,Tổng danh thu/ phần trăm doanh thu,Hoàn Thành,"- Hiển thị tổng số doanh thu dựa trên tổng số giá tiền đơn hàng
+- Hiển thị phần trăm tăng trưởng so với tháng trước ","Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,127,Đơn hàng,Hoàn Thành,- Hiển thị tổng số các đơn hàng đang có trong hệ thống bao gồm cả hủy,"Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,128,Tổng sản phẩm,Hoàn Thành,Hiển thị số lượng sản phẩm ,"Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,129,Khách hàng,Hoàn Thành,Hiển thị số lượng khách hàng ,"Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,130,Biểu đồ tổng quan,Hoàn Thành,Có biểu đồ trực quan (Biểu đồ đường/cột cho Doanh thu 7 ngày qua và Doanh thu 6 tháng gần nhất) hiển thị,"Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,131,Lợi nhuận,Hoàn Thành,"- Hiển thị lợi nhuận sau khi trừ các chi phí cost, chi phí vận chuyển, chi phí hoàn tiền, chương trình flash-sale, mã giảm giá, sản phẩm bị tiêu hủy do hết hạn","Giải pháp:
+- AdminDashboardController.java, DashboardService.java, DashboardDAO.java
+- Lợi nhuận được tính bằng**: Doanh thu đơn hàng hoàn thành - Tổng giá nhập kho của các sản phẩm đó - Phí vận chuyển - Tổng số tiền hoàn trả - Giá trị hàng hết hạn tiêu hủy
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Amin Thông báo
+/admin/notifications",132,Đánh đấu đã đọc tất cả,Hoàn Thành,Đang bình thường,"Giải pháp:
+- AdminNotificationController.java, UserNotificationService.java
+Flow:
+- Admin click vào dòng thông báo -> Gọi API đánh dấu đã đọc userNotificationService.markAsRead(notificationId)
+- Servlet trả về link đích target_url (ví dụ: /admin/orders/edit?id=OrderId) -> JS redirect Admin đến trang xử lý đơn hàng đó"
+,133,Điều hướng từ thông báo,Hoàn Thành,"- Khi click vào nội dung thông báo, admin đã được chuyển đúng đến trang xử lý nghiệp vụ liên quan.
+","Giải pháp:
+- AdminNotificationController.java, UserNotificationService.java
+Flow:
+- Admin click vào dòng thông báo -> Gọi API đánh dấu đã đọc userNotificationService.markAsRead(notificationId)
+- Servlet trả về link đích target_url (ví dụ: /admin/orders/edit?id=OrderId) -> JS redirect Admin đến trang xử lý đơn hàng đó"
+,134,Tìm kiếm thông báo,Giảm tải,"Mong muốn:
+- Có thể tìm kiếm thông báo theo tên, chữ có trong danh sách các thông báo của hệ thống ",
+,135,Ghim thông báo quan trọng,Giảm tải,"Mong muốn:
+- Các thông báo quan trọng như: (lỗi hệ thống, lỗi hình ảnh,..) sẽ bị trôi đi và tính năng này sẽ cho phép Admin Ghim các thông báo quan trọng lên đầu danh sách để xử lý sau.",
+,136,Đánh dấu đọc từng thông báo ,Hoàn Thành,Đang bình thường,"Giải pháp:
+- AdminNotificationController.java, UserNotificationService.java
+Flow:
+- Admin click vào dòng thông báo -> Gọi API đánh dấu đã đọc userNotificationService.markAsRead(notificationId)
+- Servlet trả về link đích target_url (ví dụ: /admin/orders/edit?id=OrderId) -> JS redirect Admin đến trang xử lý đơn hàng đó"
+Admin Quản lý mã giảm giá,137,Danh sách mã giảm giá ,Hoàn Thành,"- Hiển thị danh sách voucher:mã,loại giảm (%, tiền, freeship),giá trị,điều kiện áp dụng,thời gian,trạng thái (đang hoạt động / hết hạn)","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,138,Bộ lọc mã giảm giá,Hoàn Thành,"- Lọc được các trạng thái : tất cả, hoạt động, sắp diễn ra, hết hạn, đã tắt","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,139,Tạo mã giảm giá,Hoàn Thành,"-Nhân viên có thể vào tạo mã giảm giảm giá với các thông tin: Mã code, loại giảm(%, tiền, freeship),giá trị giảm giảm tối đa, giá trị đơn tối thiểu
+- Với các điều kiện áp dụng: Số lượng mã, giới hạn mỗi user bao nhiêu lần, thời gian bắt đầu/ kết thúc
+
+","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,140,Nút kích hoạt ngay lập tức ,Hoàn Thành,"- Khi tick vào nút kích hoạt ngay lập tức, mã giảm giá sẽ được bật lên, nếu không stick thi  trạng thái mã giảm giá sẽ bị tắt ","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,141,Bật / tắc trạng thái mã,Hoàn Thành,"- Hiển thị trạng thái: đang hoạt động, sắp diễn ra, hết lượt, đã hết hạn
+- Có thể tắt bật tắc mã giảm giá
+","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,142,Xem chi tiết mã,Hoàn Thành,"- Xem được chi tiết mã giảm  giá: Mã code, loại giảm(%, tiền, freeship),giá trị giảm giảm tối đa, giá trị đơn tối thiểu, số lượng mã, giới hạn mỗi user bao nhiêu lần, thời gian bắt đầu/ kết thúc
+- Xem được số lượt đã dùng, tổng số tiền đã giảm, tỷ lệ sử dụng mã
+- Xem được lịch sử các đơn hàng đã sử dụng mẫ giảm giá","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,143,Chỉnh sửa / Xóa mã,Hoàn Thành," Cho phép chỉnh sửa nhưng giới hạn sửa coupon đã dùng,không cho sửa: mã code, loại giảm giá, giá trị giảm, giảm tối đa, giới hạn sử dụng
+- Không cho phép xóa mã vật lý chỉ xõa những mã chưa được sử dụng, các mã đã sử dụng nút xoá bị ẩn đi","Giải pháp:
+- AdminCouponController.java, CouponService.java, CouponDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Quản lý sản phẩm
+/admin/products",144,Quản lý lịch sử sản phẩm,Giảm tải,"- Chỉ hiện thị ngày cập nhật
+Mong muốn:
+- Chưa tích hợp tính năng quản lý lịch sử chỉnh sửa, gây khó kiểm soát khi có nhiều nhân viên cùng thao tác
+- Lưu trữ vết sửa đổi giá, tồn kho và có time sửa cụ thể",
+,145,Ẩn sản phẩm ,Hoàn Thành,"Chức năng ẩn sản phẩm đang hoạt động, có cơ chế thùng rác, nếu ẩn nhầm thì không thể khôi phục","Giải pháp:
+- Thêm cột deleted_at trong bảng products
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,146,Xoá sản phẩm,Hoàn Thành,Vào thùng rác để xoá hoàn toàn sản phẩm,"Giải pháp:
+- Thêm cột deleted_at trong bảng products
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,147,tìm kiếm theo tên,Hoàn Thành,Admin tìm kiếm sản phẩm theo từ khóa tên sản phẩm để nhanh chóng lọc ra danh sách mong muốn.,"Giải pháp:
+- AdminProductController.java (doGet), ProductService.java, ProductDAO.java
+Flow:
+- Admin nhập từ khóa tên sản phẩm và nhấn tìm kiếm hoặc thay đổi giá trị ô nhập liệu.
+- Frontend gửi request GET /admin/products?search=<từ_khóa> lên máy chủ.
+- AdminProductController.doGet() lấy tham số search, gọi productService.getProductsFiltered(...) để thực thi câu lệnh SQL LIKE truy vấn dữ liệu.
+- Forward danh sách kết quả lọc sang /admin/products.jsp hiển thị."
+,148,"Bộ lọc danh mục, trạng thái, sắp xếp ",Hoàn Thành,Lọc sản phẩm theo danh mục và trạng thái tồn kho/hạn dùng; sắp xếp danh sách theo tên/giá/ngày tạo.,"Giải pháp:
+- AdminProductController.java (doGet), ProductService.java, ProductDAO.java
+Flow:
+- Admin chọn danh mục, trạng thái (ví dụ: instock, expiring, expired...) hoặc tiêu chí sắp xếp trên bộ lọc UI.
+- Browser gửi request GET /admin/products kèm theo các tham số category, status, sort lên server.
+- Controller tiếp nhận tham số, gọi productService.getProductsFiltered(...) để truy vấn dữ liệu đã lọc ở DB, sau đó render lại danh sách."
+,149,Lọc theo hạn sử dụng,Hoàn Thành,"- Lọc và hiển thị trạng thái hạn sử dụng (Còn hạn, Sắp hết hạn trong 3 ngày, Hết hạn).
+- Hỗ trợ Admin lọc nhanh hàng cận date để tạo chiến dịch Flash Sale nhằm xả kho.","Giải pháp:
+- AdminProductController.java, AdminFlashSaleController.java, ProductVariant.java
+Flow:
+- Ở trang quản lý sản phẩm, hệ thống tự động xác định trạng thái của từng biến thể (còn hạn, sắp hết hạn, hết hạn) bằng logic so sánh hạn dùng với thời gian hiện tại trong hàm ProductVariant.getExpiryStatus().
+- Tại trang thêm Flash Sale (/admin/flash-sales/add), Admin check chọn ""Chỉ hiển thị sản phẩm sắp hết hạn"" để JavaScript lọc nhanh các sản phẩm có biến thể cận date và chọn nhanh hàng loạt đưa vào chiến dịch giảm giá."
+,150,Xuất excel,Hoàn Thành,Xuất ra được file excel,"Giải pháp:
+- ExcelExportService.java sử dụng thư viện Apache POI để viết bảng tính Excel
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,151,Tồn kho,Hoàn Thành,"- Bán theo cây/gói/quả/trái nhưng trừ tồn kho theo kg (hoặc ngược lại) gây lệch số liệu thực tế.
+- Hệ thống hỗ trợ đơn vị tính kép (vừa theo hộp, vừa theo trọng lượng kg) để kiểm kê chính xác.","Giải pháp:
+- Cấu hình thuộc tính quy đổi đơn vị trong bảng product_variants (ví dụ: Biến thể ""Hộp 500g"" có trọng lượng quy đổi là 0.5kg)
+- Khi bán 1 hộp, hệ thống tự động trừ tồn kho ảo tương ứng 0.5kg
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,152,Tự động tạo Slug từ Tiêu đề,Giảm tải,"Mong muốn:
+- Khi nhập Tên sản phẩm hoặc Tiêu đề bài viết, hệ thống tự động chuyển thành slug (viết thường, không dấu, ngăn cách bằng dấu -).
+VD: ""Rau nêm Ngò rí"" → rau-nem-ngo-ri",
+,153,Chỉnh sửa Slug thủ công	,Giảm tải,"Mong muốn:
+- Cho phép Admin nhấp vào ô Slug để sửa lại theo ý muốn. Hệ thống vẫn phải tự động loại bỏ dấu và ký tự đặc biệt ngay khi Admin đang gõ.",
+,154,Kiểm tra trùng lặp Slug ,Giảm tải,"Mong muốn:
+Khi lưu, hệ thống phải kiểm tra trong database, nếu trùng phải hiển thị cảnh báo (Đường dẫn đã tồn tại) hoặc tự động thêm hậu tố số (VD: san-pham-1) để đảm bảo link là duy nhất.",
+,155,Chọn tất cả sản phẩm,Hoàn Thành,"- Thêm được tính năng chọn tất cả sản phẩm trên 1 trang, chọn tất cả sản phẩm trên tất cả các trang","Giải pháp:
+- JavaScript quản lý mảng Checkbox trên giao diện quản trị
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Thêm sản phẩm
+/admin/products/add",156,tạo sản phẩm mới,Giảm tải,"Thêm được sản phẩm mới
+Mong muốn:
+-Thêm tính năng nhập liệu sản phẩm nhanh, theo định dạng, theo file, theo link gg sheet, không cần phải nhập liệu từng dòng",
+,157,Giá  nhập kho ,Hoàn Thành,"- Admin nhập được giá nhập cho từng sản phẩm 
+- Hệ thống dùng giá nhập để tính tỉ lệ lợi nhuận so với tháng trước
+- Giá nhập không xuất hiện ở trang bán sản phẩm
+- Có thể thay đổi giá nhập theo các lần nhập hàng nếu sau này mở rộng quản lý kho
+- Giá nhập phải là số dương
+- Chỉ admin hoặc nhân sự được phân quyền mới xem/sửa được giá nhập","Giải pháp:
+- Form product-add.jsp cho phép tạo động nhiều dòng biến thể
+- Khi submit, Servlet lặp qua mảng dữ liệu biến thể gửi lên và lưu vào bảng product_variants liên kết với product_id
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,158,Hạn sử dụng,Hoàn Thành,"- Nhập  được ngày tháng nhật kho và hạn sử dụng của sản phẩm
+- Nếu gần đến hạn sử dụng thì sẽ thông báo đềadmin xuất lên mục giá tốt để tạo chương trình giảm giá.","Giải pháp:
+- Form product-add.jsp cho phép tạo động nhiều dòng biến thể
+- Khi submit, Servlet lặp qua mảng dữ liệu biến thể gửi lên và lưu vào bảng product_variants liên kết với product_id
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,159,Thêm biến thể ,Hoàn Thành,"Thêm được biến thể cho 1 sản phẩm ví dụ: cùng là bắp cải, với phân loại 500g thì giá bán 25000, thì thêm biến thể với phân loại 1kg thì giá bán 50000","Giải pháp:
+- Form product-add.jsp cho phép tạo động nhiều dòng biến thể
+- Khi submit, Servlet lặp qua mảng dữ liệu biến thể gửi lên và lưu vào bảng product_variants liên kết với product_id
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,160,Cập nhật trọng lượng thực tế,Giảm tải,"Mong muốn:
+- Hàng rau củ (Cà chua, xà lách...) khi đóng gói luôn có sai số gram (Vd:: khách đặt 1kg nhưng thực tế cân là 1.05kg hoặc 0.98kg). Hệ thống đang khóa cứng số tiền theo trọng lượng, Admin không sửa được số gram thực tế để tính tiền đúng
+- Cho phép Admin nhập số ký thực tế sau khi cân. Hệ thống tự động nhân với đơn giá để ra Tổng tiền mới trên Bill trước khi khách thanh toán hoặc Shipper đi giao",
+,161,Hình ảnh sản phẩm,Giảm tải,"Thêm được nhiều hình ảnh cho sản phẩm
+Mong muốn:
+- Tự động thêm hình ảnh nhanh, thêm bằng file, không phải thêm thủ công",
+"Admin Chỉnh sửa sản phẩm
+/admin/products/edit",162,"Sửa thông tin cơ bản, tên, danh mục, phân loại/giá, hình ảnh",Giảm tải,"Chỉ sửa thông tin thủ công
+Mong muốn:
+-Tự động sửa/ cập nhật thông tin nhanh qua File, google sheet, link,...
+-Chọn nhiều sản phẩm cùng lúc, để sửa theo lần lượt theo hàng đợi.",
+"Admin Quản lý giá tốt
+/admin/flash-sales",163,Hiển thị các thông tin sản phẩm giá tốt,Hoàn Thành,"Hiển thị nhanh sản phẩm,giảm giá, số lượng bán/giới hạn, thời gian, trạng thái","Giải pháp:
+- AdminFlashSaleController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Thêm giá tốt mới
+/admin/flash-sales/add",164,Thêm sản phẩm giá tốt,Giảm tải,"chỉ thêm được thủ công
+Mong muốn:
+- Tự động theo theo danh sách, file nhanh chóng không cần nhập thủ công.
+- Thêm tự động theo ngày lễ, sự kiện",
+,165,Chọn sản phẩm,Hoàn Thành,"- chọn tất cả sản phẩm, chọn theo danh sách sắp hết hạn","Giải pháp:
+- AdminFlashSaleController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,166,số lần dùng / user,Hoàn Thành,"- Có thể giới hạn 1 user mau được bao nhiêu sản phảm giảm giá
+- Ví dụ: số lần dùng / user là 1 vậy chỉ 1 user chỉ được mua sản phẩm giảm giá đó 1 lần, lần thứ 2 không được giảm","Giải pháp:
+- AdminFlashSaleController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,167,Giới hạn số lượng bán,Hoàn Thành,-Số lượng phải bé hơn tồn kho,"Giải pháp:
+- AdminFlashSaleController.java, FlashSaleService.java, FlashSaleDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,168,Thêm nhiều Khung giờ giảm giá,Giảm tải,-Hiển tại chỉ giảm giá theo khung 24 giờ,
+"Admin Chỉnh sửa giá tốt
+/admin/flash-sales/edit",169,Ẩn flash sale tạm thời,Giảm tải,"Mong muốn:
+- Thêm tính năng bật tắt flash sale khi cần thay đổi hay gặp phải lỗi bất kỳ(số lượng quá nhiều, time quá dài, hình ảnh và sản phẩm flash sale không khớp,...)
+- Khi tắt, flash sale biến mất trên web nhưng vẫn lưu lại trong Admin để tái sử dụng khi cần.",
+,170,Tự động kết thúc khi hết kho,Giảm tải,"Mong muốn:
+- Nếu tồn kho của sản phẩm sale về 0, hệ thống tự động đổi trạng thái thành ""Cháy hàng"" và ẩn nút mua ngay lập tức kể cả khi thời gian của flash sale vẫn còn",
+,171,"Sửa thông tin cơ bản, tên, danh mục, phân loại/giá, hình ảnh",Giảm tải,"Chỉ sửa thông tin thủ công
+Mong muốn:
+-Tự động sửa/ cập nhật thông tin nhanh qua File, google sheet, link,...
+-Chọn nhiều sản phẩm cùng lúc, để sửa theo lần lượt theo hàng đợi.",
+"Admin Quản lý danh mục
+/admin/categories",172,Thêm mới danh mục,Hoàn Thành,"tạo thêm danh mục mới, sẽ được Hiển thị trên trang chủ, và thanh menu tự động","Giải pháp:
+- AdminCategoryController.java, CategoryService.java, CategoryDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,173,Chỉnh sửa danh mục,Hoàn Thành,"sửa danh mục sẽ được Hiển thị trên trang chủ, và thanh menu tự động","Giải pháp:
+- AdminCategoryController.java, CategoryService.java, CategoryDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,174,Kiểm tra ràng buộc khi xóa danh mục        ,Hoàn Thành,"Khi xóa, hệ thống phải kiểm tra và cảnh báo nếu danh mục có chứa sản phẩm. Yêu cầu chuyển sản phẩm sang danh mục khác trước khi cho phép xóa hẳn.","Giải pháp:
+- AdminCategoryController.java, CategoryService.java, CategoryDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,175,Ản danh mục tạm thời,Hoàn Thành,"- Thêm tính năng bật tắt danh mục khi cần thay đổi hay gặp phải lỗi bất kỳ
+- Khi tắt, danh mục biến mất trên web nhưng vẫn lưu lại trong Admin để tái sử dụng khi cần.","Giải pháp:
+- AdminCategoryController.java, CategoryService.java, CategoryDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,176,Ẩn danh mục,Hoàn Thành,"- Ẩn danh mục sẽ xóa hiển thị trên trang chủ, và thanh menu tự động","Giải pháp:
+- AdminCategoryController.java, CategoryService.java, CategoryDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Quản lý đơn hàng
+/admin/orders",177,"Bộ lọc sắp xếp nhanh theo tình trạng đơn hàng, ngày",Hoàn Thành,"- Lọc được đơn hàng theo từng trạng thía: chờ xác nhận, đang xử lý, đang giao, hoàn thành, đã huỷ
+-  Lọc theo đơn hàng trong khoảng thời gian","Giải pháp:
+- AdminOrderController.java, OrderService.java, OrderDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,178,"Hiển thị các chi tiết thông tin đơn hàng, tình trạng đơn hàng",Hoàn Thành,"- Hiển thị các thông tin như mã đơn, khách hàng, sản phẩm, tổng tiền, phương thức thanh toán, trạng thái thanh toán, trạng thái đơn, ngày đặt","Giải pháp:
+- AdminOrderController.java, OrderService.java, OrderDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,179,Mục hoàn tiền ,Hoàn Thành,"- Mục hoàn tiền sẽ hiển thị thông tin gồm nội dung, video/ảnh mà user đã gửi yêu cầu hỗ trợ hoàn tiền ","Giải pháp:
+- AdminRefundController.java đọc dữ liệu từ bảng refund_requests
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,180,nút bấm thay đổi tình trạng đơn hàng của admin,Hoàn Thành,"thay đổi lịch trình xử lý đơn hàng nhanh chóng
+khi đã xác nhận đơn hàng hoặc hủy đơn hàng","Giải pháp:
+- AdminOrderController.java, OrderService.java, OrderDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Quản lý tài khoản
+/admin/users",181,Xem danh sách người dùng,Hoàn Thành,Admin có thể xem toàn bộ danh sách khách hàng đăng ký trên hệ thống.,"Giải pháp:
+- AdminUserController.java, UserService.java, UserDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,182,Bộ lọc,Hoàn Thành,"- Sắp xếp lọc Hiển thị các tài khoản bị khóa do vi phạm, tài khoản chưa xác thực","Giải pháp:
+- AdminUserController.java, UserService.java, UserDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,183,Tìm kiếm tài khoản,Hoàn Thành,Tính năng tìm kiếm người dùng theo Tên hoặc Email hoạt động,"Giải pháp:
+- AdminUserController.java, UserService.java, UserDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,184,Phân trang danh sách khách hàng,Hoàn Thành,- Phân chia danh sách theo trang mỗi trang gồm 10 user,"Giải pháp:
+- AdminUserController.java, UserService.java, UserDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,185,"Mở rộng phân quyền, vai trò của người dùng RBAC (Quản trị hệ thống)",Hoàn Thành,"Triển khai hệ thống quản lý quyền truy cập dựa trên vai trò
+Admin có thể tạo không giới hạn vai trò mới và tích chọn các quyền hạn cụ thể (vd Nhân viên kho chỉ được xem/sửa đơn hàng; Marketing chỉ được viết bài tin tức)
+Đảm bảo tính bảo mật: Người dùng không có quyền sẽ bị từ chối truy cập ngay tại tầng giao diện và API.
+","Giải pháp:
+- AdminAuthFilter.java chặn kiểm tra quyền của session user dựa trên bản đồ bảo mật SECURITY_MAP
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,186,Khóa/Mở khóa tài khoản,Hoàn Thành,"- Khi bị khóa, người dùng không thể đăng nhập và nhận được thông báo lý do cụ thể
+- Nút chuyển đổi trạng thái hoạt động cập nhật dữ liệu ngay lập tức","Giải pháp:
+- AdminUserController.java, UserService.java, UserDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Quản lý bài viết/blog
+/admin/posts",187,Hiển thị bài viết,Hoàn Thành,"Đã Hiển thị được tổng thể các bài viết của web theo: danh mục, tác giả, lượt xem, ngày đăng","Giải pháp:
+- AdminPostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,188,Thao tác bài viết,Hoàn Thành,"Cho phép người thêm bài viết mới, chỉnh sửa nội dung hình ảnh của bài viết đang có và xoá bài viết ","Giải pháp:
+- AdminPostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,189,Ràng buộc khi xóa danh mục bài viết,Hoàn Thành,"- Khi nhấn xóa, hệ thống phải kiểm tra xem danh mục có chứa bài viết nào không
+- Trường hợp có bài viết: Không cho phép xóa và hiển thị thông báo: ""Không thể xóa danh mục này vì đang chứa X bài viết. Hãy chuyển bài viết sang danh mục khác trước
+- Trường hợp trống: Hiển thị popup xác nhận ""Bạn có chắc chắn muốn xóa danh mục này?"" trước khi thực thi
+","Giải pháp:
+- AdminPostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,190,Trạng thái bài viết (Ẩn/Hiển),Hoàn Thành,- Bổ sung cột trạng thái với nút cho phép Admin ẩn hoặc Hiển bài viết trên trang chủ ngay lập tức. ,"Giải pháp:
+- AdminPostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,191,Bộ lọc bài viết nâng cao,Hoàn Thành,"- Thêm bộ lọc bài viết theo: Danh mục, Tác giả, Khoảng thời gian đăng bài và Trạng thái (Nháp/Đã xuất bản)","Giải pháp:
+- AdminPostController.java, PostService.java, PostDAO.java
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+"Admin Quản lý trang tĩnh
+/admin/static-pages",192,Hiển thị danh sách thông tin các trang tĩnh,Giảm tải,"-Bao gồm các title, loại, trạng tái, lần cập nhật
+-Không thể tạo hay xóa các trang tĩnh
+Mong muốn:
+- Có thể thêm sửa, xóa can thiệp vào các phần code cứng của dữ liệu Hiển thị tại thanh footer tùy biến và có thể trực tiếp đến phần code cứng thông qua phần admin ",
+,193,Quản lý banner/ popup khuyến mãi,Giảm tải,"Mong muốn:
+- Tuỳ chỉnh hiển thị một cái popup thông báo giảm giá 20% khi khách vừa vào web (có thể bật/tắt trong Admin)",
+,194,Chỉnh sửa thông tin trang tĩnh,Hoàn Thành,sử dụng tinymce để làm trình chỉnh sửa html cho trang tĩnh,"Giải pháp:
+- AdminStaticPageController.java (path /admin/static-pages/edit), frontend tích hợp thư viện JS TinyMCE để bind dữ liệu textarea
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+Admin (Toàn hệ thống),195,Điều hướng sau khi đăng nhập thành công (Toàn hệ thống),Hoàn Thành,"- Người dùng đã đăng nhập vẫn có thể quay lại trang login bằng cách gõ URL.
+- Nếu session còn hiệu lực, hệ thống phải tự động điều hướng người dùng về trang chủ nếu họ cố tình truy cập link /login.","Giải pháp:
+- Kiểm tra session attribute auth trong phương thức doGet của LoginController
+Flow:
+- Gửi yêu cầu từ giao diện -> Controller nhận xử lý -> Cập nhật UI."
+,196,Nhận form liên hệ của khách hàng,Hoàn Thành,- Nhận được liên hệ từ khách hàng,"Giải pháp:
+- Đóng gói dự án thành file .war bằng Gradle/Maven, deploy trực tiếp lên máy chủ Web Tomcat 10 kết nối MySQL database chạy trên Windows Server/Linux VPS
+Flow:
+- Khi Admin thực hiện thêm/xóa sản phẩm trên Web -> Event được kích hoạt -> Lưu thông tin ID sản phẩm và hành động (ADD / DELETE) kèm timestamp vào Session HashMap hoặc Application Context HashMap
+- Mobile App định kỳ gửi request đồng bộ tới endpoint sync kèm theo lastSyncTimestamp và deviceStateHash
+- Server kiểm tra nếu deviceStateHash khớp với serverStateHash hiện tại -> Trả về trạng thái ""Đã đồng bộ"" (no-op)
+- Nếu lệch hash, server truy vấn HashMap lấy ra danh sách sản phẩm thay đổi có timestamp > lastSyncTimestamp
+- Server trả về danh sách các sản phẩm cần thêm hoặc xóa dưới dạng JSON kèm theo newServerStateHash và currentTimestamp
+- Mobile app áp dụng các thay đổi vào local SQLite/Room database và lưu lại newServerStateHash cùng lastSyncTimestamp
+"
+,197,Thông báo của admin,Giảm tải,"Chỉ nhận thông báo qua trang quản trị, dễ sót đơn hàng
+Mong muốn:
+- Tích hợp Bot Telegram hoặc tự động gửi Email thông báo ngay khi có đơn hàng mới phát sinh để Admin xử lý kịp thời",
+,198,Chế độ bảo trì 	,Giảm tải,"Mong muốn:
+- Bổ sung nút gạt Bật bảo trì, khi bật toàn bộ khách truy cập sẽ thấy trang thông báo: ""Hệ thống đang nâng cấp"" thay vì vào web",S
+,199,Tự động sao lưu dữ liệu ,Giảm tải,"Mong muốn:
+-Tích hợp tính năng Backup dữ liệu hàng tuần/tháng. Admin có thể tải bản backup về máy cá nhân để dự phòng",
+,200,Quản lý tệp tin,Giảm tải,"Mong muốn:
+- Xây dựng kho lưu trữ theo thư mục. Cho phép Tìm kiếm, Sắp xếp và Xóa các ảnh không còn sử dụng để nhẹ máy chủ.",
+,201,Phản hồi đánh giá,Giảm tải,"Mong muốn:
+- Admin có thể trả lời khiếu nại hoặc cảm ơn ngay bên dưới review
+- Bổ sung nút Phản hồi dưới mỗi đánh giá/review để Admin trực tiếp trả lời, cảm ơn hoặc giải đáp thắc mắc của khách hàng.",
+Hệ thống,202,Đồng bộ thêm/xoá sản phẩm Giỏ hàng với moblile,Hoàn Thành,"Để tối ưu hóa hiệu năng, giảm tải truy vấn I/O cho cơ sở dữ liệu MySQL và đảm bảo đồng bộ dữ liệu giỏ hàng theo thời gian thực (Real-time) giữa Web và Mobile, hệ thống sử dụng Redis Hash làm bộ lưu trữ giỏ hàng tập trung","Giải pháp:
+- Lớp service CartService.java sử dụng thư viện Jedis để tương tác với Redis Hash với cấu trúc cart:user:{userId}.
+- API /api/cart (do AddToCartController.java quản lý) xử lý các request thay đổi giỏ hàng từ Web/Mobile.
+Flow:
+- Người dùng Thêm/Xóa/Sửa giỏ hàng trên Web hoặc Mobile.
+- Client gửi request (POST/DELETE/PUT) tới endpoint /api/cart.
+- Server xử lý và gọi CartService để cập nhật trực tiếp vào Redis Hash (dùng HSET để cập nhật hoặc HDEL để xóa).
+- Giỏ hàng được đồng bộ tức thời trên cả hai nền tảng nhờ sử dụng chung Redis lưu trữ tập trung."
+,203,deploy,Hoàn Thành,"Cloud Provider / Server: Ứng dụng được triển khai trên máy chủ ảo cá nhân (VPS) chạy hệ điều hành Linux với địa chỉ IP 165.232.168.235 (nhà cung cấp DigitalOcean).
+Domain & SSL (HTTPS): Website chạy dưới tên miền chính thức https://nongsanfarmily.site.
+Lưu ý kỹ thuật: SSL/TLS được cấu hình thông qua dịch vụ Cloudflare (chế độ Proxy). Cloudflare đóng vai trò là CDN & Reverse Proxy đứng trước VPS, đảm nhận việc mã hóa HTTPS ở cổng 443, sau đó chuyển tiếp traffic dạng HTTP (cổng 80) về VPS.
+Cơ sở dữ liệu & Bộ nhớ đệm:
+Database: MySQL Server chạy trực tiếp trên Host OS ở cổng 3306.
+Caching: Redis Server chạy trực tiếp trên Host OS ở cổng 6379.","Giải pháp:
+- Đóng gói ứng dụng thành file ROOT.war bằng Gradle.
+- Sử dụng Gradle plugin org.hidetake.ssh để chạy script deploy tự động (lệnh ./gradlew docker_deploy).
+Flow:
+- Hệ thống thực hiện build đóng gói file ROOT.war.
+- Connect SSH tới VPS, xóa file WAR cũ và upload file ROOT.war mới lên thư mục /usr/deploy.
+- Khởi động lại container Docker chạy image Tomcat 10.1, mount thư mục /usr/deploy ngoài host vào container để triển khai ứng dụng."

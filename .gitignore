@@ -29,16 +29,3 @@ src/main/resources/payment.properties
 src/main/resources/db.properties
 src/main/resources/cloudinary.properties
 
-# CK-kit
-.claude
-.opencode
-.kiro
-.agent
-release-manifest.json
-plans/
-CLAUDE.md
-GEMINI.md
-AGENTS.md
-.repomixignore
-qa/
-src/test/
